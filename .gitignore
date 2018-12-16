@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+*.gpkg-wal
+*.gpkg-shm
+demo/demodata_geolife_large.gpkg
+*.prefs
+.project
+.pydevproject
