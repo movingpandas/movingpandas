@@ -25,6 +25,7 @@ import multiprocessing as mp
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import timedelta
+from itertools import repeat
 
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
@@ -34,7 +35,7 @@ from trajectory_sampler import TrajectorySampler
 
 pd.set_option('display.max_colwidth', -1)
 
-XMIN, YMIN, XMAX, YMAX = 10.30774, 57.25922, 12.13159, 58.03877 # 11.30746, 57.47915, 12.10191, 57.77084 #
+XMIN, YMIN, XMAX, YMAX = 11.30746, 57.47915, 12.10191, 57.77084 # 10.30774, 57.25922, 12.13159, 58.03877 #
 
 DATA_PATH = "E:/Geodata/AISDK/aisdk_20180101.csv" # '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' #
 EXTRACT = 'E:/Geodata/AISDK/extract.csv' # '/home/agraser/tmp/extract.csv' #
@@ -48,9 +49,13 @@ PAST_MINUTES = 5
 FUTURE_MINUTES = 5
 BUFFER_MINUTES = 5
 
-def worker(feature, trajectories, past_timedelta, future_timedelta, 
-           min_starting_speed_ms, buffer_timedelta):
-    print("Processing feature {} ...".format(feature))
+def worker(feature, trajectories):
+    #print("Processing feature {} ...".format(feature))
+    min_starting_speed_ms = 1
+    past_timedelta = timedelta(minutes=PAST_MINUTES)
+    future_timedelta = timedelta(minutes=FUTURE_MINUTES)
+    buffer_timedelta = timedelta(minutes=BUFFER_MINUTES)
+    
     samples = []
     counter = 0
     for traj in trajectories:
@@ -64,24 +69,8 @@ def worker(feature, trajectories, past_timedelta, future_timedelta,
                 counter +=1
                 print(traj.id)
             except RuntimeError as e:
-                print(e)   
-    return samples
-
-def listener(my_queue):
-    print("Writing output ...")
-    output = open(OUTPUT, 'w')
-    output.write("id;start_secs;past_secs;future_secs;past_traj;future_pos;future_traj\n")
-    while 1:
-        result = my_queue.get()
-        if result == 'kill':
-            break
-        for sample in samples:
-            try:
-                output.write(str(sample))
-            except:
-                pass
-            output.write('\n')
-    output.close()
+                print(e)
+    return samples   
 
 if __name__ == '__main__':   
     try:
@@ -118,32 +107,20 @@ if __name__ == '__main__':
             print("Failed to create trajectory!")  
     
     print("Extracting samples ...")
-    min_starting_speed_ms = 1
-    past_timedelta = timedelta(minutes=PAST_MINUTES)
-    future_timedelta = timedelta(minutes=FUTURE_MINUTES)
-    buffer_timedelta = timedelta(minutes=BUFFER_MINUTES)
     polygon_file = fiona.open(GRID, 'r')
     samples = []    
-    
-    manager = mp.Manager()
-    my_queue = manager.Queue()    
+        
     pool = mp.Pool(mp.cpu_count() + 2)
-    watcher = pool.apply_async(listener, (my_queue,))
-    jobs = []
     
-    for feature in polygon_file:
-        job = pool.apply_async(worker, (
-            feature, trajectories, past_timedelta, future_timedelta, 
-            min_starting_speed_ms, buffer_timedelta))
-        jobs.append(job)        
-        
-    for job in jobs:
-        job.get()
-        
-    my_queue.put('kill')
-    pool.close()   
-        
+    with open(OUTPUT,'w') as output:
+        output.write("id;start_secs;past_secs;future_secs;past_traj;future_pos;future_traj\n")
+        for samples in pool.starmap(worker, zip(polygon_file, repeat(trajectories))): 
+            for sample in samples:
+                try:
+                    output.write(str(sample))
+                except:
+                    pass
+                output.write('\n')
+    output.close()
     polygon_file.close()
-    
-    
     
