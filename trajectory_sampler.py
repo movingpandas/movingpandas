@@ -17,24 +17,27 @@
 ***************************************************************************
 """
 
-import warnings
 import random
-from pandas import NaT
 from datetime import timedelta
+from shapely.geometry import Point
+
+from geometry_utils import measure_distance_spherical
 
 
 class TrajectorySample():
-    def __init__(self, id, start_timedelta, past_timedelta, future_timedelta, past_traj, future_pos):
+    def __init__(self, id, start_timedelta, past_timedelta, future_timedelta, past_traj, future_pos, future_traj):
         self.id = id
         self.start_secs = start_timedelta.total_seconds()
         self.past_secs = past_timedelta.total_seconds()
         self.future_secs = future_timedelta.total_seconds()
         self.past_traj = past_traj
         self.future_pos = future_pos
+        self.future_traj = future_traj
         
     def __str__(self):
-        return "{};{};{};{};{};{}".format(
-            self.id, self.start_secs, self.past_secs, self.future_secs, self.past_traj.to_linestring().wkt, self.future_pos.wkt)
+        return "{};{};{};{};{};{};{}".format(
+            self.id, self.start_secs, self.past_secs, self.future_secs, self.past_traj.to_linestring().wkt, 
+            self.future_pos.wkt, self.future_traj.to_linestring().wkt)
 
 
 class TrajectorySampler():
@@ -43,10 +46,10 @@ class TrajectorySampler():
         self.sample_counter = 0
         self.tolerance = tolerance 
         
-    def is_sampling_possible(self, past_timedelta, future_timedelta, min_meters_per_sec = 0.3):
-        sample_duration = past_timedelta + future_timedelta 
+    def is_sampling_possible(self, past_timedelta, future_timedelta, buffer_timedelta, min_meters_per_sec = 0.3):
+        sample_duration = past_timedelta + future_timedelta + buffer_timedelta
         if self.traj.get_duration() < sample_duration:
-            raise RuntimeError("Trajectory {} is too short to extract sample of {} seconds!".format(
+            raise RuntimeError("Trajectory {} is too short to extract {} seconds sample!".format(
                 self.traj.id, sample_duration.total_seconds()))
         
         self.traj.add_meters_per_sec() 
@@ -70,8 +73,10 @@ class TrajectorySampler():
                 sample_times.append(row['t'])    
         return sample_times
         
-    def get_sample_times(self, df, delta_t, first_move_time, past_timedelta, future_timedelta, randomize):
+    def get_sample_times(self, df, delta_t, first_move_time, past_timedelta, future_timedelta, buffer_timedelta, randomize):
         for t, row in df.iterrows():
+            if t > self.traj.get_end_time() - buffer_timedelta:
+                continue
             if randomize:
                 if t < first_move_time + delta_t:
                     continue
@@ -88,9 +93,9 @@ class TrajectorySampler():
                 successful = True
                 return successful, start_time, past_time, future_time, start_timedelta
               
-    def get_sample(self, past_timedelta, future_timedelta, min_meters_per_sec = 0.3, randomize = False):
+    def get_sample(self, past_timedelta, future_timedelta, min_meters_per_sec = 0.3, randomize = False, buffer_timedelta = timedelta(seconds=0)):
         number_of_retries = 3
-        if not self.is_sampling_possible(past_timedelta, future_timedelta, min_meters_per_sec):
+        if not self.is_sampling_possible(past_timedelta, future_timedelta, buffer_timedelta, min_meters_per_sec):
             raise RuntimeError("Cannot extract sample from this trajectory!")
         
         above_speed_limit = self.traj.df[self.traj.df['next_ms'] > min_meters_per_sec]
@@ -102,15 +107,15 @@ class TrajectorySampler():
         successful = False
         if randomize:
             while not successful and number_of_retries > 0:
-                random_start = random.randint(0, int((self.traj.get_duration()-future_timedelta).total_seconds()))
+                random_start = random.randint(0, int((self.traj.get_duration() - future_timedelta).total_seconds()))
                 delta_t = timedelta(seconds=random_start)
-                sample_times = self.get_sample_times(df, delta_t, first_move_time, past_timedelta, future_timedelta, randomize)
+                sample_times = self.get_sample_times(df, delta_t, first_move_time, past_timedelta, future_timedelta, buffer_timedelta, randomize)
                 if sample_times:
                     successful, start_time, past_time, future_time, start_timedelta = sample_times
                 number_of_retries -= 1
         else:
             delta_t = timedelta(seconds=0)
-            sample_times = self.get_sample_times(df, delta_t, first_move_time, past_timedelta, future_timedelta, randomize)
+            sample_times = self.get_sample_times(df, delta_t, first_move_time, past_timedelta, future_timedelta, buffer_timedelta, randomize)
             if sample_times:
                 successful, start_time, past_time, future_time, start_timedelta = sample_times
              
@@ -118,14 +123,16 @@ class TrajectorySampler():
             raise RuntimeError("Failed to extract sample from trajectory {}!".format(self.traj.id))
              
         future_pos = self.traj.get_position_at(future_time)
-        
+        future_traj = self.traj.get_segment_between(start_time, start_time + timedelta(days=1))
         past_traj = self.traj.get_segment_between(past_time, start_time)
-        #if not past_traj:
-        #    raise RuntimeError("Failed to extract past trajectory!")
+        
+        if measure_distance_spherical(Point(past_traj.to_linestring().coords[0]), 
+                                      Point(past_traj.to_linestring().coords[-1])) < 0.5*min_meters_per_sec*past_timedelta.total_seconds():
+            raise RuntimeError("Skipping sample {} since it there is not enough movement!".format(self.traj.id))
 
         sample_id = "{}_{}".format(self.traj.id, self.sample_counter)
         self.sample_counter += 1
-        return TrajectorySample(sample_id, start_timedelta, past_timedelta, future_timedelta, past_traj, future_pos)
+        return TrajectorySample(sample_id, start_timedelta, past_timedelta, future_timedelta, past_traj, future_pos, future_traj)
         
         
     

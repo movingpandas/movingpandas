@@ -154,8 +154,12 @@ def clip(traj, polygon):
         rown = traj.df.iloc[traj.df.index.get_loc(tn, method='pad')]
         rown['geometry'] = ptn
         # Insert rows
-        traj.df.loc[t0] = row0
-        traj.df.loc[tn] = rown
+        try:
+            traj.df.loc[t0] = row0
+            traj.df.loc[tn] = rown
+        except:
+            print("Failed to insert row")
+            continue
         traj.df = traj.df.sort_index()
         
         try:
