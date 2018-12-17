@@ -75,7 +75,7 @@ class TrajectorySampler():
         
     def get_sample_times(self, df, delta_t, first_move_time, past_timedelta, future_timedelta, buffer_timedelta, randomize):
         for t, row in df.iterrows():
-            if t > self.traj.get_end_time() - buffer_timedelta:
+            if t > self.traj.get_end_time() - (past_timedelta + future_timedelta + buffer_timedelta):
                 continue
             if randomize:
                 if t < first_move_time + delta_t:
