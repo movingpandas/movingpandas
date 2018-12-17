@@ -102,7 +102,11 @@ def is_equal(t1, t2):
     return abs(t1 - t2) < timedelta(milliseconds=10)
      
 def intersects(traj, polygon):
-    return traj.to_linestring().intersects(polygon)
+    try: 
+        line = traj.to_linestring()
+    except:
+        return False 
+    return line.intersects(polygon)
     
 def clip(traj, polygon):
     #pd.set_option('display.max_colwidth', -1)
@@ -141,29 +145,33 @@ def clip(traj, polygon):
         ranges.append((x['t0'], x['tn'], x['pt0'], x['ptn']))
            
     ranges = _dissolve_ranges(ranges)
-    for range in ranges:
-        t0, tn, pt0, ptn = range[0], range[1], range[2], range[3]
+    for the_range in ranges:
+        t0, tn, pt0, ptn = the_range[0], the_range[1], the_range[2], the_range[3]
         # Create row at entry point with attributes from previous row = pad 
-        row0 = traj.df.iloc[traj.df.index.drop_duplicates().get_loc(t0, method='pad')]
+        row0 = traj.df.iloc[traj.df.index.get_loc(t0, method='pad')]
         row0['geometry'] = pt0
         # Create row at exit point
-        rown = traj.df.iloc[traj.df.index.drop_duplicates().get_loc(tn, method='pad')]
+        rown = traj.df.iloc[traj.df.index.get_loc(tn, method='pad')]
         rown['geometry'] = ptn
         # Insert rows
         traj.df.loc[t0] = row0
         traj.df.loc[tn] = rown
         traj.df = traj.df.sort_index()
         
-        intersection = traj.get_segment_between(range[0], range[1])
+        try:
+            intersection = traj.get_segment_between(the_range[0], the_range[1])
+        except RuntimeError as e:
+            print(e)
+            continue
         intersection.crs = traj.crs
         intersection.id = "{}_{}".format(traj.id, j)
-        
-        if has_dummy:
-            intersection.df.drop(columns=['dummy_that_stops_things_from_breaking'], axis=1, inplace=True)        
-        
+       
         intersections.append(intersection)
         j += 1
-         
+    
+    if has_dummy:
+        intersection.df.drop(columns=['dummy_that_stops_things_from_breaking'], axis=1, inplace=True)        
+      
     return intersections
 
 def intersection(traj, feature):

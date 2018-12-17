@@ -154,7 +154,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
             {'geometry':Point(6,0), 't':datetime(2018,1,1,12,10,0)},
             {'geometry':Point(6,-6), 't':datetime(2018,1,1,12,20,0)},
-            {'geometry':Point(-6,-6), 't':datetime(2018,1,1,12,20,0)}
+            {'geometry':Point(-6,-6), 't':datetime(2018,1,1,12,30,0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1,geo_df)
