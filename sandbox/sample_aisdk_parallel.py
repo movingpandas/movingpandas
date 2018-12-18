@@ -24,7 +24,7 @@ import pandas as pd
 import multiprocessing as mp
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
-from datetime import timedelta
+from datetime import timedelta, datetime
 from itertools import repeat
 
 import warnings
@@ -38,7 +38,7 @@ from trajectory_sampler import TrajectorySampler
 
 pd.set_option('display.max_colwidth', -1)
 
-XMIN, YMIN, XMAX, YMAX = 11.30746, 57.47915, 12.10191, 57.77084 # 10.30774, 57.25922, 12.13159, 58.03877 #
+XMIN, YMIN, XMAX, YMAX = 10.04395, 56.98817, 12.62355, 58.00984 # 10.30774, 57.25922, 12.13159, 58.03877 #
 
 DATA_PATH = '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' # "E:/Geodata/AISDK/aisdk_20180101.csv" #
 EXTRACT = '/home/agraser/tmp/extract.csv' # 'E:/Geodata/AISDK/extract.csv' # 
@@ -76,8 +76,10 @@ def worker(feature, trajectories):
     return samples   
 
 if __name__ == '__main__':   
+    script_start = datetime.now()
+    print("{} Loading data ...".format(script_start))
+    
     try:
-        print("Loading data ...")
         df = pd.read_csv(EXTRACT)
     except:
         print("Extracting data based on bbox {} ...".format([XMIN, XMAX, YMIN, YMIN]))
@@ -126,4 +128,7 @@ if __name__ == '__main__':
                 output.write('\n')
     output.close()
     polygon_file.close()
+    print("{} Finished! ...".format(datetime.now()))
+    print("Runtime: {}".format(datetime.now()-script_start))
+    
     
