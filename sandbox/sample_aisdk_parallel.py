@@ -27,6 +27,9 @@ from shapely.geometry import Point
 from datetime import timedelta
 from itertools import repeat
 
+import warnings
+warnings.filterwarnings('ignore')
+
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 from trajectory import Trajectory 
@@ -37,10 +40,10 @@ pd.set_option('display.max_colwidth', -1)
 
 XMIN, YMIN, XMAX, YMAX = 11.30746, 57.47915, 12.10191, 57.77084 # 10.30774, 57.25922, 12.13159, 58.03877 #
 
-DATA_PATH = "E:/Geodata/AISDK/aisdk_20180101.csv" # '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' #
-EXTRACT = 'E:/Geodata/AISDK/extract.csv' # '/home/agraser/tmp/extract.csv' #
-GRID = 'E:/Geodata/AISDK/grid.gpkg' #'/home/agraser/tmp/grid.gpkg' #
-OUTPUT = 'E:/Geodata/AISDK/sample.csv' # '/home/agraser/tmp/sample.csv' #
+DATA_PATH = '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' # "E:/Geodata/AISDK/aisdk_20180101.csv" #
+EXTRACT = '/home/agraser/tmp/extract.csv' # 'E:/Geodata/AISDK/extract.csv' # 
+GRID = '/home/agraser/tmp/grid.gpkg' # 'E:/Geodata/AISDK/grid.gpkg' #
+OUTPUT = '/home/agraser/tmp/sample.csv' # 'E:/Geodata/AISDK/sample.csv' # 
 
 FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo'

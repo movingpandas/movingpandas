@@ -25,6 +25,9 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import timedelta
 
+import warnings
+warnings.filterwarnings('ignore')
+
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 from trajectory import Trajectory 
