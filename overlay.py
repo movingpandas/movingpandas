@@ -169,6 +169,7 @@ def clip(traj, polygon):
             continue
         intersection.crs = traj.crs
         intersection.id = "{}_{}".format(traj.id, j)
+        intersection.parent = traj
        
         intersections.append(intersection)
         j += 1

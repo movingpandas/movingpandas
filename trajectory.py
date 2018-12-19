@@ -44,6 +44,7 @@ class Trajectory():
         self.id = traj_id
         self.df = df[~df.index.duplicated(keep='first')] 
         self.crs = df.crs['init']
+        self.parent = None
         
     def __str__(self):
         try:
@@ -63,6 +64,9 @@ class Trajectory():
         if not self.get_start_time() < self.get_end_time():
             return False
         return True
+        
+    def has_parent(self):
+        return self.parent != None 
         
     def to_linestring(self):
         try:

@@ -123,8 +123,12 @@ class TrajectorySampler():
             raise RuntimeError("Failed to extract sample from trajectory {}!".format(self.traj.id))
              
         future_pos = self.traj.get_position_at(future_time)
-        future_traj = self.traj.get_segment_between(start_time, start_time + timedelta(days=1))
         past_traj = self.traj.get_segment_between(past_time, start_time)
+        
+        if self.traj.has_parent():
+            future_traj = self.traj.parent.get_segment_between(start_time, start_time + timedelta(days=1))
+        else:
+            future_traj = self.traj.get_segment_between(start_time, start_time + timedelta(days=1))
         
         if measure_distance_spherical(Point(past_traj.to_linestring().coords[0]), 
                                       Point(past_traj.to_linestring().coords[-1])) < 0.5*min_meters_per_sec*past_timedelta.total_seconds():
