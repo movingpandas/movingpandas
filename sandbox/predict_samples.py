@@ -20,7 +20,6 @@
 import os
 import sys 
 import pickle
-import pandas as pd 
 import multiprocessing as mp
 from datetime import timedelta, datetime
 from itertools import repeat
@@ -33,7 +32,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 from trajectory_predictor import TrajectoryPredictor
 from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, EvaluatedPrediction
 
-pd.set_option('display.max_colwidth', -1)
 
 FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo'
@@ -44,7 +42,6 @@ INPUT = '/home/agraser/tmp/sample.csv'
 OUTPUT = '/home/agraser/tmp/predictions_kin.csv' 
 
 def prediction_worker(sample, prediction_timedelta):
-    #print(sample.past_traj)
     predictor = TrajectoryPredictor(sample.past_traj) 
     #predicted_location = predictor.predict_linearly(prediction_timedelta)
     predicted_location = predictor.predict_kinetically(prediction_timedelta)
@@ -53,7 +50,7 @@ def prediction_worker(sample, prediction_timedelta):
     prediction = EvaluatedPrediction(predicted_location, context, errors)
     return prediction
     
-def compute_predictions(samples, past, future, pool):
+def compute_predictions(samples, future, pool):
     with open(OUTPUT.replace('sample.csv','sample_{}_{}_{}.csv'.format(SHIPTYPE, past, future)), 'w') as output:
         output.write(EvaluatedPrediction.get_csv_header())
         for prediction in pool.starmap(prediction_worker, zip(samples, repeat(future))): 
@@ -78,7 +75,7 @@ if __name__ == '__main__':
                 print("Loading pickled data from {} ...".format(input_file))
             except:    
                 print("Failed to load pickled data from {}!".format(input_file))
-            compute_predictions(input_samples, timedelta(minutes=past), timedelta(minutes=future), pool)
+            compute_predictions(input_samples, timedelta(minutes=future), pool)
     
     print("{} Finished! ...".format(datetime.now()))
     print("Runtime: {}".format(datetime.now()-script_start))

@@ -81,14 +81,12 @@ class TrajectorySampler():
                 if t < first_move_time + delta_t:
                     continue
             delta_t += row['delta_t']
-            #print(delta_t)
             start_time = self.traj.get_row_at(first_move_time + past_timedelta + delta_t)['t']
             start_timedelta = start_time - first_move_time
             past_time = start_time - past_timedelta
             future_time = start_time + future_timedelta   
             x = self._is_sampling_successful(start_time, past_time, future_time)
             if x: 
-                #print('OK')
                 start_time, past_time, future_time = x     
                 successful = True
                 return successful, start_time, past_time, future_time, start_timedelta
@@ -148,9 +146,9 @@ class TrajectorySampler():
         past_traj.context = self.traj.context
         
         if self.traj.has_parent():
-            future_traj = self.traj.parent.get_segment_between(start_time, start_time + future_traj_duration)
+            future_traj = self.traj.parent.get_segment_between(start_time, max(start_time+future_traj_duration, future_time))
         else:
-            future_traj = self.traj.get_segment_between(start_time, start_time + future_traj_duration)
+            future_traj = self.traj.get_segment_between(start_time, max(start_time+future_traj_duration, future_time))
         
         if not self._is_moving_sufficiently(past_traj, min_meters_per_sec, past_timedelta):
             raise RuntimeError("Skipping sample {} since it there is not enough movement!".format(self.traj.id))

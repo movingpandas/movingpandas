@@ -17,8 +17,7 @@
 ***************************************************************************
 """
 
-import pandas as pd
-from math import sin, cos, atan2, radians, degrees, asin, sqrt
+from math import sin, cos, atan2, radians, degrees, asin
 from datetime import timedelta
 from shapely.geometry import Point
 

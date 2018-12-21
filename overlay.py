@@ -19,17 +19,11 @@
 
 import os
 import sys
-import pandas as pd 
-import numpy as np
-from geopandas import GeoDataFrame
-from shapely.geometry import Point, LineString, Polygon, shape
+from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 sys.path.append(os.path.dirname(__file__))
-
-from geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
-import trajectory 
 
 
 def _connect_points(row):
