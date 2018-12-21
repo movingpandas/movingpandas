@@ -42,10 +42,10 @@ pd.set_option('display.max_colwidth', -1)
 
 XMIN, YMIN, XMAX, YMAX = 9.90353, 56.89971, 12.79016, 58.18372 # 10.30774, 57.25922, 12.13159, 58.03877 #
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Tanker'
+SHIPTYPE = 'Cargo'
 DESIRED_NO_SAMPLES = 10
-PAST_MINUTES = [5]
-FUTURE_MINUTES = [20]
+PAST_MINUTES = [1,3,5]
+FUTURE_MINUTES = [1,2,3,5,10,15,20]
 FUTURE_TRAJ_DURATION = timedelta(hours=1)
 
 DATA_PATH = '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' # "E:/Geodata/AISDK/aisdk_20180101.csv" #
@@ -145,8 +145,7 @@ def prepare_data(pool):
     return intersections_per_grid_cell
     
 def create_sample(intersections_per_grid_cell, past, future, pool):
-    samples = []
-    with open(OUTPUT.replace('sample.csv','sample_{}_{}.csv'.format(past, future)), 'w') as output:
+    with open(OUTPUT.replace('sample.csv','sample_{}_{}_{}.csv'.format(SHIPTYPE, past, future)), 'w') as output:
         output.write("id;start_secs;past_secs;future_secs;past_traj;future_pos;future_traj\n")
         for samples in pool.starmap(sampling_worker, zip(intersections_per_grid_cell.values(), repeat(past), repeat(future))): 
             for sample in samples:
@@ -169,9 +168,9 @@ if __name__ == '__main__':
     except:
         intersections_per_grid_cell = prepare_data(pool)
     
-    print("Extracting samples ...")
     for past in PAST_MINUTES:
         for future in FUTURE_MINUTES:
+            print("Extracting samples ({},{})...".format(past, future))
             create_sample(intersections_per_grid_cell, past, future, pool)
     
     print("{} Finished! ...".format(datetime.now()))
