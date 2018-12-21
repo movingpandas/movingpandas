@@ -51,7 +51,7 @@ def prediction_worker(sample, prediction_timedelta):
         predicted_location = predictor.predict_linearly(prediction_timedelta)
     elif PREDICTION_MODE == 'kinetic':
         predicted_location = predictor.predict_kinetically(prediction_timedelta)
-    errors = TrajectoryPredictionEvaluator(sample, predicted_location).get_errors()
+    errors = TrajectoryPredictionEvaluator(sample, predicted_location, 'epsg:25832').get_errors()
     context = sample.past_traj.context
     prediction = EvaluatedPrediction(predicted_location, context, errors)
     return prediction

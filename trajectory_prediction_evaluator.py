@@ -41,11 +41,11 @@ class EvaluatedPrediction():
 
 
 class TrajectoryPredictionEvaluator():
-    def __init__(self, groundtruth_sample, predicted_location):
+    def __init__(self, groundtruth_sample, predicted_location, crs):
         self.truth = groundtruth_sample.future_pos
         self.true_traj = groundtruth_sample.future_traj
         self.prediction = predicted_location
-        self.crs = Proj(init='epsg:25832')
+        self.crs = Proj(init=crs)
         self.projected_prediction = self.project_prediction_on_trajectory()
         
     def get_errors(self):
