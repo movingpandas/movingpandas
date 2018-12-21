@@ -44,8 +44,8 @@ XMIN, YMIN, XMAX, YMAX = 9.90353, 56.89971, 12.79016, 58.18372 # 10.30774, 57.25
 FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo'
 DESIRED_NO_SAMPLES = 10
-PAST_MINUTES = [1,3,5]
-FUTURE_MINUTES = [1,2,3,5,10,15,20]
+PAST_MINUTES = [5]#[1,3,5]
+FUTURE_MINUTES = [5]#[1,2,3,5,10,15,20]
 FUTURE_TRAJ_DURATION = timedelta(hours=1)
 
 DATA_PATH = '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' # "E:/Geodata/AISDK/aisdk_20180101.csv" #
@@ -63,6 +63,7 @@ def intersection_worker(feature, trajectories):
     intersections = []
     for traj in trajectories:
         for intersection in traj.intersection(feature):
+            intersection.context = feature['id']
             intersections.append(intersection)
     return feature, intersections
     
@@ -113,11 +114,10 @@ def create_trajectories(df):
     
 def compute_intersections(trajectories, polygon_file, pool):
     print("Computing all intersections for future use (this can take a while!) ...")
-    intersections = {}
+    results = {}
     for cell, intersections in pool.starmap(intersection_worker, zip(polygon_file, repeat(trajectories))): 
-        cell = cell['id']
-        intersections[cell] = intersections
-    return intersections
+        results[cell['id']] = intersections
+    return results
         
 def prepare_data(pool):
     try:
@@ -139,21 +139,26 @@ def prepare_data(pool):
     polygon_file.close()
     
     print("Writing intersections to {} ...".format(TEMP_INTERSECTIONS))
-    with open(TEMP_INTERSECTIONS, 'wb') as f: 
-        pickle.dump(intersections_per_grid_cell, f)
+    with open(TEMP_INTERSECTIONS, 'wb') as output: 
+        pickle.dump(intersections_per_grid_cell, output)
 
     return intersections_per_grid_cell
     
 def create_sample(intersections_per_grid_cell, past, future, pool):
+    all_samples = []
     with open(OUTPUT.replace('sample.csv','sample_{}_{}_{}.csv'.format(SHIPTYPE, past, future)), 'w') as output:
         output.write("id;start_secs;past_secs;future_secs;past_traj;future_pos;future_traj\n")
         for samples in pool.starmap(sampling_worker, zip(intersections_per_grid_cell.values(), repeat(past), repeat(future))): 
             for sample in samples:
+                all_samples.append(sample)
                 try:
                     output.write(str(sample))
                 except:
                     pass
-                output.write('\n')
+                output.write('\n')   
+    output.close()    
+    with open(OUTPUT.replace('sample.csv','sample_{}_{}_{}.pickle'.format(SHIPTYPE, past, future)), 'wb') as output:
+        pickle.dump(all_samples, output)   
     output.close()    
 
 if __name__ == '__main__':   
@@ -164,6 +169,7 @@ if __name__ == '__main__':
     try:
         with open(TEMP_INTERSECTIONS, 'rb') as f: 
             intersections_per_grid_cell = pickle.load(f)
+            print(intersections_per_grid_cell)
         print("Loading pickled data from {} ...".format(TEMP_INTERSECTIONS))
     except:
         intersections_per_grid_cell = prepare_data(pool)

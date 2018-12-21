@@ -45,6 +45,7 @@ class Trajectory():
         self.df = df[~df.index.duplicated(keep='first')] 
         self.crs = df.crs['init']
         self.parent = None
+        self.context = None
         
     def __str__(self):
         try:

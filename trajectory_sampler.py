@@ -145,6 +145,7 @@ class TrajectorySampler():
 
         future_pos = self.traj.get_position_at(future_time)
         past_traj = self.traj.get_segment_between(past_time, start_time)
+        past_traj.context = self.traj.context
         
         if self.traj.has_parent():
             future_traj = self.traj.parent.get_segment_between(start_time, start_time + future_traj_duration)
