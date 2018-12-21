@@ -169,7 +169,6 @@ if __name__ == '__main__':
     try:
         with open(TEMP_INTERSECTIONS, 'rb') as f: 
             intersections_per_grid_cell = pickle.load(f)
-            print(intersections_per_grid_cell)
         print("Loading pickled data from {} ...".format(TEMP_INTERSECTIONS))
     except:
         intersections_per_grid_cell = prepare_data(pool)

@@ -37,14 +37,20 @@ FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo'
 PAST_MINUTES = [5]#[1,3,5]
 FUTURE_MINUTES = [5]#[1,2,3,5,10,15,20]
+PREDICTION_MODE = 'linear' # 'kinetic'
 
 INPUT = '/home/agraser/tmp/sample.csv' 
-OUTPUT = '/home/agraser/tmp/predictions_kin.csv' 
+if PREDICTION_MODE == 'linear':
+    OUTPUT = '/home/agraser/tmp/predictions_lin.csv' 
+elif PREDICTION_MODE == 'kinetic':
+    OUTPUT = '/home/agraser/tmp/predictions_kin.csv' 
 
 def prediction_worker(sample, prediction_timedelta):
     predictor = TrajectoryPredictor(sample.past_traj) 
-    #predicted_location = predictor.predict_linearly(prediction_timedelta)
-    predicted_location = predictor.predict_kinetically(prediction_timedelta)
+    if PREDICTION_MODE == 'linear':
+        predicted_location = predictor.predict_linearly(prediction_timedelta)
+    elif PREDICTION_MODE == 'kinetic':
+        predicted_location = predictor.predict_kinetically(prediction_timedelta)
     errors = TrajectoryPredictionEvaluator(sample, predicted_location).get_errors()
     context = sample.past_traj.context
     prediction = EvaluatedPrediction(predicted_location, context, errors)

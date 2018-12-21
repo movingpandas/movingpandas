@@ -18,6 +18,7 @@
 """
 
 import random
+import warnings
 from datetime import timedelta
 from shapely.geometry import Point
 
@@ -49,8 +50,9 @@ class TrajectorySampler():
     def _is_sampling_possible(self, past_timedelta, future_timedelta, min_meters_per_sec = 0.3):
         sample_duration = past_timedelta + future_timedelta 
         if self.traj.get_duration() < sample_duration:
-            raise RuntimeError("Trajectory {} is too short to extract {} seconds sample!".format(
+            warnings.warn("Trajectory {} is too short to extract {} seconds sample!".format(
                 self.traj.id, sample_duration.total_seconds()))
+            return False
         
         self.traj.add_meters_per_sec() 
         self.traj.df['next_ms'] = self.traj.df['meters_per_sec'].shift(-1)
@@ -58,11 +60,12 @@ class TrajectorySampler():
 
         above_speed_limit = self.traj.df[self.traj.df['next_ms'] > min_meters_per_sec]
         if len(above_speed_limit) == 0:
-            raise RuntimeError("No data above specified speed limit!")
+            warnings.warn("No data above specified speed limit!")
+            return False
         
         return True 
         
-    def _is_sampling_successful(self, start_time, past_time, future_time):
+    def _get_actually_available_times(self, start_time, past_time, future_time):
         sample_times = []
         for t in [start_time, past_time, future_time]:
             #print("Testing {}".format(t))
@@ -85,7 +88,7 @@ class TrajectorySampler():
             start_timedelta = start_time - first_move_time
             past_time = start_time - past_timedelta
             future_time = start_time + future_timedelta   
-            x = self._is_sampling_successful(start_time, past_time, future_time)
+            x = self._get_actually_available_times(start_time, past_time, future_time)
             if x: 
                 start_time, past_time, future_time = x     
                 successful = True

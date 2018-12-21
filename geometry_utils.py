@@ -17,7 +17,7 @@
 ***************************************************************************
 """
 
-from math import sin, cos, atan2, radians, degrees, asin, sqrt, ceil, log, tan, pi
+from math import sin, cos, atan2, radians, degrees, sqrt
 from shapely.geometry import Point
 
 

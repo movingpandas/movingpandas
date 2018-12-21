@@ -19,12 +19,8 @@
 
 import os
 import sys
-import pandas as pd 
-import numpy as np
-from geopandas import GeoDataFrame
-from shapely.geometry import Point, LineString, Polygon
-from shapely.affinity import translate
-from datetime import datetime, timedelta
+from shapely.geometry import Point, LineString
+from datetime import datetime
 
 sys.path.append(os.path.dirname(__file__))
 
