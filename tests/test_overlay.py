@@ -32,12 +32,9 @@ import os
 import sys 
 import unittest
 import pandas as pd 
-import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, Polygon
-from shapely.affinity import translate
 from datetime import datetime, timedelta
-from numpy import nan
 
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 

@@ -31,7 +31,7 @@ from trajectory import Trajectory
 
 
 if __name__ == '__main__':
-    xmin, xmax, ymin, ymax = 116.36850352835575,116.37029459899574,39.904675309969896,39.90772814977718 
+    xmin, xmax, ymin, ymax = 116.3685035,116.3702945,39.904675,39.907728 
     polygon = Polygon([(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin)])
     
     t_start = datetime.now()
@@ -43,7 +43,9 @@ if __name__ == '__main__':
     t_start = datetime.now()
     trajectories = []
     for key, values in df.groupby(['trajectory_id']):
-        trajectories.append(Trajectory(key, values))
+        trajectory = Trajectory(key, values)
+        print(trajectory)
+        trajectories.append(trajectory)
     print("Finished creating {} trajectories in {}".format(len(trajectories),datetime.now() - t_start))
     
     t_start = datetime.now()    

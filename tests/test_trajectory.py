@@ -32,12 +32,9 @@ import os
 import sys 
 import unittest
 import pandas as pd 
-import numpy as np
 from geopandas import GeoDataFrame
-from shapely.geometry import Point, LineString, Polygon
-from shapely.affinity import translate
-from datetime import datetime, timedelta
-from numpy import nan
+from shapely.geometry import Point
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 
@@ -199,6 +196,16 @@ class TestTrajectory(unittest.TestCase):
         expected_result = 676.3
         self.assertAlmostEqual(result, expected_result, 1)
         
+    def test_get_bbox(self):
+        df = pd.DataFrame([
+            {'geometry':Point(0,1), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(6,5), 't':datetime(2018,1,1,12,0,1)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '4326'})
+        traj = Trajectory(1,geo_df)
+        result = traj.get_bbox()
+        expected_result = (0,1,6,5) # (minx, miny, maxx, maxy)
+        self.assertEqual(result, expected_result)
  
 if __name__ == '__main__':
     unittest.main()

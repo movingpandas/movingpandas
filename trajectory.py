@@ -20,11 +20,10 @@
 import os
 import sys
 import pandas as pd 
-import numpy as np
 from geopandas import GeoDataFrame
-from shapely.geometry import Point, LineString, Polygon
-from shapely.affinity import translate
-from datetime import datetime, timedelta
+from shapely.geometry import Point, LineString
+#from shapely.affinity import translate
+from datetime import datetime
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -50,9 +49,9 @@ class Trajectory():
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
-        return "Trajectory {1} ({2} to {3}) | Size: {0}\n{4}".format(
+        return "Trajectory {1} ({2} to {3}) | Size: {0}\nBounds: {5}\n{4}".format(
             self.df.geometry.count(), self.id, self.get_start_time(), 
-            self.get_end_time(), line.wkt)
+            self.get_end_time(), line.wkt[:100], self.get_bbox())
 
     def set_crs(self, crs):
         self.crs = crs            
@@ -66,7 +65,7 @@ class Trajectory():
         
     def to_linestring(self):
         try:
-            return self.make_line(self.df)
+            return self._make_line(self.df)
         except RuntimeError:
             raise RuntimeError("Cannot generate linestring")
     
@@ -85,6 +84,9 @@ class Trajectory():
     
     def get_end_location(self):
         return self.df.tail(1).geometry[0]
+    
+    def get_bbox(self):
+        return self.to_linestring().bounds # (minx, miny, maxx, maxy)
         
     def get_start_time(self):
         return self.df.index.min().to_pydatetime()
@@ -110,7 +112,7 @@ class Trajectory():
         
     def get_linestring_between(self, t1, t2):
         try:
-            return self.make_line(self.get_segment_between(t1, t2))
+            return self._make_line(self.get_segment_between(t1, t2))
         except RuntimeError:
             raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
         
@@ -123,7 +125,7 @@ class Trajectory():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
         return segment
 
-    def compute_heading(self, row):
+    def _compute_heading(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
         if type(pt0) != Point:
@@ -135,7 +137,7 @@ class Trajectory():
         else:
             return azimuth(pt0, pt1)
         
-    def compute_speed(self, row):
+    def _compute_speed(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
         if type(pt0) != Point:
@@ -150,7 +152,7 @@ class Trajectory():
             
     def add_heading(self):
         self.df['prev_pt'] = self.df.geometry.shift()
-        self.df['heading'] = self.df.apply(self.compute_heading, axis=1)
+        self.df['heading'] = self.df.apply(self._compute_heading, axis=1)
         self.df.at[self.get_start_time(),'heading'] = self.df.iloc[1]['heading']
         
     def add_meters_per_sec(self):
@@ -158,10 +160,10 @@ class Trajectory():
         self.df['t'] = self.df.index
         self.df['prev_t'] = self.df['t'].shift()
         self.df['delta_t'] = self.df['t'] - self.df['prev_t'] 
-        self.df['meters_per_sec'] = self.df.apply(self.compute_speed, axis=1)
+        self.df['meters_per_sec'] = self.df.apply(self._compute_speed, axis=1)
         self.df.at[self.get_start_time(),'meters_per_sec'] = self.df.iloc[1]['meters_per_sec']
         
-    def make_line(self, df):
+    def _make_line(self, df):
         if len(df) > 1:
             return df.groupby([True]*len(df)).geometry.apply(
                 lambda x: LineString(x.tolist())).values[0]

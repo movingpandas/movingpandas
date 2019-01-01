@@ -17,19 +17,18 @@
 ***************************************************************************
 """
 
-import os
-import sys
+#import os
+#import sys
 import pandas as pd 
-import numpy as np
 from geopandas import GeoDataFrame
-from shapely.geometry import Point, LineString, Polygon, shape
+from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
 from datetime import datetime, timedelta
 
-sys.path.append(os.path.dirname(__file__))
+#sys.path.append(os.path.dirname(__file__))
 
-from geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
-import trajectory 
+#from geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
+#import trajectory 
 
 
 def _connect_points(row):
@@ -57,9 +56,9 @@ def _get_spatiotemporal_ref(row):
         ptn = Point(row['geo_intersection'].coords[-1])
         t = row['prev_t']
         t_delta = row['t'] - t
-        len = row['line'].length
-        t0 = t + (t_delta * row['line'].project(pt0)/len)
-        tn = t + (t_delta * row['line'].project(ptn)/len)
+        length = row['line'].length
+        t0 = t + (t_delta * row['line'].project(pt0)/length)
+        tn = t + (t_delta * row['line'].project(ptn)/length)
         # to avoid intersection issues with zero length lines
         if ptn == translate(pt0, 0.00000001, 0.00000001):
             t0 = row['prev_t']
@@ -77,24 +76,24 @@ def _dissolve_ranges(ranges):
     new = []
     start = None
     end = None
-    for range in ranges:
+    for r in ranges:
         if start is None:
-            start = range[0]
-            end = range[1]
-            pt0 = range[2]
-            ptn = range[3]
-        elif end == range[0]:
-            end = range[1]
-            ptn = range[3]
-        elif range[0] > end and is_equal(range[0], end):
-            end = range[1]
-            ptn = range[3]
+            start = r[0]
+            end = r[1]
+            pt0 = r[2]
+            ptn = r[3]
+        elif end == r[0]:
+            end = r[1]
+            ptn = r[3]
+        elif r[0] > end and is_equal(r[0], end):
+            end = r[1]
+            ptn = r[3]
         else:
             new.append((start, end, pt0, ptn))
-            start = range[0]
-            end = range[1]
-            pt0 = range[2]
-            ptn = range[3]
+            start = r[0]
+            end = r[1]
+            pt0 = r[2]
+            ptn = r[3]
     new.append((start, end, pt0, ptn))
     return new
 
