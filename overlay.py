@@ -19,16 +19,13 @@
 
 #import os
 #import sys
-import pandas as pd 
+import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 #sys.path.append(os.path.dirname(__file__))
-
-#from geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
-#import trajectory 
 
 
 def _connect_points(row):
@@ -40,7 +37,7 @@ def _connect_points(row):
         # to avoid intersection issues with zero length lines
         pt1 = translate(pt1, 0.00000001, 0.00000001)
     return LineString(list(pt0.coords) + list(pt1.coords))
-    
+
 def _to_line_df(traj):
     line_df = traj.df.copy()
     line_df['prev_pt'] = line_df['geometry'].shift()
@@ -99,14 +96,14 @@ def _dissolve_ranges(ranges):
 
 def is_equal(t1, t2):
     return abs(t1 - t2) < timedelta(milliseconds=10)
-     
+
 def intersects(traj, polygon):
-    try: 
+    try:
         line = traj.to_linestring()
     except:
-        return False 
+        return False
     return line.intersects(polygon)
-    
+
 def clip(traj, polygon):
     #pd.set_option('display.max_colwidth', -1)
     if not intersects(traj, polygon):
@@ -116,37 +113,37 @@ def clip(traj, polygon):
     intersections = [] # list of trajectories
 
     line_df = _to_line_df(traj)
-    
-    # The following for loop creates wrong results if there 
+
+    # The following for loop creates wrong results if there
     # is no other column besides the geometry column.
     has_dummy = False
     if len(traj.df.columns) < 2:
         traj.df['dummy_that_stops_things_from_breaking'] = 1
         has_dummy = True
-    
+
     spatial_index = line_df.sindex
     if spatial_index:
         possible_matches_index = list(spatial_index.intersection(polygon.bounds))
         possible_matches = line_df.iloc[possible_matches_index].sort_index()
     else:
         possible_matches = line_df
-        
-    # Note: If the trajectory contains consecutive rows without location change 
-    #       these will result in zero length lines that return an empty 
-    #       intersection.        
+
+    # Note: If the trajectory contains consecutive rows without location change
+    #       these will result in zero length lines that return an empty
+    #       intersection.
     possible_matches['geo_intersection'] = possible_matches.intersection(polygon)
     possible_matches['intersection'] = possible_matches.apply(_get_spatiotemporal_ref, axis=1)
-        
+
     for index, row in possible_matches.iterrows():
         x = row['intersection']
-        if x is None: 
+        if x is None:
             continue
         ranges.append((x['t0'], x['tn'], x['pt0'], x['ptn']))
-           
+
     ranges = _dissolve_ranges(ranges)
     for the_range in ranges:
         t0, tn, pt0, ptn = the_range[0], the_range[1], the_range[2], the_range[3]
-        # Create row at entry point with attributes from previous row = pad 
+        # Create row at entry point with attributes from previous row = pad
         row0 = traj.df.iloc[traj.df.index.get_loc(t0, method='pad')]
         row0['geometry'] = pt0
         # Create row at exit point
@@ -160,7 +157,7 @@ def clip(traj, polygon):
             print("Failed to insert row")
             continue
         traj.df = traj.df.sort_index()
-        
+
         try:
             intersection = traj.get_segment_between(the_range[0], the_range[1])
         except RuntimeError as e:
@@ -168,13 +165,14 @@ def clip(traj, polygon):
             continue
         intersection.crs = traj.crs
         intersection.id = "{}_{}".format(traj.id, j)
-       
+        intersection.parent = traj
+
         intersections.append(intersection)
         j += 1
-    
+
     if has_dummy:
-        intersection.df.drop(columns=['dummy_that_stops_things_from_breaking'], axis=1, inplace=True)        
-      
+        intersection.df.drop(columns=['dummy_that_stops_things_from_breaking'], axis=1, inplace=True)
+
     return intersections
 
 def intersection(traj, feature):
@@ -185,14 +183,13 @@ def intersection(traj, feature):
         properties = feature['properties']
     except:
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
-    
+
     intersections = clip(traj, geometry)
-    
+
     result = []
     for intersection in intersections:
         for key, value in properties.items():
             intersection.df['intersecting_'+key] = value
         result.append(intersection)
-                
-    return result
 
+    return result

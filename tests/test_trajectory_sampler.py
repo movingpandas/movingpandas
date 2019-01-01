@@ -56,7 +56,6 @@ class TestTrajectorySampler(unittest.TestCase):
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1,geo_df)
         sampler = TrajectorySampler(traj)
-        #start_timedelta = timedelta(seconds=2)
         past_timedelta = timedelta(seconds=2)
         future_timedelta = timedelta(seconds=2)
         sample = sampler.get_sample(past_timedelta, future_timedelta)
@@ -82,7 +81,6 @@ class TestTrajectorySampler(unittest.TestCase):
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1,geo_df)
         sampler = TrajectorySampler(traj)
-        #start_timedelta = timedelta(seconds=2)
         past_timedelta = timedelta(seconds=2)
         future_timedelta = timedelta(seconds=2)
         sample = sampler.get_sample(past_timedelta, future_timedelta)
@@ -101,7 +99,7 @@ class TestTrajectorySampler(unittest.TestCase):
             {'geometry':Point(0,9), 't':datetime(2018,1,1,12,9,2)},
             {'geometry':Point(0,10), 't':datetime(2018,1,1,12,10,2)},
             {'geometry':Point(0,14), 't':datetime(2018,1,1,12,14,3)},
-            {'geometry':Point(0,19), 't':datetime(2018,1,1,12,19,4)},
+            {'geometry':Point(0,19), 't':datetime(2018,1,1,12,19,5)},
             {'geometry':Point(0,20), 't':datetime(2018,1,1,12,20,0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
