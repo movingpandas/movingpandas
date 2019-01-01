@@ -51,9 +51,9 @@ class Trajectory():
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
-        return "Trajectory {1} ({2} to {3}) | Size: {0}\nBounds: {5}\n{4}".format(
+        return "Trajectory {1} ({2} to {3}) | Size: {0} | Length: {6:.1f}m\nBounds: {5}\n{4}".format(
             self.df.geometry.count(), self.id, self.get_start_time(),
-            self.get_end_time(), line.wkt[:100], self.get_bbox())
+            self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
     def set_crs(self, crs):
         self.crs = crs
@@ -129,6 +129,24 @@ class Trajectory():
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
         return segment
+    
+    def _compute_distance(self, row):
+        pt0 = row['prev_pt']
+        pt1 = row['geometry']
+        if type(pt0) != Point:
+            return 0.0
+        if pt0 == pt1:
+            return 0.0
+        if self.crs == '4326' or self.crs == 'epsg:4326':
+            dist_meters = measure_distance_spherical(pt0, pt1)
+        else: # The following distance will be in CRS units that might not be meters!
+            dist_meters = measure_distance_euclidean(pt0, pt1)
+        return dist_meters  
+    
+    def get_length(self):
+        self.df['prev_pt'] = self.df.geometry.shift()
+        self.df['dist_to_prev'] = self.df.apply(self._compute_distance, axis=1)
+        return self.df['dist_to_prev'].sum() 
 
     def _compute_heading(self, row):
         pt0 = row['prev_pt']

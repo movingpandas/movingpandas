@@ -207,6 +207,28 @@ class TestTrajectory(unittest.TestCase):
         expected_result = (0,1,6,5) # (minx, miny, maxx, maxy)
         self.assertEqual(result, expected_result)
  
+    def test_length_spherical(self):
+        df = pd.DataFrame([
+            {'geometry':Point(0,1), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(6,0), 't':datetime(2018,1,1,12,0,1)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '4326'})
+        traj = Trajectory(1,geo_df)
+        result = traj.get_length()/1000
+        expected_result = 676.3
+        self.assertAlmostEqual(result, expected_result, 1)
+        
+    def test_length_euclidiean(self):
+        df = pd.DataFrame([
+            {'geometry':Point(0,2), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(6,0), 't':datetime(2018,1,1,12,0,1)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1,geo_df)
+        result = traj.get_length()
+        expected_result = 6.3
+        self.assertAlmostEqual(result, expected_result, 1)
+        
 if __name__ == '__main__':
     unittest.main()
     
