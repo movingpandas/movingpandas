@@ -148,6 +148,14 @@ class Trajectory():
         self.df['dist_to_prev'] = self.df.apply(self._compute_distance, axis=1)
         return self.df['dist_to_prev'].sum() 
 
+    def get_direction(self):
+        pt0 = self.get_start_location()
+        pt1 = self.get_end_location()
+        if self.crs == '4326':
+            return calculate_initial_compass_bearing(pt0, pt1)
+        else:
+            return azimuth(pt0, pt1)
+    
     def _compute_heading(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
