@@ -40,31 +40,38 @@ from trajectory_sampler import TrajectorySampler
 
 pd.set_option('display.max_colwidth', -1)
 
-XMIN, YMIN, XMAX, YMAX = 9.90353, 56.89971, 12.79016, 58.18372 # 10.30774, 57.25922, 12.13159, 58.03877 #
+XMIN, YMIN, XMAX, YMAX = 10.137673,57.111366,12.302739,58.461380 # 9.90353, 56.89971, 12.79016, 58.18372 # 10.30774, 57.25922, 12.13159, 58.03877 #
 FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo'
 DESIRED_NO_SAMPLES = 10
-PAST_MINUTES = [5]#[1,3,5]
-FUTURE_MINUTES = [5]#[1,2,3,5,10,15,20]
+PAST_MINUTES = [1,3,5]
+FUTURE_MINUTES = [1,2,3,5,10,15,20]
 FUTURE_TRAJ_DURATION = timedelta(hours=1)
 
-DATA_PATH = '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' # "E:/Geodata/AISDK/aisdk_20180101.csv" #
-TEMP_EXTRACT = '/home/agraser/tmp/extract.csv' # 'E:/Geodata/AISDK/extract.csv' # 
-GRID = '/home/agraser/tmp/grid.gpkg' # 'E:/Geodata/AISDK/grid.gpkg' #
-OUTPUT = '/home/agraser/tmp/sample.csv' # 'E:/Geodata/AISDK/sample.csv' # 
+DATA_PATH = "E:/Geodata/AISDK/raw_ais" # '/media/agraser/Elements/AIS_DK/2018/aisdk_20180101.csv' # 
+TEMP_EXTRACT = 'E:/Geodata/AISDK/extract.csv' # '/home/agraser/tmp/extract.csv' # 
+GRID = 'E:/Geodata/AISDK/grid.gpkg' # '/home/agraser/tmp/grid.gpkg' # 
+OUTPUT = 'E:/Geodata/AISDK/sample.csv' # '/home/agraser/tmp/sample.csv' # 
 
 if FILTER_BY_SHIPTYPE:
-    TEMP_INTERSECTIONS = '/home/agraser/tmp/intersections_{}.pickle'.format(SHIPTYPE)
+    TEMP_INTERSECTIONS = 'E:/Geodata/AISDK/intersections_{}.pickle'.format(SHIPTYPE)
+    #TEMP_INTERSECTIONS = '/home/agraser/tmp/intersections_{}.pickle'.format(SHIPTYPE)
 else: 
-    TEMP_INTERSECTIONS = '/home/agraser/tmp/intersections.pickle'
+    TEMP_INTERSECTIONS = 'E:/Geodata/AISDK/intersections.pickle'
+    #TEMP_INTERSECTIONS = '/home/agraser/tmp/intersections.pickle'
     
 
 def intersection_worker(feature, trajectories):
+    print("Initializing intersection worker ...")
     intersections = []
+    shuffle(trajectories)
     for traj in trajectories:
         for intersection in traj.intersection(feature):
+            if len(intersections) >= 5*DESIRED_NO_SAMPLES: # used to run out of memory without this :(
+                break 
             intersection.context = feature['id']
             intersections.append(intersection)
+    print("Finished intersection worker!")
     return feature, intersections
     
 def sampling_worker(trajectories, past, future):
@@ -74,6 +81,7 @@ def sampling_worker(trajectories, past, future):
     samples = []
     counter = 0
     shuffle(trajectories)
+    #print("Got {} trajectories!".format(len(trajectories)))
     for traj in trajectories:
         if counter >= DESIRED_NO_SAMPLES:
             break
@@ -85,6 +93,7 @@ def sampling_worker(trajectories, past, future):
             #print(traj.id)
         except RuntimeError as e:
             pass #print(e)
+    print("Got {} trajectories, extracted {}!".format(len(trajectories),len(samples)))
     return samples   
 
 def filter_df_by_bbox(df, XMIN, XMAX, YMIN, YMAX):
@@ -113,7 +122,7 @@ def create_trajectories(df):
     return trajectories
     
 def compute_intersections(trajectories, polygon_file, pool):
-    print("Computing all intersections for future use (this can take a while!) ...")
+    print("Computing intersections for future use (this can take a while!) ...")
     results = {}
     for cell, intersections in pool.starmap(intersection_worker, zip(polygon_file, repeat(trajectories))): 
         results[cell['id']] = intersections
@@ -121,13 +130,20 @@ def compute_intersections(trajectories, polygon_file, pool):
         
 def prepare_data(pool):
     try:
-        df = pd.read_csv(TEMP_EXTRACT)
         print("Loading filtered data from {} ...".format(TEMP_EXTRACT))
+        df = pd.read_csv(TEMP_EXTRACT)
     except:
+        print("Failed to load filtered data from {}!".format(TEMP_EXTRACT))
         print("Extracting data based on bbox {} ...".format([XMIN, XMAX, YMIN, YMAX]))
-        df = pd.read_csv(DATA_PATH)
-        df = filter_df_by_bbox(df, XMIN, XMAX, YMIN, YMAX)
-        df.to_csv(TEMP_EXTRACT, index = False)  
+        dfs = []
+        for filename in os.listdir(DATA_PATH):
+            if filename.endswith(".csv"):
+                print("Processing {} ...".format(filename))
+                df = pd.read_csv(os.path.join(DATA_PATH,filename))
+                df = filter_df_by_bbox(df, XMIN, XMAX, YMIN, YMAX)
+                dfs.append(df)
+        df = pd.concat(dfs)  
+        df.to_csv(TEMP_EXTRACT, index = False)
         
     if FILTER_BY_SHIPTYPE:
         print("Filtering: Only {} vessels ...".format(SHIPTYPE))
@@ -148,9 +164,13 @@ def create_sample(intersections_per_grid_cell, past, future, pool):
     all_samples = []
     with open(OUTPUT.replace('sample.csv','sample_{}_{}_{}.csv'.format(SHIPTYPE, past, future)), 'w') as output:
         output.write("id;start_secs;past_secs;future_secs;past_traj;future_pos;future_traj\n")
-        for samples in pool.starmap(sampling_worker, zip(intersections_per_grid_cell.values(), repeat(past), repeat(future))): 
+        jobs = zip(intersections_per_grid_cell.values(), repeat(past), repeat(future))
+        counter = 0
+        for samples in pool.starmap(sampling_worker, jobs):
             for sample in samples:
                 all_samples.append(sample)
+                counter += 1
+                print("{} of {} done!".format(counter,len(jobs)))
                 try:
                     output.write(str(sample))
                 except:
@@ -164,14 +184,18 @@ def create_sample(intersections_per_grid_cell, past, future, pool):
 if __name__ == '__main__':   
     print("{} Started! ...".format(datetime.now()))
     script_start = datetime.now()   
-    pool = mp.Pool(mp.cpu_count())
+    pool = mp.Pool(4) # running out of memory :(
     
     try:
+        print("Loading pickled data from {} ...".format(TEMP_INTERSECTIONS))
         with open(TEMP_INTERSECTIONS, 'rb') as f: 
             intersections_per_grid_cell = pickle.load(f)
-        print("Loading pickled data from {} ...".format(TEMP_INTERSECTIONS))
     except:
+        print("Failed to load pickled data from {}!".format(TEMP_INTERSECTIONS))
+        print("Preparing data ...")
         intersections_per_grid_cell = prepare_data(pool)
+    
+    pool = mp.Pool(mp.cpu_count()-1)
     
     for past in PAST_MINUTES:
         for future in FUTURE_MINUTES:

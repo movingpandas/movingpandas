@@ -35,15 +35,15 @@ from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, Evalu
 
 FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo'
-PAST_MINUTES = [5]#[1,3,5]
-FUTURE_MINUTES = [5]#[1,2,3,5,10,15,20]
+PAST_MINUTES = [1,3,5]
+FUTURE_MINUTES = [1,2,3,5,10,15,20]
 PREDICTION_MODE = 'linear' # 'kinetic'
 
-INPUT = '/home/agraser/tmp/sample.csv' 
+INPUT = 'E:/Geodata/AISDK/sample.csv' # '/home/agraser/tmp/sample.csv' 
 if PREDICTION_MODE == 'linear':
-    OUTPUT = '/home/agraser/tmp/predictions_lin.csv' 
+    OUTPUT = 'E:/Geodata/AISDK/predictions_lin.csv' # '/home/agraser/tmp/predictions_lin.csv' 
 elif PREDICTION_MODE == 'kinetic':
-    OUTPUT = '/home/agraser/tmp/predictions_kin.csv' 
+    OUTPUT = 'E:/Geodata/AISDK/predictions_kin.csv' # '/home/agraser/tmp/predictions_kin.csv' 
 
 def prediction_worker(sample, prediction_timedelta):
     predictor = TrajectoryPredictor(sample.past_traj) 
@@ -56,13 +56,16 @@ def prediction_worker(sample, prediction_timedelta):
     prediction = EvaluatedPrediction(predicted_location, context, errors)
     return prediction
     
-def compute_predictions(samples, future, pool):
-    with open(OUTPUT.replace('sample.csv','sample_{}_{}_{}.csv'.format(SHIPTYPE, past, future)), 'w') as output:
+def compute_predictions(samples, past, future, pool):
+    out = OUTPUT.replace('in.csv', 'in_{}_{}_{}.csv'.format(SHIPTYPE, past, future))
+    print("Writing to {}".format(out))
+    future = timedelta(minutes=future)
+    with open(out, 'w') as output:
         output.write(EvaluatedPrediction.get_csv_header())
         for prediction in pool.starmap(prediction_worker, zip(samples, repeat(future))): 
             try:
                 output.write(prediction.to_csv())
-                print(prediction)
+                #print(prediction)
             except TypeError as e:
                 print(e)
     output.close()    
@@ -81,7 +84,7 @@ if __name__ == '__main__':
                 print("Loading pickled data from {} ...".format(input_file))
             except:    
                 print("Failed to load pickled data from {}!".format(input_file))
-            compute_predictions(input_samples, timedelta(minutes=future), pool)
+            compute_predictions(input_samples, past, future, pool)
     
     print("{} Finished! ...".format(datetime.now()))
     print("Runtime: {}".format(datetime.now()-script_start))
