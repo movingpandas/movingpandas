@@ -49,10 +49,10 @@ def create_interactive_linked_charts(df):
     df = df[df['future']>=5]
     #df = df[df['distance_error']<=4000]
     
-    future_selection = alt.selection_multi(fields=['future'])
+    future_selection = alt.selection_multi(fields=['future'])#,'past'])
     future_color = alt.condition(future_selection, alt.Color('future:N', legend=None), alt.value('lightgray'))
     
-    hist = alt.Chart(title='Error Distribution').mark_area(
+    hist = alt.Chart(df, title='Error Distribution').mark_area(
             clip=True,
             opacity=1,
             interpolate='step'
@@ -66,7 +66,8 @@ def create_interactive_linked_charts(df):
             future_selection
         )
     
-    legend = alt.Chart().mark_point().encode(
+    legend = alt.Chart(df).mark_rect().encode(
+            #x=alt.X('past:N'),
             y=alt.Y('future:N', axis=alt.Axis(orient='right')),
             color=future_color
         ).add_selection(
@@ -77,7 +78,7 @@ def create_interactive_linked_charts(df):
     context_color = alt.condition(context_selection, alt.Color('future:N', legend=None), alt.value('lightgray'))
     map_color = alt.condition(context_selection, alt.value('#4c78a8'), alt.value('#f5f5f5'))
         
-    scatter = alt.Chart(title='Along-track & Cross-track Error').mark_point(
+    scatter = alt.Chart(df, title='Along-track & Cross-track Error').mark_point(
             clip=True
         ).encode(
             alt.X('along_track_error', scale=alt.Scale(domain=(0, 4000))),
@@ -103,9 +104,24 @@ def create_interactive_linked_charts(df):
             height=230
         )
 
+    cities = pd.DataFrame([
+        {"lon":11.9667, "lat":57.7, "city":"Gothenburg"},
+        {"lon":10.534, "lat":57.441, "city":"Frederikshavn"}
+    ]) 
+    city_points = alt.Chart(cities).mark_point().encode(
+            color=alt.value('black'),
+            longitude='lon:Q',
+            latitude='lat:Q'
+        )
+    city_labels = alt.Chart(cities).mark_text(dy=-5).encode(
+            longitude='lon:Q',
+            latitude='lat:Q',
+            text='city:N'
+        )
+    
     grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid.topojson', 'grid')
     variable_list = ['distance_error', 'along_track_error', 'cross_track_error', 'context', 'future']
-    map_chart = alt.Chart(grid, title='Spatial Distribution').mark_geoshape(
+    map1 = alt.Chart(grid, title='Spatial Distribution').mark_geoshape(
             stroke='white',
             strokeWidth=2    
         ).encode(
@@ -120,12 +136,14 @@ def create_interactive_linked_charts(df):
             context_selection
         )
         
-    literature = alt.Chart(df[df['past']==3], title='Literature Comparison').mark_line().encode(
+    map1 = map1 + land + city_points + city_labels
+        
+    literature = alt.Chart(df, title='Literature Comparison').mark_line().encode(
             x = alt.X('future:Q', 
                       scale=alt.Scale(domain=(0, 20))),
             y = alt.Y('mean(distance_error):Q',
                       scale=alt.Scale(domain=(0,4000))),
-            color=alt.value('#4c78a8')
+            color='past:Q'#alt.value('#4c78a8')#
         ).transform_filter(
             context_selection
         ) 
@@ -134,12 +152,12 @@ def create_interactive_linked_charts(df):
             y = alt.Y('error'), # ,scale=alt.Scale(domain=(0,2000)))
             tooltip=['method','future','error']
         ).properties(
-            width=350,
+            width=300,
             height=200
         )   
         
-    upper = alt.hconcat(scatter, hist, data=df, title='Vessel Trajetory Prediction Errors (in Meters)')
-    lower = alt.hconcat(map_chart+land, legend, data=df)
+    upper = alt.hconcat(scatter, hist, title='Vessel Trajetory Prediction Errors (in Meters)')
+    lower = alt.hconcat(map1, legend)
     lower = alt.hconcat(lower, literature)
     chart = alt.vconcat(upper, lower)
 
@@ -197,9 +215,11 @@ def create_single_map(df):
         strokeWidth=2
     ).encode(
         color=alt.value('#eee'),
+    ).project(
+        type='equirectangular'        
     ).properties(
         width=700,
-        height=500
+        height=400
     )
     
     grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid.topojson', 'grid')
@@ -212,12 +232,24 @@ def create_single_map(df):
     ).transform_lookup(
         lookup='properties.id',
         from_=alt.LookupData(df2, 'context', variable_list)
-    ).properties(
-        width=500,
-        height=500
     )
+    
+    cities = pd.DataFrame([
+        {"lon":11.9667, "lat":57.7, "city":"Gothenburg"},
+        {"lon":10.534, "lat":57.441, "city":"Frederikshavn"}
+    ]) 
+    city_points = alt.Chart(cities).mark_point().encode(
+            color=alt.value('black'),
+            longitude='lon:Q',
+            latitude='lat:Q'
+        )
+    city_labels = alt.Chart(cities).mark_text(dy=-5).encode(
+            longitude='lon:Q',
+            latitude='lat:Q',
+            text='city:N'
+        )
 
-    map_chart = map_chart + basemap
+    map_chart = map_chart + basemap + city_points + city_labels
     
     with open(INPUT.replace('.csv','_single_map.vega'),'w') as map_output:
         map_output.write(map_chart.to_json(indent=2))
