@@ -206,3 +206,15 @@ class Trajectory():
 
     def intersection(self, feature):
         return overlay.intersection(self, feature)
+        
+    def split(self, mode='daybreak'):
+        result = []
+        if mode == 'daybreak':
+            dfs = [group[1] for group in self.df.groupby(self.df.index.day)]
+            for i, df in enumerate(dfs):
+                result.append(Trajectory('{}_{}'.format(self.id, i), df))
+        else:
+            raise ValueError('Invalid split mode {}. Must be one of [daybreak]'.format(mode))
+        return result
+        
+    
