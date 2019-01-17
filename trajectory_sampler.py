@@ -105,9 +105,12 @@ class TrajectorySampler():
         return df
         
     def _match_sample_pattern_to_df(self, df, first_move_time, past_timedelta, future_timedelta, randomize):
+        secs = int((self.traj.get_duration() - future_timedelta).total_seconds())
+        if secs < 0:
+            raise RuntimeError("Failed to extract sample from trajectory {}!".format(self.traj.id))
         if randomize:
             number_of_retries = 3
-            random_start = random.randint(0, int((self.traj.get_duration() - future_timedelta).total_seconds()))
+            random_start = random.randint(0, secs)
             delta_t = timedelta(seconds=random_start)
         else:
             number_of_retries = 1
@@ -119,7 +122,7 @@ class TrajectorySampler():
                     df, delta_t, first_move_time, past_timedelta, future_timedelta, randomize)
             except RuntimeError:
                 number_of_retries -= 1
-                random_start = random.randint(0, int((self.traj.get_duration() - future_timedelta).total_seconds()))
+                random_start = random.randint(0, secs)
                 delta_t = timedelta(seconds=random_start)
 
         if not successful:
@@ -134,7 +137,7 @@ class TrajectorySampler():
         else:
             return True
           
-    def get_sample(self, past_timedelta, future_timedelta, min_meters_per_sec=0.3, randomize=False, future_traj_duration=timedelta(hours=0)):      
+    def get_sample(self, past_timedelta, future_timedelta, min_meters_per_sec=0.3, randomize=False, future_traj_duration=timedelta(hours=0)):
         if not self._is_sampling_possible(past_timedelta, future_timedelta, min_meters_per_sec):
             raise RuntimeError("Cannot extract sample from this trajectory!")
         
@@ -156,8 +159,7 @@ class TrajectorySampler():
         if not self._is_moving_sufficiently(past_traj, min_meters_per_sec, past_timedelta):
             raise RuntimeError("Skipping sample {} since it there is not enough movement!".format(self.traj.id))
 
-        self.sample_counter += 1
-        sample_id = "{}_{}".format(self.traj.id, self.sample_counter)        
+        sample_id = "{}".format(self.traj.id)
         return TrajectorySample(sample_id, start_timedelta, past_timedelta, future_timedelta, past_traj, future_pos, future_traj)
         
         

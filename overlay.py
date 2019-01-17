@@ -70,9 +70,13 @@ def _get_spatiotemporal_ref(row):
         return None
 
 def _dissolve_ranges(ranges):
+    if len(ranges) == 0:
+        raise ValueError("Nothing to dissolve (received empty ranges)!")
     new = []
     start = None
     end = None
+    pt0 = None
+    ptn = None
     for r in ranges:
         if start is None:
             start = r[0]
@@ -140,7 +144,8 @@ def clip(traj, polygon):
             continue
         ranges.append((x['t0'], x['tn'], x['pt0'], x['ptn']))
 
-    ranges = _dissolve_ranges(ranges)
+    if len(ranges) > 0:
+        ranges = _dissolve_ranges(ranges)
     for the_range in ranges:
         t0, tn, pt0, ptn = the_range[0], the_range[1], the_range[2], the_range[3]
         # Create row at entry point with attributes from previous row = pad

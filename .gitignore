@@ -108,3 +108,8 @@ demo/demodata_geolife_large.gpkg
 *.prefs
 .project
 .pydevproject
+.idea/misc.xml
+.idea/modules.xml
+*.iml
+.idea/vcs.xml
+.idea/workspace.xml

@@ -26,24 +26,25 @@ from datetime import timedelta, datetime
 from itertools import repeat
 
 import warnings
-import past
+
 warnings.filterwarnings('ignore')
 
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Cargo'
+SHIPTYPE = 'Cargo' # 'Fishing' # 'Passenger'
 PAST_MINUTES = [1,3,5]
-FUTURE_MINUTES = [1,2,3,5,10,15,20]
-PREDICTION_MODE = 'linear' # 'kinetic'
+FUTURE_MINUTES = [1,5,10,15,20]
+PREDICTION_MODE = 'Linear' # 'Kinetic' # 'Similar Trajectory' #
 LITERATURE_ERRORS = pd.read_csv('./literature_errors.csv')
 LITERATURE_ERRORS = LITERATURE_ERRORS[LITERATURE_ERRORS['future']<=20]
 
-if PREDICTION_MODE == 'linear':
+if PREDICTION_MODE == 'Linear':
     INPUT = 'E:/Geodata/AISDK/predictions_lin.csv' # '/home/agraser/tmp/predictions_lin.csv' 
-elif PREDICTION_MODE == 'kinetic':
+elif PREDICTION_MODE == 'Kinetic':
     INPUT = 'E:/Geodata/AISDK/predictions_kin.csv' # '/home/agraser/tmp/predictions_kin.csv' 
-
+elif PREDICTION_MODE == 'Similar Trajectory':
+    INPUT = 'E:/Geodata/AISDK/predictions_sts.csv'
 
 def create_interactive_linked_charts(df):
     df = df[df['future']>=5]
@@ -52,19 +53,40 @@ def create_interactive_linked_charts(df):
     future_selection = alt.selection_multi(fields=['future'])#,'past'])
     future_color = alt.condition(future_selection, alt.Color('future:N', legend=None), alt.value('lightgray'))
     
-    hist = alt.Chart(df, title='Error Distribution').mark_area(
+    hist1 = alt.Chart(df, title='Along-Track Error Distribution').mark_area(
             clip=True,
             opacity=1,
             interpolate='step'
         ).encode(
-            alt.X('distance_error', bin=alt.Bin(step=100),  scale=alt.Scale(domain=(0, 4000))),
+            alt.X('along_track_error', bin=alt.Bin(step=100),  scale=alt.Scale(domain=(0, 5000))),
             alt.Y('count()', stack=None,  scale=alt.Scale(domain=(0, 600))),#scale=alt.Scale(type='log')),
             color = future_color 
         ).add_selection(
             future_selection
         ).transform_filter(
             future_selection
+        ).properties(
+            width=350,
+            height=170
         )
+    hist2 = alt.Chart(df, title='Cross-Track Error Distribution').mark_area(
+            clip=True,
+            opacity=1,
+            interpolate='step'
+        ).encode(
+            alt.X('cross_track_error', bin=alt.Bin(step=100), scale=alt.Scale(domain=(0, 5000))),
+            alt.Y('count()', stack=None, scale=alt.Scale(domain=(0, 600))),  # scale=alt.Scale(type='log')),
+            color=future_color
+        ).add_selection(
+            future_selection
+        ).transform_filter(
+            future_selection
+        ).properties(
+            width=350,
+            height=170
+        )
+
+
     
     legend = alt.Chart(df).mark_rect().encode(
             #x=alt.X('past:N'),
@@ -81,27 +103,30 @@ def create_interactive_linked_charts(df):
     scatter = alt.Chart(df, title='Along-track & Cross-track Error').mark_point(
             clip=True
         ).encode(
-            alt.X('along_track_error', scale=alt.Scale(domain=(0, 4000))),
-            alt.Y('cross_track_error', scale=alt.Scale(domain=(0, 4000))),
+            alt.X('along_track_error', scale=alt.Scale(domain=(0, 5000))),
+            alt.Y('cross_track_error', scale=alt.Scale(domain=(0, 5000))),
             color=context_color,
-            tooltip=['context','future','along_track_error','cross_track_error']
+            tooltip=['context','past','future','along_track_error','cross_track_error']
         ).add_selection(
             context_selection
         ).transform_filter(
             future_selection
+        ).properties(
+            width=400,
+            height=400
         )
         
-    countries = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/land.topojson','land')
+    countries = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/land40.topojson','land40')
     land = alt.Chart(countries).mark_geoshape(
             stroke='white',
             strokeWidth=2
         ).encode(
             color=alt.value('lightgray'),
         ).project(
-            type='equirectangular'            
+            type='mercator'
         ).properties(
             width=350,
-            height=230
+            height=300
         )
 
     cities = pd.DataFrame([
@@ -119,7 +144,7 @@ def create_interactive_linked_charts(df):
             text='city:N'
         )
     
-    grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid.topojson', 'grid')
+    grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid40.topojson', 'grid40')
     variable_list = ['distance_error', 'along_track_error', 'cross_track_error', 'context', 'future']
     map1 = alt.Chart(grid, title='Spatial Distribution').mark_geoshape(
             stroke='white',
@@ -131,18 +156,20 @@ def create_interactive_linked_charts(df):
             lookup='properties.id',
             from_=alt.LookupData(df, 'context', variable_list)
         ).project(
-            type='equirectangular'
+            type='mercator'
         ).add_selection(
             context_selection
         )
         
     map1 = map1 + land + city_points + city_labels
         
-    literature = alt.Chart(df, title='Literature Comparison').mark_line().encode(
+    literature = alt.Chart(df, title='Literature Comparison').mark_line(
+            clip=True,
+        ).encode(
             x = alt.X('future:Q', 
                       scale=alt.Scale(domain=(0, 20))),
             y = alt.Y('mean(distance_error):Q',
-                      scale=alt.Scale(domain=(0,4000))),
+                      scale=alt.Scale(domain=(0,5000))),
             color='past:Q'#alt.value('#4c78a8')#
         ).transform_filter(
             context_selection
@@ -154,14 +181,50 @@ def create_interactive_linked_charts(df):
         ).properties(
             width=300,
             height=200
-        )   
-        
-    upper = alt.hconcat(scatter, hist, title='Vessel Trajetory Prediction Errors (in Meters)')
-    lower = alt.hconcat(map1, legend)
-    lower = alt.hconcat(lower, literature)
-    chart = alt.vconcat(upper, lower)
+        )
 
-    with open(INPUT.replace('.csv','_interactive.vega'),'w') as chart_output:
+    along = alt.Chart(df, title='Along-Track Error').mark_line(
+            clip=True,
+        ).encode(
+            x=alt.X('future:Q',
+                    scale=alt.Scale(domain=(0, 20))),
+            y=alt.Y('mean(along_track_error):Q',
+                    scale=alt.Scale(domain=(0, 5000))),
+            color='past:Q'  # alt.value('#4c78a8')#
+        ).transform_filter(
+            context_selection
+        ).properties(
+            width=300,
+            height=200
+        )
+    cross = alt.Chart(df, title='Cross-Track Error').mark_line(
+            clip=True,
+        ).encode(
+            x=alt.X('future:Q',
+                    scale=alt.Scale(domain=(0, 20))),
+            y=alt.Y('mean(cross_track_error):Q',
+                    scale=alt.Scale(domain=(0, 5000))),
+            color='past:Q'  # alt.value('#4c78a8')#
+        ).transform_filter(
+            context_selection
+        ).properties(
+            width=300,
+            height=200
+        )
+
+    left = alt.vconcat(literature, along, cross)
+    map_and_legend = alt.hconcat(map1, legend)
+    right = alt.vconcat(map_and_legend, scatter)
+    title = '{} {} Vessel Trajectory Prediction Errors (in Meters)'.format(PREDICTION_MODE, SHIPTYPE)
+    chart = alt.hconcat(left,right,title=title)
+
+    #hist = alt.vconcat(along, cross)
+    #upper = alt.hconcat(scatter, hist, title='Vessel Trajectory Prediction Errors (in Meters)')
+    #lower = alt.hconcat(map1, legend)
+    #lower = alt.hconcat(lower, literature)
+    #chart = alt.vconcat(upper, lower)
+
+    with open(INPUT.replace('.csv','_{}_interactive.vega'.format(SHIPTYPE)),'w') as chart_output:
         chart_output.write(chart.to_json(indent=2))
 
 def create_error_over_future_graph(df):
@@ -203,26 +266,26 @@ def create_error_over_future_graph(df):
         chart_output.write(chart.to_json(indent=2))
         
     return chart
-        
+
 def create_single_map(df):
     df2 = df.groupby('context').mean()
     df2['context'] = df2.index
     print(df2)
         
-    countries = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/land.topojson','land')
+    countries = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/land40.topojson','land40')
     basemap = alt.Chart(countries).mark_geoshape(
         stroke='white',
         strokeWidth=2
     ).encode(
         color=alt.value('#eee'),
     ).project(
-        type='equirectangular'        
+        type='mercator'
     ).properties(
-        width=700,
-        height=400
+        width=500,
+        height=300
     )
     
-    grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid.topojson', 'grid')
+    grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid40.topojson', 'grid40')
     variable_list = ['distance_error', 'along_track_error', 'cross_track_error']
     map_chart = alt.Chart(grid).mark_geoshape(
         stroke='white',
@@ -263,59 +326,66 @@ def create_map_series(df):
     df2['context'] = df2.index
     print(df2)
     
-    grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid.topojson', 'grid')
+    grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid40.topojson', 'grid40')
     variable_list = ['distance_error', 'along_track_error', 'cross_track_error']
-    map_chart = alt.Chart(grid).mark_geoshape(
+    map_chart = alt.Chart(grid, title=SHIPTYPE).mark_geoshape(
             stroke='white',
             strokeWidth=2    
         ).encode(
-            alt.Color(alt.repeat('row') , type='quantitative')
+            alt.Color(alt.repeat('column') , type='quantitative', scale=alt.Scale(domain=(0, 2000)))
         ).transform_lookup(
             lookup='properties.id',
             from_=alt.LookupData(df2, 'context', variable_list)
         ).project(
-            type='equirectangular'
+            type='mercator'
         ).properties(
             width=300,
             height=200
         ).repeat(
-            row=variable_list
+            column=variable_list
         ).resolve_scale(
-            color='independent'
+            color='shared'
         )
     
-    with open(INPUT.replace('.csv','_map_series.vega'),'w') as map_output:
+    with open(INPUT.replace('.csv','_{}_map_series.vega'.format(SHIPTYPE)),'w') as map_output:
         map_output.write(map_chart.to_json(indent=2))
+
+
+
 
 if __name__ == '__main__':   
     print("{} Started! ...".format(datetime.now()))
+    print(PREDICTION_MODE)
     script_start = datetime.now()   
-    
-    
+
     frames = []
     
     for past in PAST_MINUTES:
         for future in FUTURE_MINUTES:
-            input_file = INPUT.replace('in.csv', 'in_{}_{}_{}.csv'.format(SHIPTYPE, past, future))
+            input_file = INPUT.replace('.csv', '_{}_{}_{}.csv'.format(SHIPTYPE, past, future))
             df = pd.read_csv(input_file, ';')
             df['past'] = past
             df['future'] = future
             #df = df[df['future']==5]
             means = df.groupby('context').mean()
-            print(means)
+            #print(means)
             df['code'] = '{}_{}'.format(past,future)
             frames.append(df)
-            means.to_csv(input_file.replace('.csv','_summary.csv'))
+            means.to_csv(input_file.replace('.csv','_{}_summary.csv'.format(SHIPTYPE)))
             
     df = pd.concat(frames)
-    df.to_csv(INPUT.replace('.csv','_summary.csv'))
+    df.to_csv(INPUT.replace('.csv','_{}_summary.csv'.format(SHIPTYPE)))
+
   
     #create_error_over_future_graph(df)
     #create_single_map(df)
-    #create_map_series(df)
-    
+    create_map_series(df)
     create_interactive_linked_charts(df)
-    
+
+    df = df[df['context'] == 23]
+    means = df.groupby('future').mean()
+    print(means)
+
     
     print("{} Finished! ...".format(datetime.now()))
     print("Runtime: {}".format(datetime.now()-script_start))

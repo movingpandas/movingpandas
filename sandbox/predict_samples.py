@@ -34,9 +34,9 @@ from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, Evalu
 
 
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Cargo'
+SHIPTYPE = 'Passenger' # 'Cargo' # 'Fishing' #
 PAST_MINUTES = [1,3,5]
-FUTURE_MINUTES = [1,2,3,5,10,15,20]
+FUTURE_MINUTES = [1,5,10,15,20]
 PREDICTION_MODE = 'linear' # 'kinetic'
 
 INPUT = 'E:/Geodata/AISDK/sample.csv' # '/home/agraser/tmp/sample.csv' 
