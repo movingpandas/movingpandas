@@ -173,6 +173,8 @@ class Trajectory():
         pt1 = row['geometry']
         if type(pt0) != Point:
             return 0.0
+        if type(pt1) != Point:
+            raise ValueError('Invalid trajectory! Got {} instead of point!'.format(pt1))
         if pt0 == pt1:
             return 0.0
         if self.crs == '4326' or self.crs == 'epsg:4326':
@@ -191,7 +193,10 @@ class Trajectory():
         self.df['t'] = self.df.index
         self.df['prev_t'] = self.df['t'].shift()
         self.df['delta_t'] = self.df['t'] - self.df['prev_t']
-        self.df['meters_per_sec'] = self.df.apply(self._compute_speed, axis=1)
+        try:
+            self.df['meters_per_sec'] = self.df.apply(self._compute_speed, axis=1)
+        except ValueError as e:
+            raise e
         self.df.at[self.get_start_time(),'meters_per_sec'] = self.df.iloc[1]['meters_per_sec']
 
     def _make_line(self, df):

@@ -25,7 +25,7 @@ R_EARTH = 6371000  # radius of earth in meters
 
 def measure_distance_spherical(point1, point2):
     if (type(point1) != Point) or (type(point2) != Point):
-        raise TypeError("Only Points are supported as arguments")
+        raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     lon1 = float(point1.x)
     lon2 = float(point2.x)
     lat1 = float(point1.y)

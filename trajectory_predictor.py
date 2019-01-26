@@ -69,8 +69,11 @@ class TrajectoryPredictor():
         start_prediction_from = self.traj.get_end_location()
         #print("Starting prediction from: {}".format(current_pos))
         
-        self.traj.add_heading() 
-        self.traj.add_meters_per_sec()
+        try:
+            self.traj.add_heading()
+            self.traj.add_meters_per_sec()
+        except ValueError as e:
+            raise e
         self.traj.df['prev_heading'] = self.traj.df['heading'].shift()
         self.traj.df['delta_heading'] = self.traj.df['heading'] - self.traj.df['prev_heading'] 
         self.traj.df['prev_ms'] = self.traj.df['meters_per_sec'].shift()
