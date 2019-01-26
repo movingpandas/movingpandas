@@ -68,7 +68,7 @@ class TrajectoryPredictor():
         """
         start_prediction_from = self.traj.get_end_location()
         #print("Starting prediction from: {}".format(current_pos))
-        
+
         try:
             self.traj.add_heading()
             self.traj.add_meters_per_sec()
@@ -93,8 +93,8 @@ class TrajectoryPredictor():
 
         # loop over all historic points
         for index, row in self.traj.df.iterrows():
-            current_heading = 0
-            current_ms = 0
+            current_heading = row['heading']
+            current_ms = row['meters_per_sec']
 
             # only proceed if delta_t > 0, because otherwise division through zero will occur
             delta_t_sec = row['delta_t'].total_seconds()
