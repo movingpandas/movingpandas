@@ -66,8 +66,7 @@ class TrajectoryPredictor():
         Based on:
         Sang, L. Z., Yan, X. P., Wall, A., Wang, J., & Mao, Z. (2016). CPA calculation method based on AIS position prediction. The Journal of Navigation, 69(6), 1409-1426.
         """
-        current_pos = self.traj.get_end_location()
-        predict_secs = prediction_timedelta.total_seconds()
+        start_prediction_from = self.traj.get_end_location()
         #print("Starting prediction from: {}".format(current_pos))
         
         self.traj.add_heading() 
@@ -79,22 +78,35 @@ class TrajectoryPredictor():
         self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_heading") ] = self.traj.df.iloc[2]['delta_heading']
         self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_ms") ] = self.traj.df.iloc[2]['delta_ms']
         #print(self.traj.df)
-        
-        current_heading = float(self.traj.df.tail(1)['heading'])
-        current_ms = float(self.traj.df.tail(1)['meters_per_sec'])
 
+        # total time range between first and last point in trajectory
+        time_range = self.traj.get_end_time() - self.traj.get_start_time()
+        # distances in x- and y-direction that will be added to the last point of the trajectory
+        dx = 0.0
+        dy = 0.0
+
+        # loop over all historic points
         for index, row in self.traj.df.iterrows():
+
+            # only proceed if delta_t > 0, because otherwise division through zero will occur
             delta_t_sec = row['delta_t'].total_seconds()
             if delta_t_sec > 0.0:
-                #print(row)
+                # calculate COG based on ROT
                 current_heading = current_heading + float(row['delta_heading'])
+                # calculate SOG based on COS
                 current_ms = max(0, current_ms + float(row['delta_ms']))
-                #print("COG: {} | SOG: {}".format(current_cog, current_sog))
-                scaled_prediction_secs = delta_t_sec * (predict_secs / (self.traj.get_end_time() - self.traj.get_start_time()).total_seconds())    
-                current_pos = self.compute_future_position(current_pos, current_ms, current_heading, timedelta(seconds=scaled_prediction_secs))
-                #print(current_pos)
-        return current_pos          
-        
-        
-        
+                # calculate the prediction time for this point (i.e., how much of the prediction is explained by this pair of points)
+                prediction_time = prediction_timedelta.total_seconds() * (delta_t_sec / time_range)
+                # predict into the future, starting from the last point of the trajectory
+                predicted_pos = self.compute_future_position(start_prediction_from, current_ms, current_heading, timedelta(seconds=prediction_time))
+                # store the differences in x- and y-direction (this is what this point adds to the prediction)
+                dx += radians(predicted_pos.x() - start_prediction_from.x())
+                dy += radians(predicted_pos.y() - start_prediction_from.y())
+
+        # add distances in x- and y-direction to the last point of the trajectory
+        predicted_x = radians(start_prediction_from.x()) + dx
+        predicted_y = radians(start_prediction_from.y()) + dy
+        # save predicted point
+        predicted_point = Point(degrees(predicted_x), degrees(predicted_y))
+        return predicted_point
         
