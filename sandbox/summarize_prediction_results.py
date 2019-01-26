@@ -32,10 +32,10 @@ warnings.filterwarnings('ignore')
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Cargo' # 'Fishing' # 'Passenger'
+SHIPTYPE = 'Fishing' # 'Passenger' # 'Cargo' #
 PAST_MINUTES = [1,3,5]
 FUTURE_MINUTES = [1,5,10,15,20]
-PREDICTION_MODE = 'Linear' # 'Kinetic' # 'Similar Trajectory' #
+PREDICTION_MODE = 'Kinetic' # 'Similar Trajectory' # 'Linear' #
 LITERATURE_ERRORS = pd.read_csv('./literature_errors.csv')
 LITERATURE_ERRORS = LITERATURE_ERRORS[LITERATURE_ERRORS['future']<=20]
 
@@ -332,7 +332,7 @@ def create_map_series(df):
             stroke='white',
             strokeWidth=2    
         ).encode(
-            alt.Color(alt.repeat('column') , type='quantitative', scale=alt.Scale(domain=(0, 2000)))
+            alt.Color(alt.repeat('column') , type='quantitative', scale=alt.Scale(domain=(0, 1000)))
         ).transform_lookup(
             lookup='properties.id',
             from_=alt.LookupData(df2, 'context', variable_list)
