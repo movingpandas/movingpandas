@@ -80,13 +80,15 @@ class TrajectoryPredictor():
         #print(self.traj.df)
 
         # total time range between first and last point in trajectory
-        time_range = self.traj.get_end_time() - self.traj.get_start_time()
+        time_range = (self.traj.get_end_time() - self.traj.get_start_time()).total_seconds()
         # distances in x- and y-direction that will be added to the last point of the trajectory
         dx = 0.0
         dy = 0.0
 
         # loop over all historic points
         for index, row in self.traj.df.iterrows():
+            current_heading = 0
+            current_ms = 0
 
             # only proceed if delta_t > 0, because otherwise division through zero will occur
             delta_t_sec = row['delta_t'].total_seconds()
@@ -100,12 +102,12 @@ class TrajectoryPredictor():
                 # predict into the future, starting from the last point of the trajectory
                 predicted_pos = self.compute_future_position(start_prediction_from, current_ms, current_heading, timedelta(seconds=prediction_time))
                 # store the differences in x- and y-direction (this is what this point adds to the prediction)
-                dx += radians(predicted_pos.x() - start_prediction_from.x())
-                dy += radians(predicted_pos.y() - start_prediction_from.y())
+                dx += radians(predicted_pos.x - start_prediction_from.x)
+                dy += radians(predicted_pos.y - start_prediction_from.y)
 
         # add distances in x- and y-direction to the last point of the trajectory
-        predicted_x = radians(start_prediction_from.x()) + dx
-        predicted_y = radians(start_prediction_from.y()) + dy
+        predicted_x = radians(start_prediction_from.x) + dx
+        predicted_y = radians(start_prediction_from.y) + dy
         # save predicted point
         predicted_point = Point(degrees(predicted_x), degrees(predicted_y))
         return predicted_point
