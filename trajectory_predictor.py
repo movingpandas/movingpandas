@@ -74,9 +74,12 @@ class TrajectoryPredictor():
         self.traj.df['prev_heading'] = self.traj.df['heading'].shift()
         self.traj.df['delta_heading'] = self.traj.df['heading'] - self.traj.df['prev_heading'] 
         self.traj.df['prev_ms'] = self.traj.df['meters_per_sec'].shift()
-        self.traj.df['delta_ms'] = self.traj.df['meters_per_sec'] - self.traj.df['prev_ms'] 
-        self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_heading") ] = self.traj.df.iloc[2]['delta_heading']
-        self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_ms") ] = self.traj.df.iloc[2]['delta_ms']
+        self.traj.df['delta_ms'] = self.traj.df['meters_per_sec'] - self.traj.df['prev_ms']
+        try:
+            self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_heading") ] = self.traj.df.iloc[2]['delta_heading']
+            self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_ms") ] = self.traj.df.iloc[2]['delta_ms']
+        except IndexError as e:
+            raise ValueError('Failed to predict trajectory {} because the past trajectory is too short!'.format(self.traj.id))
         #print(self.traj.df)
 
         # total time range between first and last point in trajectory

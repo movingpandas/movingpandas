@@ -34,10 +34,10 @@ from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, Evalu
 
 
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Passenger' # 'Cargo' # 'Fishing' #
+SHIPTYPE = 'Cargo' # 'Fishing' # 'Passenger' #
 PAST_MINUTES = [1,3,5]
 FUTURE_MINUTES = [1,5,10,15,20]
-PREDICTION_MODE = 'linear' # 'kinetic'
+PREDICTION_MODE = 'kinetic' # 'linear' #
 
 INPUT = 'E:/Geodata/AISDK/sample.csv' # '/home/agraser/tmp/sample.csv' 
 if PREDICTION_MODE == 'linear':
@@ -50,7 +50,11 @@ def prediction_worker(sample, prediction_timedelta):
     if PREDICTION_MODE == 'linear':
         predicted_location = predictor.predict_linearly(prediction_timedelta)
     elif PREDICTION_MODE == 'kinetic':
-        predicted_location = predictor.predict_kinetically(prediction_timedelta)
+        try:
+            predicted_location = predictor.predict_kinetically(prediction_timedelta)
+        except ValueError as e:
+            print(e)
+            return None
     errors = TrajectoryPredictionEvaluator(sample, predicted_location, 'epsg:25832').get_errors()
     context = sample.past_traj.context
     prediction = EvaluatedPrediction(predicted_location, context, errors)
@@ -64,8 +68,7 @@ def compute_predictions(samples, past, future, pool):
         output.write(EvaluatedPrediction.get_csv_header())
         for prediction in pool.starmap(prediction_worker, zip(samples, repeat(future))): 
             try:
-                output.write(prediction.to_csv())
-                #print(prediction)
+                if prediction: output.write(prediction.to_csv())
             except TypeError as e:
                 print(e)
     output.close()    
