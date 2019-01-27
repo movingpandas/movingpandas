@@ -34,7 +34,7 @@ import unittest
 import pandas as pd 
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
-from datetime import datetime
+from datetime import datetime, timedelta
 
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 
@@ -254,7 +254,34 @@ class TestTrajectory(unittest.TestCase):
         result = len(split)
         expected_result = 2
         self.assertEqual(result, expected_result)
-        
+
+    def test_offset_seconds(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0), 'value': 1},
+            {'geometry': Point(-6, 10), 't': datetime(2018, 1, 1, 12, 1, 0), 'value': 2},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 2, 0), 'value': 3},
+            {'geometry': Point(6, 12), 't': datetime(2018, 1, 1, 12, 3, 0), 'value':4},
+            {'geometry': Point(6, 18), 't': datetime(2018, 1, 1, 12, 4, 0), 'value':5}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        traj.apply_offset_seconds('value', -120)
+        self.assertEqual(traj.df.iloc[2].value, 5)
+        self.assertEqual(traj.df.iloc[2].geometry, Point(6, 6))
+
+    def test_offset_minutes(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0), 'value': 1},
+            {'geometry': Point(-6, 10), 't': datetime(2018, 1, 1, 12, 1, 0), 'value': 2},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 2, 0), 'value': 3},
+            {'geometry': Point(6, 12), 't': datetime(2018, 1, 1, 12, 3, 0), 'value':4},
+            {'geometry': Point(6, 18), 't': datetime(2018, 1, 1, 12, 4, 0), 'value':5}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        traj.apply_offset_minutes('value', -2)
+        self.assertEqual(traj.df.iloc[2].value, 5)
+        self.assertEqual(traj.df.iloc[2].geometry, Point(6, 6))
         
         
 if __name__ == '__main__':

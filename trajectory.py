@@ -222,4 +222,9 @@ class Trajectory():
             raise ValueError('Invalid split mode {}. Must be one of [daybreak]'.format(mode))
         return result
         
-    
+    def apply_offset_seconds(self, column, offset):
+        self.df[column] = self.df[column].shift(offset, freq='1s')
+
+    def apply_offset_minutes(self, column, offset):
+        self.df[column] = self.df[column].shift(offset, freq='1min')
+
