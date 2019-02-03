@@ -76,7 +76,7 @@ class Trajectory():
             raise RuntimeError("Cannot generate linestring")
 
     def to_linestringm_wkt(self):
-        # Shapely only supports x, y, z. Therfore, this is a bit hacky!
+        # Shapely only supports x, y, z. Therefore, this is a bit hacky!
         coords = ''
         for index, row in self.df.iterrows():
             pt = row.geometry
