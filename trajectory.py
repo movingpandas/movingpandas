@@ -41,6 +41,7 @@ class Trajectory():
             raise ValueError("Trajectory dataframe must have at least two rows!")
 
         self.id = traj_id
+        df.sort_index(inplace=True)
         self.df = df[~df.index.duplicated(keep='first')]
         self.crs = df.crs['init']
         self.parent = None

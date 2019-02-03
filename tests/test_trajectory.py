@@ -282,7 +282,18 @@ class TestTrajectory(unittest.TestCase):
         traj.apply_offset_minutes('value', -2)
         self.assertEqual(traj.df.iloc[2].value, 5)
         self.assertEqual(traj.df.iloc[2].geometry, Point(6, 6))
-        
+
+    def test_nonchronological_input(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 2, 0, 0, 0)},
+            {'geometry': Point(1, 1), 't': datetime(2018, 1, 3, 0, 0, 0)},
+            {'geometry': Point(2, 2), 't': datetime(2018, 1, 1, 0, 0, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        self.assertEqual(traj.get_start_time(), datetime(2018, 1, 1))
+        self.assertEqual(traj.get_end_time(), datetime(2018, 1, 3))
+        self.assertEqual(traj.get_start_location(), Point(2, 2))
         
 if __name__ == '__main__':
     unittest.main()
