@@ -43,11 +43,10 @@ class TrajectoryPredictor():
         dist = meters_per_sec * prediction_timedelta.total_seconds()
         lat1_rad = radians(current_pos.y)
         lon1_rad = radians(current_pos.x)
-        lat2_rad = asin(sin(lat1_rad) * cos(dist / R_EARTH) + cos(lat1_rad) * 
-                    sin(dist / R_EARTH) * cos(heading_rad))
+        lat2_rad = asin(sin(lat1_rad) * cos(dist / R_EARTH) + cos(lat1_rad) * sin(dist / R_EARTH) * cos(heading_rad))
         lon2_rad = lon1_rad + atan2(sin(heading_rad) * sin(dist / R_EARTH) * cos(lat1_rad),
-                    cos(dist / R_EARTH) - sin(lat1_rad) * sin(lat2_rad))
-        return Point(degrees(lon2_rad),degrees(lat2_rad))
+                                    cos(dist / R_EARTH) - sin(lat1_rad) * sin(lat2_rad))
+        return Point(degrees(lon2_rad), degrees(lat2_rad))
     
     def predict_linearly(self, prediction_timedelta):
         """
@@ -117,4 +116,3 @@ class TrajectoryPredictor():
         # save predicted point
         predicted_point = Point(degrees(predicted_x), degrees(predicted_y))
         return predicted_point
-        

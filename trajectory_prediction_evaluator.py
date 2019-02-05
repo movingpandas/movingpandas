@@ -23,24 +23,26 @@ from shapely.geometry import Point, LineString
 from geometry_utils import measure_distance_spherical
 
 
-class EvaluatedPrediction():
-    def __init__(self, predicted_location, context, errors={}):
+class EvaluatedPrediction:
+    def __init__(self, id, predicted_location, context, errors={}):
+        self.id = id
         self.predicted_location = predicted_location
         self.errors = errors
         self.context = context
         
     def __str__(self):
-        return "{}: {} - Errors: {}".format(self.context, self.predicted_location, self.errors)
+        return "{} ({}): {} - Errors: {}".format(self.id, self.context, self.predicted_location, self.errors)
         
     @staticmethod
     def get_csv_header():
-        return "predicted_location;context;distance_error;along_track_error;cross_track_error\n"        
+        return "id;predicted_location;context;distance_error;along_track_error;cross_track_error\n"
         
     def to_csv(self):
-        return "{};{};{};{};{}\n".format(self.predicted_location, self.context, self.errors['distance'], self.errors['along_track'], self.errors['cross_track'])
+        return "{};{};{};{};{};{}\n".format(self.id, self.predicted_location, self.context, self.errors['distance'],
+                                            self.errors['along_track'], self.errors['cross_track'])
 
 
-class TrajectoryPredictionEvaluator():
+class TrajectoryPredictionEvaluator:
     def __init__(self, groundtruth_sample, predicted_location, crs):
         self.truth = groundtruth_sample.future_pos
         self.true_traj = groundtruth_sample.future_traj
@@ -75,6 +77,5 @@ class TrajectoryPredictionEvaluator():
         
     def get_along_track_error(self):
         return measure_distance_spherical(self.truth, self.projected_prediction)
-        
-        
-        
+
+

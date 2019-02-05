@@ -29,25 +29,29 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
+pd.set_option('display.max_colwidth', -1)
+pd.set_option('display.max_columns', 500)
+
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Fishing' # 'Passenger' # 'Cargo' #
-PAST_MINUTES = [1,3,5]
-FUTURE_MINUTES = [1,5,10,15,20]
-PREDICTION_MODE = 'Kinetic' # 'Similar Trajectory' # 'Linear' #
+SHIPTYPE = 'Cargo' # 'Fishing' # 'Passenger' #
+PAST_MINUTES = [1, 3, 5]
+FUTURE_MINUTES = [1, 5, 10, 15, 20]
+PREDICTION_MODE = 'Similar Trajectory' # 'Linear' # 'Kinetic' #
 LITERATURE_ERRORS = pd.read_csv('./literature_errors.csv')
-LITERATURE_ERRORS = LITERATURE_ERRORS[LITERATURE_ERRORS['future']<=20]
+LITERATURE_ERRORS = LITERATURE_ERRORS[LITERATURE_ERRORS['future'] <= 20]
 
 if PREDICTION_MODE == 'Linear':
-    INPUT = 'E:/Geodata/AISDK/predictions_lin.csv' # '/home/agraser/tmp/predictions_lin.csv' 
+    INPUT = '/home/agraser/Dropbox/AIT/MARNG/data/prediction_output/predictions_lin.csv' #'E:/Geodata/AISDK/predictions_lin.csv' #
 elif PREDICTION_MODE == 'Kinetic':
-    INPUT = 'E:/Geodata/AISDK/predictions_kin.csv' # '/home/agraser/tmp/predictions_kin.csv' 
+    INPUT = '/home/agraser/Dropbox/AIT/MARNG/data/prediction_output/predictions_kin.csv' # 'E:/Geodata/AISDK/predictions_kin.csv' #
 elif PREDICTION_MODE == 'Similar Trajectory':
-    INPUT = 'E:/Geodata/AISDK/predictions_sts.csv'
+    INPUT = '/home/agraser/Dropbox/AIT/MARNG/data/prediction_output/predictions_sts.csv' # 'E:/Geodata/AISDK/predictions_sts.csv'
+
 
 def create_interactive_linked_charts(df):
-    df = df[df['future']>=5]
+    df = df[df['future'] >= 5]
     #df = df[df['distance_error']<=4000]
     
     future_selection = alt.selection_multi(fields=['future'])#,'past'])
@@ -85,8 +89,6 @@ def create_interactive_linked_charts(df):
             width=350,
             height=170
         )
-
-
     
     legend = alt.Chart(df).mark_rect().encode(
             #x=alt.X('past:N'),
@@ -324,7 +326,7 @@ def create_map_series(df):
     
     df2 = df.groupby('context').mean()
     df2['context'] = df2.index
-    print(df2)
+    #print(df2)
     
     grid = alt.topo_feature('https://raw.githubusercontent.com/anitagraser/sandbox/master/grid40.topojson', 'grid40')
     variable_list = ['distance_error', 'along_track_error', 'cross_track_error']
@@ -351,8 +353,6 @@ def create_map_series(df):
         map_output.write(map_chart.to_json(indent=2))
 
 
-
-
 if __name__ == '__main__':   
     print("{} Started! ...".format(datetime.now()))
     print(PREDICTION_MODE)
@@ -369,25 +369,29 @@ if __name__ == '__main__':
             #df = df[df['future']==5]
             means = df.groupby('context').mean()
             #print(means)
-            df['code'] = '{}_{}'.format(past,future)
+            df['code'] = '{}_{}'.format(past, future)
             frames.append(df)
-            means.to_csv(input_file.replace('.csv','_{}_summary.csv'.format(SHIPTYPE)))
+            means.to_csv(input_file.replace('.csv', '_{}_summary.csv'.format(SHIPTYPE)))
             
     df = pd.concat(frames)
-    df.to_csv(INPUT.replace('.csv','_{}_summary.csv'.format(SHIPTYPE)))
+    #df.to_csv(INPUT.replace('.csv', '_{}_summary.csv'.format(SHIPTYPE)))
 
-  
+    #print(df)
+
+    df2 = df.groupby(['context', 'code']).mean()
+    print(df2)
+    #df2['context'] = df2.index
+    df2.to_csv(INPUT.replace('.csv', '_{}_summary.csv'.format(SHIPTYPE)))
+
     #create_error_over_future_graph(df)
     #create_single_map(df)
     create_map_series(df)
     create_interactive_linked_charts(df)
 
-    df = df[df['context'] == 23]
-    means = df.groupby('future').mean()
-    print(means)
+    #df = df[df['context'] == 23]
+    #means = df.groupby('future').mean()
+    #print(means)
 
-    
     print("{} Finished! ...".format(datetime.now()))
     print("Runtime: {}".format(datetime.now()-script_start))
-    
-    
+

@@ -27,7 +27,7 @@ from itertools import repeat
 import warnings
 warnings.filterwarnings('ignore')
 
-sys.path.append(os.path.join(os.path.dirname(__file__),".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from trajectory_predictor import TrajectoryPredictor
 from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, EvaluatedPrediction
@@ -35,15 +35,16 @@ from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, Evalu
 
 FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo' # 'Fishing' # 'Passenger' #
-PAST_MINUTES = [1,3,5]
-FUTURE_MINUTES = [1,5,10,15,20]
-PREDICTION_MODE = 'kinetic' # 'linear' #
+PAST_MINUTES = [1, 3, 5]
+FUTURE_MINUTES = [1, 5, 10, 15, 20]
+PREDICTION_MODE = 'kinetic' #'linear' #
 
-INPUT = 'E:/Geodata/AISDK/sample.csv' # '/home/agraser/tmp/sample.csv' 
+INPUT = '/home/agraser/tmp/sample.csv' # 'E:/Geodata/AISDK/sample.csv' #
 if PREDICTION_MODE == 'linear':
-    OUTPUT = 'E:/Geodata/AISDK/predictions_lin.csv' # '/home/agraser/tmp/predictions_lin.csv' 
+    OUTPUT = '/home/agraser/tmp/predictions_lin.csv' # 'E:/Geodata/AISDK/predictions_lin.csv' #
 elif PREDICTION_MODE == 'kinetic':
-    OUTPUT = 'E:/Geodata/AISDK/predictions_kin.csv' # '/home/agraser/tmp/predictions_kin.csv' 
+    OUTPUT = '/home/agraser/tmp/predictions_kin.csv' # 'E:/Geodata/AISDK/predictions_kin.csv' #
+
 
 def prediction_worker(sample, prediction_timedelta):
     predictor = TrajectoryPredictor(sample.past_traj) 
@@ -57,9 +58,10 @@ def prediction_worker(sample, prediction_timedelta):
             return None
     errors = TrajectoryPredictionEvaluator(sample, predicted_location, 'epsg:25832').get_errors()
     context = sample.past_traj.context
-    prediction = EvaluatedPrediction(predicted_location, context, errors)
+    prediction = EvaluatedPrediction(sample.id, predicted_location, context, errors)
     return prediction
-    
+
+
 def compute_predictions(samples, past, future, pool):
     out = OUTPUT.replace('in.csv', 'in_{}_{}_{}.csv'.format(SHIPTYPE, past, future))
     print("Writing to {}".format(out))
@@ -71,7 +73,8 @@ def compute_predictions(samples, past, future, pool):
                 if prediction: output.write(prediction.to_csv())
             except TypeError as e:
                 print(e)
-    output.close()    
+    output.close()
+
 
 if __name__ == '__main__':   
     print("{} Started! ...".format(datetime.now()))
@@ -91,5 +94,4 @@ if __name__ == '__main__':
     
     print("{} Finished! ...".format(datetime.now()))
     print("Runtime: {}".format(datetime.now()-script_start))
-    
-    
+
