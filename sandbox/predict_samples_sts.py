@@ -119,8 +119,6 @@ def get_centermost_location(df, sample, future):
 
 def get_centermost_id(df, k):
     # note that this approach uses euclidean distances!
-    df = df.reset_index()
-    df['prediction_id'] = df.index
     pts = np.array(list(zip(df.lon, df.lat)) )
     btree = cKDTree(pts)
     dist, idx = btree.query(pts, k=k)
@@ -148,7 +146,7 @@ def compute_final_sts_prediction(df, sample, past, future):
         return None
     errors = TrajectoryPredictionEvaluator(sample, predicted_location, 'epsg:25832').get_errors()
     context = sample.past_traj.context
-    prediction = EvaluatedPrediction(predicted_location, context, errors)
+    prediction = EvaluatedPrediction(sample.id, predicted_location, context, errors)
     return prediction
 
 def compute_final_sts_predictions(input_predictions, input_samples, past, future):
