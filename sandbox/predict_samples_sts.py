@@ -27,6 +27,7 @@ import multiprocessing as mp
 from datetime import timedelta, datetime
 from itertools import repeat
 from sklearn.cluster import DBSCAN
+from scipy.spatial import cKDTree
 from geopy.distance import great_circle
 from shapely.geometry import MultiPoint, Point
 from shapely import wkt
@@ -41,13 +42,14 @@ from trajectory_prediction_evaluator import TrajectoryPredictionEvaluator, Evalu
 
 
 FILTER_BY_SHIPTYPE = True
-SHIPTYPE = 'Cargo'
+SHIPTYPE = 'Cargo' #'Fishing' #
 PAST_MINUTES = [1,3,5]
-FUTURE_MINUTES = [1,2,3,5,10,15,20]
+FUTURE_MINUTES = [1,5,10,15,20]
 PREDICTION_MODE = 'similar_traj'
 
-INPUT = 'E:/Geodata/AISDK/sample.csv'
-OUTPUT = 'E:/Geodata/AISDK/predictions_sts.csv'
+INPUT_SAMPLE = 'E:/Dropbox/AIT/MARNG/data/prediction_input/sample.csv'
+INPUT_POTENTIAL_LOCATIONS = 'E:/Dropbox/AIT/MARNG/data/prediction_output_20190215/sample.csv'
+OUTPUT = 'E:/Dropbox/AIT/MARNG/data/prediction_output_20190215/predictions_sts.csv'
 
 kms_per_radian = 6371.0088
 
@@ -92,23 +94,56 @@ def get_center_of_main_cluster(df, past, future):
     center = dbscan_main_center(df, epsilon=eps_rad)
     return center
 
-def get_location_closest_to_linear_prediction(df, sample, past, future, x='lon', y='lat'):
+def get_location_closest_to_linear_prediction(df, sample, future, x='lon', y='lat'):
     prediction_timedelta = timedelta(minutes=future)
     predictor = TrajectoryPredictor(sample.past_traj)
     predicted_location = predictor.predict_linearly(prediction_timedelta)
     if len(df) == 0:
         return predicted_location
-    main_cluster = df.as_matrix(columns=[y, x]) #get_main_cluster(df, epsilon=eps_rad)
-    eps_rad = 0.5 / kms_per_radian
+    main_cluster = df.as_matrix(columns=[y, x])
     return get_nearest_cluster_point(main_cluster, predicted_location)
+
+def get_centermost_location(df, sample, future):
+    prediction_timedelta = timedelta(minutes=future)
+    predictor = TrajectoryPredictor(sample.past_traj)
+    predicted_location = predictor.predict_linearly(prediction_timedelta)
+    if len(df) == 0:
+        return predicted_location
+    elif len(df) <= 2:
+        x = 0
+    elif len(df) == 3:
+        x = get_centermost_id(df, 2)
+    else:
+        x = get_centermost_id(df, 3)
+    return Point(df.iloc[x].lon, df.iloc[x].lat)
+
+def get_centermost_id(df, k):
+    # note that this approach uses euclidean distances!
+    df = df.reset_index()
+    df['prediction_id'] = df.index
+    pts = np.array(list(zip(df.lon, df.lat)) )
+    btree = cKDTree(pts)
+    dist, idx = btree.query(pts, k=k)
+    #print(idx)
+    counts = [0]*len(df)
+    if k==2:
+        for id, n1 in idx:
+            counts[n1] += 1
+    else:
+        for id, n1, n2 in idx:
+            counts[n1] += 1
+            counts[n2] += 2
+    return counts.index(max(counts))
+
 
 def compute_final_sts_prediction(df, sample, past, future):
     #print(sample.id)
     #print(df[df['ID']==sample.id])
     predictions_for_current_sample = df[df['ID']==sample.id]
-    print(len(predictions_for_current_sample))
+    #print(len(predictions_for_current_sample))
     #predicted_location = get_center_of_main_cluster(predictions_for_current_sample, past, future)
-    predicted_location = get_location_closest_to_linear_prediction(predictions_for_current_sample, sample, past, future)
+    #predicted_location = get_location_closest_to_linear_prediction(predictions_for_current_sample, sample, future)
+    predicted_location = get_centermost_location(predictions_for_current_sample, sample, future)
     if predicted_location is None:
         return None
     errors = TrajectoryPredictionEvaluator(sample, predicted_location, 'epsg:25832').get_errors()
@@ -154,14 +189,13 @@ def clean_file(file):
 
 if __name__ == '__main__':
     # the previous step of Similar Trajectory Search returns a set of potential future locations
-    # to provide one final prediction, we determine the biggest cluster of potential future
-    # locations and finally get its mean coordinates
+    # to provide one final prediction, we determine the centermost coordinate
     print("{} Started! ...".format(datetime.now()))
     script_start = datetime.now()
     
     for past in PAST_MINUTES:
         for future in FUTURE_MINUTES:
-            samples_file = INPUT.replace('.csv','_{}_{}_{}.pickle'.format(SHIPTYPE, past, future))
+            samples_file = INPUT_SAMPLE.replace('.csv','_{}_{}_{}.pickle'.format(SHIPTYPE, past, future))
             try:
                 with open(samples_file, 'rb') as f:
                     input_samples = pickle.load(f)
@@ -169,7 +203,7 @@ if __name__ == '__main__':
             except:
                 print("Failed to load pickled data from {}!".format(samples_file))
 
-            predictions_file = INPUT.replace('.csv', '_{}_{}_{}.csv.prediction'.format(SHIPTYPE, past, future))
+            predictions_file = INPUT_POTENTIAL_LOCATIONS.replace('.csv', '_{}_{}_{}.csv.prediction'.format(SHIPTYPE, past, future))
             cleaned = clean_file(predictions_file)
             predictions = pd.read_csv(cleaned, ';')
 
