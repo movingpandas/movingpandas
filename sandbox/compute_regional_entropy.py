@@ -29,48 +29,47 @@ from datetime import datetime
 script_path = os.path.dirname(__file__)
 sys.path.append(os.path.join(script_path, ".."))
 
-from trajectory import Trajectory
+from trajectory import Trajectory, DIRECTION_COL_NAME
 
 pd.set_option('display.max_colwidth', -1)
 pd.set_option('display.max_columns', 500)
 
-INPUT_REGIONS = os.path.join(script_path, '../demo/demodata_grid_fine.gpkg')
+INPUT_REGIONS = os.path.join(script_path, '../demo/demodata_grid.gpkg')
 REGION_ID = 'id'
-INPUT_MOVEMENT = os.path.join(script_path,'../demo/demodata_geolife_large.gpkg')
+INPUT_MOVEMENT = os.path.join(script_path,'../demo/demodata_geolife.gpkg')
 TRAJECTORY_ID = 'trajectory_id'
-OUTPUT_FILE = os.path.join(script_path,'../demo/tmp_grid_entropy.gpkg')
+OUTPUT_FILE = os.path.join(script_path,'../demo/tmp_grid_entropy2.gpkg')
 
 
 def prepare_regions(data_path):
     return read_file(data_path)
 
 
-def prepare_trajectories(data_path, trajectory_id, regions):
+def prepare_trajectories(data_path, trajectory_id, regions_df):
     df = read_file(data_path)
     df['t'] = pd.to_datetime(df['t'])
     df = df.set_index('t')
-    pts_with_region = sjoin(df, regions, how="inner", op='intersects')
-    trajectories = []
-    for key, values in pts_with_region.groupby([trajectory_id]):
-        trajectory = Trajectory(key, values)
-        trajectory.add_heading()
-        trajectory.add_meters_per_sec()
-        print(trajectory)
-        trajectories.append(trajectory)
-    return trajectories
+    pts_with_region = sjoin(df, regions_df, how="inner", op='intersects')
+    trajectory_list = []
+    for traj_id, rows in pts_with_region.groupby([trajectory_id]):
+        trajectory = Trajectory(traj_id, rows)
+        trajectory.add_direction()
+        trajectory.add_speed()
+        trajectory_list.append(trajectory)
+    return trajectory_list
 
 
-def merge_trajectory_dfs_by_region(trajectories, region_id):
+def get_directions_per_region(trajectory_list, region_id):
     region_values = {}
-    for traj in trajectories:
-        datas = {}
+    for traj in trajectory_list:
+        rows_per_region = {}
         for i, g in traj.df.groupby(region_id):
-            datas.update({i: g.reset_index(drop=True)})
-        for key, value in datas.items():
-            if key in region_values.keys():
-                region_values[key] += value['heading'].values.tolist()
+            rows_per_region.update({i: g.reset_index(drop=True)})
+        for region, rows in rows_per_region.items():
+            if region in region_values.keys():
+                region_values[region] += rows[DIRECTION_COL_NAME].values.tolist()
             else:
-                region_values[key] = value['heading'].values.tolist()
+                region_values[region] = rows[DIRECTION_COL_NAME].values.tolist()
     return region_values
 
 
@@ -80,13 +79,13 @@ def get_entropy(values, n=36):
     return entropy(counts)
 
 
-def count_and_merge(n, bearings):
+def count_and_merge(n, directions):
     # code from https://github.com/gboeing/osmnx-examples/blob/master/notebooks/17-street-network-orientations.ipynb
     # make twice as many bins as desired, then merge them in pairs
     # prevents bin-edge effects around common values like 0° and 90°
     n = n * 2
     bins = np.arange(n + 1) * 360 / n
-    count, _ = np.histogram(bearings, bins=bins)
+    count, _ = np.histogram(directions, bins=bins)
     # move the last bin to the front, so eg 0.01° and 359.99° will be binned together
     count = np.roll(count, 1)
     return count[::2] + count[1::2]
@@ -107,9 +106,9 @@ if __name__ == '__main__':
     trajectories = prepare_trajectories(INPUT_MOVEMENT, TRAJECTORY_ID, regions)
     if REGION_ID in trajectories[0].df.keys():
         joined_id = REGION_ID
-    else:
-        joined_id = REGION_ID+'_right'
-    regions_with_values = merge_trajectory_dfs_by_region(trajectories, joined_id)
+    else: # sjoin adds _left and _right suffixes if both input dfs have cols with same name
+        joined_id = REGION_ID + '_right'
+    regions_with_values = get_directions_per_region(trajectories, joined_id)
     HD_VALUES = {}
     for region, values in regions_with_values.items():
         Hd = get_entropy(values)

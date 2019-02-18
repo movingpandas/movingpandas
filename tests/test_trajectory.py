@@ -38,7 +38,7 @@ from datetime import datetime, timedelta
 
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 
-from trajectory import Trajectory 
+from trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME
 
  
 class TestTrajectory(unittest.TestCase):
@@ -155,8 +155,8 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1,geo_df)
-        traj.add_heading()
-        result = traj.df['heading'].tolist() 
+        traj.add_direction()
+        result = traj.df[DIRECTION_COL_NAME].tolist()
         expected_result = [90.0, 90.0, 180.0, 270]
         self.assertEqual(result, expected_result)
         
@@ -167,8 +167,8 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
         traj = Trajectory(1,geo_df)
-        traj.add_heading()
-        result = traj.df['heading'].tolist()
+        traj.add_direction()
+        result = traj.df[DIRECTION_COL_NAME].tolist()
         expected_result = [44.561451413257714, 44.561451413257714]
         self.assertAlmostEqual(result[0], expected_result[0], 5)
         
@@ -179,8 +179,8 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1,geo_df)
-        traj.add_meters_per_sec()
-        result = traj.df['meters_per_sec'].tolist() 
+        traj.add_speed()
+        result = traj.df[SPEED_COL_NAME].tolist()
         expected_result = [6.0, 6.0]
         self.assertEqual(result, expected_result)
         
@@ -191,8 +191,8 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
         traj = Trajectory(1,geo_df)
-        traj.add_meters_per_sec()
-        result = traj.df['meters_per_sec'].tolist()[0]/1000
+        traj.add_speed()
+        result = traj.df[SPEED_COL_NAME].tolist()[0]/1000
         expected_result = 676.3
         self.assertAlmostEqual(result, expected_result, 1)
         

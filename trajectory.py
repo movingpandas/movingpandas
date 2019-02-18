@@ -31,6 +31,10 @@ import overlay
 from geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
 
 
+SPEED_COL_NAME = 'speed'
+DIRECTION_COL_NAME = 'direction'
+
+
 def to_unixtime(t):
     return (t - datetime(1970,1,1,0,0,0)).total_seconds()
 
@@ -184,21 +188,25 @@ class Trajectory():
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters / row['delta_t'].total_seconds()
 
-    def add_heading(self):
+    def add_direction(self, overwrite=False):
+        if DIRECTION_COL_NAME in self.df.keys() and not overwrite:
+            raise RuntimeError('Trajectory already has direction values! Use overwrite=True to overwrite exiting values.')
         self.df['prev_pt'] = self.df.geometry.shift()
-        self.df['heading'] = self.df.apply(self._compute_heading, axis=1)
-        self.df.at[self.get_start_time(),'heading'] = self.df.iloc[1]['heading']
+        self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
+        self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][DIRECTION_COL_NAME]
 
-    def add_meters_per_sec(self):
+    def add_speed(self, overwrite=False):
+        if SPEED_COL_NAME in self.df.keys() and not overwrite:
+            raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
         self.df['prev_pt'] = self.df.geometry.shift()
         self.df['t'] = self.df.index
         self.df['prev_t'] = self.df['t'].shift()
         self.df['delta_t'] = self.df['t'] - self.df['prev_t']
         try:
-            self.df['meters_per_sec'] = self.df.apply(self._compute_speed, axis=1)
+            self.df[SPEED_COL_NAME] = self.df.apply(self._compute_speed, axis=1)
         except ValueError as e:
             raise e
-        self.df.at[self.get_start_time(),'meters_per_sec'] = self.df.iloc[1]['meters_per_sec']
+        self.df.at[self.get_start_time(), SPEED_COL_NAME] = self.df.iloc[1][SPEED_COL_NAME]
 
     def _make_line(self, df):
         if len(df) > 1:

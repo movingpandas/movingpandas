@@ -23,6 +23,7 @@ from datetime import timedelta
 from shapely.geometry import Point
 
 from geometry_utils import measure_distance_spherical
+from trajectory import DIRECTION_COL_NAME, SPEED_COL_NAME
 
 
 class TrajectorySample():
@@ -54,8 +55,8 @@ class TrajectorySampler():
                 self.traj.id, sample_duration.total_seconds()))
             return False
         
-        self.traj.add_meters_per_sec() 
-        self.traj.df['next_ms'] = self.traj.df['meters_per_sec'].shift(-1)
+        self.traj.add_speed()
+        self.traj.df['next_ms'] = self.traj.df[SPEED_COL_NAME].shift(-1)
         self.traj.df = self.traj.df[:-1]
 
         above_speed_limit = self.traj.df[self.traj.df['next_ms'] > min_meters_per_sec]

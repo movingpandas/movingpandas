@@ -69,8 +69,8 @@ class TrajectoryPredictor():
         #print("Starting prediction from: {}".format(current_pos))
 
         try:
-            self.traj.add_heading()
-            self.traj.add_meters_per_sec()
+            self.traj.add_direction()
+            self.traj.add_speed()
         except ValueError as e:
             raise e
         self.traj.df['prev_heading'] = self.traj.df['heading'].shift()
