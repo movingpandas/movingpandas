@@ -38,7 +38,7 @@ FILTER_BY_SHIPTYPE = True
 SHIPTYPE = 'Cargo' # 'Fishing' # 'Passenger' #
 PAST_MINUTES = [1, 3, 5]
 FUTURE_MINUTES = [1, 5, 10, 15, 20]
-PREDICTION_MODE = 'Similar Trajectory' # 'Linear' # 'Kinetic' #
+PREDICTION_MODE = 'Similar Trajectory' #'Linear' # 'Kinetic' #
 LITERATURE_ERRORS = pd.read_csv('./literature_errors.csv')
 LITERATURE_ERRORS = LITERATURE_ERRORS[LITERATURE_ERRORS['future'] <= 20]
 
@@ -47,7 +47,7 @@ if PREDICTION_MODE == 'Linear':
 elif PREDICTION_MODE == 'Kinetic':
     INPUT = '/home/agraser/Dropbox/AIT/MARNG/data/prediction_output/predictions_kin.csv' # 'E:/Geodata/AISDK/predictions_kin.csv' #
 elif PREDICTION_MODE == 'Similar Trajectory':
-    INPUT = '/home/agraser/Dropbox/AIT/MARNG/data/prediction_output/predictions_sts.csv' # 'E:/Geodata/AISDK/predictions_sts.csv'
+    INPUT = '/home/agraser/Dropbox/AIT/MARNG/data/prediction_output_20190220/get_location_closest_to_linear_prediction/predictions_sts.csv' # 'E:/Geodata/AISDK/predictions_sts.csv'
 
 
 def create_interactive_linked_charts(df):
@@ -378,9 +378,16 @@ if __name__ == '__main__':
 
     #print(df)
 
-    df2 = df.groupby(['context', 'code']).mean()
+    #df2 = df.groupby(['context', 'code']).mean()
+    df2 = df.groupby(['context', 'code']).aggregate({'future':['count'],
+                                                     'distance_error': ['mean'],
+                                                     'along_track_error': ['mean'],
+                                                     'cross_track_error': ['mean']})
+    df2.columns = df2.columns.droplevel(1)
+    df2.rename(index=str, columns={'future': 'n'}, inplace=True)
     print(df2)
     #df2['context'] = df2.index
+    print('Writing to {} ...'.format(INPUT.replace('.csv', '_{}_summary.csv'.format(SHIPTYPE))))
     df2.to_csv(INPUT.replace('.csv', '_{}_summary.csv'.format(SHIPTYPE)))
 
     #create_error_over_future_graph(df)
