@@ -48,8 +48,8 @@ FUTURE_MINUTES = [1,5,10,15,20]
 PREDICTION_MODE = 'similar_traj'
 
 INPUT_SAMPLE = 'E:/Dropbox/AIT/MARNG/data/prediction_input/sample.csv'
-INPUT_POTENTIAL_LOCATIONS = 'E:/Dropbox/AIT/MARNG/data/prediction_output_20190215/sample.csv'
-OUTPUT = 'E:/Dropbox/AIT/MARNG/data/prediction_output_20190215/predictions_sts.csv'
+INPUT_POTENTIAL_LOCATIONS = 'E:/Dropbox/AIT/MARNG/data/prediction_output_20190220/sample.csv'
+OUTPUT = 'E:/Dropbox/AIT/MARNG/data/prediction_output_20190220/predictions_sts.csv'
 
 kms_per_radian = 6371.0088
 
@@ -111,10 +111,8 @@ def get_centermost_location(df, sample, future):
         return predicted_location
     elif len(df) <= 2:
         x = 0
-    elif len(df) == 3:
-        x = get_centermost_id(df, 2)
     else:
-        x = get_centermost_id(df, 3)
+        x = get_centermost_id(df, round(len(df)/2))
     return Point(df.iloc[x].lon, df.iloc[x].lat)
 
 def get_centermost_id(df, k):
@@ -124,13 +122,9 @@ def get_centermost_id(df, k):
     dist, idx = btree.query(pts, k=k)
     #print(idx)
     counts = [0]*len(df)
-    if k==2:
-        for id, n1 in idx:
-            counts[n1] += 1
-    else:
-        for id, n1, n2 in idx:
-            counts[n1] += 1
-            counts[n2] += 2
+    for x in idx:
+        for n in x[1:]:
+            counts[n] += 1
     return counts.index(max(counts))
 
 
@@ -140,8 +134,8 @@ def compute_final_sts_prediction(df, sample, past, future):
     predictions_for_current_sample = df[df['ID']==sample.id]
     #print(len(predictions_for_current_sample))
     #predicted_location = get_center_of_main_cluster(predictions_for_current_sample, past, future)
-    #predicted_location = get_location_closest_to_linear_prediction(predictions_for_current_sample, sample, future)
-    predicted_location = get_centermost_location(predictions_for_current_sample, sample, future)
+    predicted_location = get_location_closest_to_linear_prediction(predictions_for_current_sample, sample, future)
+    #predicted_location = get_centermost_location(predictions_for_current_sample, sample, future)
     if predicted_location is None:
         return None
     errors = TrajectoryPredictionEvaluator(sample, predicted_location, 'epsg:25832').get_errors()
