@@ -148,9 +148,7 @@ class TestTrajectoryPredictor(unittest.TestCase):
         traj = Trajectory(1,geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(100,0)
-        #print("\n")
-        #print(predictor.traj.df)
+        expected_result = Point(80,0)
         #print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))            
     
@@ -164,9 +162,7 @@ class TestTrajectoryPredictor(unittest.TestCase):
         traj = Trajectory(1,geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(28,0)
-        #print("\n")
-        #print(predictor.traj.df)
+        expected_result = Point(32,0)
         #print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))  
         
@@ -180,9 +176,7 @@ class TestTrajectoryPredictor(unittest.TestCase):
         traj = Trajectory(1,geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(18,0)
-        #print("\n")
-        #print(predictor.traj.df)
+        expected_result = Point(24,0)
         #print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
@@ -196,11 +190,9 @@ class TestTrajectoryPredictor(unittest.TestCase):
         traj = Trajectory(1,geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(-1,-1)
-        #print("\n")
-        #print(predictor.traj.df)
+        expected_result = Point(-1.172832,38.747237)
         #print("Got {}, expected {}".format(result, expected_result))
-        self.assertTrue(result.almost_equals(expected_result,0))
+        self.assertTrue(result.almost_equals(expected_result))
         
     def test_kinetic_prediction_turning_right(self):
         df = pd.DataFrame([
@@ -212,9 +204,7 @@ class TestTrajectoryPredictor(unittest.TestCase):
         traj = Trajectory(1,geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(50.4,-49.3)
-        #print("\n")
-        #print(predictor.traj.df)
+        expected_result = Point(68.7,-37.3)
         #print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result,0))
         
