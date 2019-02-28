@@ -113,3 +113,4 @@ demo/demodata_geolife_large.gpkg
 *.iml
 .idea/vcs.xml
 .idea/workspace.xml
+/.idea/encodings.xml
