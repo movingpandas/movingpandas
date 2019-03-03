@@ -22,6 +22,7 @@ from datetime import timedelta
 from shapely.geometry import Point
 
 from geometry_utils import calculate_initial_compass_bearing, measure_distance_spherical, R_EARTH
+from trajectory import DIRECTION_COL_NAME, SPEED_COL_NAME
 
 
 class TrajectoryPredictor():
@@ -73,13 +74,18 @@ class TrajectoryPredictor():
             self.traj.add_speed()
         except ValueError as e:
             raise e
-        self.traj.df['prev_heading'] = self.traj.df['heading'].shift()
-        self.traj.df['delta_heading'] = self.traj.df['heading'] - self.traj.df['prev_heading'] 
-        self.traj.df['prev_ms'] = self.traj.df['meters_per_sec'].shift()
-        self.traj.df['delta_ms'] = self.traj.df['meters_per_sec'] - self.traj.df['prev_ms']
+
+        prev_dir_col = 'prev_{}'.format(DIRECTION_COL_NAME)
+        delta_dir_col = 'delta_{}'.format(DIRECTION_COL_NAME)
+        prev_speed_col = 'prev_{}'.format(SPEED_COL_NAME)
+        delta_speed_col = 'delta_{}'.format(SPEED_COL_NAME)
+        self.traj.df[prev_dir_col] = self.traj.df[DIRECTION_COL_NAME].shift()
+        self.traj.df[delta_dir_col] = self.traj.df[DIRECTION_COL_NAME] - self.traj.df[prev_dir_col]
+        self.traj.df[prev_speed_col] = self.traj.df[SPEED_COL_NAME].shift()
+        self.traj.df[delta_speed_col] = self.traj.df[SPEED_COL_NAME] - self.traj.df[prev_speed_col]
         try:
-            self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_heading") ] = self.traj.df.iloc[2]['delta_heading']
-            self.traj.df.iat[1, self.traj.df.columns.get_loc("delta_ms") ] = self.traj.df.iloc[2]['delta_ms']
+            self.traj.df.iat[1, self.traj.df.columns.get_loc(delta_dir_col)] = self.traj.df.iloc[2][delta_dir_col]
+            self.traj.df.iat[1, self.traj.df.columns.get_loc(delta_speed_col)] = self.traj.df.iloc[2][delta_speed_col]
         except IndexError as e:
             raise ValueError('Failed to predict trajectory {} because the past trajectory is too short!'.format(self.traj.id))
         #print(self.traj.df)
@@ -92,16 +98,16 @@ class TrajectoryPredictor():
 
         # loop over all historic points
         for index, row in self.traj.df.iterrows():
-            current_heading = row['heading']
-            current_ms = row['meters_per_sec']
+            current_heading = row[DIRECTION_COL_NAME]
+            current_ms = row[SPEED_COL_NAME]
 
             # only proceed if delta_t > 0, because otherwise division through zero will occur
             delta_t_sec = row['delta_t'].total_seconds()
             if delta_t_sec > 0.0:
                 # calculate COG based on ROT
-                current_heading = current_heading + float(row['delta_heading'])
+                current_heading = current_heading + float(row[delta_dir_col])
                 # calculate SOG based on COS
-                current_ms = max(0, current_ms + float(row['delta_ms']))
+                current_ms = max(0, current_ms + float(row[delta_speed_col]))
                 # calculate the prediction time for this point (i.e., how much of the prediction is explained by this pair of points)
                 prediction_time = prediction_timedelta.total_seconds() * (delta_t_sec / time_range)
                 # predict into the future, starting from the last point of the trajectory
