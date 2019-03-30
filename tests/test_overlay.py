@@ -60,14 +60,20 @@ class TestOverlay(unittest.TestCase):
         for x in intersections:
             result.append(x.to_linestring().wkt)
         expected_result = ["LINESTRING (5 0, 6 0, 7 0)", "LINESTRING (7 10, 5 10)"]
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         # temporal 
         result = []
         for x in intersections:
             result.append((x.get_start_time(), x.get_end_time()))
         expected_result = [(datetime(2018,1,1,12,5,0), datetime(2018,1,1,12,7,0)),
                            (datetime(2018,1,1,12,39,0), datetime(2018,1,1,12,45,0))]
-        self.assertEqual(result, expected_result) 
+        self.assertEqual(expected_result, result)
+        # ids
+        result = []
+        for x in intersections:
+            result.append(x.id)
+        expected_result = ['1_0', '1_1']
+        self.assertEqual(expected_result, result)
                 
     def test_clip_with_duplicate_traj_points(self):
         polygon = Polygon([(5,-5), (7,-5), (7,5), (5,5), (5,-5)])
@@ -86,15 +92,49 @@ class TestOverlay(unittest.TestCase):
         result = []
         for x in intersections:
             result.append(x.to_linestring())
-        expected_result = [LineString([(5,0),(6,0),(6,0),(7,0)])]
-        self.assertEqual(result, expected_result)
+        expected_result = [LineString([(5,0), (6,0), (6,0), (7,0)])]
+        self.assertEqual(expected_result, result)
         # temporal
         result = []
         for x in intersections:
             result.append((x.get_start_time(), x.get_end_time()))
         expected_result = [(datetime(2018,1,1,12,5,0), datetime(2018,1,1,12,8,0))]
-        self.assertEqual(result, expected_result) 
- 
+        self.assertEqual(expected_result, result)
+
+    def test_clip_pointbased(self):
+        polygon = Polygon([(5,-5), (7,-5), (7,12), (5,12), (5,-5)])
+        df = pd.DataFrame([
+            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
+            {'geometry':Point(6.5,0), 't':datetime(2018,1,1,12,6,30)},
+            {'geometry':Point(7,0), 't':datetime(2018,1,1,12,7,0)},
+            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,11,0)},
+            {'geometry':Point(10,10), 't':datetime(2018,1,1,12,30,0)},
+            {'geometry':Point(5,10), 't':datetime(2018,1,1,12,45,0)},
+            {'geometry':Point(0,10), 't':datetime(2018,1,1,13,0,0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'} )
+        traj = Trajectory(1,geo_df)
+        intersections = traj.clip(polygon, pointbased=True)
+        # spatial
+        result = []
+        for x in intersections:
+            result.append(x.to_linestring())
+        expected_result = [LineString([(6,0), (6.5,0), (7,0)])]
+        self.assertEqual(expected_result, result)
+        # temporal
+        result = []
+        for x in intersections:
+            result.append((x.get_start_time(), x.get_end_time()))
+        expected_result = [(datetime(2018,1,1,12,6,0), datetime(2018,1,1,12,7,0))]
+        self.assertEqual(expected_result, result)
+        # ids
+        result = []
+        for x in intersections:
+            result.append(x.id)
+        expected_result = ['1_0']
+        self.assertEqual(expected_result, result)
+
     def test_clip_with_one_intersection(self):
         polygon = Polygon([(5,-5), (7,-5), (7,5), (5,5), (5,-5)])
         df = pd.DataFrame([
@@ -112,13 +152,13 @@ class TestOverlay(unittest.TestCase):
         for x in intersections:
             result.append(x.to_linestring().wkt)
         expected_result = ["LINESTRING (5 0, 6 0, 7 0)"]
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         # temporal
         result = []
         for x in intersections:
             result.append((x.get_start_time(), x.get_end_time()))
         expected_result = [(datetime(2018,1,1,12,5,0), datetime(2018,1,1,12,7,0))]
-        self.assertEqual(result, expected_result) 
+        self.assertEqual(expected_result, result)
          
     def test_clip_with_one_intersection_reversed(self):
         polygon = Polygon([(5,-5), (7,-5), (7,5), (5,5), (5,-5)])
@@ -137,13 +177,13 @@ class TestOverlay(unittest.TestCase):
         for x in intersections:
             result.append(x.to_linestring().wkt)
         expected_result = ["LINESTRING (7 0, 6 0, 5 0)"]
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         # temporal
         result = []
         for x in intersections:
             result.append((x.get_start_time(), x.get_end_time()))
         expected_result = [(datetime(2018,1,1,12,25,0), datetime(2018,1,1,12,35,0))]
-        self.assertEqual(result, expected_result) 
+        self.assertEqual(expected_result, result)
          
     def test_clip_with_milliseconds(self):
         polygon = Polygon([(5,-5), (7,-5), (8,5), (5,5), (5,-5)])
@@ -160,10 +200,10 @@ class TestOverlay(unittest.TestCase):
         # spatial
         result = intersection.to_linestring().wkt
         expected_result = "LINESTRING (7.5 0, 6 0, 5 0)"
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         # temporal
-        self.assertAlmostEqual(intersection.get_start_time(), datetime(2018,1,1,12,24,22,500000), delta=timedelta(milliseconds=1))
-        self.assertEqual(intersection.get_end_time(), datetime(2018,1,1,12,35,0))
+        self.assertAlmostEqual(datetime(2018,1,1,12,24,22,500000), intersection.get_start_time(), delta=timedelta(milliseconds=1))
+        self.assertEqual(datetime(2018,1,1,12,35,0), intersection.get_end_time())
          
     def test_clip_with_numerical_time_issues(self):     
         xmin, xmax, ymin, ymax = 116.36850352835575,116.37029459899574,39.904675309969896,39.90772814977718 
@@ -178,7 +218,7 @@ class TestOverlay(unittest.TestCase):
         intersection = traj.clip(polygon)[0]
         result = intersection.to_linestring().wkt
         expected_result = "LINESTRING (116.36855 39.904926, 116.368612 39.904877, 116.368644 39.90484)"
-        self.assertEqual(result, expected_result)         
+        self.assertEqual(expected_result, result)
          
     def test_clip_with_no_intersection(self):
         polygon = Polygon([(105,-5), (107,-5), (107,12), (105,12), (105,-5)])
@@ -192,7 +232,7 @@ class TestOverlay(unittest.TestCase):
         traj = Trajectory(1,geo_df)
         result = traj.clip(polygon)
         expected_result = []
-        self.assertEqual(result, expected_result) 
+        self.assertEqual(expected_result, result)
         
     def test_intersection_with_one_intersection(self):
         feature = {
@@ -210,7 +250,7 @@ class TestOverlay(unittest.TestCase):
         intersections = traj.intersection(feature)
         result = list(intersections[0].df.columns)
         expected_result = ['geometry', 'intersecting_id', 'intersecting_name']
-        self.assertCountEqual(result, expected_result)
+        self.assertCountEqual(expected_result, result)
         
  
 if __name__ == '__main__':

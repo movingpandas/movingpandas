@@ -61,10 +61,10 @@ class TestTrajectorySampler(unittest.TestCase):
         sample = sampler.get_sample(past_timedelta, future_timedelta)
         result = sample.future_pos.wkt
         expected_result = "POINT (0 4)"
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         result = sample.past_traj.to_linestring().wkt
         expected_result = "LINESTRING (0 0, 0 1, 0 2)"
-        self.assertEqual(result, expected_result)     
+        self.assertEqual(expected_result, result)
     
     def test_sample_after_movement_start(self):
         df = pd.DataFrame([
@@ -86,10 +86,10 @@ class TestTrajectorySampler(unittest.TestCase):
         sample = sampler.get_sample(past_timedelta, future_timedelta)
         result = sample.future_pos.wkt
         expected_result = "POINT (0 4)"
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         result = sample.past_traj.to_linestring().wkt
         expected_result = "LINESTRING (0 0, 0 1, 0 2)"
-        self.assertEqual(result, expected_result)     
+        self.assertEqual(expected_result, result)
     
     def test_sample_irregular_updates(self):
         df = pd.DataFrame([
@@ -110,10 +110,10 @@ class TestTrajectorySampler(unittest.TestCase):
         sample = sampler.get_sample(past_timedelta, future_timedelta)
         result = sample.future_pos.wkt
         expected_result = "POINT (0 19)"
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         result = sample.past_traj.to_linestring().wkt
         expected_result = "LINESTRING (0 9, 0 10, 0 14)"
-        self.assertEqual(result, expected_result)  
+        self.assertEqual(expected_result, result)
             
 if __name__ == '__main__':
     unittest.main()

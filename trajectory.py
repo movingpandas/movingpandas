@@ -40,7 +40,7 @@ def to_unixtime(t):
 
 
 class Trajectory():
-    def __init__(self, traj_id, df):
+    def __init__(self, traj_id, df, parent=None):
         if len(df) < 2:
             raise ValueError("Trajectory dataframe must have at least two rows!")
 
@@ -48,7 +48,7 @@ class Trajectory():
         df.sort_index(inplace=True)
         self.df = df[~df.index.duplicated(keep='first')]
         self.crs = df.crs['init']
-        self.parent = None
+        self.parent = parent
         self.context = None
 
     def __str__(self):
@@ -130,7 +130,7 @@ class Trajectory():
         #start_time = self.get_start_time()
         #if t1 < self.get_start_time():
         #    raise ValueError("First time parameter ({}) has to be equal or later than trajectory start time ({})!".format(t1, start_time))
-        segment = Trajectory(self.id, self.df[t1:t2])
+        segment = Trajectory(self.id, self.df[t1:t2], parent=self)
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
         return segment
@@ -215,8 +215,8 @@ class Trajectory():
         else:
             raise RuntimeError('Dataframe needs at least two points to make line!')
 
-    def clip(self, polygon):
-        return overlay.clip(self, polygon)
+    def clip(self, polygon, pointbased=False):
+        return overlay.clip(self, polygon, pointbased)
 
     def intersection(self, feature):
         return overlay.intersection(self, feature)
