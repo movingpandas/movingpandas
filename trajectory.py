@@ -224,7 +224,7 @@ class Trajectory():
     def split(self, mode='daybreak'):
         result = []
         if mode == 'daybreak':
-            dfs = [group[1] for group in self.df.groupby(self.df.index.day)]
+            dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
             for i, df in enumerate(dfs):
                 result.append(Trajectory('{}_{}'.format(self.id, i), df))
         else:

@@ -255,6 +255,20 @@ class TestTrajectory(unittest.TestCase):
         expected_result = 2
         self.assertEqual(expected_result, result)
 
+    def test_split_by_daybreak_same_day_of_year(self):
+        df = pd.DataFrame([
+            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(-6,10), 't':datetime(2018,1,1,12,1,0)},
+            {'geometry':Point(6,6), 't':datetime(2019,1,1,12,0,1)},
+            {'geometry':Point(6,16), 't':datetime(2019,1,1,12,5,1)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1,geo_df)
+        split = traj.split('daybreak')
+        result = len(split)
+        expected_result = 2
+        self.assertEqual(expected_result, result)
+
     def test_offset_seconds(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0), 'value': 1},
