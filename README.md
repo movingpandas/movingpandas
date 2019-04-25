@@ -1,5 +1,7 @@
 # MovingPandas
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/master)
+
 MovingPandas implements a Trajectory class and corresponding methods based on **GeoPandas**.
 
 Check the demo folder for usage examples!
