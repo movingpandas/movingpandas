@@ -102,7 +102,7 @@ class TestOverlay(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     def test_clip_pointbased(self):
-        polygon = Polygon([(5,-5), (7,-5), (7,12), (5,12), (5,-5)])
+        polygon = Polygon([(5.1,-5), (7.5,-5), (7.5,12), (5.1,12), (5.1,-5)])
         df = pd.DataFrame([
             {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
             {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
@@ -133,6 +133,40 @@ class TestOverlay(unittest.TestCase):
         for x in intersections:
             result.append(x.id)
         expected_result = ['1_0']
+        self.assertEqual(expected_result, result)
+
+    def test_clip_pointbased_singlepoint(self):
+        polygon = Polygon([(5.1,-5), (6.4,-5), (6.4,12), (5.1,12), (5.1,-5)])
+        df = pd.DataFrame([
+            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
+            {'geometry':Point(6.5,0), 't':datetime(2018,1,1,12,6,30)},
+            {'geometry':Point(7,0), 't':datetime(2018,1,1,12,7,0)},
+            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,11,0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'} )
+        traj = Trajectory(1,geo_df)
+        intersections = traj.clip(polygon, pointbased=True)
+        result = intersections
+        expected_result = []
+        self.assertEqual(expected_result, result)
+
+    def test_clip_interpolated_singlepoint(self):
+        polygon = Polygon([(5.1,-5), (6.4,-5), (6.4,12), (5.1,12), (5.1,-5)])
+        df = pd.DataFrame([
+            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
+            {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
+            {'geometry':Point(6.5,0), 't':datetime(2018,1,1,12,6,30)},
+            {'geometry':Point(7,0), 't':datetime(2018,1,1,12,7,0)},
+            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,11,0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'} )
+        traj = Trajectory(1,geo_df)
+        intersections = traj.clip(polygon, pointbased=False)
+        result = []
+        for x in intersections:
+            result.append(x.to_linestring())
+        expected_result = [LineString([(5.1,0), (6.0,0), (6.4,0)])]
         self.assertEqual(expected_result, result)
 
     def test_clip_with_one_intersection(self):

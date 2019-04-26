@@ -113,12 +113,26 @@ class Trajectory():
         except:
             return self.df.iloc[self.df.index.sort_values().drop_duplicates().get_loc(t, method=method)]
 
-    def get_position_at(self, t, method='nearest'):
-        row = self.get_row_at(t, method)
-        try:
-            return row.geometry[0]
-        except:
-            return row.geometry
+    def interpolate_position_at(self, t):
+        prev = self.get_row_at(t, 'ffill')
+        next = self.get_row_at(t, 'bfill')
+        t_diff = next.name - prev.name
+        t_diff_at = t - prev.name
+        line = LineString([prev.geometry, next.geometry])
+        interpolated_position = line.interpolate(t_diff_at/t_diff*line.length)
+        return interpolated_position
+
+    def get_position_at(self, t, method='interpolated'):
+        if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
+            raise ValueError('Invalid split mode {}. Must be one of [nearest, interpolated, ffill, bfill]'.format(mode))
+        if method == 'interpolated':
+            return self.interpolate_position_at(t)
+        else:
+            row = self.get_row_at(t, method)
+            try:
+                return row.geometry[0]
+            except:
+                return row.geometry
 
     def get_linestring_between(self, t1, t2):
         try:

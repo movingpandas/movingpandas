@@ -148,7 +148,7 @@ class TrajectorySampler():
         successful, start_time, past_time, future_time, start_timedelta = self._match_sample_pattern_to_df(
             df, first_move_time, past_timedelta, future_timedelta, randomize)
 
-        future_pos = self.traj.get_position_at(future_time)
+        future_pos = self.traj.get_position_at(future_time, method='nearest')
         past_traj = self.traj.get_segment_between(past_time, start_time)
         past_traj.context = self.traj.context
         
