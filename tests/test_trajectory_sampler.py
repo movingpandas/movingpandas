@@ -36,7 +36,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import datetime, timedelta
 
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from trajectory import Trajectory
 from trajectory_sampler import TrajectorySampler
@@ -46,15 +46,15 @@ class TestTrajectorySampler(unittest.TestCase):
     
     def test_sample(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(0,1), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(0,2), 't':datetime(2018,1,1,12,0,2)},
-            {'geometry':Point(0,3), 't':datetime(2018,1,1,12,0,3)},
-            {'geometry':Point(0,4), 't':datetime(2018,1,1,12,0,4)},
-            {'geometry':Point(0,4), 't':datetime(2018,1,1,12,0,5)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(0, 1), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(0, 2), 't': datetime(2018, 1, 1, 12, 0, 2)},
+            {'geometry': Point(0, 3), 't': datetime(2018, 1, 1, 12, 0, 3)},
+            {'geometry': Point(0, 4), 't': datetime(2018, 1, 1, 12, 0, 4)},
+            {'geometry': Point(0, 4), 't': datetime(2018, 1, 1, 12, 0, 5)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         sampler = TrajectorySampler(traj)
         past_timedelta = timedelta(seconds=2)
         future_timedelta = timedelta(seconds=2)
@@ -68,18 +68,18 @@ class TestTrajectorySampler(unittest.TestCase):
     
     def test_sample_after_movement_start(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,11,0,57)},
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,11,0,58)},
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,11,0,59)},
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,1,0)},
-            {'geometry':Point(0,1), 't':datetime(2018,1,1,12,1,1)},
-            {'geometry':Point(0,2), 't':datetime(2018,1,1,12,1,2)},
-            {'geometry':Point(0,3), 't':datetime(2018,1,1,12,1,3)},
-            {'geometry':Point(0,4), 't':datetime(2018,1,1,12,1,4)},
-            {'geometry':Point(0,4), 't':datetime(2018,1,1,12,1,5)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 11, 0, 57)},
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 11, 0, 58)},
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 11, 0, 59)},
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'geometry': Point(0, 1), 't': datetime(2018, 1, 1, 12, 1, 1)},
+            {'geometry': Point(0, 2), 't': datetime(2018, 1, 1, 12, 1, 2)},
+            {'geometry': Point(0, 3), 't': datetime(2018, 1, 1, 12, 1, 3)},
+            {'geometry': Point(0, 4), 't': datetime(2018, 1, 1, 12, 1, 4)},
+            {'geometry': Point(0, 4), 't': datetime(2018, 1, 1, 12, 1, 5)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         sampler = TrajectorySampler(traj)
         past_timedelta = timedelta(seconds=2)
         future_timedelta = timedelta(seconds=2)
@@ -93,17 +93,17 @@ class TestTrajectorySampler(unittest.TestCase):
     
     def test_sample_irregular_updates(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(0,3), 't':datetime(2018,1,1,12,3,2)},
-            {'geometry':Point(0,6), 't':datetime(2018,1,1,12,6,1)},
-            {'geometry':Point(0,9), 't':datetime(2018,1,1,12,9,2)},
-            {'geometry':Point(0,10), 't':datetime(2018,1,1,12,10,2)},
-            {'geometry':Point(0,14), 't':datetime(2018,1,1,12,14,3)},
-            {'geometry':Point(0,19), 't':datetime(2018,1,1,12,19,5)},
-            {'geometry':Point(0,20), 't':datetime(2018,1,1,12,20,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(0, 3), 't': datetime(2018, 1, 1, 12, 3, 2)},
+            {'geometry': Point(0, 6), 't': datetime(2018, 1, 1, 12, 6, 1)},
+            {'geometry': Point(0, 9), 't': datetime(2018, 1, 1, 12, 9, 2)},
+            {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 12, 10, 2)},
+            {'geometry': Point(0, 14), 't': datetime(2018, 1, 1, 12, 14, 3)},
+            {'geometry': Point(0, 19), 't': datetime(2018, 1, 1, 12, 19, 5)},
+            {'geometry': Point(0, 20), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         sampler = TrajectorySampler(traj, timedelta(seconds=5))
         past_timedelta = timedelta(minutes=5)
         future_timedelta = timedelta(minutes=5)
@@ -114,7 +114,8 @@ class TestTrajectorySampler(unittest.TestCase):
         result = sample.past_traj.to_linestring().wkt
         expected_result = "LINESTRING (0 9, 0 10, 0 14)"
         self.assertEqual(expected_result, result)
-            
+
+
 if __name__ == '__main__':
     unittest.main()
     

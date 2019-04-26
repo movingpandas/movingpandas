@@ -36,7 +36,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import datetime, timedelta
 
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from trajectory import Trajectory
 from trajectory_predictor import TrajectoryPredictor
@@ -46,167 +46,168 @@ class TestTrajectoryPredictor(unittest.TestCase):
     
     def test_linear_prediction_east(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,1,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 1, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
         traj = Trajectory(1,geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_linearly(timedelta(minutes=1))
-        expected_result = Point(20,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(20, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
     
     def test_linear_prediction_west(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(-10,0), 't':datetime(2018,1,1,12,1,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(-10, 0), 't': datetime(2018, 1, 1, 12, 1, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_linearly(timedelta(minutes=1))
-        expected_result = Point(-20,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(-20, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
     def test_linear_prediction_north(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(0,10), 't':datetime(2018,1,1,12,1,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 12, 1, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_linearly(timedelta(minutes=1))
-        expected_result = Point(0,20)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(0, 20)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
 
     def test_linear_prediction_south(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(0,-10), 't':datetime(2018,1,1,12,1,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(0, -10), 't': datetime(2018, 1, 1, 12, 1, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_linearly(timedelta(minutes=1))
-        expected_result = Point(0,-20)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(0, -20)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
 
     def test_kinetic_prediction_east_constant(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,1,0)},
-            {'geometry':Point(20,0), 't':datetime(2018,1,1,12,2,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 2, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(minutes=1))
-        expected_result = Point(30,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(30, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
     def test_kinetic_prediction_west_constant(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(-10,0), 't':datetime(2018,1,1,12,1,0)},
-            {'geometry':Point(-20,0), 't':datetime(2018,1,1,12,2,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(-10, 0), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'geometry': Point(-20, 0), 't': datetime(2018, 1, 1, 12, 2, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(minutes=1))
-        expected_result = Point(-30,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(-30, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
     def test_kinetic_prediction_east_3pt_constant_speed(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,1,0)},
-            {'geometry':Point(20,0), 't':datetime(2018,1,1,12,2,0)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 2, 0)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(minutes=1))
-        expected_result = Point(30,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(30, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
     def test_kinetic_prediction_east_3pt_accelerating(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(30,0), 't':datetime(2018,1,1,12,0,2)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(30, 0), 't': datetime(2018, 1, 1, 12, 0, 2)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(80,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(80, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))            
     
     def test_kinetic_prediction_east_3pt_decelerating(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(18,0), 't':datetime(2018,1,1,12,0,2)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(18, 0), 't': datetime(2018, 1, 1, 12, 0, 2)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(32,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(32, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))  
         
     def test_kinetic_prediction_east_3pt_decelerating_tozero(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(10,0), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(16,0), 't':datetime(2018,1,1,12,0,2)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(16, 0), 't': datetime(2018, 1, 1, 12, 0, 2)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(24,0)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(24, 0)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
     def test_kinetic_prediction_turning_left(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(20,0), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(20,20), 't':datetime(2018,1,1,12,0,2)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(20, 20), 't': datetime(2018, 1, 1, 12, 0, 2)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(-1.172832,38.747237)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(-1.172832, 38.747237)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result))
         
     def test_kinetic_prediction_turning_right(self):
         df = pd.DataFrame([
-            {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-            {'geometry':Point(20,0), 't':datetime(2018,1,1,12,0,1)},
-            {'geometry':Point(38,-10), 't':datetime(2018,1,1,12,0,2)}
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 0, 1)},
+            {'geometry': Point(38, -10), 't': datetime(2018, 1, 1, 12, 0, 2)}
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '4326'})
-        traj = Trajectory(1,geo_df)
+        traj = Trajectory(1, geo_df)
         predictor = TrajectoryPredictor(traj)
         result = predictor.predict_kinetically(timedelta(seconds=2))
-        expected_result = Point(68.7,-37.3)
-        #print("Got {}, expected {}".format(result, expected_result))
+        expected_result = Point(68.7, -37.3)
+        # print("Got {}, expected {}".format(result, expected_result))
         self.assertTrue(result.almost_equals(expected_result,0))
-        
+
+
 if __name__ == '__main__':
     unittest.main()
