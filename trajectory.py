@@ -70,6 +70,12 @@ class Trajectory():
             return False
         return True
 
+    def is_latlon(self):
+        if self.crs == '4326' or self.crs == 'epsg:4326':
+            return True
+        else:
+            return False
+
     def has_parent(self):
         return self.parent != None
 
@@ -126,7 +132,7 @@ class Trajectory():
 
     def get_position_at(self, t, method='interpolated'):
         if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
-            raise ValueError('Invalid split mode {}. Must be one of [nearest, interpolated, ffill, bfill]'.format(method))
+            raise ValueError('Invalid split method {}. Must be one of [nearest, interpolated, ffill, bfill]'.format(method))
         if method == 'interpolated':
             return self.interpolate_position_at(t)
         else:
@@ -158,7 +164,7 @@ class Trajectory():
             return 0.0
         if pt0 == pt1:
             return 0.0
-        if self.crs == '4326' or self.crs == 'epsg:4326':
+        if self.is_latlon():
             dist_meters = measure_distance_spherical(pt0, pt1)
         else: # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
@@ -172,7 +178,7 @@ class Trajectory():
     def get_direction(self):
         pt0 = self.get_start_location()
         pt1 = self.get_end_location()
-        if self.crs == '4326':
+        if self.is_latlon():
             return calculate_initial_compass_bearing(pt0, pt1)
         else:
             return azimuth(pt0, pt1)
@@ -184,7 +190,7 @@ class Trajectory():
             return 0.0
         if pt0 == pt1:
             return 0.0
-        if self.crs == '4326':
+        if self.is_latlon():
             return calculate_initial_compass_bearing(pt0, pt1)
         else:
             return azimuth(pt0, pt1)
@@ -198,7 +204,7 @@ class Trajectory():
             raise ValueError('Invalid trajectory! Got {} instead of point!'.format(pt1))
         if pt0 == pt1:
             return 0.0
-        if self.crs == '4326' or self.crs == 'epsg:4326':
+        if self.is_latlon():
             dist_meters = measure_distance_spherical(pt0, pt1)
         else: # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
