@@ -43,11 +43,12 @@ class EvaluatedPrediction:
 
 
 class TrajectoryPredictionEvaluator:
-    def __init__(self, groundtruth_sample, predicted_location, crs):
+    def __init__(self, groundtruth_sample, predicted_location, crs, input_crs='epsg:4326'):
         self.truth = groundtruth_sample.future_pos
         self.true_traj = groundtruth_sample.future_traj
         self.prediction = predicted_location
-        self.crs = Proj(init=crs)
+        self.evaluation_crs = Proj(init=crs)
+        self.input_crs = Proj(init=input_crs)
         self.projected_prediction = self.project_prediction_on_trajectory()
         
     def get_errors(self):
@@ -59,11 +60,11 @@ class TrajectoryPredictionEvaluator:
         return measure_distance_spherical(self.truth, self.prediction)
 
     def project_point(self, pt) :
-        x, y = transform(Proj(init='epsg:4326'), self.crs, pt.x, pt.y)
+        x, y = transform(self.input_crs, self.crs, pt.x, pt.y)
         return Point(x, y)
         
     def project_back(self, pt):
-        lon, lat = transform(self.crs, Proj(init='epsg:4326'), pt.x, pt.y)
+        lon, lat = transform(self.crs, self.input_crs, pt.x, pt.y)
         return Point(lon, lat)   
         
     def project_prediction_on_trajectory(self):
