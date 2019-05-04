@@ -119,12 +119,14 @@ class Trajectory():
         t_diff = next.name - prev.name
         t_diff_at = t - prev.name
         line = LineString([prev.geometry, next.geometry])
+        if t_diff == 0 or line.length == 0:
+            return prev.geometry
         interpolated_position = line.interpolate(t_diff_at/t_diff*line.length)
         return interpolated_position
 
     def get_position_at(self, t, method='interpolated'):
         if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
-            raise ValueError('Invalid split mode {}. Must be one of [nearest, interpolated, ffill, bfill]'.format(mode))
+            raise ValueError('Invalid split mode {}. Must be one of [nearest, interpolated, ffill, bfill]'.format(method))
         if method == 'interpolated':
             return self.interpolate_position_at(t)
         else:

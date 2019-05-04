@@ -91,6 +91,32 @@ class TestTrajectory(unittest.TestCase):
         expected_result = Point(6, 0)
         self.assertEqual(expected_result, result)
 
+    def test_get_position_with_invalid_method(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        try:
+            result = traj.get_position_at(datetime(2018, 1, 1, 12, 10, 0), method='xxx')
+            assert False
+        except ValueError:
+            assert True
+
+    def test_get_interpolated_position_at_existing_timestamp(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        result = traj.get_position_at(datetime(2018, 1, 1, 12, 10, 0), method='interpolated')
+        expected_result = Point(6, 0)
+        self.assertEqual(expected_result, result)
+
     def test_get_position_of_nearest_timestamp(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
