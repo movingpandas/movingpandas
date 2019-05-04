@@ -20,7 +20,7 @@
 from pyproj import Proj, transform
 from shapely.geometry import Point, LineString
 
-from geometry_utils import measure_distance_spherical
+from geometry_utils import measure_distance_spherical, measure_distance_euclidean
 
 
 class EvaluatedPrediction:
@@ -49,34 +49,41 @@ class TrajectoryPredictionEvaluator:
         self.prediction = predicted_location
         self.evaluation_crs = Proj(init=crs)
         self.input_crs = Proj(init=input_crs)
-        self.projected_prediction = self.project_prediction_on_trajectory()
-        
+        self.linestring = self.create_linestring()
+        self.projected_prediction = self.project_prediction_onto_linestring()
+
+    def create_linestring(self):
+        linestring = self.true_traj.to_linestring().coords
+        return LineString([Point(self.project_point(Point(p))) for p in linestring])
+
     def get_errors(self):
         return {'distance': self.get_distance_error(),
                 'cross_track': self.get_cross_track_error(),
                 'along_track': self.get_along_track_error()}
     
     def get_distance_error(self):
-        return measure_distance_spherical(self.truth, self.prediction)
+        if self.input_crs.is_latlong():
+            return measure_distance_spherical(self.truth, self.prediction)
+        else:
+            return measure_distance_euclidean(self.truth, self.prediction)
 
     def project_point(self, pt) :
-        x, y = transform(self.input_crs, self.crs, pt.x, pt.y)
+        x, y = transform(self.input_crs, self.evaluation_crs, pt.x, pt.y)
         return Point(x, y)
         
     def project_back(self, pt):
-        lon, lat = transform(self.crs, self.input_crs, pt.x, pt.y)
+        lon, lat = transform(self.evaluation_crs, self.input_crs, pt.x, pt.y)
         return Point(lon, lat)   
-        
-    def project_prediction_on_trajectory(self):
-        traj = self.true_traj.to_linestring().coords
-        traj = LineString([Point(self.project_point(Point(p))) for p in traj])
+
+    def project_prediction_onto_linestring(self):
         predicted_point = self.project_point(self.prediction)
-        return self.project_back(traj.interpolate(traj.project(predicted_point)))
+        return self.project_back(self.linestring.interpolate(self.linestring.project(predicted_point)))
         
     def get_cross_track_error(self):
         return measure_distance_spherical(self.prediction, self.projected_prediction)
         
     def get_along_track_error(self):
-        return measure_distance_spherical(self.truth, self.projected_prediction)
-
+        truth_dist_along_line = self.linestring.project(self.truth)
+        predicted_dist_along_line = self.linestring.project(self.projected_prediction)
+        return abs(predicted_dist_along_line - truth_dist_along_line)
 
