@@ -259,3 +259,35 @@ class Trajectory():
     def apply_offset_minutes(self, column, offset):
         self.df[column] = self.df[column].shift(offset, freq='1min')
 
+    def generalize(self, mode, tolerance):
+        if mode == 'douglas-peucker':
+            return self.douglas_peucker(tolerance)
+        else:
+            raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker]'.format(mode))
+
+    def douglas_peucker(self, tolerance):
+        prev_pt = None
+        pts = []
+        keep_rows = []
+        i = 0
+
+        for index, row in self.df.iterrows():
+            current_pt = row.geometry
+            if prev_pt is None:
+                prev_pt = current_pt
+                keep_rows.append(i)
+                continue
+            line = LineString([prev_pt, current_pt])
+            for pt in pts:
+                if line.distance(pt) > tolerance:
+                    prev_pt = current_pt
+                    pts = []
+                    keep_rows.append(i)
+                    continue
+            pts.append(current_pt)
+            i += 1
+
+        keep_rows.append(i)
+        new_df = self.df.iloc[keep_rows]
+        new_traj = Trajectory(self.id, new_df)
+        return new_traj

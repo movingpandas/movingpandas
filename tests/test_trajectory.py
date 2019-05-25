@@ -350,6 +350,19 @@ class TestTrajectory(unittest.TestCase):
         self.assertEqual(datetime(2018, 1, 3), traj.get_end_time())
         self.assertEqual(Point(2, 2), traj.get_start_location())
 
+    def test_douglas_peucker(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(1, 0.1), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(2, 0.2), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(3, 0), 't': datetime(2018, 1, 1, 12, 30, 0)},
+            {'geometry': Point(3, 3), 't': datetime(2018, 1, 1, 13, 0, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        result = traj.generalize(mode='douglas-peucker', tolerance=1)
+        self.assertEqual('LINESTRING (0 0, 3 0, 3 3)', result.to_linestring().wkt)
+
 
 if __name__ == '__main__':
     unittest.main()
