@@ -290,4 +290,5 @@ class Trajectory():
         keep_rows.append(i)
         new_df = self.df.iloc[keep_rows]
         new_traj = Trajectory(self.id, new_df)
+        new_traj.get_length() # to recompute prev_pt and dist_to_prev
         return new_traj
