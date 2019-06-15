@@ -115,15 +115,15 @@ class Trajectory():
         return self.to_linestring().bounds # (minx, miny, maxx, maxy)
 
     def get_start_time(self):
-        """Return datatime.datetime object of Trajectory's start location"""
+        """Return datetime.datetime object of Trajectory's start location"""
         return self.df.index.min().to_pydatetime()
 
     def get_end_time(self):
-        """Return datatime.datetime object of Trajectory's start location"""
+        """Return datetime.datetime object of Trajectory's start location"""
         return self.df.index.max().to_pydatetime()
 
     def get_duration(self):
-        """Return datatime.timedelta object of Trajectory's duration"""
+        """Return datetime.timedelta object of Trajectory's duration"""
         return self.get_end_time() - self.get_start_time()
 
     def get_row_at(self, t, method='nearest'):
