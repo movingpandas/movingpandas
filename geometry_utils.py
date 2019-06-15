@@ -24,7 +24,7 @@ from shapely.geometry import Point
 R_EARTH = 6371000  # radius of earth in meters
 
 def measure_distance_spherical(point1, point2):
-    """Return spherical distance between two shapely Points as float."""
+    """Return spherical distance between two shapely Points as a float."""
     if (type(point1) != Point) or (type(point2) != Point):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     lon1 = float(point1.x)
