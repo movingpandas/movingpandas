@@ -242,28 +242,26 @@ class Trajectory():
     def intersection(self, feature):
         return overlay.intersection(self, feature)
         
-    def split(self, mode='date-change', **kwargs):
+    def split_by_date(self):
         result = []
-        if mode == 'date-change':
-            dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
-            for i, df in enumerate(dfs):
-                result.append(Trajectory('{}_{}'.format(self.id, i), df))
-        elif mode == 'observation-gap':
-            if not 'gap' in kwargs or type(kwargs['gap']) != timedelta:
-                raise ValueError('Split by observation gap requires keyword argument gap of type timedelta')
-            self.df['t'] = self.df.index
-            self.df['gap'] = self.df['t'].diff() > kwargs['gap']
-            self.df['gap'] = self.df['gap'].apply(lambda x: 1 if x else 0).cumsum()
-            dfs = [group[1] for group in self.df.groupby(self.df['gap'])]
-            for i, df in enumerate(dfs):
-                try:
-                    result.append(Trajectory('{}_{}'.format(self.id, i), df))
-                except ValueError:
-                    pass
-        else:
-            raise ValueError('Invalid split mode {}. Must be one of [date-change, observation-gap]'.format(mode))
+        dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
+        for i, df in enumerate(dfs):
+            result.append(Trajectory('{}_{}'.format(self.id, i), df))
         return result
-        
+
+    def split_by_observation_gap(self, gap):
+        result = []
+        self.df['t'] = self.df.index
+        self.df['gap'] = self.df['t'].diff() > gap
+        self.df['gap'] = self.df['gap'].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in self.df.groupby(self.df['gap'])]
+        for i, df in enumerate(dfs):
+            try:
+                result.append(Trajectory('{}_{}'.format(self.id, i), df))
+            except ValueError:
+                pass
+        return result
+
     def apply_offset_seconds(self, column, offset):
         self.df[column] = self.df[column].shift(offset, freq='1s')
 

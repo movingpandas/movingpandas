@@ -304,7 +304,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1, geo_df)
-        split = traj.split('date-change')
+        split = traj.split_by_date()
         result = len(split)
         expected_result = 2
         self.assertEqual(expected_result, result)
@@ -318,7 +318,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1, geo_df)
-        split = traj.split('date-change')
+        split = traj.split_by_date()
         result = len(split)
         expected_result = 2
         self.assertEqual(expected_result, result)
@@ -332,7 +332,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1, geo_df)
-        split = traj.split('observation-gap', gap=timedelta(seconds=120))
+        split = traj.split_by_observation_gap(timedelta(seconds=120))
         result = len(split)
         expected_result = 2
         self.assertEqual(expected_result, result)
@@ -346,7 +346,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1, geo_df)
-        split = traj.split('observation-gap', gap=timedelta(seconds=61))
+        split = traj.split_by_observation_gap(timedelta(seconds=61))
         result = len(split)
         expected_result = 1
         self.assertEqual(expected_result, result)
