@@ -222,8 +222,7 @@ class Trajectory():
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
         self.df['prev_pt'] = self.df.geometry.shift()
         self.df['t'] = self.df.index
-        self.df['prev_t'] = self.df['t'].shift()
-        self.df['delta_t'] = self.df['t'] - self.df['prev_t']
+        self.df['delta_t'] = self.df['t'].diff()
         try:
             self.df[SPEED_COL_NAME] = self.df.apply(self._compute_speed, axis=1)
         except ValueError as e:
