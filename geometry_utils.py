@@ -39,7 +39,7 @@ def measure_distance_spherical(point1, point2):
 
 def measure_distance_euclidean(point1, point2):
     if (type(point1) != Point) or (type(point2) != Point):
-        raise TypeError("Only Points are supported as arguments")
+        raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     return point1.distance(point2)
  
 def calculate_initial_compass_bearing(point1, point2):
@@ -57,7 +57,7 @@ def calculate_initial_compass_bearing(point1, point2):
       float
     """
     if (type(point1) != Point) or (type(point2) != Point):
-        raise TypeError("Only Points are supported as arguments")
+        raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     lat1 = radians(point1.y)
     lat2 = radians(point2.y)
     delta_lon = radians(point2.x - point1.x)
@@ -77,7 +77,7 @@ def azimuth(point1, point2):
     Calculates euclidean bearing of line between two points
     """
     if (type(point1) != Point) or (type(point2) != Point):
-        raise TypeError("Only Points are supported as arguments")
+        raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
         
     angle = atan2(point2.x - point1.x, point2.y - point1.y) 
     azimuth = degrees(angle)    
