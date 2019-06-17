@@ -23,7 +23,7 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 #from shapely.affinity import translate
-from datetime import datetime
+from datetime import datetime, timedelta
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -243,14 +243,26 @@ class Trajectory():
     def intersection(self, feature):
         return overlay.intersection(self, feature)
         
-    def split(self, mode='daybreak'):
+    def split(self, mode='date-change', **kwargs):
         result = []
-        if mode == 'daybreak':
+        if mode == 'date-change':
             dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
             for i, df in enumerate(dfs):
                 result.append(Trajectory('{}_{}'.format(self.id, i), df))
+        elif mode == 'observation-gap':
+            if not 'gap' in kwargs or type(kwargs['gap']) != timedelta:
+                raise ValueError('Split by observation gap requires keyword argument gap of type timedelta')
+            self.df['t'] = self.df.index
+            self.df['gap'] = self.df['t'].diff() > kwargs['gap']
+            self.df['gap'] = self.df['gap'].apply(lambda x: 1 if x else 0).cumsum()
+            dfs = [group[1] for group in self.df.groupby(self.df['gap'])]
+            for i, df in enumerate(dfs):
+                try:
+                    result.append(Trajectory('{}_{}'.format(self.id, i), df))
+                except ValueError:
+                    pass
         else:
-            raise ValueError('Invalid split mode {}. Must be one of [daybreak]'.format(mode))
+            raise ValueError('Invalid split mode {}. Must be one of [date-change, observation-gap]'.format(mode))
         return result
         
     def apply_offset_seconds(self, column, offset):

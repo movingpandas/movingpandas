@@ -304,7 +304,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1, geo_df)
-        split = traj.split('daybreak')
+        split = traj.split('date-change')
         result = len(split)
         expected_result = 2
         self.assertEqual(expected_result, result)
@@ -318,9 +318,37 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs={'init': '31256'})
         traj = Trajectory(1, geo_df)
-        split = traj.split('daybreak')
+        split = traj.split('date-change')
         result = len(split)
         expected_result = 2
+        self.assertEqual(expected_result, result)
+
+    def test_split_by_observation_gap(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(-6, 10), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 5, 0)},
+            {'geometry': Point(6, 16), 't': datetime(2018, 1, 1, 12, 6, 30)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        split = traj.split('observation-gap', gap=timedelta(seconds=120))
+        result = len(split)
+        expected_result = 2
+        self.assertEqual(expected_result, result)
+
+    def test_split_by_observation_gap_skip_single_points(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(-6, 10), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 5, 0)},
+            {'geometry': Point(6, 16), 't': datetime(2018, 1, 1, 12, 6, 30)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        split = traj.split('observation-gap', gap=timedelta(seconds=61))
+        result = len(split)
+        expected_result = 1
         self.assertEqual(expected_result, result)
 
     def test_offset_seconds(self):
