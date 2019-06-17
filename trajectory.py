@@ -144,7 +144,7 @@ class Trajectory():
 
     def get_linestring_between(self, t1, t2):
         try:
-            return self._make_line(self.get_segment_between(t1, t2))
+            return self._make_line(self.get_segment_between(t1, t2).df)
         except RuntimeError:
             raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
 

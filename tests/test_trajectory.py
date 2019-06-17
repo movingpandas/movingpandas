@@ -186,6 +186,19 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
         pd.testing.assert_frame_equal(result, expected_result)
+
+    def test_get_linestring_between(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 20, 0)},
+            {'geometry': Point(30, 0), 't': datetime(2018, 1, 1, 12, 30, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)
+        result = traj.get_linestring_between(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 25, 0, 50)).wkt
+        expected_result = "LINESTRING (10 0, 20 0)"
+        self.assertEqual(result, expected_result)
         
     def test_add_heading(self):
         df = pd.DataFrame([
