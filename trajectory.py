@@ -23,7 +23,7 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 #from shapely.affinity import translate
-from datetime import datetime
+from datetime import datetime, timedelta
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -160,7 +160,7 @@ class Trajectory():
 
     def get_linestring_between(self, t1, t2):
         try:
-            return self._make_line(self.get_segment_between(t1, t2))
+            return self._make_line(self.get_segment_between(t1, t2).df)
         except RuntimeError:
             raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
 
@@ -252,8 +252,7 @@ class Trajectory():
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
         self.df['prev_pt'] = self.df.geometry.shift()
         self.df['t'] = self.df.index
-        self.df['prev_t'] = self.df['t'].shift()
-        self.df['delta_t'] = self.df['t'] - self.df['prev_t']
+        self.df['delta_t'] = self.df['t'].diff()
         try:
             self.df[SPEED_COL_NAME] = self.df.apply(self._compute_speed, axis=1)
         except ValueError as e:
@@ -274,17 +273,27 @@ class Trajectory():
     def intersection(self, feature):
         return overlay.intersection(self, feature)
         
-    def split(self, mode='daybreak'):
-        """Return list of Trajectory objects split by mode."""
+    def split_by_date(self):
+        """Return list of Trajectory objects split by date."""
         result = []
-        if mode == 'daybreak':
-            dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
-            for i, df in enumerate(dfs):
-                result.append(Trajectory('{}_{}'.format(self.id, i), df))
-        else:
-            raise ValueError('Invalid split mode {}. Must be one of [daybreak]'.format(mode))
+        dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
+        for i, df in enumerate(dfs):
+            result.append(Trajectory('{}_{}'.format(self.id, i), df))
         return result
-        
+
+    def split_by_observation_gap(self, gap):
+        result = []
+        self.df['t'] = self.df.index
+        self.df['gap'] = self.df['t'].diff() > gap
+        self.df['gap'] = self.df['gap'].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in self.df.groupby(self.df['gap'])]
+        for i, df in enumerate(dfs):
+            try:
+                result.append(Trajectory('{}_{}'.format(self.id, i), df))
+            except ValueError:
+                pass
+        return result
+
     def apply_offset_seconds(self, column, offset):
         self.df[column] = self.df[column].shift(offset, freq='1s')
 
