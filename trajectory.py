@@ -92,7 +92,7 @@ class Trajectory():
             raise RuntimeError("Cannot generate linestring")
 
     def to_linestringm_wkt(self):
-       """Return WKT Linestring M as string of Trajectory object."""
+        """Return WKT Linestring M as string of Trajectory object."""
         # Shapely only supports x, y, z. Therefore, this is a bit hacky!
         coords = ''
         for index, row in self.df.iterrows():
@@ -188,7 +188,11 @@ class Trajectory():
         return dist_meters  
     
     def get_length(self):
-        """Return float of length of Trajectory object in measurement unit of CRS."""
+        """Return float of length of Trajectory object.
+
+        This is calculated with the measurement unit of the CRS used, except
+        when using WGS 84 when it is calculated in metres.
+        """
         self.df['prev_pt'] = self.df.geometry.shift()
         self.df['dist_to_prev'] = self.df.apply(self._compute_distance, axis=1)
         return self.df['dist_to_prev'].sum() 
@@ -240,7 +244,9 @@ class Trajectory():
     def add_speed(self, overwrite=False):
         """Add speed column and values to Trajectory object's DataFrame.
 
-        Calculation is in measurement unit of CRS divided by total seconds.
+        This is calculated with the measurement unit of the CRS used, except
+        when using WGS 84 when it is calculated in metres. This is then divided
+        by total seconds.
         """
         if SPEED_COL_NAME in self.df.keys() and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
@@ -269,7 +275,7 @@ class Trajectory():
         return overlay.intersection(self, feature)
         
     def split(self, mode='daybreak'):
-        """Return list of Dataframes representing Trajectory split by date."""
+        """Return list of Trajectory objects split by mode."""
         result = []
         if mode == 'daybreak':
             dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
