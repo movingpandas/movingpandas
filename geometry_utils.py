@@ -24,6 +24,7 @@ from shapely.geometry import Point
 R_EARTH = 6371000  # radius of earth in meters
 
 def measure_distance_spherical(point1, point2):
+    """Return spherical distance between two shapely Points as a float."""
     if (type(point1) != Point) or (type(point2) != Point):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     lon1 = float(point1.x)
@@ -38,13 +39,14 @@ def measure_distance_spherical(point1, point2):
     return dist
 
 def measure_distance_euclidean(point1, point2):
+    """Return euclidean distance between two shapely Points as float."""
     if (type(point1) != Point) or (type(point2) != Point):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     return point1.distance(point2)
  
 def calculate_initial_compass_bearing(point1, point2):
-    """
-    Calculates the bearing between two points.
+    """Calculate the bearing between two points.
+
     The formulae used is the following:
         θ = atan2(sin(Δlong).cos(lat2),
                   cos(lat1).sin(lat2) − sin(lat1).cos(lat2).cos(Δlong))
