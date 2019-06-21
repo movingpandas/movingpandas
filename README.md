@@ -2,7 +2,9 @@
 
 MovingPandas implements a Trajectory class and corresponding methods based on **GeoPandas**.
 
-MovingPandas thus avoids limitations of Simple Feature-based movement data models commonly used to handle trajectories in the GIS world.
+You can try MovingPandas in a MyBinder notebook - no installation required: 
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/master)
 
 ## Introduction 
 
@@ -14,14 +16,6 @@ GeoPandas extends the data types that can be used in Pandas DataFrames, thus cre
 
 MovingPandas uses the following terminology. A *trajectory* is, or more correctly has, a time-ordered series of geometries. These
 geometries and associated attributes are stored in a GeoDataFrame *df*. Furthermore, a trajectory can have a *parent* trajectory and can itself be the parent of successive trajectories. Raw unsegmented streams of movement data, as well as semantically meaningful subsections or other subsections, can therefore be represented as trajectories. Depending on the use case, the trajectory object can access a point-based or a line-based representation of its data. (Source: [0])
-
-## Usage
-
-You can try MovingPandas in a MyBinder notebook - no installation required: 
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/master)
-
-For more examples, check the demo folder!
 
 ## Publications
 
