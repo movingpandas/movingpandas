@@ -46,7 +46,9 @@ class TrajectorySampler():
     def __init__(self, traj, tolerance = timedelta(seconds=1)):
         self.traj = traj
         self.sample_counter = 0
-        self.tolerance = tolerance 
+        self.tolerance = tolerance
+        # creating a time value column for the trajectory here...
+        self.traj.df = traj.df.assign(t=traj.df.index.values)
         
     def _is_sampling_possible(self, past_timedelta, future_timedelta, min_meters_per_sec = 0.3):
         sample_duration = past_timedelta + future_timedelta 
@@ -67,6 +69,8 @@ class TrajectorySampler():
         return True 
         
     def _get_actually_available_times(self, start_time, past_time, future_time):
+        # NOTE: this is a bit crufty, as everything about the times 
+        #   should be available in the index
         sample_times = []
         for t in [start_time, past_time, future_time]:
             #print("Testing {}".format(t))

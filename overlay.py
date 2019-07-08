@@ -121,10 +121,10 @@ def intersects(traj, polygon):
 
 def _create_entry_and_exit_points(traj, range):
     # Create row at entry point with attributes from previous row = pad
-    row0 = traj.df.iloc[traj.df.index.get_loc(range.t_0, method='pad')]
+    row0 = traj.df.iloc[traj.df.index.get_loc(range.t_0, method='pad')].copy()
     row0['geometry'] = range.pt_0
     # Create row at exit point
-    rown = traj.df.iloc[traj.df.index.get_loc(range.t_n, method='pad')]
+    rown = traj.df.iloc[traj.df.index.get_loc(range.t_n, method='pad')].copy()
     rown['geometry'] = range.pt_n
     # Insert rows
     traj.df.loc[range.t_0] = row0

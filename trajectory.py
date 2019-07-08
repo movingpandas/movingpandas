@@ -187,14 +187,25 @@ class Trajectory():
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters  
     
+    def _update_prev_pt(self, force=True):
+        """create a shifted geometry column with previous positions,
+        required for several calculations
+        """
+        if 'prev_pt' not in self.df.columns or force:
+            # TODO: decide on default enforcement behavior
+            self.df = self.df.assign(prev_pt=self.df.geometry.shift())
+        
     def get_length(self):
         """Return float of length of Trajectory object.
 
         This is calculated with the measurement unit of the CRS used, except
         when using WGS 84 when it is calculated in metres.
         """
-        self.df['prev_pt'] = self.df.geometry.shift()
-        self.df['dist_to_prev'] = self.df.apply(self._compute_distance, axis=1)
+        self._update_prev_pt()
+        # NOTE: we could also make this column temporary if not needed again...
+        self.df = self.df.assign(dist_to_prev=self.df.apply(
+                self._compute_distance, axis=1))
+        # self.df['dist_to_prev'] = self.df.apply(self._compute_distance, axis=1)
         return self.df['dist_to_prev'].sum() 
 
     def get_direction(self):
@@ -235,9 +246,10 @@ class Trajectory():
 
     def add_direction(self, overwrite=False):
         """Add direction column and values to Trajectory object's DataFrame."""
-        if DIRECTION_COL_NAME in self.df.keys() and not overwrite:
+        if DIRECTION_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has direction values! Use overwrite=True to overwrite exiting values.')
-        self.df['prev_pt'] = self.df.geometry.shift()
+        self._update_prev_pt()
+        # self.df['prev_pt'] = self.df.geometry.shift()
         self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
         self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][DIRECTION_COL_NAME]
 
@@ -248,15 +260,22 @@ class Trajectory():
         when using WGS 84 when it is calculated in metres. This is then divided
         by total seconds.
         """
-        if SPEED_COL_NAME in self.df.keys() and not overwrite:
+        if SPEED_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
-        self.df['prev_pt'] = self.df.geometry.shift()
-        self.df['t'] = self.df.index
-        self.df['delta_t'] = self.df['t'].diff()
+        self._update_prev_pt()
+        # NOTE: ? do we need the 't' again
+        #self.df = self.df.assign(t=self.df.index)
+        # self.df['delta_t'] = self.df['t'].diff()
+        if 't' in self.df.columns:
+            times = self.df.t
+        else:
+            times = self.df.reset_index().t
+        self.df = self.df.assign(delta_t=times.diff().values)
         try:
             self.df[SPEED_COL_NAME] = self.df.apply(self._compute_speed, axis=1)
         except ValueError as e:
             raise e
+        # ? what is that doing
         self.df.at[self.get_start_time(), SPEED_COL_NAME] = self.df.iloc[1][SPEED_COL_NAME]
 
     def _make_line(self, df):
