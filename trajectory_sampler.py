@@ -82,6 +82,8 @@ class TrajectorySampler():
         return sample_times
         
     def _get_sample_times(self, df, delta_t, first_move_time, past_timedelta, future_timedelta, randomize):
+        """ensure that only real positions are being used for sampling, but no interpolations
+        """
         for t, row in df.iterrows():
             if t > self.traj.get_end_time() - (past_timedelta + future_timedelta):
                 continue
