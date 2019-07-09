@@ -1,8 +1,8 @@
-numpy==1.15
-matplotlib==3
-seaborn==0.8.1
-pandas==0.23
-geopandas==0.4
+numpy
+matplotlib
+seaborn
+pandas
+geopandas
 rtree
 geopy
 mercantile
