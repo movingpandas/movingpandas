@@ -3,3 +3,5 @@ matplotlib==3.*
 seaborn==0.8.1
 pandas==0.23.*
 geopandas==0.4.*
+rtree
+contextily
