@@ -46,7 +46,9 @@ class TrajectorySampler():
     def __init__(self, traj, tolerance = timedelta(seconds=1)):
         self.traj = traj
         self.sample_counter = 0
-        self.tolerance = tolerance 
+        self.tolerance = tolerance
+        # creating a time value column for the trajectory here...
+        self.traj.df = traj.df.assign(t=traj.df.index.values)
         
     def _is_sampling_possible(self, past_timedelta, future_timedelta, min_meters_per_sec = 0.3):
         sample_duration = past_timedelta + future_timedelta 
@@ -78,6 +80,8 @@ class TrajectorySampler():
         return sample_times
         
     def _get_sample_times(self, df, delta_t, first_move_time, past_timedelta, future_timedelta, randomize):
+        """ensure that only real positions are being used for sampling, but no interpolations
+        """
         for t, row in df.iterrows():
             if t > self.traj.get_end_time() - (past_timedelta + future_timedelta):
                 continue
