@@ -3,6 +3,8 @@
 import os
 import sys
 
+import contextily as ctx
+
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
@@ -43,13 +45,17 @@ class Trajectory():
             self.df.geometry.count(), self.id, self.get_start_time(),
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
-    def plot(self, *args, **kwargs):
+    def plot(self, with_basemap=False, *args, **kwargs):
         if 'column' in kwargs:
             if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
                 self.add_speed()
         self._update_prev_pt()
         self.df['line'] = self.df.apply(self._connect_points, axis=1)
-        return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
+        if with_basemap:
+            ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+            return ctx.add_basemap(ax)
+        else:
+            return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
 
     def set_crs(self, crs):
         """Set coordinate reference system of Trajectory using string of SRID."""
