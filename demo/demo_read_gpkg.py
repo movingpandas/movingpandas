@@ -27,7 +27,7 @@ from datetime import datetime
 script_path = os.path.dirname(__file__)
 sys.path.append(os.path.join(script_path,".."))
 
-from trajectory import Trajectory 
+from movingpandas.trajectory import Trajectory
 
 
 if __name__ == '__main__':

@@ -26,8 +26,8 @@ from datetime import datetime
 
 sys.path.append(os.path.dirname(__file__))
 
-import overlay
-from geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
+from movingpandas import overlay
+from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
 
 
 SPEED_COL_NAME = 'speed'

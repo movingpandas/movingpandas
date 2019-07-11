@@ -1,21 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-***************************************************************************
-    test_geometry_utils.py
-    ---------------------
-    Date                 : December 2018
-    Copyright            : (C) 2018 by Anita Graser
-    Email                : anitagraser@gmx.at
-***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************
-
 ATTENTION!
 If you use OSGeo4W, you need to run the following command first:
 call C:\OSGeo4W64\bin\py3_env.bat
@@ -35,7 +20,7 @@ from shapely.geometry import Point
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from geometry_utils import azimuth, calculate_initial_compass_bearing, angular_difference
+from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, angular_difference
 
  
 class TestGeometryUtils(unittest.TestCase):
