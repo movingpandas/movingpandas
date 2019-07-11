@@ -19,11 +19,10 @@
 
 import os
 import sys
-import pandas as pd
-from geopandas import GeoDataFrame
+
+from shapely.affinity import translate
 from shapely.geometry import Point, LineString
-#from shapely.affinity import translate
-from datetime import datetime, timedelta
+from datetime import datetime
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -60,6 +59,11 @@ class Trajectory():
         return "Trajectory {1} ({2} to {3}) | Size: {0} | Length: {6:.1f}m\nBounds: {5}\n{4}".format(
             self.df.geometry.count(), self.id, self.get_start_time(),
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
+
+    def plot(self, *args, **kwargs):
+        self.to_linestring()
+        self.df['line'] = self.df.apply(self._connect_points, axis=1)
+        return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
 
     def set_crs(self, crs):
         """Set coordinate reference system of Trajectory using string of SRID."""
@@ -335,3 +339,13 @@ class Trajectory():
         new_traj = Trajectory(self.id, new_df)
         new_traj.get_length() # to recompute prev_pt and dist_to_prev
         return new_traj
+
+    def _connect_points(self, row):
+        pt0 = row['prev_pt']
+        pt1 = row['geometry']
+        if type(pt0) != Point:
+            return None
+        if pt0 == pt1:
+            # to avoid intersection issues with zero length lines
+            pt1 = translate(pt1, 0.00000001, 0.00000001)
+        return LineString(list(pt0.coords) + list(pt1.coords))
