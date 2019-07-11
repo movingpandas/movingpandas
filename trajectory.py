@@ -61,7 +61,7 @@ class Trajectory():
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
     def plot(self, *args, **kwargs):
-        self.to_linestring()
+        self.df['prev_pt'] = self.df.geometry.shift()
         self.df['line'] = self.df.apply(self._connect_points, axis=1)
         return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
 
@@ -70,7 +70,13 @@ class Trajectory():
         self.crs = crs
 
     def is_valid(self):
-        """Return Boolean of whether Trajectory meets minimum prerequisites."""
+        """Return Boolean of w        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        traj = Trajectory(1, geo_df)hether Trajectory meets minimum prerequisites."""
         if len(self.df) < 2:
             return False
         if not self.get_start_time() < self.get_end_time():
