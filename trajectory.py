@@ -203,9 +203,7 @@ class Trajectory():
         """
         self._update_prev_pt()
         # NOTE: we could also make this column temporary if not needed again...
-        self.df = self.df.assign(dist_to_prev=self.df.apply(
-                self._compute_distance, axis=1))
-        # self.df['dist_to_prev'] = self.df.apply(self._compute_distance, axis=1)
+        self.df = self.df.assign(dist_to_prev=self.df.apply(self._compute_distance, axis=1))
         return self.df['dist_to_prev'].sum() 
 
     def get_direction(self):
@@ -240,7 +238,7 @@ class Trajectory():
             return 0.0
         if self.is_latlon():
             dist_meters = measure_distance_spherical(pt0, pt1)
-        else: # The following distance will be in CRS units that might not be meters!
+        else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters / row['delta_t'].total_seconds()
 
@@ -249,7 +247,6 @@ class Trajectory():
         if DIRECTION_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has direction values! Use overwrite=True to overwrite exiting values.')
         self._update_prev_pt()
-        # self.df['prev_pt'] = self.df.geometry.shift()
         self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
         self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][DIRECTION_COL_NAME]
 
@@ -263,9 +260,6 @@ class Trajectory():
         if SPEED_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
         self._update_prev_pt()
-        # NOTE: ? do we need the 't' again
-        #self.df = self.df.assign(t=self.df.index)
-        # self.df['delta_t'] = self.df['t'].diff()
         if 't' in self.df.columns:
             times = self.df.t
         else:
@@ -275,7 +269,7 @@ class Trajectory():
             self.df[SPEED_COL_NAME] = self.df.apply(self._compute_speed, axis=1)
         except ValueError as e:
             raise e
-        # ? what is that doing
+        # set the speed in the first row to the speed of the second row
         self.df.at[self.get_start_time(), SPEED_COL_NAME] = self.df.iloc[1][SPEED_COL_NAME]
 
     def _make_line(self, df):
@@ -352,5 +346,5 @@ class Trajectory():
         keep_rows.append(i)
         new_df = self.df.iloc[keep_rows]
         new_traj = Trajectory(self.id, new_df)
-        new_traj.get_length() # to recompute prev_pt and dist_to_prev
+        new_traj.get_length()  # to recompute prev_pt and dist_to_prev
         return new_traj

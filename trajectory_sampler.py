@@ -69,8 +69,6 @@ class TrajectorySampler():
         return True 
         
     def _get_actually_available_times(self, start_time, past_time, future_time):
-        # NOTE: this is a bit crufty, as everything about the times 
-        #   should be available in the index
         sample_times = []
         for t in [start_time, past_time, future_time]:
             #print("Testing {}".format(t))
