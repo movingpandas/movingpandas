@@ -39,23 +39,7 @@ class TemporalRange():
         self.t_0 = t_0
         self.t_n= t_n
 
-def _connect_points(row):
-    pt0 = row['prev_pt']
-    pt1 = row['geometry']
-    if type(pt0) != Point:
-        return None
-    if pt0 == pt1:
-        # to avoid intersection issues with zero length lines
-        pt1 = translate(pt1, 0.00000001, 0.00000001)
-    return LineString(list(pt0.coords) + list(pt1.coords))
 
-def _to_line_df(traj):
-    line_df = traj.df.copy()
-    line_df['prev_pt'] = line_df['geometry'].shift()
-    line_df['t'] = traj.df.index
-    line_df['prev_t'] = line_df['t'].shift()
-    line_df['line'] = line_df.apply(_connect_points, axis=1)
-    return line_df.set_geometry('line')[1:]
 
 def _get_spatiotemporal_ref(row):
     #print(type(row['geo_intersection']))
@@ -174,7 +158,7 @@ def _determine_time_ranges_pointbased(traj, polygon):
     return ranges
 
 def _get_potentially_intersecting_lines(traj, polygon):
-    line_df = _to_line_df(traj)
+    line_df = traj._to_line_df()
     spatial_index = line_df.sindex
     if spatial_index:
         possible_matches_index = list(spatial_index.intersection(polygon.bounds))

@@ -61,7 +61,10 @@ class Trajectory():
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
     def plot(self, *args, **kwargs):
-        self.df['prev_pt'] = self.df.geometry.shift()
+        if 'column' in kwargs:
+            if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
+                self.add_speed()
+        self._update_prev_pt()
         self.df['line'] = self.df.apply(self._connect_points, axis=1)
         return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
 
@@ -362,3 +365,11 @@ class Trajectory():
             # to avoid intersection issues with zero length lines
             pt1 = translate(pt1, 0.00000001, 0.00000001)
         return LineString(list(pt0.coords) + list(pt1.coords))
+
+    def _to_line_df(self):
+        line_df = self.df.copy()
+        line_df['prev_pt'] = line_df['geometry'].shift()
+        line_df['t'] = self.df.index
+        line_df['prev_t'] = line_df['t'].shift()
+        line_df['line'] = line_df.apply(self._connect_points, axis=1)
+        return line_df.set_geometry('line')[1:]
