@@ -52,8 +52,18 @@ class Trajectory():
         self._update_prev_pt()
         self.df['line'] = self.df.apply(self._connect_points, axis=1)
         if with_basemap:
-            ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
-            return ctx.add_basemap(ax)
+            if 'url' in kwargs and 'zoom' in kwargs:
+                url = kwargs.pop('url')
+                zoom = kwargs.pop('zoom')
+                ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                return ctx.add_basemap(ax, url=url, zoom=zoom)
+            elif 'url' in kwargs:
+                url = kwargs.pop('url')
+                ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                return ctx.add_basemap(ax, url=url)
+            else:
+                ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                return ctx.add_basemap(ax)
         else:
             return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
 
