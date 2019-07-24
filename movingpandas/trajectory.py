@@ -82,7 +82,7 @@ class Trajectory():
 
     def is_latlon(self):
         """Return Boolean of whether coordinate reference system is WGS 84."""
-        if self.crs['init'] == 'epsg:4326':
+        if self.crs['init'] == from_epsg(4326)['init']:
             return True
         else:
             return False
