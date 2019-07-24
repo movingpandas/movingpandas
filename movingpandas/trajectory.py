@@ -7,6 +7,7 @@ import contextily as ctx
 
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
+from fiona.crs import from_epsg
 from datetime import datetime
 
 sys.path.append(os.path.dirname(__file__))
@@ -32,7 +33,7 @@ class Trajectory():
         self.id = traj_id
         df.sort_index(inplace=True)
         self.df = df[~df.index.duplicated(keep='first')]
-        self.crs = df.crs['init']
+        self.crs = df.crs
         self.parent = parent
         self.context = None
 
@@ -81,7 +82,7 @@ class Trajectory():
 
     def is_latlon(self):
         """Return Boolean of whether coordinate reference system is WGS 84."""
-        if self.crs == '4326' or self.crs == 'epsg:4326':
+        if self.crs['init'] == 'epsg:4326':
             return True
         else:
             return False

@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 
 from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME
+from fiona.crs import from_epsg
 
  
 class TestTrajectory(unittest.TestCase):
@@ -34,7 +35,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_end_location()
         expected_result = Point(10, 0)
@@ -46,7 +47,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.to_linestring().wkt
         expected_result = "LINESTRING (0 0, 6 0, 10 0)"        
@@ -58,7 +59,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(1970, 1, 1, 0, 0, 2)},
             {'geometry': Point(10, 0), 't': datetime(1970, 1, 1, 0, 0, 3)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.to_linestringm_wkt()
         expected_result = "LINESTRING M (0.0 0.0 1.0, 6.0 0.0 2.0, 10.0 0.0 3.0)"        
@@ -70,7 +71,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_position_at(datetime(2018, 1, 1, 12, 10, 0), method='nearest')
         expected_result = Point(6, 0)
@@ -82,7 +83,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         try:
             result = traj.get_position_at(datetime(2018, 1, 1, 12, 10, 0), method='xxx')
@@ -96,7 +97,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_position_at(datetime(2018, 1, 1, 12, 10, 0), method='interpolated')
         expected_result = Point(6, 0)
@@ -108,7 +109,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_position_at(datetime(2018, 1, 1, 12, 14, 0), method='nearest')
         expected_result = Point(6, 0)
@@ -123,7 +124,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_position_at(datetime(2018, 1, 1, 12, 14, 0), method="interpolated")
         expected_result = Point(6+4/10*4, 0)
@@ -140,7 +141,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_segment_between(datetime(2018, 1, 1, 12, 10, 0), datetime(2018, 1, 1, 12, 30, 0)).df
         expected_result = pd.DataFrame([
@@ -163,7 +164,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 20, 0)},
             {'geometry': Point(30, 0), 't': datetime(2018, 1, 1, 12, 30, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_segment_between(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 25, 0, 50)).df
         expected_result = pd.DataFrame([
@@ -179,7 +180,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 20, 0)},
             {'geometry': Point(30, 0), 't': datetime(2018, 1, 1, 12, 30, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_linestring_between(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 25, 0, 50)).wkt
         expected_result = "LINESTRING (10 0, 20 0)"
@@ -192,7 +193,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, -6), 't': datetime(2018, 1, 1, 12, 20, 0)},
             {'geometry': Point(-6, -6), 't': datetime(2018, 1, 1, 12, 30, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         traj.add_direction()
         result = traj.df[DIRECTION_COL_NAME].tolist()
@@ -204,7 +205,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 10, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '4326'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(4326))
         traj = Trajectory(1, geo_df)
         traj.add_direction()
         result = traj.df[DIRECTION_COL_NAME].tolist()
@@ -216,7 +217,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 0, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         traj.add_speed()
         result = traj.df[SPEED_COL_NAME].tolist()
@@ -228,7 +229,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(0, 1), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 0, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '4326'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(4326))
         traj = Trajectory(1, geo_df)
         traj.add_speed()
         result = traj.df[SPEED_COL_NAME].tolist()[0]/1000
@@ -240,7 +241,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(0, 1), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 5), 't': datetime(2018, 1, 1, 12, 0, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '4326'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(4326))
         traj = Trajectory(1, geo_df)
         result = traj.get_bbox()
         expected_result = (0, 1, 6, 5)  # (minx, miny, maxx, maxy)
@@ -251,7 +252,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(0, 1), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 0, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '4326'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(4326))
         traj = Trajectory(1, geo_df)
         result = traj.get_length()/1000
         expected_result = 676.3
@@ -262,7 +263,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(0, 2), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 0, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_length()
         expected_result = 6.3
@@ -274,7 +275,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(-6, 10), 't': datetime(2018, 1, 1, 12, 0, 1)},
             {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 0, 2)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.get_direction()
         expected_result = 45
@@ -287,7 +288,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 6), 't': datetime(2018, 1, 3, 12, 0, 1)},
             {'geometry': Point(6, 16), 't': datetime(2018, 1, 3, 12, 5, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         split = traj.split_by_date()
         result = len(split)
@@ -301,7 +302,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 6), 't': datetime(2019, 1, 1, 12, 0, 1)},
             {'geometry': Point(6, 16), 't': datetime(2019, 1, 1, 12, 5, 1)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         split = traj.split_by_date()
         result = len(split)
@@ -315,7 +316,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 5, 0)},
             {'geometry': Point(6, 16), 't': datetime(2018, 1, 1, 12, 6, 30)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         split = traj.split_by_observation_gap(timedelta(seconds=120))
         result = len(split)
@@ -329,7 +330,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 5, 0)},
             {'geometry': Point(6, 16), 't': datetime(2018, 1, 1, 12, 6, 30)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         split = traj.split_by_observation_gap(timedelta(seconds=61))
         result = len(split)
@@ -344,7 +345,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 12), 't': datetime(2018, 1, 1, 12, 3, 0), 'value': 4},
             {'geometry': Point(6, 18), 't': datetime(2018, 1, 1, 12, 4, 0), 'value': 5}
         ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         traj.apply_offset_seconds('value', -120)
         self.assertEqual(5, traj.df.iloc[2].value)
@@ -358,7 +359,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 12), 't': datetime(2018, 1, 1, 12, 3, 0), 'value': 4},
             {'geometry': Point(6, 18), 't': datetime(2018, 1, 1, 12, 4, 0), 'value': 5}
         ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         traj.apply_offset_minutes('value', -2)
         self.assertEqual(5, traj.df.iloc[2].value)
@@ -370,7 +371,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(1, 1), 't': datetime(2018, 1, 3, 0, 0, 0)},
             {'geometry': Point(2, 2), 't': datetime(2018, 1, 1, 0, 0, 0)}
         ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         self.assertEqual(datetime(2018, 1, 1), traj.get_start_time())
         self.assertEqual(datetime(2018, 1, 3), traj.get_end_time())
@@ -384,7 +385,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(3, 0), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(3, 3), 't': datetime(2018, 1, 1, 13, 0, 0)}
         ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.generalize(mode='douglas-peucker', tolerance=1)
         self.assertEqual('LINESTRING (0 0, 3 0, 3 3)', result.to_linestring().wkt)
@@ -396,10 +397,24 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.plot()
         self.assertIsInstance(result, Axes)
+
+    """ 
+    This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
+    def test_crs(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(4326))
+        traj = Trajectory(1, geo_df)
+        new_df = traj.df.to_crs(epsg=3857)
+        self.assertEqual(new_df.crs, from_epsg(3857))
+    """
 
 
 if __name__ == '__main__':

@@ -20,8 +20,9 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, Polygon
 from datetime import datetime, timedelta
+from fiona.crs import from_epsg
 
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from movingpandas.trajectory import Trajectory
 
@@ -37,7 +38,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon)
         # spatial 
@@ -70,7 +71,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon)
         # spatial
@@ -98,7 +99,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(5, 10), 't': datetime(2018, 1, 1, 12, 45, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon, pointbased=True)
         # spatial
@@ -129,7 +130,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(7, 0), 't': datetime(2018, 1, 1, 12, 7, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 11, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon, pointbased=True)
         result = intersections
@@ -145,7 +146,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(7, 0), 't': datetime(2018, 1, 1, 12, 7, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 11, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon, pointbased=False)
         result = []
@@ -163,7 +164,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon)
         # spatial
@@ -188,7 +189,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon)
         # spatial
@@ -213,7 +214,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersection = traj.clip(polygon)[0]
         # spatial
@@ -232,7 +233,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(116.368612, 39.904877), 't': datetime(2009, 3, 10, 11, 3, 37)},
             {'geometry': Point(116.368644, 39.90484), 't': datetime(2009, 3, 10, 11, 3, 39)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersection = traj.clip(polygon)[0]
         result = intersection.to_linestring().wkt
@@ -247,7 +248,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 15, 0)},
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         result = traj.clip(polygon)
         expected_result = []
@@ -264,7 +265,7 @@ class TestOverlay(unittest.TestCase):
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
             {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
             ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.intersection(feature)
         result = list(intersections[0].df.columns)
