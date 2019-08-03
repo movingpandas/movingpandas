@@ -13,24 +13,15 @@ from datetime import datetime
 sys.path.append(os.path.dirname(__file__))
 
 from movingpandas import overlay
-from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, measure_distance_euclidean
+from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
+                                        measure_distance_euclidean
 
 
 SPEED_COL_NAME = 'speed'
 DIRECTION_COL_NAME = 'direction'
 
 
-def to_unixtime(t):
-    """Return float of total seconds since Unix time."""
-    return (t - datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
-
-
-def point_gdf_to_linestring(df):
-    return df.groupby([True] * len(df)).geometry.apply(
-        lambda x: LineString(x.tolist())).values[0]
-
-
-class Trajectory():
+class Trajectory:
     def __init__(self, traj_id, df, parent=None):
         if len(df) < 2:
             raise ValueError("Trajectory dataframe must have at least two rows!")
@@ -57,7 +48,7 @@ class Trajectory():
             if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
                 temp_df = self.get_df_with_speed()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
-        temp_df['line'] = temp_df.apply(self._connect_points, axis=1)
+        temp_df['line'] = temp_df.apply(self._connect_prev_pt_and_geometry, axis=1)
         if with_basemap:
             if 'url' in kwargs and 'zoom' in kwargs:
                 url = kwargs.pop('url')
@@ -95,12 +86,12 @@ class Trajectory():
 
     def has_parent(self):
         """Return Boolean of whether Trajectory object has parent."""
-        return self.parent != None
+        return self.parent is not None
 
     def to_linestring(self):
         """Return shapely Linestring object of Trajectory."""
         try:
-            return self._make_line(self.df)
+            return point_gdf_to_linestring(self.df)
         except RuntimeError:
             raise RuntimeError("Cannot generate linestring")
 
@@ -125,7 +116,7 @@ class Trajectory():
 
     def get_bbox(self):
         """Return tuple of minimum & maximum x & y of Trajectory's locations."""
-        return self.to_linestring().bounds # (minx, miny, maxx, maxy)
+        return self.to_linestring().bounds  # (minx, miny, maxx, maxy)
 
     def get_start_time(self):
         """Return datetime.datetime object of Trajectory's start location."""
@@ -143,25 +134,26 @@ class Trajectory():
         """Return pandas series of position at given datetime object."""
         try:
             return self.df.loc[t]
-        except:
+        except KeyError:
             return self.df.iloc[self.df.index.sort_values().drop_duplicates().get_loc(t, method=method)]
 
     def interpolate_position_at(self, t):
         """Return interpolated shapely Point at given datetime object."""
-        prev = self.get_row_at(t, 'ffill')
-        next = self.get_row_at(t, 'bfill')
-        t_diff = next.name - prev.name
-        t_diff_at = t - prev.name
-        line = LineString([prev.geometry, next.geometry])
+        prev_row = self.get_row_at(t, 'ffill')
+        next_row = self.get_row_at(t, 'bfill')
+        t_diff = next_row.name - prev_row.name
+        t_diff_at = t - prev_row.name
+        line = LineString([prev_row.geometry, next_row.geometry])
         if t_diff == 0 or line.length == 0:
-            return prev.geometry
+            return prev_row.geometry
         interpolated_position = line.interpolate(t_diff_at/t_diff*line.length)
         return interpolated_position
 
     def get_position_at(self, t, method='interpolated'):
         """Return shapely Point at given datetime object and split method."""
         if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
-            raise ValueError('Invalid split method {}. Must be one of [nearest, interpolated, ffill, bfill]'.format(method))
+            raise ValueError('Invalid split method {}. Must be one of [nearest, interpolated, ffill, bfill]'.
+                             format(method))
         if method == 'interpolated':
             return self.interpolate_position_at(t)
         else:
@@ -177,20 +169,17 @@ class Trajectory():
             raise ValueError('Invalid split method {}. Must be one of [interpolated, within]'.format(method))
         if method == 'interpolated':
             st_range = overlay.SpatioTemporalRange(self.get_position_at(t1), self.get_position_at(t2), t1, t2)
-            temp_df = overlay._create_entry_and_exit_points(self, st_range)
+            temp_df = overlay.create_entry_and_exit_points(self, st_range)
             temp_df = temp_df[t1:t2]
             return point_gdf_to_linestring(temp_df)
         else:
             try:
-                return self._make_line(self.get_segment_between(t1, t2).df)
+                return point_gdf_to_linestring(self.get_segment_between(t1, t2).df)
             except RuntimeError:
                 raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
 
     def get_segment_between(self, t1, t2):
         """Return Trajectory object between given datetime objects."""
-        #start_time = self.get_start_time()
-        #if t1 < self.get_start_time():
-        #    raise ValueError("First time parameter ({}) has to be equal or later than trajectory start time ({})!".format(t1, start_time))
         segment = Trajectory(self.id, self.df[t1:t2], parent=self)
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
@@ -205,7 +194,7 @@ class Trajectory():
             return 0.0
         if self.is_latlon():
             dist_meters = measure_distance_spherical(pt0, pt1)
-        else: # The following distance will be in CRS units that might not be meters!
+        else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters  
     
@@ -263,6 +252,17 @@ class Trajectory():
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters / row['delta_t'].total_seconds()
 
+    @staticmethod
+    def _connect_prev_pt_and_geometry(row):
+        pt0 = row['prev_pt']
+        pt1 = row['geometry']
+        if type(pt0) != Point:
+            return None
+        if pt0 == pt1:
+            # to avoid intersection issues with zero length lines
+            pt1 = translate(pt1, 0.00000001, 0.00000001)
+        return LineString(list(pt0.coords) + list(pt1.coords))
+
     def add_direction(self, overwrite=False):
         """Add direction column and values to Trajectory object's DataFrame."""
         if DIRECTION_COL_NAME in self.df.columns and not overwrite:
@@ -302,12 +302,6 @@ class Trajectory():
         # set the speed in the first row to the speed of the second row
         temp_df.at[self.get_start_time(), SPEED_COL_NAME] = temp_df.iloc[1][SPEED_COL_NAME]
         return temp_df
-
-    def _make_line(self, df):
-        if len(df) > 1:
-            return point_gdf_to_linestring(df)
-        else:
-            raise RuntimeError('Dataframe needs at least two points to make line!')
 
     def clip(self, polygon, pointbased=False):
         """Return clipped Trajectory with polygon as Trajectory object."""
@@ -381,20 +375,23 @@ class Trajectory():
         new_traj.get_length()  # to recompute prev_pt and dist_to_prev
         return new_traj
 
-    def _connect_points(self, row):
-        pt0 = row['prev_pt']
-        pt1 = row['geometry']
-        if type(pt0) != Point:
-            return None
-        if pt0 == pt1:
-            # to avoid intersection issues with zero length lines
-            pt1 = translate(pt1, 0.00000001, 0.00000001)
-        return LineString(list(pt0.coords) + list(pt1.coords))
-
     def _to_line_df(self):
         line_df = self.df.copy()
         line_df['prev_pt'] = line_df['geometry'].shift()
         line_df['t'] = self.df.index
         line_df['prev_t'] = line_df['t'].shift()
-        line_df['line'] = line_df.apply(self._connect_points, axis=1)
+        line_df['line'] = line_df.apply(self._connect_prev_pt_and_geometry, axis=1)
         return line_df.set_geometry('line')[1:]
+
+
+def to_unixtime(t):
+    """Return float of total seconds since Unix time."""
+    return (t - datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
+
+
+def point_gdf_to_linestring(df):
+    if len(df) > 1:
+        return df.groupby([True] * len(df)).geometry.apply(
+            lambda x: LineString(x.tolist())).values[0]
+    else:
+        raise RuntimeError('Dataframe needs at least two points to make line!')

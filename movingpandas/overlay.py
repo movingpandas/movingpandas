@@ -86,7 +86,7 @@ def intersects(traj, polygon):
         return False
     return line.intersects(polygon)
 
-def _create_entry_and_exit_points(traj, range):
+def create_entry_and_exit_points(traj, range):
     # Create row at entry point with attributes from previous row = pad
     row0 = traj.df.iloc[traj.df.index.get_loc(range.t_0, method='pad')].copy()
     row0['geometry'] = range.pt_0
@@ -114,7 +114,7 @@ def _get_segments_for_ranges(traj, ranges):
     intersections = [] # list of trajectories
     for the_range in ranges:
         if type(the_range) == SpatioTemporalRange:
-            traj.df = _create_entry_and_exit_points(traj, the_range)
+            traj.df = create_entry_and_exit_points(traj, the_range)
         try:
             intersection = traj.get_segment_between(the_range.t_0, the_range.t_n)
         except ValueError as e:
