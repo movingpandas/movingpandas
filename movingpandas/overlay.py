@@ -10,22 +10,25 @@ from datetime import timedelta
 
 #sys.path.append(os.path.dirname(__file__))
 
-class SpatioTemporalRange():
+
+class SpatioTemporalRange:
     def __init__(self, pt_0, pt_n, t_0, t_n):
         self.pt_0 = pt_0
         self.pt_n = pt_n
         self.t_0 = t_0
         self.t_n= t_n
 
-class TemporalRange():
+
+class TemporalRange:
     def __init__(self, t_0, t_n):
         self.t_0 = t_0
         self.t_n= t_n
 
 
-
 def _get_spatiotemporal_ref(row):
-    #print(type(row['geo_intersection']))
+    """Returns the SpatioTemporalRange for the input row's spatial_intersection LineString
+    by interpolating timestamps.
+    """
     if type(row['spatial_intersection']) == LineString:
         pt0 = Point(row['spatial_intersection'].coords[0])
         ptn = Point(row['spatial_intersection'].coords[-1])
@@ -47,7 +50,9 @@ def _get_spatiotemporal_ref(row):
     else:
         return None
 
+
 def _dissolve_ranges(ranges):
+    """SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissovled (aka. merged)."""
     if len(ranges) == 0:
         raise ValueError("Nothing to dissolve (received empty ranges)!")
     new = []
@@ -76,8 +81,11 @@ def _dissolve_ranges(ranges):
     new.append(SpatioTemporalRange(pt0, ptn, start, end))
     return new
 
+
 def is_equal(t1, t2):
+    """Similar timestamps are considered equal to avoid numerical issues."""
     return abs(t1 - t2) < timedelta(milliseconds=10)
+
 
 def intersects(traj, polygon):
     try:
@@ -86,7 +94,11 @@ def intersects(traj, polygon):
         return False
     return line.intersects(polygon)
 
+
 def create_entry_and_exit_points(traj, range):
+    """Returns a dataframe with inserted entry and exit points according to the provided SpatioTemporalRange"""
+    if type(range) != SpatioTemporalRange:
+        raise TypeError("Input range has to be a SpatioTemporalRange!")
     # Create row at entry point with attributes from previous row = pad
     row0 = traj.df.iloc[traj.df.index.get_loc(range.t_0, method='pad')].copy()
     row0['geometry'] = range.pt_0
@@ -99,16 +111,6 @@ def create_entry_and_exit_points(traj, range):
     temp_df.loc[range.t_n] = rown
     return temp_df.sort_index()
 
-def _add_dummy(traj):
-    traj.df['dummy_that_stops_things_from_breaking'] = 1
-    return traj
-
-def _drop_dummy(traj):
-    try:
-        traj.df.drop(columns=['dummy_that_stops_things_from_breaking'], axis=1, inplace=True)
-    except KeyError:
-        pass
-    return traj
 
 def _get_segments_for_ranges(traj, ranges):
     counter = 0
@@ -122,9 +124,10 @@ def _get_segments_for_ranges(traj, ranges):
         except ValueError as e:
             continue
         segment.id = "{}_{}".format(traj.id, counter)
-        segments.append(_drop_dummy(segment))
+        segments.append(segment)
         counter += 1
     return segments
+
 
 def _determine_time_ranges_pointbased(traj, polygon):
     df = traj.df
@@ -140,7 +143,9 @@ def _determine_time_ranges_pointbased(traj, polygon):
             ranges.append(TemporalRange(row['t_min'], row['t_max']))
     return ranges
 
+
 def _get_potentially_intersecting_lines(traj, polygon):
+    """Uses a spatial index to determine which parts of the trajectory may be intersecting with the polygon"""
     line_df = traj._to_line_df()
     spatial_index = line_df.sindex
     if spatial_index:
@@ -150,32 +155,21 @@ def _get_potentially_intersecting_lines(traj, polygon):
         possible_matches = line_df
     return possible_matches
 
+
 def _determine_time_ranges_linebased(traj, polygon):
+    """Returns list of SpatioTemporalRanges that describe trajectory intersections with the provided polygon."""
     # Note: If the trajectory contains consecutive rows without location change
     #       these will result in zero length lines that return an empty
     #       intersection.
     possible_matches = _get_potentially_intersecting_lines(traj, polygon)
     possible_matches['spatial_intersection'] = possible_matches.intersection(polygon)
     possible_matches['spatiotemporal_intersection'] = possible_matches.apply(_get_spatiotemporal_ref, axis=1)
-
-    # The following for loop creates wrong results if there
-    # is no other column besides the geometry column.
-    if len(traj.df.columns) < 2:
-        traj = _add_dummy(traj)
-
-    ranges = []
-    for index, row in possible_matches.iterrows():
-        x = row['spatiotemporal_intersection']
-        if x is None:
-            continue
-        ranges.append(x)
-
-    traj = _drop_dummy(traj)
-
+    ranges = possible_matches['spatiotemporal_intersection']
     return _dissolve_ranges(ranges)
 
+
 def clip(traj, polygon, pointbased=False):
-    #pd.set_option('display.max_colwidth', -1)
+    """Returns a list of trajectory segments clipped by the given feature."""
     if not intersects(traj, polygon):
         return []
     if pointbased:
@@ -184,7 +178,9 @@ def clip(traj, polygon, pointbased=False):
         ranges = _determine_time_ranges_linebased(traj, polygon)
     return _get_segments_for_ranges(traj, ranges)
 
+
 def _get_geometry_and_properties_from_feature(feature):
+    """Provides convenience access to geometry and properties of a Shapely feature."""
     if type(feature) != dict:
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
     try:
@@ -192,14 +188,18 @@ def _get_geometry_and_properties_from_feature(feature):
         properties = feature['properties']
     except:
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
-    return (geometry, properties)
+    return geometry, properties
+
 
 def intersection(traj, feature, pointbased=False):
+    """Returns a list of trajectory segments that intersect the given feature.
+    Resulting trajectories include the intersecting feature's attributes.
+    """
     geometry, properties = _get_geometry_and_properties_from_feature(feature)
-    intersections = clip(traj, geometry, pointbased)
-    result = []
-    for intersection in intersections:
+    clipped = clip(traj, geometry, pointbased)
+    segments = []
+    for clipping in clipped:
         for key, value in properties.items():
-            intersection.df['intersecting_'+key] = value
-        result.append(intersection)
-    return result
+            clipping.df['intersecting_'+key] = value
+        segments.append(clipping)
+    return segments
