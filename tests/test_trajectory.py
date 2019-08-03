@@ -16,17 +16,18 @@ python3 -m unittest discover . -v
 import os 
 import sys 
 import unittest
-import pandas as pd 
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import datetime, timedelta
-
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
-
-from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME
 from fiona.crs import from_epsg
 
- 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME
+
+
 class TestTrajectory(unittest.TestCase):
 
     def test_endlocation(self):
@@ -186,7 +187,7 @@ class TestTrajectory(unittest.TestCase):
         expected_result = "LINESTRING (10 0, 20 0)"
         self.assertEqual(result, expected_result)
         
-    def test_add_heading(self):
+    def test_add_direction(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
@@ -200,7 +201,7 @@ class TestTrajectory(unittest.TestCase):
         expected_result = [90.0, 90.0, 180.0, 270]
         self.assertEqual(expected_result, result)
         
-    def test_add_heading_latlon(self):
+    def test_add_direction_latlon(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 10, 0)}
@@ -212,7 +213,7 @@ class TestTrajectory(unittest.TestCase):
         expected_result = [44.561451413257714, 44.561451413257714]
         self.assertAlmostEqual(expected_result[0], result[0], 5)
         
-    def test_add_meters_per_sec(self):
+    def test_add_speed(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 0, 1)}
@@ -224,7 +225,7 @@ class TestTrajectory(unittest.TestCase):
         expected_result = [6.0, 6.0]
         self.assertEqual(expected_result, result)
         
-    def test_add_meters_per_sec_latlon(self):
+    def test_add_speed_latlon(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 1), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 0, 1)}
@@ -401,6 +402,74 @@ class TestTrajectory(unittest.TestCase):
         traj = Trajectory(1, geo_df)
         result = traj.plot()
         self.assertIsInstance(result, Axes)
+
+    def test_tolinestring_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df
+        traj_linestring = traj.to_linestring()
+        result = traj.df
+        assert_frame_equal(expected_result, result)
+
+    def test_getlength_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df
+        traj_length = traj.get_length()
+        result = traj.df
+        assert_frame_equal(expected_result, result)
+
+    def test_str_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df
+        traj_str = str(traj)
+        result = traj.df
+        assert_frame_equal(expected_result, result)
+
+    def test_plot_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df
+        traj.plot(column='speed')
+        result = traj.df
+        assert_frame_equal(expected_result, result)
+
+    def test_splitbyobservationgap_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, -10), 't': datetime(2018, 1, 1, 11, 59, 0)},
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df
+        split = traj.split_by_observation_gap(timedelta(minutes=5))
+        result = traj.df
+        assert_frame_equal(expected_result, result)
+
+
 
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134

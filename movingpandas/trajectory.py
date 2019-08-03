@@ -47,26 +47,27 @@ class Trajectory():
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
     def plot(self, with_basemap=False, *args, **kwargs):
+        temp_df = self.df
         if 'column' in kwargs:
             if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
-                self.add_speed()
-        self._update_prev_pt()
-        self.df['line'] = self.df.apply(self._connect_points, axis=1)
+                temp_df = self.get_df_with_speed()
+        temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
+        temp_df['line'] = temp_df.apply(self._connect_points, axis=1)
         if with_basemap:
             if 'url' in kwargs and 'zoom' in kwargs:
                 url = kwargs.pop('url')
                 zoom = kwargs.pop('zoom')
-                ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax, url=url, zoom=zoom)
             elif 'url' in kwargs:
                 url = kwargs.pop('url')
-                ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax, url=url)
             else:
-                ax = self.df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax)
         else:
-            return self.df.set_geometry('line')[1:].plot(*args, **kwargs)
+            return temp_df.set_geometry('line')[1:].plot(*args, **kwargs)
 
     def set_crs(self, crs):
         """Set coordinate reference system of Trajectory using string of SRID."""
@@ -194,7 +195,7 @@ class Trajectory():
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters  
     
-    def _update_prev_pt(self, force=True):
+    def add_prev_pt(self, force=True):
         """create a shifted geometry column with previous positions,
         required for several calculations
         """
@@ -208,10 +209,9 @@ class Trajectory():
         This is calculated with the measurement unit of the CRS used, except
         when using WGS 84 when it is calculated in metres.
         """
-        self._update_prev_pt()
-        # NOTE: we could also make this column temporary if not needed again...
-        self.df = self.df.assign(dist_to_prev=self.df.apply(self._compute_distance, axis=1))
-        return self.df['dist_to_prev'].sum() 
+        temp_df = self.df.assign(prev_pt=self.df.geometry.shift())
+        temp_df = temp_df.assign(dist_to_prev=temp_df.apply(self._compute_distance, axis=1))
+        return temp_df['dist_to_prev'].sum()
 
     def get_direction(self):
         """Return compass bearing as float of Trajectory object."""
@@ -253,7 +253,7 @@ class Trajectory():
         """Add direction column and values to Trajectory object's DataFrame."""
         if DIRECTION_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has direction values! Use overwrite=True to overwrite exiting values.')
-        self._update_prev_pt()
+        self.add_prev_pt()
         self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
         self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][DIRECTION_COL_NAME]
 
@@ -266,18 +266,28 @@ class Trajectory():
         """
         if SPEED_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
-        self._update_prev_pt()
-        if 't' in self.df.columns:
-            times = self.df.t
+        self.df = self.get_df_with_speed()
+
+    def get_df_with_speed(self):
+        """Add speed column and values to Trajectory object's DataFrame.
+
+        This is calculated with the measurement unit of the CRS used, except
+        when using WGS 84 when it is calculated in metres. This is then divided
+        by total seconds.
+        """
+        temp_df = self.df.assign(prev_pt=self.df.geometry.shift())
+        if 't' in temp_df.columns:
+            times = temp_df.t
         else:
-            times = self.df.reset_index().t
-        self.df = self.df.assign(delta_t=times.diff().values)
+            times = temp_df.reset_index().t
+        temp_df = temp_df.assign(delta_t=times.diff().values)
         try:
-            self.df[SPEED_COL_NAME] = self.df.apply(self._compute_speed, axis=1)
+            temp_df[SPEED_COL_NAME] = temp_df.apply(self._compute_speed, axis=1)
         except ValueError as e:
             raise e
         # set the speed in the first row to the speed of the second row
-        self.df.at[self.get_start_time(), SPEED_COL_NAME] = self.df.iloc[1][SPEED_COL_NAME]
+        temp_df.at[self.get_start_time(), SPEED_COL_NAME] = temp_df.iloc[1][SPEED_COL_NAME]
+        return temp_df
 
     def _make_line(self, df):
         if len(df) > 1:
@@ -303,12 +313,14 @@ class Trajectory():
 
     def split_by_observation_gap(self, gap):
         result = []
-        self.df['t'] = self.df.index
-        self.df['gap'] = self.df['t'].diff() > gap
-        self.df['gap'] = self.df['gap'].apply(lambda x: 1 if x else 0).cumsum()
-        dfs = [group[1] for group in self.df.groupby(self.df['gap'])]
+        temp_df = self.df
+        temp_df['t'] = temp_df.index
+        temp_df['gap'] = temp_df['t'].diff() > gap
+        temp_df['gap'] = temp_df['gap'].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in temp_df.groupby(temp_df['gap'])]
         for i, df in enumerate(dfs):
             try:
+                df = df.drop(columns=['t', 'gap'])
                 result.append(Trajectory('{}_{}'.format(self.id, i), df))
             except ValueError:
                 pass
