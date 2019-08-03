@@ -22,7 +22,12 @@ DIRECTION_COL_NAME = 'direction'
 
 def to_unixtime(t):
     """Return float of total seconds since Unix time."""
-    return (t - datetime(1970,1,1,0,0,0)).total_seconds()
+    return (t - datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
+
+
+def point_gdf_to_linestring(df):
+    return df.groupby([True] * len(df)).geometry.apply(
+        lambda x: LineString(x.tolist())).values[0]
 
 
 class Trajectory():
@@ -163,14 +168,23 @@ class Trajectory():
             row = self.get_row_at(t, method)
             try:
                 return row.geometry[0]
-            except:
+            except TypeError:
                 return row.geometry
 
-    def get_linestring_between(self, t1, t2):
-        try:
-            return self._make_line(self.get_segment_between(t1, t2).df)
-        except RuntimeError:
-            raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
+    def get_linestring_between(self, t1, t2, method='interpolated'):
+        """Return shapely LineString between given datetime objects and split method."""
+        if method not in ['interpolated', 'within']:
+            raise ValueError('Invalid split method {}. Must be one of [interpolated, within]'.format(method))
+        if method == 'interpolated':
+            st_range = overlay.SpatioTemporalRange(self.get_position_at(t1), self.get_position_at(t2), t1, t2)
+            temp_df = overlay._create_entry_and_exit_points(self, st_range)
+            temp_df = temp_df[t1:t2]
+            return point_gdf_to_linestring(temp_df)
+        else:
+            try:
+                return self._make_line(self.get_segment_between(t1, t2).df)
+            except RuntimeError:
+                raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
 
     def get_segment_between(self, t1, t2):
         """Return Trajectory object between given datetime objects."""
@@ -291,8 +305,7 @@ class Trajectory():
 
     def _make_line(self, df):
         if len(df) > 1:
-            return df.groupby([True]*len(df)).geometry.apply(
-                lambda x: LineString(x.tolist())).values[0]
+            return point_gdf_to_linestring(df)
         else:
             raise RuntimeError('Dataframe needs at least two points to make line!')
 

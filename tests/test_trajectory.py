@@ -150,7 +150,7 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 15, 0)},
             {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)}
             ]).set_index('t')
-        pd.testing.assert_frame_equal(result, expected_result)
+        assert_frame_equal(result, expected_result)
         expected_result = pd.DataFrame([
             {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 15, 0)},
@@ -172,9 +172,9 @@ class TestTrajectory(unittest.TestCase):
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
             {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 20, 0)}
             ]).set_index('t')
-        pd.testing.assert_frame_equal(result, expected_result)
+        assert_frame_equal(result, expected_result)
 
-    def test_get_linestring_between(self):
+    def test_get_linestring_between_interpolate(self):
         df = pd.DataFrame([
             {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
             {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
@@ -183,9 +183,22 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        result = traj.get_linestring_between(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 25, 0, 50)).wkt
+        result = traj.get_linestring_between(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 25, 0), method='interpolated').wkt
+        expected_result = "LINESTRING (5 0, 10 0, 20 0, 25 0)"
+        self.assertEqual(expected_result, result)
+
+    def test_get_linestring_between_within(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(20, 0), 't': datetime(2018, 1, 1, 12, 20, 0)},
+            {'geometry': Point(30, 0), 't': datetime(2018, 1, 1, 12, 30, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        result = traj.get_linestring_between(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 25, 0, 50), method='within').wkt
         expected_result = "LINESTRING (10 0, 20 0)"
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
         
     def test_add_direction(self):
         df = pd.DataFrame([
@@ -469,6 +482,19 @@ class TestTrajectory(unittest.TestCase):
         result = traj.df
         assert_frame_equal(expected_result, result)
 
+    def test_linestringbetween_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, -10), 't': datetime(2018, 1, 1, 11, 59, 0)},
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df
+        linestring = traj.get_linestring_between(datetime(2018, 1, 1, 12, 0, 0), datetime(2018, 1, 1, 12, 1 , 0))
+        result = traj.df
+        assert_frame_equal(expected_result, result)
 
 
     """ 
