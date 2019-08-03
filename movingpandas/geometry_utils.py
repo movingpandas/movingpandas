@@ -1,22 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-***************************************************************************
-    geometryUtils.py
-    ---------------------
-    Date                 : December 2018
-    Copyright            : (C) 2018 by Anita Graser
-    Email                : anitagraser@gmx.at
-***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************
-"""
-
 from math import sin, cos, atan2, radians, degrees, sqrt
 from shapely.geometry import Point
 
