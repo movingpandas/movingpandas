@@ -437,7 +437,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        expected_result = traj.df
+        expected_result = traj.df.copy()
         traj_linestring = traj.to_linestring()
         result = traj.df
         assert_frame_equal(expected_result, result)
@@ -450,7 +450,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        expected_result = traj.df
+        expected_result = traj.df.copy()
         traj_length = traj.get_length()
         result = traj.df
         assert_frame_equal(expected_result, result)
@@ -463,7 +463,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        expected_result = traj.df
+        expected_result = traj.df.copy()
         traj_str = str(traj)
         result = traj.df
         assert_frame_equal(expected_result, result)
@@ -476,7 +476,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        expected_result = traj.df
+        expected_result = traj.df.copy()
         traj.plot(column='speed')
         result = traj.df
         assert_frame_equal(expected_result, result)
@@ -490,7 +490,7 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        expected_result = traj.df
+        expected_result = traj.df.copy()
         split = traj.split_by_observation_gap(timedelta(minutes=5))
         result = traj.df
         assert_frame_equal(expected_result, result)
@@ -504,11 +504,24 @@ class TestTrajectory(unittest.TestCase):
             ]).set_index('t')
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
-        expected_result = traj.df
-        linestring = traj.get_linestring_between(datetime(2018, 1, 1, 12, 0, 0), datetime(2018, 1, 1, 12, 1 , 0))
+        expected_result = traj.df.copy()
+        linestring = traj.get_linestring_between(datetime(2018, 1, 1, 12, 0, 0), datetime(2018, 1, 1, 12, 1, 0))
         result = traj.df
         assert_frame_equal(expected_result, result)
 
+    def test_getpositionat_does_not_alter_df(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, -10), 't': datetime(2018, 1, 1, 11, 59, 0)},
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df.copy()
+        pos = traj.get_position_at(datetime(2018, 1, 1, 12, 1, 0), method="nearest")
+        result = traj.df
+        assert_frame_equal(expected_result, result)
 
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134

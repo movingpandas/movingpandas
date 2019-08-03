@@ -94,9 +94,10 @@ def create_entry_and_exit_points(traj, range):
     rown = traj.df.iloc[traj.df.index.get_loc(range.t_n, method='pad')].copy()
     rown['geometry'] = range.pt_n
     # Insert rows
-    traj.df.loc[range.t_0] = row0
-    traj.df.loc[range.t_n] = rown
-    return traj.df.sort_index()
+    temp_df = traj.df.copy()
+    temp_df.loc[range.t_0] = row0
+    temp_df.loc[range.t_n] = rown
+    return temp_df.sort_index()
 
 def _add_dummy(traj):
     traj.df['dummy_that_stops_things_from_breaking'] = 1
@@ -111,20 +112,19 @@ def _drop_dummy(traj):
 
 def _get_segments_for_ranges(traj, ranges):
     counter = 0
-    intersections = [] # list of trajectories
+    segments = []  # list of trajectories
     for the_range in ranges:
+        temp_traj = traj.copy()
         if type(the_range) == SpatioTemporalRange:
-            traj.df = create_entry_and_exit_points(traj, the_range)
+            temp_traj.df = create_entry_and_exit_points(traj, the_range)
         try:
-            intersection = traj.get_segment_between(the_range.t_0, the_range.t_n)
+            segment = temp_traj.get_segment_between(the_range.t_0, the_range.t_n)
         except ValueError as e:
-            print(e)
             continue
-        intersection.id = "{}_{}".format(traj.id, counter)
-        intersection = _drop_dummy(intersection)
-        intersections.append(intersection)
+        segment.id = "{}_{}".format(traj.id, counter)
+        segments.append(_drop_dummy(segment))
         counter += 1
-    return intersections
+    return segments
 
 def _determine_time_ranges_pointbased(traj, polygon):
     df = traj.df
@@ -169,6 +169,8 @@ def _determine_time_ranges_linebased(traj, polygon):
         if x is None:
             continue
         ranges.append(x)
+
+    traj = _drop_dummy(traj)
 
     return _dissolve_ranges(ranges)
 

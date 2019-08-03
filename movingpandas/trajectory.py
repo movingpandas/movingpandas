@@ -42,6 +42,9 @@ class Trajectory:
             self.df.geometry.count(), self.id, self.get_start_time(),
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
+    def copy(self):
+        return Trajectory(self.id, self.df.copy(), self.parent)
+
     def plot(self, with_basemap=False, *args, **kwargs):
         temp_df = self.df.copy()
         if 'column' in kwargs:

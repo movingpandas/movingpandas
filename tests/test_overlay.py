@@ -16,7 +16,8 @@ python3 -m unittest discover . -v
 import os 
 import sys 
 import unittest
-import pandas as pd 
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, Polygon
 from datetime import datetime, timedelta
@@ -179,6 +180,22 @@ class TestOverlay(unittest.TestCase):
             result.append((x.get_start_time(), x.get_end_time()))
         expected_result = [(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 7, 0))]
         self.assertEqual(expected_result, result)
+
+    def test_clip_does_not_alter_df(self):
+        polygon = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
+            {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
+            ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        expected_result = traj.df.copy()
+        intersections = traj.clip(polygon)
+        result = traj.df
+        assert_frame_equal(expected_result, result)
          
     def test_clip_with_one_intersection_reversed(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
