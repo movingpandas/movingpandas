@@ -404,6 +404,19 @@ class TestTrajectory(unittest.TestCase):
         result = traj.generalize(mode='douglas-peucker', tolerance=1)
         self.assertEqual('LINESTRING (0 0, 3 0, 3 3)', result.to_linestring().wkt)
 
+    def test_generalize_min_time_delta(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(1, 0.1), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(2, 0.2), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(3, 0), 't': datetime(2018, 1, 1, 12, 30, 0)},
+            {'geometry': Point(3, 3), 't': datetime(2018, 1, 1, 13, 0, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
+        traj = Trajectory(1, geo_df)
+        result = traj.generalize(mode='min-time-delta', tolerance=timedelta(minutes=10))
+        self.assertEqual('LINESTRING (0 0, 2 0.2, 3 0, 3 3)', result.to_linestring().wkt)
+
     def test_plot(self):
         from matplotlib.axes import Axes
         df = pd.DataFrame([

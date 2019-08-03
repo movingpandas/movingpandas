@@ -43,7 +43,7 @@ class Trajectory:
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
     def plot(self, with_basemap=False, *args, **kwargs):
-        temp_df = self.df
+        temp_df = self.df.copy()
         if 'column' in kwargs:
             if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
                 temp_df = self.get_df_with_speed()
@@ -320,7 +320,7 @@ class Trajectory:
 
     def split_by_observation_gap(self, gap):
         result = []
-        temp_df = self.df
+        temp_df = self.df.copy()
         temp_df['t'] = temp_df.index
         temp_df['gap'] = temp_df['t'].diff() > gap
         temp_df['gap'] = temp_df['gap'].apply(lambda x: 1 if x else 0).cumsum()
@@ -342,11 +342,34 @@ class Trajectory:
     def generalize(self, mode, tolerance):
         """Return new generalized Trajectory for Trajectory object."""
         if mode == 'douglas-peucker':
-            return self.douglas_peucker(tolerance)
+            return self.generalize_douglas_peucker(tolerance)
+        elif mode == 'min-time-delta':
+            return self.generalize_min_time_delta(tolerance)
         else:
-            raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker]'.format(mode))
+            raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker, min-time-delta]'.format(mode))
 
-    def douglas_peucker(self, tolerance):
+    def generalize_min_time_delta(self, tolerance):
+        """Return new generalized Trajectory where consecutive rows are at least a certain timedelta apart."""
+        temp_df = self.df.copy()
+        temp_df['t'] = temp_df.index
+        prev_t = temp_df.head(1)['t'][0]
+        keep_rows = [0]
+        i = 0
+
+        for index, row in temp_df.iterrows():
+            t = row['t']
+            tdiff = t - prev_t
+            if tdiff >= tolerance:
+                keep_rows.append(i)
+                prev_t = t
+            i += 1
+
+        keep_rows.append(len(self.df)-1)
+        new_df = self.df.iloc[keep_rows]
+        new_traj = Trajectory(self.id, new_df)
+        return new_traj
+
+    def generalize_douglas_peucker(self, tolerance):
         """Return new generalized Trajectory using Douglas-Peucker Algorithm."""
         prev_pt = None
         pts = []
@@ -372,7 +395,6 @@ class Trajectory:
         keep_rows.append(i)
         new_df = self.df.iloc[keep_rows]
         new_traj = Trajectory(self.id, new_df)
-        new_traj.get_length()  # to recompute prev_pt and dist_to_prev
         return new_traj
 
     def _to_line_df(self):
