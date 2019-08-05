@@ -42,6 +42,8 @@ class TestOverlay(unittest.TestCase):
         geo_df = GeoDataFrame(df, crs=from_epsg(31256))
         traj = Trajectory(1, geo_df)
         intersections = traj.clip(polygon)
+        # If traj.__eq__ is implemented use that to check for intersections
+        # If not possible extract asserts into their own assert function
         # spatial 
         result = []
         for x in intersections:
@@ -287,6 +289,7 @@ class TestOverlay(unittest.TestCase):
         intersections = traj.intersection(feature)
         result = list(intersections[0].df.columns)
         expected_result = ['geometry', 'intersecting_id', 'intersecting_name']
+        # TODO: also check values
         self.assertCountEqual(expected_result, result)
         
  
