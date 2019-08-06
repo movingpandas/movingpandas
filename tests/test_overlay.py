@@ -22,123 +22,50 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, Polygon
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 from movingpandas.trajectory import Trajectory
+from test_trajectory import Node, make_trajectory, CRS_METRIC, CRS_LATLON
 
  
 class TestOverlay(unittest.TestCase):
+    def setUp(self):
+        nodes = [
+            Node( 0,  0, 1970, 1, 1, 0, 0,  0),
+            Node( 6,  0, 1970, 1, 1, 0, 0,  6),
+            Node(10,  0, 1970, 1, 1, 0, 0, 10),
+            Node(10, 10, 1970, 1, 1, 0, 0, 20),
+            Node( 0, 10, 1970, 1, 1, 0, 0, 30)
+        ]
+        self.default_traj_metric = make_trajectory(nodes[:3], CRS_METRIC)
+        self.default_traj_latlon = make_trajectory(nodes[:3], CRS_LATLON)
+        self.default_traj_metric_5 = make_trajectory(nodes, CRS_METRIC)
          
     def test_clip_two_intersections_with_same_polygon(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 12), (5, 12), (5, -5)])
-        df = pd.DataFrame([
-            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
-            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
-            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 10, 0)},
-            {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
-            {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
-            ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
-        traj = Trajectory(1, geo_df)
+        traj = self.default_traj_metric_5
         intersections = traj.clip(polygon)
-        # If traj.__eq__ is implemented use that to check for intersections
-        # If not possible extract asserts into their own assert function
-        # spatial 
-        result = []
-        for x in intersections:
-            result.append(x.to_linestring().wkt)
-        expected_result = ["LINESTRING (5 0, 6 0, 7 0)", "LINESTRING (7 10, 5 10)"]
-        self.assertEqual(expected_result, result)
-        # temporal 
-        result = []
-        for x in intersections:
-            result.append((x.get_start_time(), x.get_end_time()))
-        expected_result = [(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 7, 0)),
-                           (datetime(2018, 1, 1, 12, 39, 0), datetime(2018, 1, 1, 12, 45, 0))]
-        self.assertEqual(expected_result, result)
-        # ids
-        result = []
-        for x in intersections:
-            result.append(x.id)
-        expected_result = ['1_0', '1_1']
-        self.assertEqual(expected_result, result)
+        self.assertEqual(2, len(intersections))
+        self.assertEqual(make_trajectory([Node(5, 0, second=5), Node(6, 0, second=6), Node(7, 0, second=7)], id='1_0', parent=traj), intersections[0])
+        self.assertEqual(make_trajectory([Node(7, 10, second=23), Node(5, 10, second=25)], id='1_1', parent=traj), intersections[1])
                 
-    def test_clip_with_duplicate_traj_points(self):
+    def test_clip_with_duplicate_traj_points_does_not_drop_any_points(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
-        df = pd.DataFrame([
-            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
-            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
-            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 7, 0)},
-            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 11, 0)},
-            {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
-            {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
-            ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
-        traj = Trajectory(1, geo_df)
+        traj = make_trajectory([Node(), Node(6, 0, second=6), Node(6, 0, second=7), Node(10, 0, second=11), Node(10, 10, second=20), Node(0, 10, second=30)])
         intersections = traj.clip(polygon)
-        # spatial
-        result = []
-        for x in intersections:
-            result.append(x.to_linestring())
-        expected_result = [LineString([(5, 0), (6, 0), (6, 0), (7, 0)])]
-        self.assertEqual(expected_result, result)
-        # temporal
-        result = []
-        for x in intersections:
-            result.append((x.get_start_time(), x.get_end_time()))
-        expected_result = [(datetime(2018, 1, 1, 12, 5, 0), datetime(2018, 1, 1, 12, 8, 0))]
-        self.assertEqual(expected_result, result)
+        self.assertEqual(1, len(intersections))
+        self.assertEqual(make_trajectory([Node(5, 0, second=5), Node(6, 0, second=6), Node(6, 0, second=7), Node(7, 0, second=8)], id='1_0', parent=traj), intersections[0])
 
     def test_clip_pointbased(self):
         polygon = Polygon([(5.1, -5), (7.5, -5), (7.5, 12), (5.1, 12), (5.1, -5)])
-        df = pd.DataFrame([
-            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
-            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
-            {'geometry': Point(6.5, 0), 't': datetime(2018, 1, 1, 12, 6, 30)},
-            {'geometry': Point(7, 0), 't': datetime(2018, 1, 1, 12, 7, 0)},
-            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 11, 0)},
-            {'geometry': Point(10, 10), 't': datetime(2018, 1, 1, 12, 30, 0)},
-            {'geometry': Point(5, 10), 't': datetime(2018, 1, 1, 12, 45, 0)},
-            {'geometry': Point(0, 10), 't': datetime(2018, 1, 1, 13, 0, 0)}
-            ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
-        traj = Trajectory(1, geo_df)
+        traj = make_trajectory([Node(), Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30), Node(7, 0, minute=7), Node(10, 0, minute=10)])
         intersections = traj.clip(polygon, pointbased=True)
-        # spatial
-        result = []
-        for x in intersections:
-            result.append(x.to_linestring())
-        expected_result = [LineString([(6, 0), (6.5, 0), (7, 0)])]
-        self.assertEqual(expected_result, result)
-        # temporal
-        result = []
-        for x in intersections:
-            result.append((x.get_start_time(), x.get_end_time()))
-        expected_result = [(datetime(2018, 1, 1, 12, 6, 0), datetime(2018, 1, 1, 12, 7, 0))]
-        self.assertEqual(expected_result, result)
-        # ids
-        result = []
-        for x in intersections:
-            result.append(x.id)
-        expected_result = ['1_0']
-        self.assertEqual(expected_result, result)
+        self.assertEqual(1, len(intersections))
+        self.assertEqual(make_trajectory([Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30), Node(7, 0, minute=7)], id='1_0', parent=traj), intersections[0])
 
-    def test_clip_pointbased_singlepoint(self):
+    def test_clip_pointbased_singlepoint_returns_empty(self):
         polygon = Polygon([(5.1, -5), (6.4, -5), (6.4, 12), (5.1, 12), (5.1, -5)])
-        df = pd.DataFrame([
-            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
-            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
-            {'geometry': Point(6.5, 0), 't': datetime(2018, 1, 1, 12, 6, 30)},
-            {'geometry': Point(7, 0), 't': datetime(2018, 1, 1, 12, 7, 0)},
-            {'geometry': Point(10, 0), 't': datetime(2018, 1, 1, 12, 11, 0)}
-            ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs=from_epsg(31256))
-        traj = Trajectory(1, geo_df)
+        traj = make_trajectory([Node(), Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30), Node(7, 0, minute=7), Node(10, 0, minute=10)])
         intersections = traj.clip(polygon, pointbased=True)
-        result = intersections
-        expected_result = []
-        self.assertEqual(expected_result, result)
+        self.assertEqual([], intersections)
 
     def test_clip_interpolated_singlepoint(self):
         polygon = Polygon([(5.1, -5), (6.4, -5), (6.4, 12), (5.1, 12), (5.1, -5)])

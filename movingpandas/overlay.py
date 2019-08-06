@@ -124,6 +124,7 @@ def _get_segments_for_ranges(traj, ranges):
         except ValueError as e:
             continue
         segment.id = "{}_{}".format(traj.id, counter)
+        segment.parent = traj
         segments.append(segment)
         counter += 1
     return segments

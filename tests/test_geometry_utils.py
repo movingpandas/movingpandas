@@ -17,9 +17,6 @@ import os
 import sys 
 import unittest
 from shapely.geometry import Point
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, angular_difference
 
  

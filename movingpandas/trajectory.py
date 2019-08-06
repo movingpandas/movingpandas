@@ -44,7 +44,7 @@ class Trajectory:
 
     def __eq__(self, other):
         # TODO: make bullet proof
-        return str(self) == str(other)
+        return str(self) == str(other) and self.crs == other.crs and self.parent == other.parent
 
     def copy(self):
         return Trajectory(self.id, self.df.copy(), self.parent)
