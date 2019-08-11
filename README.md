@@ -29,7 +29,7 @@ Use the following steps to run the notebooks locally on your machine:
 
 4. Wait until the environment is ready, then change to the Home tab and install Jupyter notebooks into the movingpandas environment
 5. Launch Jupyter notebooks and navigate to the cloned directory to execute them
-6. Now you can adjust the code to use your own data
+6. Now you can run the notebooks, experiment with the code and adjust them to your own data
 
 ## Publications
 
