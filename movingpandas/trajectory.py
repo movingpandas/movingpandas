@@ -49,7 +49,7 @@ class Trajectory:
     def copy(self):
         return Trajectory(self.id, self.df.copy(), self.parent)
 
-    def plot(self, with_basemap=False, *args, **kwargs):
+    def plot(self, with_basemap=False, for_basemap=False, *args, **kwargs):
         temp_df = self.df.copy()
         if 'column' in kwargs:
             if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
@@ -70,7 +70,10 @@ class Trajectory:
                 ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax)
         else:
-            return temp_df.set_geometry('line')[1:].plot(*args, **kwargs)
+            if for_basemap:
+                return temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+            else:
+                return temp_df.set_geometry('line')[1:].plot(*args, **kwargs)
 
     def set_crs(self, crs):
         """Set coordinate reference system of Trajectory using string of SRID."""
@@ -265,6 +268,8 @@ class Trajectory:
         pt1 = row['geometry']
         if type(pt0) != Point:
             return None
+        if type(pt1) != Point:
+            raise ValueError('Invalid trajectory! Got {} instead of point!'.format(pt1))
         if pt0 == pt1:
             # to avoid intersection issues with zero length lines
             pt1 = translate(pt1, 0.00000001, 0.00000001)
@@ -296,7 +301,8 @@ class Trajectory:
         when using WGS 84 when it is calculated in metres. This is then divided
         by total seconds.
         """
-        temp_df = self.df.assign(prev_pt=self.df.geometry.shift())
+        temp_df = self.df.copy()
+        temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         if 't' in temp_df.columns:
             times = temp_df.t
         else:
@@ -308,6 +314,7 @@ class Trajectory:
             raise e
         # set the speed in the first row to the speed of the second row
         temp_df.at[self.get_start_time(), SPEED_COL_NAME] = temp_df.iloc[1][SPEED_COL_NAME]
+        temp_df = temp_df.drop(columns=['prev_pt', 'delta_t'])
         return temp_df
 
     def clip(self, polygon, pointbased=False):
@@ -327,7 +334,8 @@ class Trajectory:
         else:
             raise ValueError('Invalid split mode {}. Must be one of [day, year]'.format(mode))
         for key, values in grouped:
-            result.append(Trajectory('{}_{}'.format(self.id, key), values))
+            if len(values) > 1:
+                result.append(Trajectory('{}_{}'.format(self.id, key), values))
         return result
 
     def split_by_observation_gap(self, gap):
@@ -338,11 +346,9 @@ class Trajectory:
         temp_df['gap'] = temp_df['gap'].apply(lambda x: 1 if x else 0).cumsum()
         dfs = [group[1] for group in temp_df.groupby(temp_df['gap'])]
         for i, df in enumerate(dfs):
-            try:
-                df = df.drop(columns=['t', 'gap'])
+            df = df.drop(columns=['t', 'gap'])
+            if len(df) > 1:
                 result.append(Trajectory('{}_{}'.format(self.id, i), df))
-            except ValueError:
-                pass
         return result
 
     def apply_offset_seconds(self, column, offset):

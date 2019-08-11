@@ -124,10 +124,30 @@ class TestTrajectory:
         traj.add_speed()
         assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
 
+    def test_add_speed_can_overwrite(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed()
+        traj.add_speed(overwrite=True)
+        assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+
+    def test_add_speed_only_adds_speed_column_and_doesnt_otherwise_alter_df(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.add_speed()
+        traj.df = traj.df.drop(columns=['speed'])
+        assert_frame_equal(self.default_traj_metric_5.df, traj.df)
+
     def test_add_speed_latlon(self):
         traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
         traj.add_speed()
         assert traj.df[SPEED_COL_NAME].tolist()[0] / 1000 == pytest.approx(676.3, 1)
+
+    def test_add_speed_latlon_numerical_issues(self):
+        from shapely.geometry import Polygon
+        traj = make_traj([Node(33.3545, 28.1335, 2010, 10, 4, 8), Node(35.817, 23.78383, 2010, 10, 4, 20)], CRS_LATLON)
+        area_of_interest = Polygon([(30, 25), (50, 25), (50, 15), (30, 15), (30, 25)])
+        traj = traj.clip(area_of_interest)[0]
+        traj.add_speed()
+        traj.add_speed(overwrite=True)
 
     def test_get_bbox(self):
         result = make_traj([Node(0, 1), Node(6, 5, day=2)], CRS_LATLON).get_bbox()
@@ -150,6 +170,11 @@ class TestTrajectory:
         assert len(split) == 2
         assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01')
         assert split[1] == make_traj([Node(day=2), Node(day=2, second=1)], id='1_1970-01-02')
+
+    def test_split_by_date_ignores_single_node_sgements(self):
+        split = make_traj([Node(), Node(second=1), Node(day=2)]).split_by_date()
+        assert len(split) == 1
+        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01')
 
     def test_split_by_daybreak_same_day_of_year(self):
         split = make_traj([Node(), Node(second=1), Node(year=2000), Node(year=2000, second=1)]).split_by_date()

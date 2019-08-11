@@ -10,3 +10,4 @@ dependencies:
   - pandas
   - geopandas
   - contextily
+  - descartes

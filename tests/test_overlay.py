@@ -20,7 +20,15 @@ class TestOverlay:
         self.default_traj_metric = make_traj(nodes[:3], CRS_METRIC)
         self.default_traj_latlon = make_traj(nodes[:3], CRS_LATLON)
         self.default_traj_metric_5 = make_traj(nodes, CRS_METRIC)
-         
+
+    def test_clip_one_intersections(self):
+        polygon = Polygon([(5, -5), (7, -5), (7, 8), (5, 8), (5, -5)])
+        traj = self.default_traj_metric_5
+        intersections = traj.clip(polygon)
+        assert len(intersections) == 1
+        assert intersections[0] == \
+               make_traj([Node(5, 0, second=5), Node(6, 0, second=6), Node(7, 0, second=7)], id='1_0', parent=traj)
+
     def test_clip_two_intersections_with_same_polygon(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 12), (5, 12), (5, -5)])
         traj = self.default_traj_metric_5
@@ -99,7 +107,7 @@ class TestOverlay:
         polygon = Polygon([(105, -5), (107, -5), (107, 12), (105, 12), (105, -5)])
         assert self.default_traj_metric.clip(polygon) == []
         
-    def test_intersection_with_one_intersection(self):
+    def test_intersection_with_feature(self):
         feature = {
             'geometry': {'type': 'Polygon', 'coordinates': [[(5, -5), (7, -5), (8, 5), (5, 5), (5, -5)]]},
             'properties': {'id': 1, 'name': 'foo'}}

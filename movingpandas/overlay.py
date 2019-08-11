@@ -6,7 +6,7 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 #sys.path.append(os.path.dirname(__file__))
 
@@ -37,6 +37,9 @@ def _get_spatiotemporal_ref(row):
         length = row['line'].length
         t0 = t + (t_delta * row['line'].project(pt0)/length)
         tn = t + (t_delta * row['line'].project(ptn)/length)
+        # to avoid numerical issues with microseconds beyond six digits, we reconstruct the timestamps
+        t0 = datetime(t0.year, t0.month, t0.day, t0.hour, t0.minute, t0.second, t0.microsecond)
+        tn = datetime(tn.year, tn.month, tn.day, tn.hour, tn.minute, tn.second, tn.microsecond)
         # to avoid intersection issues with zero length lines
         if ptn == translate(pt0, 0.00000001, 0.00000001):
             t0 = row['prev_t']
@@ -52,7 +55,7 @@ def _get_spatiotemporal_ref(row):
 
 
 def _dissolve_ranges(ranges):
-    """SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissovled (aka. merged)."""
+    """SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissolved (aka. merged)."""
     if len(ranges) == 0:
         raise ValueError("Nothing to dissolve (received empty ranges)!")
     new = []
@@ -61,6 +64,8 @@ def _dissolve_ranges(ranges):
     pt0 = None
     ptn = None
     for r in ranges:
+        if r is None:
+            raise ValueError('Received range that is None!')
         if start is None:
             start = r.t_0
             end = r.t_n
