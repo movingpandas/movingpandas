@@ -317,12 +317,17 @@ class Trajectory:
     def intersection(self, feature):
         return overlay.intersection(self, feature)
         
-    def split_by_date(self):
+    def split_by_date(self, mode='day'):
         """Return list of Trajectory objects split by date."""
         result = []
-        dfs = [group[1] for group in self.df.groupby(self.df.index.date)]
-        for i, df in enumerate(dfs):
-            result.append(Trajectory('{}_{}'.format(self.id, i), df))
+        if mode == 'day':
+            grouped = self.df.groupby(self.df.index.date)
+        elif mode == 'year':
+            grouped = self.df.groupby(self.df.index.year)
+        else:
+            raise ValueError('Invalid split mode {}. Must be one of [day, year]'.format(mode))
+        for key, values in grouped:
+            result.append(Trajectory('{}_{}'.format(self.id, key), values))
         return result
 
     def split_by_observation_gap(self, gap):
