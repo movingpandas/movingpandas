@@ -317,6 +317,9 @@ class Trajectory:
         temp_df = temp_df.drop(columns=['prev_pt', 'delta_t'])
         return temp_df
 
+    def intersects(self, polygon):
+        return overlay.intersects(self, polygon)
+
     def clip(self, polygon, pointbased=False):
         """Return clipped Trajectory with polygon as Trajectory object."""
         return overlay.clip(self, polygon, pointbased)

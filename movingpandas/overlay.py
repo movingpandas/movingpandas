@@ -65,7 +65,7 @@ def _dissolve_ranges(ranges):
     ptn = None
     for r in ranges:
         if r is None:
-            raise ValueError('Received range that is None!')
+            continue  # raise ValueError('Received range that is None!')
         if start is None:
             start = r.t_0
             end = r.t_n
