@@ -160,7 +160,7 @@ class Trajectory:
         return interpolated_position
 
     def get_position_at(self, t, method='interpolated'):
-        """Return shapely Point at given datetime object and split method."""
+        """Return shapely Point at given datetime using the provided method."""
         if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
             raise ValueError('Invalid split method {}. Must be one of [nearest, interpolated, ffill, bfill]'.
                              format(method))
