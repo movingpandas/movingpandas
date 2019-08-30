@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-#import os
-#import sys
 import pandas as pd
-from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
 from datetime import datetime, timedelta
-
-#sys.path.append(os.path.dirname(__file__))
 
 
 class SpatioTemporalRange:
@@ -89,7 +84,11 @@ def _dissolve_ranges(ranges):
 
 def is_equal(t1, t2):
     """Similar timestamps are considered equal to avoid numerical issues."""
-    return abs(t1 - t2) < timedelta(milliseconds=10)
+    if type(t2) == pd.Timestamp:
+        td = abs(t1 - t2.tz_localize(t1.tzinfo).to_pydatetime())
+    else:
+        td = abs(t1 - t2)
+    return td < timedelta(milliseconds=10)
 
 
 def intersects(traj, polygon):
