@@ -46,11 +46,6 @@ import warnings
 warnings.simplefilter("ignore")
 ```
 
-```{r}
-knitr::opts_chunk$set(eval = FALSE)
-```
-
-
 
 ## Creating a trajectory from scratch
 
@@ -106,6 +101,10 @@ toy_traj.plot(column="speed", linewidth=5, capstyle='round', legend=True)
 ```
 
 In contrast to the earlier example where we visualized the whole trajectory as one linestring, the trajectory plot() function draws each line segment individually and thus each can have a different color.
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
 
 ## Analyzing trajectories
 
