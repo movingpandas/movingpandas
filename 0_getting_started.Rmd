@@ -1,3 +1,7 @@
+---
+output: github_document
+---
+
 # Tutorial 0: Getting started with MovingPandas
 
 MovingPandas provides a trajectory datatype based on GeoPandas.
@@ -26,11 +30,8 @@ The line-based approach has many advantages for trajectory analysis and visualiz
 
 ## Jupyter notebook setup
 
-```{r}
-%matplotlib inline
-```
 
-```{r}
+```{r, engine='python'}
 import urllib
 import os
 import pandas as pd
@@ -45,13 +46,14 @@ import warnings
 warnings.simplefilter("ignore")
 ```
 
+
 ## Creating a trajectory from scratch
 
 Trajectory objects consist of a trajectory ID and a GeoPandas GeoDataFrame with a DatetimeIndex. The data frame therefore represents the trajectory data as a Pandas time series with associated point locations (and optional further attributes).
 
 Let's create a small toy trajectory to see how this works:
 
-```{r}
+```{r, engine='python'}
 df = pd.DataFrame([
   {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
   {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
@@ -65,13 +67,13 @@ toy_traj.df
 
 We can access **key information** about our trajectory by looking at the print output:
 
-```{r}
+```{r, engine='python'}
 print(toy_traj)
 ```
 
 We can also access the trajectories GeoDataFrame:
 
-```{r}
+```{r, engine='python'}
 toy_traj.df
 ```
 
@@ -81,20 +83,20 @@ To **visualize the trajectory**, we can turn it into a linestring.
 
 (The notebook environment automatically plots Shapely geometry objects like the LineString returned by to_linestring().)
 
-```{r}
+```{r, engine='python'}
 toy_traj.to_linestring()
 ```
 
 We can **compute the speed** of movement along the trajectory (between consecutive points). The values are in meters per second:
 
-```{r}
+```{r, engine='python'}
 toy_traj.add_speed(overwrite=True)
 toy_traj.df
 ```
 
 We can also visualize the speed values:
 
-```{r}
+```{r, engine='python'}
 toy_traj.plot(column="speed", linewidth=5, capstyle='round', legend=True)
 ```
 
@@ -106,7 +108,7 @@ MovingPandas provides many functions for trajectory analysis.
 
 To see all available functions of the MovingPandas.Trajectory class use:
 
-```{r}
+```{r, engine='python'}
 dir(mp.Trajectory)
 ```
 
@@ -116,19 +118,19 @@ Functions that start with an underscore (e.g. ```__str__```) should not be calle
 
 For example, let's have a look at the get_position_at() function:
 
-```{r}
+```{r, engine='python'}
 help(mp.Trajectory.get_position_at)
 ```
 
 When we call this method, the resulting point is directly rendered:
 
-```{r}
+```{r, engine='python'}
 toy_traj.get_position_at(datetime(2018,1,1,12,6,0), method="nearest")    
 ```
 
 To see its coordinates, we can look at the print output:
 
-```{r}
+```{r, engine='python'}
 print(toy_traj.get_position_at(datetime(2018,1,1,12,6,0), method="nearest"))
 ```
 
@@ -136,11 +138,11 @@ The method parameter describes what the function should do if there is no entry 
 
 For example, there is no entry at 2018-01-01 12:07:00
 
-```{r}
+```{r, engine='python'}
 toy_traj.df
 ```
 
-```{r}
+```{r, engine='python'}
 print(toy_traj.get_position_at(datetime(2018,1,1,12,7,0), method="nearest"))
 print(toy_traj.get_position_at(datetime(2018,1,1,12,7,0), method="interpolated"))
 print(toy_traj.get_position_at(datetime(2018,1,1,12,7,0), method="ffill")) # from the previous row
@@ -151,25 +153,25 @@ print(toy_traj.get_position_at(datetime(2018,1,1,12,7,0), method="bfill")) # fro
 
 First, let's extract the trajectory segment for a certain time period:
 
-```{r}
+```{r, engine='python'}
 segment = toy_traj.get_segment_between(datetime(2018,1,1,12,6,0),datetime(2018,1,1,12,12,0))
 print(segment)
 ```
 
 Now, let's extract the trajectory segment that intersects with a given polygon:
 
-```{r}
+```{r, engine='python'}
 xmin, xmax, ymin, ymax = 2, 8, -10, 5
 polygon = Polygon([(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin)])
 polygon
 ```
 
-```{r}
+```{r, engine='python'}
 intersections = toy_traj.clip(polygon)
 print(intersections[0])
 ```
 
-```{r}
+```{r, engine='python'}
 intersections[0].plot(linewidth=5, capstyle='round')
 ```
 
@@ -177,7 +179,7 @@ intersections[0].plot(linewidth=5, capstyle='round')
 
 The MovingPandas repository contains a demo GeoPackage file that can be loaded as follows:
 
-```{r}
+```{r, engine='python'}
 url = 'https://github.com/anitagraser/movingpandas/raw/master/demo/demodata_geolife.gpkg'
 filename = url.split('/')[-1] 
 
@@ -187,13 +189,13 @@ with open(filename, 'wb' ) as f:
     f.write( content )
 ```
 
-```{r}
+```{r, engine='python'}
 assert(os.path.exists(filename))
 ```
 
 Now, we can use GeoPandas' read_file() function to read the GeoPackage and construct the Trajectories:
 
-```{r}
+```{r, engine='python'}
 t_start = datetime.now()
 df = read_file(filename)
 df['t'] = pd.to_datetime(df['t'])
@@ -211,17 +213,17 @@ print("Finished creating {} trajectories in {}".format(len(trajectories),datetim
 
 Let's look at one of those trajectories:
 
-```{r}
+```{r, engine='python'}
 trajectories[1].plot(column='speed', linewidth=5, capstyle='round', figsize=(9,3), legend=True)
 ```
 
-```{r}
+```{r, engine='python'}
 trajectories[1].plot(with_basemap=True, linewidth=5.0, capstyle='round', figsize=(9,9))
 ```
 
 ### Finding intersections with a Shapely polygon
 
-```{r}
+```{r, engine='python'}
 xmin, xmax, ymin, ymax = 116.3685035,116.3702945,39.904675,39.907728
 polygon = Polygon([(xmin,ymin), (xmin,ymax), (xmax,ymax), (xmax,ymin), (xmin,ymin)])
 
@@ -232,7 +234,7 @@ for traj in trajectories:
 print("Found {} intersections".format(len(intersections)))
 ```
 
-```{r}
+```{r, engine='python'}
 intersections[2].plot(linewidth=5.0, capstyle='round')
 ```
 
@@ -242,19 +244,19 @@ Gaps are quite common in trajectories. For example, GPS tracks may contain gaps 
 
 Depending on the use case, we therefore might want to split trajectories at observation gaps that exceed a certain minimum duration:
 
-```{r}
+```{r, engine='python'}
 my_traj = trajectories[1]
 print(my_traj)
 my_traj.plot(linewidth=5.0, capstyle='round')
 ```
 
-```{r}
+```{r, engine='python'}
 split = my_traj.split_by_observation_gap(timedelta(minutes=5))
 for traj in split:
     print(traj)
 ```
 
-```{r}
+```{r, engine='python'}
 fig, axes = plt.subplots(nrows=1, ncols=len(split), figsize=(19,4))
 for i, traj in enumerate(split):
     traj.plot(ax=axes[i], linewidth=5.0, capstyle='round')
@@ -264,39 +266,39 @@ for i, traj in enumerate(split):
 
 To reduce the size of trajectory objects, we can generalize them, for example, using the Douglas-Peucker algorithm:
 
-```{r}
+```{r, engine='python'}
 original_traj = trajectories[1]
 print(original_traj)
 ```
 
-```{r}
+```{r, engine='python'}
 original_traj.plot(column='speed', linewidth=5, capstyle='round', figsize=(9,3), legend=True)
 ```
 
 Try different tolerance settings and observe the results in line geometry and therefore also length:
 
-```{r}
+```{r, engine='python'}
 generalized_traj = original_traj.generalize(mode='douglas-peucker', tolerance=0.001)
 generalized_traj.plot(column='speed', linewidth=5, capstyle='round', figsize=(9,3), legend=True)
 ```
 
-```{r}
+```{r, engine='python'}
 print('Original length: %s'%(original_traj.get_length()))
 print('Generalized length: %s'%(generalized_traj.get_length()))
 ```
 
 An alternative generalization method is to down-sample the trajectory to ensure a certain time delta between records:
 
-```{r}
+```{r, engine='python'}
 time_generalized = original_traj.generalize(mode='min-time-delta', tolerance=timedelta(minutes=1))
 time_generalized.plot(column='speed', linewidth=5, capstyle='round', figsize=(9,3), legend=True)
 ```
 
-```{r}
+```{r, engine='python'}
 time_generalized.df.head(10)
 ```
 
-```{r}
+```{r, engine='python'}
 original_traj.df.head(10)
 ```
 
@@ -305,5 +307,5 @@ original_traj.df.head(10)
 * [Tutorial 1: Ship data analysis](1_ship_data_analysis.ipynb)
 * [Tutorial 2: Bird migration analysis](2_bird_migration_analysis.ipynb)
 
-```{r}
+```{r, engine='python'}
 ```
