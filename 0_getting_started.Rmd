@@ -46,6 +46,11 @@ import warnings
 warnings.simplefilter("ignore")
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
 
 ## Creating a trajectory from scratch
 
