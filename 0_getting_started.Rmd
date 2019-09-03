@@ -102,10 +102,6 @@ toy_traj.plot(column="speed", linewidth=5, capstyle='round', legend=True)
 
 In contrast to the earlier example where we visualized the whole trajectory as one linestring, the trajectory plot() function draws each line segment individually and thus each can have a different color.
 
-```{r}
-knitr::opts_chunk$set(eval = FALSE)
-```
-
 ## Analyzing trajectories
 
 MovingPandas provides many functions for trajectory analysis. 
@@ -221,8 +217,8 @@ Let's look at one of those trajectories:
 trajectories[1].plot(column='speed', linewidth=5, capstyle='round', figsize=(9,3), legend=True)
 ```
 
-```{r, engine='python'}
-trajectories[1].plot(with_basemap=True, linewidth=5.0, capstyle='round', figsize=(9,9))
+```{r}
+# trajectories[1].plot(with_basemap=True, linewidth=5.0, capstyle='round', figsize=(9,9))
 ```
 
 ### Finding intersections with a Shapely polygon
