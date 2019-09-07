@@ -23,7 +23,9 @@ points or a time series of line segments. The line-based approach has
 many advantages for trajectory analysis and visualization. (For more
 detail, see e.g. Westermeier (2018))
 
-![alt text](./tutorials/trajectory_length.PNG "Trajectory length")
+![alt text](./data/trajectory_length.PNG "Trajectory length")
+![alt text](./data/trajectory_context.PNG "Trajectory context")
+![alt text](./data/trajectory_distance.PNG "Trajectory distance")
 
 ### References
 
