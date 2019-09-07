@@ -116,14 +116,5 @@ demo/demodata_geolife_large.gpkg
 /.idea/encodings.xml
 .idea/inspectionProfiles/Project_Default.xml
 .idea/workspace.xml___jb_tmp___
-demo/tmp_grid_entropy.gpkg
-demo/tmp_grid_entropy2.gpkg
-demo/entropy.qgz
-demo/demodata_grid.gpkg
-demo/demodata_geolife.gpkg
-demo/demodata_geolife.gpkg
-demo/demodata_grid_fine.gpkg
-demo/demodata_geolife.gpkg
-demodata_geolife.gpkg
 goth.tif
 .Rproj.user
