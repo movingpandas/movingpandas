@@ -23,7 +23,7 @@ points or a time series of line segments. The line-based approach has
 many advantages for trajectory analysis and visualization. (For more
 detail, see e.g. Westermeier (2018))
 
-![alt text](./demo/trajectory_length.PNG "Trajectory length")
+![alt text](./tutorials/trajectory_length.PNG "Trajectory length")
 
 ### References
 
@@ -41,12 +41,15 @@ detail, see e.g. Westermeier (2018))
 import urllib
 import os
 import pandas as pd
-import movingpandas as mp
 import contextily as ctx
 from geopandas import GeoDataFrame, read_file
 from shapely.geometry import Point, LineString, Polygon
 from datetime import datetime, timedelta
 from matplotlib import pyplot as plt
+
+import sys
+sys.path.append("..")
+import movingpandas as mp
 
 import warnings
 warnings.simplefilter("ignore")
@@ -281,7 +284,7 @@ loaded as
 follows:
 
 ``` python
-url = 'https://github.com/anitagraser/movingpandas/raw/master/demo/demodata_geolife.gpkg'
+url = 'https://github.com/anitagraser/movingpandas/raw/master/tutorials/data/demodata_geolife.gpkg'
 filename = url.split('/')[-1] 
 
 response = urllib.request.urlopen(url)
