@@ -9,5 +9,6 @@ dependencies:
   - seaborn
   - pandas
   - geopandas
+  - rasterio=1.0.13
   - contextily
   - descartes
