@@ -4,4 +4,5 @@
 
 from .trajectory import *
 
-__version__ = '0.99.0.dev'
+name = 'movingpandas'
+__version__ = '0.0.2'
