@@ -19,6 +19,14 @@ geometries and associated attributes are stored in a GeoDataFrame *df*. Furtherm
 
 ## Installation
 
+Movingpandas is available from [PyPI](https://pypi.org/project/movingpandas/) and can be installed using `pip install movingpandas` 
+
+If you're on Windows, however, many GeoPandas / MovingPandas dependencies cannot be pip installed 
+(for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/install.html#installing-with-pip)).
+Therefore, Windows users are encouraged to use the [MovingPandas conda package](https://anaconda.org/anitagraser/movingpandas). 
+
+## Setup for following the Jupyter tutorials 
+
 Use the following steps to run the notebooks locally on your machine:
 
 1. Install Anaconda
@@ -28,7 +36,7 @@ Use the following steps to run the notebooks locally on your machine:
 ![image](https://user-images.githubusercontent.com/590385/62143367-2db14c00-b2f0-11e9-8cb9-fb7993b7f62e.png)
 
 4. Wait until the environment is ready, then change to the Home tab and install Jupyter notebooks into the movingpandas environment
-5. Launch Jupyter notebooks and navigate to the cloned directory to execute them
+5. Launch Jupyter notebooks and navigate to the `movingpandas/tutorials` directory to execute them
 6. Now you can run the notebooks, experiment with the code and adjust them to your own data
 
 ## Publications
