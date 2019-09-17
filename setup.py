@@ -3,7 +3,8 @@ import setuptools
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'seaborn', 'pandas', 'geopandas', 'rasterio<=1.0.13', 'contextily', 'descartes']
+# Packages that MovingPandas uses explicitly:
+INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas', 'geopandas', 'contextily']
 
 setuptools.setup(
     name="movingpandas",
