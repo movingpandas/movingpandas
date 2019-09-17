@@ -5,6 +5,8 @@ with open("README.md", "r") as fh:
 
 # Packages that MovingPandas uses explicitly:
 INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas', 'geopandas', 'contextily']
+# Packages that are needed for the tutorials:
+INSTALL_REQUIRES.append('descartes')
 
 setuptools.setup(
     name="movingpandas",
