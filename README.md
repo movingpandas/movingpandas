@@ -19,7 +19,7 @@ geometries and associated attributes are stored in a GeoDataFrame *df*. Furtherm
 
 ## Installation
 
-Movingpandas is available from [PyPI](https://pypi.org/project/movingpandas/) and can be installed using `pip install movingpandas` 
+Movingpandas for Python >= 3.7 is available from [PyPI](https://pypi.org/project/movingpandas/) and can be installed using `pip install movingpandas` 
 
 If you're on Windows, however, many GeoPandas / MovingPandas dependencies cannot be pip installed 
 (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/install.html#installing-with-pip)).
