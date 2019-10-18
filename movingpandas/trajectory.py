@@ -56,24 +56,25 @@ class Trajectory:
                 temp_df = self.get_df_with_speed()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         temp_df['line'] = temp_df.apply(self._connect_prev_pt_and_geometry, axis=1)
+        temp_df = temp_df.set_geometry('line')[1:]
         if with_basemap:
             if 'url' in kwargs and 'zoom' in kwargs:
                 url = kwargs.pop('url')
                 zoom = kwargs.pop('zoom')
-                ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                ax = temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax, url=url, zoom=zoom)
             elif 'url' in kwargs:
                 url = kwargs.pop('url')
-                ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                ax = temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax, url=url)
             else:
-                ax = temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                ax = temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
                 return ctx.add_basemap(ax)
         else:
             if for_basemap:
-                return temp_df.set_geometry('line')[1:].to_crs(epsg=3857).plot(*args, **kwargs)
+                return temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
             else:
-                return temp_df.set_geometry('line')[1:].plot(*args, **kwargs)
+                return temp_df.plot(*args, **kwargs)
 
     def set_crs(self, crs):
         """Set coordinate reference system of Trajectory using string of SRID."""
