@@ -23,7 +23,7 @@ class TrajectoryManager:
         return len(self.trajectories)
 
     def __str__(self):
-        return 'TAnalyst with {} trajectories'.format(self.__len__())
+        return 'TrajectoryManager with {} trajectories'.format(self.__len__())
 
     def df_to_trajectories(self, df, trajectory_id):
         trajectories = []
@@ -35,6 +35,11 @@ class TrajectoryManager:
                 continue
             trajectories.append(trajectory)
         return trajectories
+
+    def get_trajectory(self, traj_id):
+        for traj in self.trajectories:
+            if traj.id == traj_id:
+                return traj
 
     def get_start_locations(self, columns=None):
         starts = []
@@ -55,7 +60,17 @@ class TrajectoryManager:
         starts = GeoDataFrame(pd.DataFrame(starts), crs=crs)
         return starts
 
-    def split_trajectories_by_observation_gap(self, gap_timedelta):
+    def split_by_date(self, mode):
+        trips = []
+        for traj in self.trajectories:
+            for x in traj.split_by_date(mode):
+                if x.get_length() > self.min_length:
+                    trips.append(x)
+        result = copy(self)
+        result.trajectories = trips
+        return result
+
+    def split_by_observation_gap(self, gap_timedelta):
         trips = []
         for traj in self.trajectories:
             for x in traj.split_by_observation_gap(gap_timedelta):
