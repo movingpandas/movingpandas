@@ -47,4 +47,4 @@ Use the following steps to run the notebooks locally on your machine:
 
 [1] Graser, A. (2019). Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school, Münster, Germany.
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/qeLQfnpJV1g/0.jpg)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Video Title")
+[![WorkshopVideo](https://user-images.githubusercontent.com/590385/67161044-f08cb100-f356-11e9-8799-f972175ec7f4.png)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Anita Graser: Analyzing movement data")
