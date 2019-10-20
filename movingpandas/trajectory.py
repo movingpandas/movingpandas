@@ -12,8 +12,8 @@ from datetime import datetime
 
 sys.path.append(os.path.dirname(__file__))
 
-from movingpandas import overlay
-from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
+from .overlay import clip, intersection, intersects, SpatioTemporalRange, create_entry_and_exit_points
+from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
                                         measure_distance_euclidean
 
 
@@ -179,8 +179,8 @@ class Trajectory:
         if method not in ['interpolated', 'within']:
             raise ValueError('Invalid split method {}. Must be one of [interpolated, within]'.format(method))
         if method == 'interpolated':
-            st_range = overlay.SpatioTemporalRange(self.get_position_at(t1), self.get_position_at(t2), t1, t2)
-            temp_df = overlay.create_entry_and_exit_points(self, st_range)
+            st_range = SpatioTemporalRange(self.get_position_at(t1), self.get_position_at(t2), t1, t2)
+            temp_df = create_entry_and_exit_points(self, st_range)
             temp_df = temp_df[t1:t2]
             return point_gdf_to_linestring(temp_df)
         else:
@@ -319,14 +319,14 @@ class Trajectory:
         return temp_df
 
     def intersects(self, polygon):
-        return overlay.intersects(self, polygon)
+        return intersects(self, polygon)
 
     def clip(self, polygon, pointbased=False):
         """Return clipped Trajectory with polygon as Trajectory object."""
-        return overlay.clip(self, polygon, pointbased)
+        return clip(self, polygon, pointbased)
 
     def intersection(self, feature):
-        return overlay.intersection(self, feature)
+        return intersection(self, feature)
         
     def split_by_date(self, mode='day'):
         """Return list of Trajectory objects split by date."""

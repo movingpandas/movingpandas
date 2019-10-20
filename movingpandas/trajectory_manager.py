@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
+import os, sys
 import numpy as np
 import pandas as pd
-import contextily as ctx
-import matplotlib.pyplot as plt
 from copy import copy
 from geopandas import GeoDataFrame
 
 sys.path.append(os.path.dirname(__file__))
 
-from movingpandas import Trajectory
+from .trajectory import Trajectory
+from .trajectory_plotter import TrajectoryPlotter
 
 
 class TrajectoryManager:
-    def __init__(self, df, trajectory_id, min_length=100):
+    def __init__(self, df, trajectory_id, min_length=0):
         self.min_length = min_length
         self.trajectories = self.df_to_trajectories(df, trajectory_id)
 
@@ -108,6 +106,8 @@ class TrajectoryManager:
         return max([traj.df[column].max() for traj in self.trajectories])
 
     def plot_with_basemap(self, property=None, property_to_color=None, *args, **kwargs):
+        TrajectoryPlotter.plot_with_basemap(self, property, property_to_color, *args, **kwargs)
+        """
         figsize = kwargs.pop('figsize', None)
         zoom = kwargs.pop('zoom', None)
         column = kwargs.get('column', None)
@@ -137,4 +137,4 @@ class TrajectoryManager:
         else:
             ctx.add_basemap(ax)
         return ax
-
+        """
