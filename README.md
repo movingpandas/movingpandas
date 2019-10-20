@@ -6,6 +6,8 @@ You can try MovingPandas in a MyBinder notebook - no installation required:
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/master)
 
+![trajectory_manager_v1](https://user-images.githubusercontent.com/590385/67160879-6e4fbd00-f355-11e9-9bdb-9636b3e62521.PNG)
+
 ## Introduction 
 
 Common Simple Features-based data models where trajectories consist of geometries with timestamps can be readily implemented in GIS environments, but they suffer from a lack of support for the temporal dimension, such as functions for duration and speed.
