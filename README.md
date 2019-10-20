@@ -44,3 +44,7 @@ Use the following steps to run the notebooks locally on your machine:
 ## Publications
 
 [0] Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54. URL: https://www.austriaca.at/rootcollection?arp=0x003aba2b
+
+[1] Graser, A. (2019). Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school, Münster, Germany.
+
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/qeLQfnpJV1g/0.jpg)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Video Title")
