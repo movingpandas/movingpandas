@@ -44,7 +44,7 @@ class TrajectoryManager:
         for traj in self.trajectories:
             crs = traj.crs
             traj_start = {'geometry': traj.get_start_location(), 'id': traj.id, 't': traj.get_start_time()}
-            if columns:
+            if columns and columns != [None]:
                 for column in columns:
                     try:
                         max_value = traj.df[column].max()
@@ -105,36 +105,6 @@ class TrajectoryManager:
     def get_max(self, column):
         return max([traj.df[column].max() for traj in self.trajectories])
 
-    def plot_with_basemap(self, property=None, property_to_color=None, *args, **kwargs):
-        TrajectoryPlotter.plot_with_basemap(self, property, property_to_color, *args, **kwargs)
-        """
-        figsize = kwargs.pop('figsize', None)
-        zoom = kwargs.pop('zoom', None)
-        column = kwargs.get('column', None)
-        ax = kwargs.pop('ax', None)
-        min_value, max_value = None, None
-        if column:
-            min_value = self.get_min(column)
-            max_value = self.get_max(column)
-        if not ax:
-            ax = plt.figure(figsize=figsize).add_subplot(1, 1, 1)
-        for traj in self.trajectories:
-            if property and property_to_color:
-                try:
-                    color = property_to_color[traj.df[property].max()]
-                except KeyError:
-                    color = 'grey'
-                ax = traj.plot(ax=ax, for_basemap=True, color=color, *args, **kwargs)
-            else:
-                ax = traj.plot(ax=ax, for_basemap=True, vmin=min_value, vmax=max_value, *args, **kwargs)
-            kwargs['legend'] = False  # otherwise we get multiple legends
+    def plot(self, *args, **kwargs):
+        return TrajectoryPlotter(self, *args, **kwargs).plot()
 
-        column = kwargs.pop('column', None)  # otherwise there's an error in the following plot call if we don't remove column from kwargs
-        ax = self.get_start_locations([property]).to_crs(epsg=3857).plot(ax=ax, column=property, color='white', *args, **kwargs)
-
-        if zoom:
-            ctx.add_basemap(ax, zoom=zoom)
-        else:
-            ctx.add_basemap(ax)
-        return ax
-        """
