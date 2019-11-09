@@ -4,4 +4,4 @@ python:
 install:
 - python setup.py install
 script:
-  - pytest
+  - pytest movingpandas

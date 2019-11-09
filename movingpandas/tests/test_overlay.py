@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 from pandas.util.testing import assert_frame_equal
-from shapely.geometry import Point, LineString, Polygon
+from shapely.geometry import Polygon
 from datetime import datetime, timedelta
-from tests.test_trajectory import Node, make_traj, CRS_METRIC, CRS_LATLON
+from movingpandas.tests.test_trajectory import Node, make_traj, CRS_METRIC, CRS_LATLON
 
  
 class TestOverlay:
