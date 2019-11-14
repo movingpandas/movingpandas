@@ -29,9 +29,9 @@ If you're on Windows, however, many GeoPandas / MovingPandas dependencies cannot
 (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/install.html#installing-with-pip)).
 Therefore, Windows users are encouraged to use the [MovingPandas conda package](https://anaconda.org/anitagraser/movingpandas). 
 
-## Setup for following the Jupyter tutorials 
+## Development Installation 
 
-Use the following steps to run the notebooks locally on your machine:
+Use the following steps to run the notebooks using the current development version:
 
 1. Install Anaconda
 2. Clone the movingpandas repository
@@ -41,7 +41,7 @@ Use the following steps to run the notebooks locally on your machine:
 
 4. Wait until the environment is ready, then change to the Home tab and install Jupyter notebooks into the movingpandas environment
 5. Launch Jupyter notebooks and navigate to the `movingpandas/tutorials` directory to execute them
-6. Now you can run the notebooks, experiment with the code and adjust them to your own data
+6. Now you can run the notebooks, experiment with the code and adjust it to your own data
 
 ## Publications
 
