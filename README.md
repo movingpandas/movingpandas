@@ -6,7 +6,7 @@ You can try MovingPandas in a MyBinder notebook - no installation required:
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/master)
 [![build status](https://travis-ci.com/anitagraser/movingpandas.svg?branch=master)](https://travis-ci.com/anitagraser/movingpandas)
-
+[![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=latest)](https://movingpandas.readthedocs.io/en/latest/)
 
 ![trajectory_manager_v1](https://user-images.githubusercontent.com/590385/67160879-6e4fbd00-f355-11e9-9bdb-9636b3e62521.PNG)
 
