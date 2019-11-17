@@ -47,13 +47,41 @@ class Trajectory:
         return str(self) == str(other) and self.crs == other.crs and self.parent == other.parent
 
     def copy(self):
+        """
+        Return a copy of the trajectory.
+
+        Returns
+        -------
+        Trajectory
+        """
         return Trajectory(self.id, self.df.copy(), self.parent)
 
     def plot(self, with_basemap=False, for_basemap=False, *args, **kwargs):
+        """
+        Generate a plot.
+
+        Render the trajectory as a matplotlib plot where consecutive points are connected by line segments.
+
+        Parameters
+        ----------
+        with_basemap: bool
+            Add a basemap to the plot (automatically reprojects to Pseudo Mercator (EPGS:3857))
+        for_basemap: bool
+            Reproject the trajectory to Pseudo Mercator (EPSG:3857)
+        args:
+            These parameters will be passed to the matplotlib plotting function.
+        kwargs:
+            These parameters will be passed to the matplotlib plotting function.
+
+        Returns
+        -------
+        matplotlib ax
+            Resulting plot
+        """
         temp_df = self.df.copy()
         if 'column' in kwargs:
             if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
-                temp_df = self.get_df_with_speed()
+                temp_df = self._get_df_with_speed()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         temp_df['line'] = temp_df.apply(self._connect_prev_pt_and_geometry, axis=1)
         temp_df = temp_df.set_geometry('line')[1:]
@@ -76,12 +104,14 @@ class Trajectory:
             else:
                 return temp_df.plot(*args, **kwargs)
 
-    def set_crs(self, crs):
-        """Set coordinate reference system of Trajectory using string of SRID."""
-        self.crs = crs
-
     def is_valid(self):
-        """Return Boolean of whether Trajectory meets minimum prerequisites."""
+        """
+        Return whether the trajectory meets minimum requirements.
+
+        Returns
+        -------
+        bool
+        """
         if len(self.df) < 2:
             return False
         if not self.get_start_time() < self.get_end_time():
@@ -89,25 +119,40 @@ class Trajectory:
         return True
 
     def is_latlon(self):
-        """Return Boolean of whether coordinate reference system is WGS 84."""
+        """
+        Return whether the trajectory CRS is WGS 84.
+
+        Returns
+        -------
+        bool
+        """
         if self.crs['init'] == from_epsg(4326)['init']:
             return True
         else:
             return False
 
-    def has_parent(self):
-        """Return Boolean of whether Trajectory object has parent."""
-        return self.parent is not None
-
     def to_linestring(self):
-        """Return shapely Linestring object of Trajectory."""
+        """
+        Return trajectory geometry as LineString.
+
+        Returns
+        -------
+        shapely LineString
+        """
         try:
             return point_gdf_to_linestring(self.df)
         except RuntimeError:
-            raise RuntimeError("Cannot generate linestring")
+            raise RuntimeError("Cannot generate LineString")
 
     def to_linestringm_wkt(self):
-        """Return WKT Linestring M as string of Trajectory object."""
+        """
+        Return the WKT string of the trajectory LineStringM representation.
+
+        Returns
+        -------
+        string
+            WKT of trajectory as LineStringM
+        """
         # Shapely only supports x, y, z. Therefore, this is a bit hacky!
         coords = ''
         for index, row in self.df.iterrows():
@@ -118,38 +163,105 @@ class Trajectory:
         return wkt
 
     def get_start_location(self):
-        """Return shapely Point object of Trajectory's start location."""
+        """
+        Return the trajectory's start location.
+
+        Returns
+        -------
+        shapely Point
+            Trajectory start location
+        """
         return self.df.head(1).geometry[0]
 
     def get_end_location(self):
-        """Return shapely Point object of Trajectory's end location."""
+        """Return the trajectory's end location.
+
+        Returns
+        -------
+        shapely Point
+            Trajectory end location
+        """
         return self.df.tail(1).geometry[0]
 
     def get_bbox(self):
-        """Return tuple of minimum & maximum x & y of Trajectory's locations."""
+        """
+        Return the trajectory's bounding box.
+
+        Returns
+        -------
+        tuple
+            Bounding box values (minx, miny, maxx, maxy)
+        """
         return self.to_linestring().bounds  # (minx, miny, maxx, maxy)
 
     def get_start_time(self):
-        """Return datetime.datetime object of Trajectory's start location."""
+        """
+        Return the trajectory's start time.
+
+        Returns
+        -------
+        datetime.datetime
+            Trajectory start time
+        """
         return self.df.index.min().to_pydatetime()
 
     def get_end_time(self):
-        """Return datetime.datetime object of Trajectory's start location."""
+        """
+        Return the trajectory's end time.
+
+        Returns
+        -------
+        datetime.datetime
+            Trajectory end time
+        """
         return self.df.index.max().to_pydatetime()
 
     def get_duration(self):
-        """Return datetime.timedelta object of Trajectory's duration."""
+        """
+        Return the trajectory's duration from start to end.
+
+        Returns
+        -------
+        datetime.timedelta
+            Trajectory duration
+        """
         return self.get_end_time() - self.get_start_time()
 
     def get_row_at(self, t, method='nearest'):
-        """Return pandas series of position at given datetime object."""
+        """
+        Return row of the trajectory's dataframe at time t.
+
+        Parameters
+        ----------
+        t : datetime.datetime
+            Timestamp to extract a row for
+        method : str
+            Pandas get_loc method
+
+        Returns
+        -------
+        Pandas series
+            Row of the dataframe at time t
+        """
         try:
             return self.df.loc[t]
         except KeyError:
             return self.df.iloc[self.df.index.sort_values().drop_duplicates().get_loc(t, method=method)]
 
     def interpolate_position_at(self, t):
-        """Return interpolated shapely Point at given datetime object."""
+        """
+        Compute and return interpolated position at time t.
+
+        Parameters
+        ----------
+        t: datetime.datetime
+            Timestamp to interpolate at
+
+        Returns
+        -------
+        shapely Point
+            Interpolated position along the trajectory at time t
+        """
         prev_row = self.get_row_at(t, 'ffill')
         next_row = self.get_row_at(t, 'bfill')
         t_diff = next_row.name - prev_row.name
@@ -161,9 +273,23 @@ class Trajectory:
         return interpolated_position
 
     def get_position_at(self, t, method='interpolated'):
-        """Return shapely Point at given datetime using the provided method."""
+        """
+        Compute and return position at time t.
+
+        Parameters
+        ----------
+        t : datetime.datetime
+            Timestamp to extract a row for
+        method : str
+            Access method
+
+        Returns
+        -------
+        shapely Point
+            Point at time t
+        """
         if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
-            raise ValueError('Invalid split method {}. Must be one of [nearest, interpolated, ffill, bfill]'.
+            raise ValueError('Invalid method {}. Must be one of [nearest, interpolated, ffill, bfill]'.
                              format(method))
         if method == 'interpolated':
             return self.interpolate_position_at(t)
@@ -175,7 +301,23 @@ class Trajectory:
                 return row.geometry
 
     def get_linestring_between(self, t1, t2, method='interpolated'):
-        """Return shapely LineString between given datetime objects and split method."""
+        """
+        Return LineString of segment between times t1 and t2.
+
+        Parameters
+        ----------
+        t1 : datetime.datetime
+            Start time for the segment
+        t2 : datetime.datetime
+            End time for the segment
+        method : str
+            Extraction method
+
+        Returns
+        -------
+        shapely LineString
+            Extracted trajectory segment
+        """
         if method not in ['interpolated', 'within']:
             raise ValueError('Invalid split method {}. Must be one of [interpolated, within]'.format(method))
         if method == 'interpolated':
@@ -190,7 +332,21 @@ class Trajectory:
                 raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
 
     def get_segment_between(self, t1, t2):
-        """Return Trajectory object between given datetime objects."""
+        """
+        Return Trajectory segment between times t1 and t2.
+
+        Parameters
+        ----------
+        t1 : datetime.datetime
+            Start time for the segment
+        t2 : datetime.datetime
+            End time for the segment
+
+        Returns
+        -------
+        Trajectory
+            Extracted trajectory segment
+        """
         segment = Trajectory(self.id, self.df[t1:t2], parent=self)
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
@@ -209,26 +365,42 @@ class Trajectory:
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters  
     
-    def add_prev_pt(self, force=True):
-        """create a shifted geometry column with previous positions,
-        required for several calculations
+    def _add_prev_pt(self, force=True):
+        """
+        Create a shifted geometry column with previous positions.
         """
         if 'prev_pt' not in self.df.columns or force:
             # TODO: decide on default enforcement behavior
             self.df = self.df.assign(prev_pt=self.df.geometry.shift())
         
     def get_length(self):
-        """Return float of length of Trajectory object.
+        """
+        Return the length of the trajectory.
 
-        This is calculated with the measurement unit of the CRS used, except
-        when using WGS 84 when it is calculated in metres.
+        Length is calculated using CRS units, except if the CRS is WGS84
+        then length is calculated in metres.
+
+        Returns
+        -------
+        float
+            Length of the trajectory
         """
         temp_df = self.df.assign(prev_pt=self.df.geometry.shift())
         temp_df = temp_df.assign(dist_to_prev=temp_df.apply(self._compute_distance, axis=1))
         return temp_df['dist_to_prev'].sum()
 
     def get_direction(self):
-        """Return compass bearing as float of Trajectory object."""
+        """
+        Return the direction of the trajectory.
+
+        The direction is calculated between the trajectory's start and end location.
+        Direction values are in degrees, starting North turning clockwise.
+
+        Returns
+        -------
+        float
+            Direction of the trajectory in degrees
+        """
         pt0 = self.get_start_location()
         pt1 = self.get_end_location()
         if self.is_latlon():
@@ -277,31 +449,30 @@ class Trajectory:
         return LineString(list(pt0.coords) + list(pt1.coords))
 
     def add_direction(self, overwrite=False):
-        """Add direction column and values to Trajectory object's DataFrame."""
+        """
+        Add direction column and values to the trajectory's dataframe.
+
+        The direction is calculated between the trajectory's start and end location.
+        Direction values are in degrees, starting North turning clockwise.
+        """
         if DIRECTION_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has direction values! Use overwrite=True to overwrite exiting values.')
-        self.add_prev_pt()
+        self._add_prev_pt()
         self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
         self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][DIRECTION_COL_NAME]
 
     def add_speed(self, overwrite=False):
-        """Add speed column and values to Trajectory object's DataFrame.
+        """
+        Add speed column and values to the trajectory's dataframe.
 
-        This is calculated with the measurement unit of the CRS used, except
-        when using WGS 84 when it is calculated in metres. This is then divided
-        by total seconds.
+        Speed is calculated as CRS units per second, except if the CRS is WGS84
+        then speed is calculated in meters per second.
         """
         if SPEED_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
-        self.df = self.get_df_with_speed()
+        self.df = self._get_df_with_speed()
 
-    def get_df_with_speed(self):
-        """Add speed column and values to Trajectory object's DataFrame.
-
-        This is calculated with the measurement unit of the CRS used, except
-        when using WGS 84 when it is calculated in metres. This is then divided
-        by total seconds.
-        """
+    def _get_df_with_speed(self):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         if 't' in temp_df.columns:
@@ -319,17 +490,70 @@ class Trajectory:
         return temp_df
 
     def intersects(self, polygon):
+        """
+        Return whether the trajectory intersects the given polygon.
+
+        Parameters
+        ----------
+        polygon : shapely Polygon
+            Polygon to test for intersections
+
+        Returns
+        -------
+        bool
+        """
         return intersects(self, polygon)
 
     def clip(self, polygon, pointbased=False):
-        """Return clipped Trajectory with polygon as Trajectory object."""
+        """
+        Return trajectory clipped by the given polygon.
+
+        Parameters
+        ----------
+        polygon : shapely Polygon
+            Polygon to clip with
+        pointbased : bool
+            Clipping method
+
+        Returns
+        -------
+        Trajectory
+            Clipped trajectory
+        """
         return clip(self, polygon, pointbased)
 
     def intersection(self, feature):
+        """
+        Return the trajectory segment that intersects the given feature.
+
+        Feature attributes are appended to the trajectory's dataframe.
+
+        Parameters
+        ----------
+        feature : shapely Feature
+            Feature to intersect with
+
+        Returns
+        -------
+        Trajectory
+            Trajectory segment intersecting with the feature
+        """
         return intersection(self, feature)
         
     def split_by_date(self, mode='day'):
-        """Return list of Trajectory objects split by date."""
+        """
+        Split trajectory into subtrajectories using regular time intervals.
+
+        Parameters
+        ----------
+        mode : str
+            Split mode
+
+        Returns
+        -------
+        list
+            List of trajectories
+        """
         result = []
         if mode == 'day':
             grouped = self.df.groupby(self.df.index.date)
@@ -343,6 +567,19 @@ class Trajectory:
         return result
 
     def split_by_observation_gap(self, gap):
+        """
+        Split the trajectory into subtrajectories whenever there is a gap in the observations.
+
+        Parameters
+        ----------
+        gap : datetime.timedelta
+            Time gap threshold
+
+        Returns
+        -------
+        list
+            List of trajectories
+        """
         result = []
         temp_df = self.df.copy()
         temp_df['t'] = temp_df.index
@@ -356,13 +593,47 @@ class Trajectory:
         return result
 
     def apply_offset_seconds(self, column, offset):
+        """
+        Shift column by the specified offset in seconds
+
+        Parameters
+        ----------
+        column : str
+            Name of the column to shift
+        offset : int
+            Number of seconds to shift by, can be positive or negative.
+        """
         self.df[column] = self.df[column].shift(offset, freq='1s')
 
     def apply_offset_minutes(self, column, offset):
+        """
+        Shift column by the specified offset in minutes
+
+        Parameters
+        ----------
+        column : str
+            Name of the column to shift
+        offset : int
+            Number of minutes to shift by, can be positive or negative.
+        """
         self.df[column] = self.df[column].shift(offset, freq='1min')
 
     def generalize(self, mode, tolerance):
-        """Return new generalized Trajectory for Trajectory object."""
+        """
+        Generalize the trajectory.
+
+        Parameters
+        ----------
+        mode : str
+            Generalization mode
+        tolerance : any type
+            Tolerance threshold, differs by generalization mode
+
+        Returns
+        -------
+        Trajectory
+            Generalized trajectory
+        """
         if mode == 'douglas-peucker':
             return self.generalize_douglas_peucker(tolerance)
         elif mode == 'min-time-delta':
@@ -371,7 +642,21 @@ class Trajectory:
             raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker, min-time-delta]'.format(mode))
 
     def generalize_min_time_delta(self, tolerance):
-        """Return new generalized Trajectory where consecutive rows are at least a certain timedelta apart."""
+        """
+        Generalize the trajectory based on time.
+
+        This generalization ensures that consecutive rows are at least a certain timedelta apart.
+
+        Parameters
+        ----------
+        tolerance : datetime.timedelta
+            Desired minimum time difference between consecutive rows
+
+        Returns
+        -------
+        Trajectory
+            Generalized trajectory
+        """
         temp_df = self.df.copy()
         temp_df['t'] = temp_df.index
         prev_t = temp_df.head(1)['t'][0]
@@ -392,7 +677,19 @@ class Trajectory:
         return new_traj
 
     def generalize_douglas_peucker(self, tolerance):
-        """Return new generalized Trajectory using Douglas-Peucker Algorithm."""
+        """
+        Generalize the trajectory using Douglas-Peucker algorithm.
+
+        Parameters
+        ----------
+        tolerance : float
+            Distance tolerance
+
+        Returns
+        -------
+        Trajectory
+            Generalized trajectory
+        """
         prev_pt = None
         pts = []
         keep_rows = []
@@ -429,11 +726,16 @@ class Trajectory:
 
 
 def to_unixtime(t):
-    """Return float of total seconds since Unix time."""
+    """
+    Return float of total seconds since Unix time.
+    """
     return (t - datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
 
 
 def point_gdf_to_linestring(df):
+    """
+    Convert GeoDataFrame of Points to shapely LineString
+    """
     if len(df) > 1:
         return df.groupby([True] * len(df)).geometry.apply(
             lambda x: LineString(x.tolist())).values[0]
