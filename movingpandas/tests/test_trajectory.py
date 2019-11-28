@@ -28,7 +28,7 @@ def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None):
     nodes = [node.to_dict() for node in nodes]
     df = pd.DataFrame(nodes).set_index('t')
     geo_df = GeoDataFrame(df, crs=crs)
-    return Trajectory(id, geo_df, parent=parent)
+    return Trajectory(geo_df, id, parent=parent)
 
 
 class TestTrajectory:
@@ -218,6 +218,7 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=3), Node(1, 1, day=2), Node(2, 2, day=1)])
         assert traj.get_start_time() == datetime(1970, 1, 1)
         assert traj.get_end_time() == datetime(1970, 1, 3)
+        assert traj.get_duration() == timedelta(days=2)
         assert traj.get_start_location() == Point(2, 2)
 
     def test_douglas_peucker(self):
