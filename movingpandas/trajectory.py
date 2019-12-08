@@ -22,16 +22,30 @@ DIRECTION_COL_NAME = 'direction'
 
 
 class Trajectory:
-    def __init__(self, traj_id, df, parent=None):
+    def __init__(self, df, traj_id, obj_id=None, parent=None):
+        """
+        Create Trajectory from GeoDataFrame
+
+        Parameters
+        ----------
+        df : GeoDataFrame
+            GeoDataFrame with point geometry column and timestamp index
+        traj_id : any
+            Trajectory ID
+        obj_id : any
+            Moving object ID
+        parent : Trajectory
+            Parent trajectory
+        """
         if len(df) < 2:
             raise ValueError("Trajectory dataframe must have at least two rows!")
 
         self.id = traj_id
+        self.obj_id = obj_id
         df.sort_index(inplace=True)
         self.df = df[~df.index.duplicated(keep='first')]
         self.crs = df.crs
         self.parent = parent
-        self.context = None
 
     def __str__(self):
         try:
@@ -54,7 +68,7 @@ class Trajectory:
         -------
         Trajectory
         """
-        return Trajectory(self.id, self.df.copy(), self.parent)
+        return Trajectory(self.df.copy(), self.id, parent=self.parent)
 
     def plot(self, with_basemap=False, for_basemap=False, *args, **kwargs):
         """
@@ -64,14 +78,14 @@ class Trajectory:
 
         Parameters
         ----------
-        with_basemap: bool
+        with_basemap : bool
             Add a basemap to the plot (automatically reprojects to Pseudo Mercator (EPGS:3857))
-        for_basemap: bool
+        for_basemap : bool
             Reproject the trajectory to Pseudo Mercator (EPSG:3857)
-        args:
-            These parameters will be passed to the matplotlib plotting function.
-        kwargs:
-            These parameters will be passed to the matplotlib plotting function.
+        args :
+            These parameters will be passed to the matplotlib plotting function
+        kwargs :
+            These parameters will be passed to the matplotlib plotting function
 
         Returns
         -------
@@ -254,7 +268,7 @@ class Trajectory:
 
         Parameters
         ----------
-        t: datetime.datetime
+        t : datetime.datetime
             Timestamp to interpolate at
 
         Returns
@@ -347,7 +361,7 @@ class Trajectory:
         Trajectory
             Extracted trajectory segment
         """
-        segment = Trajectory(self.id, self.df[t1:t2], parent=self)
+        segment = Trajectory(self.df[t1:t2], self.id, parent=self)
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
         return segment
@@ -508,6 +522,10 @@ class Trajectory:
         """
         Return trajectory clipped by the given polygon.
 
+        By default, the trajectory's line representation is clipped by the polygon.
+        If pointbased=True, the trajectory's point representation is used instead, leading to shorter
+        segments.
+
         Parameters
         ----------
         polygon : shapely Polygon
@@ -517,28 +535,34 @@ class Trajectory:
 
         Returns
         -------
-        Trajectory
-            Clipped trajectory
+        list
+            Clipped trajectory segments
         """
         return clip(self, polygon, pointbased)
 
-    def intersection(self, feature):
+    def intersection(self, feature, pointbased=False):
         """
         Return the trajectory segment that intersects the given feature.
 
         Feature attributes are appended to the trajectory's dataframe.
 
+        By default, the trajectory's line representation is clipped by the polygon.
+        If pointbased=True, the trajectory's point representation is used instead, leading to shorter
+        segments.
+
         Parameters
         ----------
         feature : shapely Feature
             Feature to intersect with
+        pointbased : bool
+            Clipping method
 
         Returns
         -------
         Trajectory
             Trajectory segment intersecting with the feature
         """
-        return intersection(self, feature)
+        return intersection(self, feature, pointbased)
         
     def split_by_date(self, mode='day'):
         """
@@ -563,7 +587,7 @@ class Trajectory:
             raise ValueError('Invalid split mode {}. Must be one of [day, year]'.format(mode))
         for key, values in grouped:
             if len(values) > 1:
-                result.append(Trajectory('{}_{}'.format(self.id, key), values))
+                result.append(Trajectory(values, '{}_{}'.format(self.id, key)))
         return result
 
     def split_by_observation_gap(self, gap):
@@ -589,7 +613,7 @@ class Trajectory:
         for i, df in enumerate(dfs):
             df = df.drop(columns=['t', 'gap'])
             if len(df) > 1:
-                result.append(Trajectory('{}_{}'.format(self.id, i), df))
+                result.append(Trajectory(df, '{}_{}'.format(self.id, i)))
         return result
 
     def apply_offset_seconds(self, column, offset):
@@ -673,7 +697,7 @@ class Trajectory:
 
         keep_rows.append(len(self.df)-1)
         new_df = self.df.iloc[keep_rows]
-        new_traj = Trajectory(self.id, new_df)
+        new_traj = Trajectory(new_df, self.id)
         return new_traj
 
     def generalize_douglas_peucker(self, tolerance):
@@ -713,7 +737,7 @@ class Trajectory:
 
         keep_rows.append(i)
         new_df = self.df.iloc[keep_rows]
-        new_traj = Trajectory(self.id, new_df)
+        new_traj = Trajectory(new_df, self.id)
         return new_traj
 
     def _to_line_df(self):

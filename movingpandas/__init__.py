@@ -3,7 +3,7 @@
 """
 
 from .trajectory import Trajectory
-from .trajectory_manager import TrajectoryManager
+from .trajectory_collection import TrajectoryCollection
 from .trajectory_plotter import TrajectoryPlotter
 
 name = 'movingpandas'
