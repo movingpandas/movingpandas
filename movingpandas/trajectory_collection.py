@@ -151,7 +151,31 @@ class TrajectoryCollection:
         result.trajectories = trips
         return result
 
-    def clip(self, polygon):
+    def get_intersecting(self, polygon):
+        """
+        Return trajectories that intersect the given polygon.
+
+        Parameters
+        ----------
+        polygon : shapely Polygon
+            Polygon to clip with
+        Returns
+        -------
+        TrajectoryCollection
+            Resulting intersecting trajectories
+        """
+        intersecting = []
+        for traj in self.trajectories:
+            try:
+                if traj.intersects(polygon):
+                    intersecting.append(traj)
+            except:
+                pass
+        result = copy(self)
+        result.trajectories = intersecting
+        return result
+
+    def clip(self, polygon, pointbased=False):
         """
         Clip trajectories by the given polygon.
 
@@ -170,7 +194,7 @@ class TrajectoryCollection:
         clipped = []
         for traj in self.trajectories:
             try:
-                for intersect in traj.clip(polygon):
+                for intersect in traj.clip(polygon, pointbased):
                     clipped.append(intersect)
             except:
                 pass
