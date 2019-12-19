@@ -15,8 +15,10 @@ class TrajectoryPlotter:
         self.zoom = kwargs.pop('zoom', None)
         self.column = kwargs.get('column', None)
         self.ax = kwargs.pop('ax', None)
+        self.color = kwargs.pop('color', None)
         self.column_to_color = kwargs.pop('column_to_color', None)
         self.with_basemap = kwargs.pop('with_basemap', False)
+        self.for_basemap = kwargs.pop('for_basemap', False)
 
         self.min_value = None
         self.max_value = None
@@ -36,12 +38,12 @@ class TrajectoryPlotter:
     def _plot_trajectory(self, traj):
         if self.column and self.column_to_color:
             try:
-                color = self.column_to_color[traj.df[self.column].max()]
+                self.color = self.column_to_color[traj.df[self.column].max()]
             except KeyError:
-                color = 'grey'
-            return traj.plot(ax=self.ax, for_basemap=self.with_basemap, color=color, *self.args, **self.kwargs)
+                self.color = 'grey'
+            return traj.plot(ax=self.ax, for_basemap=(self.with_basemap or self.for_basemap), color=self.color, *self.args, **self.kwargs)
         else:
-            return traj.plot(ax=self.ax, for_basemap=self.with_basemap, vmin=self.min_value, vmax=self.max_value, *self.args, **self.kwargs)
+            return traj.plot(ax=self.ax, for_basemap=(self.with_basemap or self.for_basemap), vmin=self.min_value, vmax=self.max_value, *self.args, **self.kwargs)
 
     def plot(self):
         for traj in self.data.trajectories:

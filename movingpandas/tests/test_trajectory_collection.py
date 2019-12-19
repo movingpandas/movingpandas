@@ -5,7 +5,12 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import datetime
+from fiona.crs import from_epsg
 from movingpandas.trajectory_collection import TrajectoryCollection
+
+
+CRS_METRIC = from_epsg(31256)
+CRS_LATLON = from_epsg(4326)
 
 
 class TestTrajectoryCollection:
