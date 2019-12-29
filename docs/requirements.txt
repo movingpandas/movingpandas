@@ -1,2 +1,5 @@
 cython
 numpy
+proj-bin
+proj-data
+python-pyproj
