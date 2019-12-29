@@ -14,3 +14,4 @@ dependencies:
   - hvplot
   - proj
   - cartopy
+  - geoviews
