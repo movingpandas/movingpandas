@@ -10,5 +10,4 @@ dependencies:
   - pandas
   - geopandas
   - rasterio
-  - contextily
-  - descartes
+  - hvplot
