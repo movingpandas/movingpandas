@@ -27,6 +27,4 @@ python:
       - method: setuptools
         path: package
 
-conda:
-  environment: environment.yml
 
