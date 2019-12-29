@@ -3,8 +3,6 @@
 import os
 import sys
 
-import contextily as ctx
-
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from fiona.crs import from_epsg
@@ -15,6 +13,7 @@ sys.path.append(os.path.dirname(__file__))
 from .overlay import clip, intersection, intersects, SpatioTemporalRange, create_entry_and_exit_points
 from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
                                         measure_distance_euclidean
+from .trajectory_plotter import TrajectoryPlotter
 
 
 SPEED_COL_NAME = 'speed'
@@ -70,53 +69,31 @@ class Trajectory:
         """
         return Trajectory(self.df.copy(), self.id, parent=self.parent)
 
-    def plot(self, with_basemap=False, for_basemap=False, *args, **kwargs):
+    def plot(self, *args, **kwargs):
         """
         Generate a plot.
 
-        Render the trajectory as a matplotlib plot where consecutive points are connected by line segments.
+        Parameters
+        ----------
+        args :
+            These parameters will be passed to the TrajectoryPlotter
+        kwargs :
+            These parameters will be passed to the TrajectoryPlotter
+        """
+        return TrajectoryPlotter(self, *args, **kwargs).plot()
+
+    def hvplot(self, *args, **kwargs):
+        """
+        Generate an interactive plot.
 
         Parameters
         ----------
-        with_basemap : bool
-            Add a basemap to the plot (automatically reprojects to Pseudo Mercator (EPGS:3857))
-        for_basemap : bool
-            Reproject the trajectory to Pseudo Mercator (EPSG:3857)
         args :
-            These parameters will be passed to the matplotlib plotting function
+            These parameters will be passed to the TrajectoryPlotter
         kwargs :
-            These parameters will be passed to the matplotlib plotting function
-
-        Returns
-        -------
-        matplotlib ax
-            Resulting plot
+            These parameters will be passed to the TrajectoryPlotter
         """
-        temp_df = self.df.copy()
-        if 'column' in kwargs:
-            if kwargs['column'] == SPEED_COL_NAME and SPEED_COL_NAME not in self.df.columns:
-                temp_df = self._get_df_with_speed()
-        temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
-        temp_df['line'] = temp_df.apply(self._connect_prev_pt_and_geometry, axis=1)
-        temp_df = temp_df.set_geometry('line')[1:]
-        if with_basemap:
-            if 'url' in kwargs and 'zoom' in kwargs:
-                url = kwargs.pop('url')
-                zoom = kwargs.pop('zoom')
-                ax = temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
-                return ctx.add_basemap(ax, url=url, zoom=zoom)
-            elif 'url' in kwargs:
-                url = kwargs.pop('url')
-                ax = temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
-                return ctx.add_basemap(ax, url=url)
-            else:
-                ax = temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
-                return ctx.add_basemap(ax)
-        else:
-            if for_basemap:
-                return temp_df.to_crs(epsg=3857).plot(*args, **kwargs)
-            else:
-                return temp_df.plot(*args, **kwargs)
+        return TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
     def is_valid(self):
         """
@@ -144,6 +121,16 @@ class Trajectory:
             return True
         else:
             return False
+
+    def get_speed_column_name(self):
+        """
+        Return name of the speed column
+
+        Returns
+        -------
+        string
+        """
+        return SPEED_COL_NAME
 
     def to_linestring(self):
         """
