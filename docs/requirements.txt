@@ -1,5 +1,1 @@
 cython
-libproj-dev
-proj-bin
-proj-data
-python-pyproj
