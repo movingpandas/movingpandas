@@ -2,7 +2,6 @@
 
 import os
 import sys
-import numpy as np
 import pandas as pd
 from copy import copy
 from geopandas import GeoDataFrame
@@ -10,7 +9,7 @@ from geopandas import GeoDataFrame
 sys.path.append(os.path.dirname(__file__))
 
 from .trajectory import Trajectory
-from .trajectory_plotter import TrajectoryPlotter
+from .trajectory_plotter import TrajectoryCollectionPlotter
 
 
 class TrajectoryCollection:
@@ -271,5 +270,17 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
         """
-        return TrajectoryPlotter(self, *args, **kwargs).plot()
+        return TrajectoryCollectionPlotter(self, *args, **kwargs).plot()
 
+    def hvplot(self, *args, **kwargs):
+        """
+        Generate an interactive plot.
+
+        Parameters
+        ----------
+        args :
+            These parameters will be passed to the TrajectoryPlotter
+        kwargs :
+            These parameters will be passed to the TrajectoryPlotter
+        """
+        return TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()
