@@ -6,6 +6,7 @@ dependencies:
   - python=3.7
   - numpy
   - matplotlib
+  - cython
   - seaborn
   - pandas
   - geopandas
