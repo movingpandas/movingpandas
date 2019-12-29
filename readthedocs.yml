@@ -19,10 +19,6 @@ sphinx:
 # Optionally set the version of Python and requirements required to build your docs
 python:
   version: 3.7
-  before_install:
-    - pip install Cython --install-option="--no-cython-compile"
-    - sudo apt-get install -y libproj-dev proj-bin proj-data
-    - sudo apt-get install -y python-pyproj
   install:
     - method: setuptools
       path: .
