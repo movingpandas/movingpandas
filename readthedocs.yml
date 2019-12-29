@@ -18,8 +18,15 @@ sphinx:
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3.7
-  install:
-    - requirements: docs/requirements.txt
-    - method: setuptools
-      path: .
+   version: 3.7
+   install:
+      - method: pip
+        path: .
+        extra_requirements:
+           - docs
+      - method: setuptools
+        path: package
+
+conda:
+  environment: environment.yml
+
