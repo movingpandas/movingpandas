@@ -21,4 +21,4 @@ python:
   version: 3.7
   install:
     - method: setuptools
-      path: ./docs/setup.py
+      path: ./docs
