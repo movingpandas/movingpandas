@@ -11,7 +11,4 @@ dependencies:
   - pandas
   - geopandas
   - rasterio
-  - hvplot
-  - proj
-  - cartopy
-  - geoviews
+
