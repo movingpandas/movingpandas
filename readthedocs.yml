@@ -1,7 +1,7 @@
 version: 2
 formats: []
 conda:
-    environment: doc/environment.yml
+    environment: docs/environment.yml
 python:
     version: 3
     install:
