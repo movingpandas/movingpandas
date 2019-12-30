@@ -3,6 +3,7 @@ python:
   - "3.7"
 before_install:
   - pip install Cython --install-option="--no-cython-compile"
+  - pip install scipy
   - sudo apt-get install -y libproj-dev proj-bin proj-data
   - sudo apt-get install -y python-pyproj
 install:
