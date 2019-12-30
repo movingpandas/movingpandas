@@ -1,23 +1,23 @@
 Welcome to MovingPandas's documentation!
 ========================================
 
-.. automodule:: movingpandas
-    :members:
+MovingPandas implements trajectory classes and functions built on top of GeoPandas.
 
-.. autoclass:: Trajectory
-   :members:
+The project home is: http://movingpandas.org
 
-.. autoclass:: TrajectoryCollection
-   :members:
+
+Contents
+--------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   trajectory
+   trajectorycollection
 
 
-Indices and tables
-==================
+All Functions
+--------------
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
