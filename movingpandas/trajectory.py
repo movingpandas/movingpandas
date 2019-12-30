@@ -71,7 +71,7 @@ class Trajectory:
 
     def plot(self, *args, **kwargs):
         """
-        Generate a plot.
+        Generate a plot using geopandas default plotting (matplotlib).
 
         Parameters
         ----------
@@ -84,7 +84,9 @@ class Trajectory:
 
     def hvplot(self, *args, **kwargs):
         """
-        Generate an interactive plot.
+        Generate an interactive plot using hvplot.
+
+        The following parameters are set by default: geo=True, tiles='OSM'. 
 
         Parameters
         ----------

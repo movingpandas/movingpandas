@@ -236,6 +236,11 @@ class TestTrajectory:
         result = self.default_traj_metric.plot()
         assert isinstance(result, Axes)
 
+    def test_hvplot_exists(self):
+        import holoviews
+        result = self.default_traj_latlon.hvplot(geo=True, tiles='OSM')
+        assert isinstance(result, holoviews.core.overlay.Overlay)
+
     def test_tolinestring_does_not_alter_df(self):
         traj = self.default_traj_metric
         expected = traj.df.copy()

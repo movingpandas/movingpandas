@@ -4,8 +4,13 @@ import pytest
 import pandas as pd
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
+from fiona.crs import from_epsg
 from datetime import datetime
 from movingpandas.trajectory_collection import TrajectoryCollection
+
+
+CRS_METRIC = from_epsg(31256)
+CRS_LATLON = from_epsg(4326)
 
 
 class TestTrajectoryCollection:
@@ -21,11 +26,13 @@ class TestTrajectoryCollection:
             {'id': 2, 'obj': 'A', 'geometry': Point(16, 16), 't': datetime(2018,1,2,12,10,0), 'val': 7},
             {'id': 2, 'obj': 'A', 'geometry': Point(190, 19), 't': datetime(2018,1,2,12,15,0), 'val': 3}
         ]).set_index('t')
-        self.geo_df = GeoDataFrame(df, crs={'init': '31256'})
+        self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        self.collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
+        self.geo_df_latlon = GeoDataFrame(df, crs=CRS_LATLON)
+        self.collection_latlon = TrajectoryCollection(self.geo_df_latlon, 'id', obj_id_col='obj')
 
     def test_number_of_trajectories(self):
-        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        assert len(collection) == 2
+        assert len(self.collection) == 2
 
     def test_number_of_trajectories_min_length(self):
         collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj', min_length=100)
@@ -36,30 +43,25 @@ class TestTrajectoryCollection:
         assert len(collection) == 0
 
     def test_split_by_date(self):
-        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        collection = collection.split_by_date(mode='day')
+        collection = self.collection.split_by_date(mode='day')
         assert len(collection) == 3
 
     def test_get_trajectory(self):
-        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        assert collection.get_trajectory(1).id == 1
-        assert collection.get_trajectory(1).obj_id == 'A'
-        assert collection.get_trajectory(2).id == 2
-        assert collection.get_trajectory(3) is None
+        assert self.collection.get_trajectory(1).id == 1
+        assert self.collection.get_trajectory(1).obj_id == 'A'
+        assert self.collection.get_trajectory(2).id == 2
+        assert self.collection.get_trajectory(3) is None
 
     def test_filter(self):
-        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        assert len(collection.filter('obj', 'A')) == 2
-        assert len(collection.filter('obj', 'B')) == 0
+        assert len(self.collection.filter('obj', 'A')) == 2
+        assert len(self.collection.filter('obj', 'B')) == 0
 
     def test_get_min_and_max(self):
-        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        assert collection.get_min('val') == 2
-        assert collection.get_max('val') == 10
+        assert self.collection.get_min('val') == 2
+        assert self.collection.get_max('val') == 10
 
     def test_get_start_locations(self):
-        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        locs = collection.get_start_locations(columns=['val'])
+        locs = self.collection.get_start_locations(columns=['val'])
         assert len(locs) == 2
         assert locs.iloc[0].geometry in [Point(0, 0), Point(10, 10)]
         assert locs.iloc[0].traj_id in [1, 2]
@@ -67,3 +69,12 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].val in [9, 10]
         assert locs.iloc[1].geometry in [Point(0, 0), Point(10, 10)]
 
+    def test_plot_exists(self):
+        from matplotlib.axes import Axes
+        result = self.collection.plot()
+        assert isinstance(result, Axes)
+
+    def test_hvplot_exists(self):
+        import holoviews
+        result = self.collection_latlon.hvplot()
+        assert isinstance(result, holoviews.core.overlay.Overlay)

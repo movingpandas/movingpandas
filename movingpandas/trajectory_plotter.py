@@ -23,6 +23,8 @@ class TrajectoryPlotter:
         self.max_value = None
 
         self.overlay = None
+        self.hvplot_is_geo = kwargs.pop('geo', True)
+        self.hvplot_tiles = kwargs.pop('tiles', 'OSM')
 
     def _make_line_df(self, traj):
         temp = traj.copy()
@@ -48,15 +50,17 @@ class TrajectoryPlotter:
             return temp_df.plot(ax=self.ax, vmin=self.min_value, vmax=self.max_value, *self.args, **self.kwargs)
 
     def _hvplot_trajectory(self, traj):
-        line_gdf = self._make_line_df(traj).to_crs(epsg=4326)
+        line_gdf = self._make_line_df(traj)
+        if not traj.is_latlon():
+            line_gdf = line_gdf.to_crs(epsg=4326)
         if self.column and self.column_to_color:
             try:
                 color = self.column_to_color[traj.df[self.column].max()]
             except KeyError:
                 color = 'grey'
-            return line_gdf.hvplot(color=color, *self.args, **self.kwargs)
+            return line_gdf.hvplot(color=color, geo=self.hvplot_is_geo, tiles=self.hvplot_tiles, *self.args, **self.kwargs)
         else:
-            return line_gdf.hvplot(*self.args, **self.kwargs)
+            return line_gdf.hvplot(geo=self.hvplot_is_geo, tiles=self.hvplot_tiles, *self.args, **self.kwargs)
 
     def plot(self):
         if not self.ax:
@@ -96,6 +100,6 @@ class TrajectoryCollectionPlotter(TrajectoryPlotter):
                 self.overlay = self.overlay * overlay
             else:
                 self.overlay = overlay
-            self.kwargs['tiles'] = False  # has to be removed after the first iteration, otherwise tiles will cover trajectories!
+            self.hvplot_tiles = False  # has to be removed after the first iteration, otherwise tiles will cover trajectories!
         return self.overlay
 
