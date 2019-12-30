@@ -7,6 +7,9 @@ Welcome to MovingPandas's documentation!
 .. autoclass:: Trajectory
    :members:
 
+.. autoclass:: TrajectoryCollection
+   :members:
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
