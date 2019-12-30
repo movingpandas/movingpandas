@@ -59,4 +59,4 @@ html_static_path = ['_static']
 
 
 
-autodoc_mock_imports = ["hvplot", "proj", "cartopy", "geoviews"]
+autodoc_mock_imports = ["hvplot", "proj", "pyproj", "cartopy", "geoviews", "contextily"]
