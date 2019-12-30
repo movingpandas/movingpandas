@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that MovingPandas uses explicitly:
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas', 'geopandas']
+INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas']
 
 setuptools.setup(
     name="movingpandas",
