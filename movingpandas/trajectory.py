@@ -124,6 +124,19 @@ class Trajectory:
         else:
             return False
 
+    def to_crs(self, crs):
+        """
+        Returns the trajectory reprojected to the target CRS.
+
+        Returns
+        -------
+        Trajectory
+        """
+        temp = self.copy()
+        temp.crs = crs
+        temp.df = temp.df.to_crs(crs)
+        return temp
+
     def get_speed_column_name(self):
         """
         Return name of the speed column
