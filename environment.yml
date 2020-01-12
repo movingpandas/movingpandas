@@ -16,3 +16,4 @@ dependencies:
   - cartopy
   - geoviews
   - scikit-learn
+  - geopy
