@@ -98,6 +98,32 @@ class TrajectoryCollection:
         starts = GeoDataFrame(pd.DataFrame(starts), crs=crs)
         return starts
 
+    def get_end_locations(self, columns=None):
+        """
+        Returns GeoDataFrame with trajectory end locations
+
+        Parameters
+        ----------
+        columns : list[string]
+            List of column names that should be copied from the trajectory's dataframe to the output
+
+        Returns
+        -------
+        GeoDataFrame
+            Trajectory end locations
+        """
+        ends = []
+        for traj in self.trajectories:
+            crs = traj.crs
+            traj_end = {'t': traj.get_end_time(), 'geometry': traj.get_end_location(),
+                          'traj_id': traj.id, 'obj_id': traj.obj_id}
+            if columns and columns != [None]:
+                for column in columns:
+                    traj_end[column] = traj.df.iloc[0][column]
+            ends.append(traj_end)
+        ends = GeoDataFrame(pd.DataFrame(ends), crs=crs)
+        return ends
+
     def split_by_date(self, mode):
         """
         Split trajectories into subtrajectories using regular time intervals.
