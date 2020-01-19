@@ -168,26 +168,26 @@ class TestTrajectory:
     def test_split_by_daybreak(self):
         split = make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1)]).split_by_date()
         assert len(split) == 2
-        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01')
-        assert split[1] == make_traj([Node(day=2), Node(day=2, second=1)], id='1_1970-01-02')
+        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01 00:00:00')
+        assert split[1] == make_traj([Node(day=2), Node(day=2, second=1)], id='1_1970-01-02 00:00:00')
 
     def test_split_by_date_ignores_single_node_sgements(self):
         split = make_traj([Node(), Node(second=1), Node(day=2)]).split_by_date()
         assert len(split) == 1
-        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01')
+        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01 00:00:00')
 
     def test_split_by_daybreak_same_day_of_year(self):
         split = make_traj([Node(), Node(second=1), Node(year=2000), Node(year=2000, second=1)]).split_by_date()
         assert len(split) == 2
-        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01')
-        assert split[1] == make_traj([Node(year=2000), Node(year=2000, second=1)], id='1_2000-01-01')
+        assert split[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01 00:00:00')
+        assert split[1] == make_traj([Node(year=2000), Node(year=2000, second=1)], id='1_2000-01-01 00:00:00')
 
     def test_split_by_year(self):
         split = make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1),
                            Node(year=2000), Node(year=2000, second=1)]).split_by_date(mode='year')
         assert len(split) == 2
-        assert split[0] == make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1)], id='1_1970')
-        assert split[1] == make_traj([Node(year=2000), Node(year=2000, second=1)], id='1_2000')
+        assert split[0] == make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1)], id='1_1970-12-31 00:00:00')
+        assert split[1] == make_traj([Node(year=2000), Node(year=2000, second=1)], id='1_2000-12-31 00:00:00')
 
     def test_split_by_observation_gap(self):
         split = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=6)])\

@@ -7,6 +7,7 @@ from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from fiona.crs import from_epsg
 from datetime import datetime
+from pandas import Grouper
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -582,11 +583,13 @@ class Trajectory:
         """
         result = []
         if mode == 'day':
-            grouped = self.df.groupby(self.df.index.date)
+            grouped = self.df.groupby(Grouper(freq="D"))
+        elif mode == 'month':
+            grouped = self.df.groupby(Grouper(freq="M"))
         elif mode == 'year':
-            grouped = self.df.groupby(self.df.index.year)
+            grouped = self.df.groupby(Grouper(freq="Y"))
         else:
-            raise ValueError('Invalid split mode {}. Must be one of [day, year]'.format(mode))
+            raise ValueError('Invalid split mode {}. Must be one of [day, month, year]'.format(mode))
         for key, values in grouped:
             if len(values) > 1:
                 result.append(Trajectory(values, '{}_{}'.format(self.id, key)))
