@@ -8,8 +8,6 @@ You can try MovingPandas in a MyBinder notebook - no installation required:
 [![build status](https://travis-ci.com/anitagraser/movingpandas.svg?branch=master)](https://travis-ci.com/anitagraser/movingpandas)
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=latest)](https://movingpandas.readthedocs.io/en/latest/)
 
-![trajectory_manager_v1](https://user-images.githubusercontent.com/590385/71562698-914cca80-2a84-11ea-8d51-2c1bb08dc8d3.PNG)
-
 ## Documentation
 
 The official documentation is hosted on ReadTheDocs: https://movingpandas.readthedocs.io
@@ -24,6 +22,11 @@ GeoPandas extends the data types that can be used in Pandas DataFrames, thus cre
 
 MovingPandas uses the following terminology. A *trajectory* is, or more correctly has, a time-ordered series of geometries. These
 geometries and associated attributes are stored in a GeoDataFrame *df*. Furthermore, a trajectory can have a *parent* trajectory and can itself be the parent of successive trajectories. Raw unsegmented streams of movement data, as well as semantically meaningful subsections or other subsections, can therefore be represented as trajectories. Depending on the use case, the trajectory object can access a point-based or a line-based representation of its data. (Source: [0])
+
+## Examples
+
+![movingpandas_ais3](https://user-images.githubusercontent.com/590385/73123652-4eeab080-3f92-11ea-9fb3-15afafcdb33f.PNG)
+![movingpandas_ais15](https://user-images.githubusercontent.com/590385/73123664-5ad67280-3f92-11ea-8b42-02a0135f0f5c.PNG)
 
 ## Installation
 
