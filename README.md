@@ -32,13 +32,19 @@ geometries and associated attributes are stored in a GeoDataFrame *df*. Furtherm
 
 Movingpandas for Python >= 3.7 is available from [PyPI](https://pypi.org/project/movingpandas/) and can be installed using `pip install movingpandas` 
 
-If you're on Windows, however, many GeoPandas / MovingPandas dependencies cannot be pip installed 
+If you're on Windows or Mac, however, many GeoPandas / MovingPandas dependencies cannot be pip installed 
 (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/install.html#installing-with-pip)).
 Therefore, Windows users are encouraged to use the [MovingPandas conda package](https://anaconda.org/anitagraser/movingpandas). 
 
 ## Development Installation 
 
 Use the following steps to run the notebooks using the current development version:
+
+### Using conda
+
+`conda env create -f environment.yml`
+
+### Using Anaconda
 
 1. Install Anaconda
 2. Clone the movingpandas repository
