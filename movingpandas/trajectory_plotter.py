@@ -51,7 +51,7 @@ class TrajectoryPlotter:
 
     def _hvplot_trajectory(self, traj):
         line_gdf = self._make_line_df(traj)
-        if not traj.is_latlon():
+        if not traj.is_latlon:
             line_gdf = line_gdf.to_crs(epsg=4326)
         if self.column and self.column_to_color:
             try:

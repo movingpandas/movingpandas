@@ -7,6 +7,7 @@ from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import Grouper
+from pyproj import CRS
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -45,6 +46,8 @@ class Trajectory:
         self.df = df[~df.index.duplicated(keep='first')]
         self.crs = df.crs
         self.parent = parent
+        crs = CRS.from_user_input(self.crs)
+        self.is_latlon = crs.is_geographic
 
     def __str__(self):
         try:
@@ -110,19 +113,6 @@ class Trajectory:
         if not self.get_start_time() < self.get_end_time():
             return False
         return True
-
-    def is_latlon(self):
-        """
-        Return whether the trajectory CRS is geographic.
-
-        Returns
-        -------
-        bool
-        """
-        from pyproj import CRS
-
-        crs = CRS.from_user_input(self.crs)
-        return crs.is_geographic
 
     def to_crs(self, crs):
         """
@@ -375,7 +365,7 @@ class Trajectory:
             return 0.0
         if pt0 == pt1:
             return 0.0
-        if self.is_latlon():
+        if self.is_latlon:
             dist_meters = measure_distance_spherical(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
@@ -419,7 +409,7 @@ class Trajectory:
         """
         pt0 = self.get_start_location()
         pt1 = self.get_end_location()
-        if self.is_latlon():
+        if self.is_latlon:
             return calculate_initial_compass_bearing(pt0, pt1)
         else:
             return azimuth(pt0, pt1)
@@ -431,7 +421,7 @@ class Trajectory:
             return 0.0
         if pt0 == pt1:
             return 0.0
-        if self.is_latlon():
+        if self.is_latlon:
             return calculate_initial_compass_bearing(pt0, pt1)
         else:
             return azimuth(pt0, pt1)
@@ -445,7 +435,7 @@ class Trajectory:
             raise ValueError('Invalid trajectory! Got {} instead of point!'.format(pt1))
         if pt0 == pt1:
             return 0.0
-        if self.is_latlon():
+        if self.is_latlon:
             dist_meters = measure_distance_spherical(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)

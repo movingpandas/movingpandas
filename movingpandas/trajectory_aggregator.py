@@ -16,7 +16,7 @@ class TrajectoryCollectionAggregator:
         self.min_distance = min_distance
         self.min_stop_duration = min_stop_duration
         self.min_angle = min_angle
-        self.is_latlon = self.traj_collection.trajectories[0].is_latlon()
+        self.is_latlon = self.traj_collection.trajectories[0].is_latlon
         print('Extracting significant points ...')
         self.significant_points = self.extract_significant_points()
         print('  No. significant points: {}'.format(len(self.significant_points)))
@@ -125,7 +125,7 @@ class PtsExtractor:
         for self.k in range(self.j + 1, self.n):
             p_j = self.traj.df.iloc[self.j].geometry
             p_k = self.traj.df.iloc[self.k].geometry
-            if self.traj.is_latlon():
+            if self.traj.is_latlon:
                 d_space_j_k = measure_distance_spherical(p_j, p_k)
             else:
                 d_space_j_k = measure_distance_euclidean(p_j, p_k)
@@ -136,7 +136,7 @@ class PtsExtractor:
     def is_representative_max_distance(self):
         p_i = self.traj.df.iloc[self.i].geometry
         p_j = self.traj.df.iloc[self.j].geometry
-        if self.traj.is_latlon():
+        if self.traj.is_latlon:
             d_space = measure_distance_spherical(p_i, p_j)
         else:
             d_space = measure_distance_euclidean(p_i, p_j)
