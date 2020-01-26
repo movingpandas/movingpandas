@@ -5,7 +5,6 @@ import sys
 
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
-from fiona.crs import from_epsg
 from datetime import datetime
 from pandas import Grouper
 
@@ -114,7 +113,7 @@ class Trajectory:
 
     def is_latlon(self):
         """
-        Return whether the trajectory CRS is WGS 84.
+        Return whether the trajectory CRS is geographic.
 
         Returns
         -------
