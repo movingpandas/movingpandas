@@ -5,7 +5,6 @@ import sys
 
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
-from fiona.crs import from_epsg
 from datetime import datetime
 from pandas import Grouper
 
@@ -87,7 +86,7 @@ class Trajectory:
         """
         Generate an interactive plot using hvplot.
 
-        The following parameters are set by default: geo=True, tiles='OSM'. 
+        The following parameters are set by default: geo=True, tiles='OSM'.
 
         Parameters
         ----------
@@ -114,16 +113,16 @@ class Trajectory:
 
     def is_latlon(self):
         """
-        Return whether the trajectory CRS is WGS 84.
+        Return whether the trajectory CRS is geographic.
 
         Returns
         -------
         bool
         """
-        if self.crs['init'] == from_epsg(4326)['init']:
-            return True
-        else:
-            return False
+        from pyproj import CRS
+
+        crs = CRS.from_user_input(self.crs)
+        return crs.is_geographic
 
     def to_crs(self, crs):
         """
@@ -368,7 +367,7 @@ class Trajectory:
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
         return segment
-    
+
     def _compute_distance(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
@@ -380,8 +379,8 @@ class Trajectory:
             dist_meters = measure_distance_spherical(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
-        return dist_meters  
-    
+        return dist_meters
+
     def _add_prev_pt(self, force=True):
         """
         Create a shifted geometry column with previous positions.
@@ -389,7 +388,7 @@ class Trajectory:
         if 'prev_pt' not in self.df.columns or force:
             # TODO: decide on default enforcement behavior
             self.df = self.df.assign(prev_pt=self.df.geometry.shift())
-        
+
     def get_length(self):
         """
         Return the length of the trajectory.
@@ -424,7 +423,7 @@ class Trajectory:
             return calculate_initial_compass_bearing(pt0, pt1)
         else:
             return azimuth(pt0, pt1)
-    
+
     def _compute_heading(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
@@ -566,7 +565,7 @@ class Trajectory:
             Trajectory segment intersecting with the feature
         """
         return intersection(self, feature, pointbased)
-        
+
     def split_by_date(self, mode='day'):
         """
         Split trajectory into subtrajectories using regular time intervals.
