@@ -7,7 +7,10 @@ from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import Grouper
-from pyproj import CRS
+try:
+    from pyproj import CRS
+except ImportError:
+    from fiona.crs import from_epsg
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -46,8 +49,11 @@ class Trajectory:
         self.df = df[~df.index.duplicated(keep='first')]
         self.crs = df.crs
         self.parent = parent
-        crs = CRS.from_user_input(self.crs)
-        self.is_latlon = crs.is_geographic
+        if 'CRS' in sys.modules:
+            crs = CRS.from_user_input(self.crs)
+            self.is_latlon = crs.is_geographic
+        else:
+            self.is_latlon = self.crs['init'] == from_epsg(4326)['init']
 
     def __str__(self):
         try:
