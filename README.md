@@ -43,7 +43,22 @@ Use the following steps to run the notebooks using the current development versi
 
 ### Using conda
 
-`conda env create -f environment.yml`
+**Linux/Mac**:  
+
+```
+conda env create -f environment.yml
+```
+
+**Windows**: 
+
+```
+conda config --add channels conda-forge
+conda config --add channels defaults
+conda config --set channel_priority strict
+conda env create -f environment.yml
+```
+
+*On Windows, because conda-forge relies on some package built with defaults blas (like scipy) one must use the defaults channel on top of conda-forge and activate conda's new strict channel feature.* Source: https://github.com/conda-forge/gdal-feedstock/issues/269#issuecomment-473661530
 
 ### Using Anaconda
 
