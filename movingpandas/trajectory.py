@@ -49,10 +49,10 @@ class Trajectory:
         self.df = df[~df.index.duplicated(keep='first')]
         self.crs = df.crs
         self.parent = parent
-        if 'CRS' in sys.modules:
+        try:
             crs = CRS.from_user_input(self.crs)
             self.is_latlon = crs.is_geographic
-        else:
+        except NameError:
             self.is_latlon = self.crs['init'] == from_epsg(4326)['init']
 
     def __str__(self):
