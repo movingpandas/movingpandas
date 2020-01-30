@@ -5,11 +5,12 @@ before_install:
   - pip install Cython --install-option="--no-cython-compile"
   - pip install scipy
   - pip install codecov 
+  - pip install pytest-cov
   - sudo apt-get install -y libproj-dev proj-bin proj-data
   - sudo apt-get install -y python-pyproj
 install:
   - python setup.py install
 script:
-  - pytest movingpandas
+  - pytest --cov-report=xml movingpandas
 after_success:
   - codecov # submit coverage  
