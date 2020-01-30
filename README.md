@@ -77,6 +77,10 @@ Known issues:
 
 * On Windows, importing rasterio can lead to DLL errors. If this happens, downgrade the rasterio version to 1.0.13.
 
+## Citation information
+
+Please cite [0] when using MovingPandas in your research.
+
 ## Publications
 
 [0] Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54. URL: https://www.austriaca.at/rootcollection?arp=0x003aba2b
