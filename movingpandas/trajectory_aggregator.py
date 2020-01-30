@@ -11,6 +11,22 @@ from .geometry_utils import azimuth, angular_difference, measure_distance_spheri
 
 class TrajectoryCollectionAggregator:
     def __init__(self, traj_collection, max_distance, min_distance, min_stop_duration, min_angle=45):
+        """
+        Create TrajectoryCollectionAggregator
+
+        Parameters
+        ----------
+        traj_collection : TrajectoryCollection
+            TrajectoryCollection to be aggregated
+        max_distance : float
+            Maximum distance between significant points
+        min_distance : float
+            Minimum distance between significant points
+        min_stop_duration : integer
+            Minimum duration required for stop detection (in seconds)
+        min_angle : float
+            Minimum angle for significant point extraction
+        """
         self.traj_collection = traj_collection
         self.max_distance = max_distance
         self.min_distance = min_distance
@@ -18,57 +34,81 @@ class TrajectoryCollectionAggregator:
         self.min_angle = min_angle
         self.is_latlon = self.traj_collection.trajectories[0].is_latlon
         print('Extracting significant points ...')
-        self.significant_points = self.extract_significant_points()
+        self.significant_points = self._extract_significant_points()
         print('  No. significant points: {}'.format(len(self.significant_points)))
         print('Clustering significant points ...')
-        self.clusters = self.cluster_significant_points()
+        self.clusters = self._cluster_significant_points()
         print('  No. clusters: {}'.format(len(self.clusters)))
         print('Computing flows ...')
-        self.flows = self.compute_flows_between_clusters()
+        self.flows = self._compute_flows_between_clusters()
         print('Flows ready!')
 
     def get_significant_points_gdf(self):
+        """
+        Return the extracted significant points
+
+        Returns
+        -------
+        GeoDataFrame
+            Significant points
+        """
         if not self.significant_points:
-            self.extract_significant_points()
+            self._extract_significant_points()
         df = DataFrame(self.significant_points, columns=['geometry'])
         return GeoDataFrame(df)
 
-    def extract_significant_points(self):
+    def get_clusters_gdf(self):
+        """
+        Return the extracted cluster centroids
+
+        Returns
+        -------
+        GeoDataFrame
+            Cluster centroids, incl. the number of clustered significant points (n)
+        """
+        if not self.clusters:
+            self._cluster_significant_points()
+        df = DataFrame([cluster.centroid for cluster in self.clusters], columns=['geometry'])
+        df['n'] = [len(cluster.points) for cluster in self.clusters]
+        return GeoDataFrame(df)
+
+    def get_flows_gdf(self):
+        """
+        Return the extracted flows
+
+        Returns
+        -------
+        GeoDataFrame
+            Flow lines, incl. the number of trajectories summarized in the flow (weight)
+        """
+        if not self.flows:
+            self._compute_flows_between_clusters()
+        return GeoDataFrame(self.flows)
+
+    def _extract_significant_points(self):
         significant_points = []
         for traj in self.traj_collection.trajectories:
-            a = PtsExtractor(traj, self.max_distance, self.min_distance, self.min_stop_duration, self.min_angle)
+            a = _PtsExtractor(traj, self.max_distance, self.min_distance, self.min_stop_duration, self.min_angle)
             significant_points = significant_points + a.find_significant_points()
         return significant_points
 
-    def cluster_significant_points(self):
+    def _cluster_significant_points(self):
         points = self.significant_points
         bbox = self.get_significant_points_gdf().total_bounds
         cell_size = self.max_distance / 10
         if self.is_latlon:
             cell_size = cell_size / R_EARTH * 360
-        grid = Grid(bbox, cell_size)
+        grid = _Grid(bbox, cell_size)
         grid.insert_points(points)
         grid.redistribute_points(points)
         return grid.resulting_clusters
 
-    def get_clusters_gdf(self):
-        if not self.clusters:
-            self.cluster_significant_points()
-        df = DataFrame([cluster.centroid for cluster in self.clusters], columns=['geometry'])
-        df['n'] = [len(cluster.points) for cluster in self.clusters]
-        return GeoDataFrame(df)
-
-    def compute_flows_between_clusters(self):
-        sg = SequenceGenerator(self.get_clusters_gdf(), self.traj_collection)
+    def _compute_flows_between_clusters(self):
+        sg = _SequenceGenerator(self.get_clusters_gdf(), self.traj_collection)
         return sg.create_flow_lines()
 
-    def get_flows_gdf(self):
-        if not self.flows:
-            self.compute_flows_between_clusters()
-        return GeoDataFrame(self.flows)
 
-
-class PtsExtractor:
+class _PtsExtractor:
     def __init__(self, traj, max_distance, min_distance, min_stop_duration, min_angle):
         self.i = 0
         self.j = 1
@@ -148,7 +188,7 @@ class PtsExtractor:
             return False
 
 
-class PointCluster:
+class _PointCluster:
     def __init__(self, pt):
         self.points = [pt]
         self.centroid = pt
@@ -165,7 +205,7 @@ class PointCluster:
         self.centroid = Point(sum(x) / len(x), sum(y) / len(y))
 
 
-class Grid:
+class _Grid:
     def __init__(self, bbox, cell_size):
         w = bbox[2] - bbox[0]
         h = bbox[3] - bbox[1]
@@ -185,7 +225,7 @@ class Grid:
         for pt in points:
             c = self.get_closest_centroid(pt, self.cell_size)
             if not c:
-                g = PointCluster(pt)
+                g = _PointCluster(pt)
                 self.resulting_clusters.append(g)
                 (i, j) = self.get_grid_position(g.centroid)
                 self.cells[i][j] = g
@@ -236,7 +276,7 @@ class Grid:
                 print("Discarding {}".format(pt))
 
 
-class SequenceGenerator:
+class _SequenceGenerator:
     def __init__(self, cells, traj_collection):
         self.cells = cells
         self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}

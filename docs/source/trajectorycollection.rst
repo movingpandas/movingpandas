@@ -8,3 +8,4 @@ MovingPandas.TrajectoryCollection
 .. autoclass:: TrajectoryCollection
    :members:
 
+   .. automethod:: __init__
