@@ -83,6 +83,7 @@ class TrajectoryCollectionPlotter(TrajectoryPlotter):
             self.max_value = self.data.get_max(self.column)
 
     def plot(self):
+        self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
         for traj in self.data.trajectories:
             self.ax = self._plot_trajectory(traj)
             self.kwargs['legend'] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
