@@ -11,6 +11,6 @@ before_install:
 install:
   - python setup.py install
 script:
-  - pytest --cov-report=xml movingpandas
+  - pytest --cov-report xml --cov=movingpandas
 after_success:
   - codecov # submit coverage  
