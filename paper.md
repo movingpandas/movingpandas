@@ -49,7 +49,7 @@ These tutorial notebooks document how to use `MovingPandas` to explore different
 
 To simplify dependency management and installation for non-experts, we maintain a version of `MovingPandas` on the `conda-forge` channel, which installs the system libraries upon which `MovingPandas` depends. This lowers the barrier to entry for people, particularly scientists, who are learning how to work with movement data in `Python`.
 
-`scikit-mobility` is a similar `Python` package which is in an early development stage and also deals with movement data. They implement TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas. There is little overlap in the covered use cases and implemented functionality. `MovingPandas` focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis. `scikit-mobility` on the other hand focuses on computing human mobility metrics, generating synthetic trajectories and assessing privacy risks.
+`scikit-mobility` [@pappalardo:2019] is a similar `Python` package which is in an early development stage and also deals with movement data. They implement TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas. There is little overlap in the covered use cases and implemented functionality. `MovingPandas` focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis. `scikit-mobility` on the other hand focuses on computing human mobility metrics, generating synthetic trajectories and assessing privacy risks.
 
 
 # Acknowledgements
