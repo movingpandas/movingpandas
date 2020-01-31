@@ -41,6 +41,8 @@ In addition to detailed API documentation and example code executed by pytest, `
 These notebooks can be executed locally or online using [MyBinder](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag)
 These tutorial notebooks document how to use `MovingPandas` to explore different types of movement datasets (including, for example, a day of vessel movements with high temporal resolution and multiple years of bird migration data with low temporal resolution).
 
+![Example trajectory summarizations included in the interactive notebooks](docs/source/img/flow.png)
+
 # MovingPandas in Context
 
 `MovingPandas`'s goal is to make working with movment data easier for scientists and data analysist who want to use open source `Python` tools for analysis and visualization.
