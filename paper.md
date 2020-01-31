@@ -23,7 +23,7 @@ bibliography: paper.bib
 
 `MovingPandas` is a package for dealing with movement data. Movement data appear in many different scientific domains, including biology, ecology, chemistry, transport and logistics, astrophysics, remote sensing, and more.
 
-`MovingPandas` implements a Trajectory class and corresponding methods based on `GeoPandas`. A trajectory has a time-ordered series of point geometries. These points and associated attributes are stored in a GeoDataFrame. `MovingPandas` implements spatial and temporal data access and analysis functions (covered in `@graser:2019`) as well as plotting functions.
+`MovingPandas` implements a Trajectory class and corresponding methods based on `GeoPandas`. A trajectory has a time-ordered series of point geometries. These points and associated attributes are stored in a GeoDataFrame. `MovingPandas` implements spatial and temporal data access and analysis functions (covered in [@graser:2019]) as well as plotting functions.
 
 When researchers and data analysts are working with movement data, there are a suite of data exploration activities that are often performed including:
 
