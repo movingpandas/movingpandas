@@ -119,7 +119,7 @@ class TrajectoryCollection:
                           'traj_id': traj.id, 'obj_id': traj.obj_id}
             if columns and columns != [None]:
                 for column in columns:
-                    traj_end[column] = traj.df.iloc[0][column]
+                    traj_end[column] = traj.df.iloc[-1][column]
             ends.append(traj_end)
         ends = GeoDataFrame(pd.DataFrame(ends), crs=crs)
         return ends
