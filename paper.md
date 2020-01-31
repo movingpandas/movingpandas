@@ -3,7 +3,7 @@
 title: 'MovingPandas: A Python package for the analysis of movement data'
 tags:
   - Python
-  - gis
+  - spatial data
   - movement data
   - mobility
 authors:
