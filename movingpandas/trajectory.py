@@ -662,8 +662,48 @@ class Trajectory:
             return self.generalize_douglas_peucker(tolerance)
         elif mode == 'min-time-delta':
             return self.generalize_min_time_delta(tolerance)
+        elif mode == 'min-distance':
+            return self.generalize_min_distance(tolerance)
         else:
-            raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker, min-time-delta]'.format(mode))
+            raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker, min-time-delta, min-distance]'.format(mode))
+
+    def generalize_min_distance(self, tolerance):
+        """
+        Generalize the trajectory based on distance.
+
+        This generalization ensures that consecutive locations are at least a certain distance apart.
+
+        Parameters
+        ----------
+        tolerance : float
+            Desired minimum distance between consecutive points
+
+        Returns
+        -------
+        Trajectory
+            Generalized trajectory
+        """
+        temp_df = self.df.copy()
+        prev_pt = temp_df.iloc[1]['geometry']
+        keep_rows = [0]
+        i = 0
+
+        for index, row in temp_df.iterrows():
+            pt = row['geometry']
+            if self.is_latlon:
+                dist = measure_distance_spherical(pt, prev_pt)
+            else:
+                dist = measure_distance_euclidean(pt, prev_pt)
+            if dist >= tolerance:
+                keep_rows.append(i)
+                prev_pt = pt
+            i += 1
+
+        keep_rows.append(len(self.df)-1)
+        new_df = self.df.iloc[keep_rows]
+        new_traj = Trajectory(new_df, self.id)
+        return new_traj
+
 
     def generalize_min_time_delta(self, tolerance):
         """

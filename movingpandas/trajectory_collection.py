@@ -124,6 +124,14 @@ class TrajectoryCollection:
         ends = GeoDataFrame(pd.DataFrame(ends), crs=crs)
         return ends
 
+    def generalize(self, mode, tolerance):
+        generalized = []
+        for traj in self.trajectories:
+            generalized.append(traj.generalize(mode, tolerance))
+        result = copy(self)
+        result.trajectories = generalized
+        return result
+
     def split_by_date(self, mode):
         """
         Split trajectories into subtrajectories using regular time intervals.
