@@ -684,7 +684,7 @@ class Trajectory:
             Generalized trajectory
         """
         temp_df = self.df.copy()
-        prev_pt = temp_df.iloc[1]['geometry']
+        prev_pt = temp_df.iloc[0]['geometry']
         keep_rows = [0]
         i = 0
 
