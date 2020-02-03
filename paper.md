@@ -47,7 +47,7 @@ These tutorial notebooks document how to use `MovingPandas` to explore different
 
 `MovingPandas`'s goal is to make working with movment data easier for scientists and data analysist who want to use open source `Python` tools for analysis and visualization.
 
-`MovingPandas` depends upon `GeoPandas` [@kelsey_jordahl_2019_3545747], which facilitates reading and writing movement data from common spatial data formats. It also requires `Matplotlib` for static plots and `hvplot` for interactive plots.
+`MovingPandas` depends upon `GeoPandas` [@kelsey_jordahl_2019_3545747], which facilitates reading and writing movement data from common spatial data formats. It also requires `Matplotlib` for static plots and `hvplot` [@philipp_rudiger_2020_3634720] for interactive plots.
 
 To simplify dependency management and installation for non-experts, we maintain a version of `MovingPandas` on the `conda-forge` channel, which installs the system libraries upon which `MovingPandas` depends. This lowers the barrier to entry for people, particularly scientists, who are learning how to work with movement data in `Python`.
 
