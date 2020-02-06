@@ -25,7 +25,7 @@ In stark contrast, the Pandas data analysis library has been developed with a st
 GeoPandas extends the data types that can be used in Pandas DataFrames, thus creating GeoDataFrames. Geometric operations on these spatial data types are performed by Shapely. Geopandas further depends on Fiona for file access (which enables direct reading of GeoDataFrames from common spatial file formats, such as GeoPackage or Shapefile), and descartes and matplotlib for plotting.
 
 MovingPandas uses the following terminology. A *trajectory* is, or more correctly has, a time-ordered series of geometries. These
-geometries and associated attributes are stored in a GeoDataFrame *df*. Furthermore, a trajectory can have a *parent* trajectory and can itself be the parent of successive trajectories. Raw unsegmented streams of movement data, as well as semantically meaningful subsections or other subsections, can therefore be represented as trajectories. Depending on the use case, the trajectory object can access a point-based or a line-based representation of its data. (Source: [0])
+geometries and associated attributes are stored in a GeoDataFrame *df*. Furthermore, a trajectory can have a *parent* trajectory and can itself be the parent of successive trajectories. Raw unsegmented streams of movement data, as well as semantically meaningful subsections or other subsections, can therefore be represented as trajectories. Depending on the use case, the trajectory object can access a point-based or a line-based representation of its data. (Source: [[0]](#publications))
 
 ## Examples
 
@@ -88,7 +88,7 @@ A detailed overview on how to contribute can be found in the [contributing guide
 
 ## Citation information
 
-Please cite [0] when using MovingPandas in your research.
+Please cite [[0]](#publications) when using MovingPandas in your research.
 
 ## Publications
 
