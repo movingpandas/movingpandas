@@ -34,7 +34,7 @@ geometries and associated attributes are stored in a GeoDataFrame *df*. Furtherm
 
 ## Installation
 
-MovingPandas and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas): and can be installed using `conda install -c conda-forge movingpandas`.
+MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas): and can be installed using `conda install -c conda-forge movingpandas`.
 
 Alternatively, MovingPandas is also available from [PyPI](https://pypi.org/project/movingpandas/) and can be installed using `pip install movingpandas`.
 Note however that, if you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed 
