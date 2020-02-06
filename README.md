@@ -4,7 +4,7 @@
 [![build status](https://travis-ci.com/anitagraser/movingpandas.svg?branch=master)](https://travis-ci.com/anitagraser/movingpandas)
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=latest)](https://movingpandas.readthedocs.io/en/latest/)
 [![codecov](https://codecov.io/gh/anitagraser/movingpandas/branch/master/graph/badge.svg)](https://codecov.io/gh/anitagraser/movingpandas)
-[![pyOpenSci](https://tinyurl.com/y22nb8up)](https://github.com/pyOpenSci/software-review/issues/18)
+<!--[![pyOpenSci](https://tinyurl.com/y22nb8up)](https://github.com/pyOpenSci/software-review/issues/18)-->
 
 
 MovingPandas implements a Trajectory class and corresponding methods based on **GeoPandas**.
