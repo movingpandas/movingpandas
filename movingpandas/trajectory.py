@@ -27,7 +27,7 @@ DIRECTION_COL_NAME = 'direction'
 class Trajectory:
     def __init__(self, df, traj_id, obj_id=None, parent=None):
         """
-        Create Trajectory from GeoDataFrame
+        Create Trajectory from GeoDataFrame.
 
         Parameters
         ----------
@@ -39,6 +39,28 @@ class Trajectory:
             Moving object ID
         parent : Trajectory
             Parent trajectory
+
+        Examples
+        --------
+
+        Creating a trajectory from scratch:
+
+        >>> import pandas as pd
+        >>> import geopandas as gpd
+        >>> import movingpandas as mpd
+        >>> from fiona.crs import from_epsg
+        >>> df = pd.DataFrame([
+        >>>     {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
+        >>>     {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
+        >>>     {'geometry':Point(6,6), 't':datetime(2018,1,1,12,10,0)},
+        >>>     {'geometry':Point(9,9), 't':datetime(2018,1,1,12,15,0)}
+        >>> ]).set_index('t')
+        >>> gdf = gpd.GeoDataFrame(df, crs=from_epsg(31256))
+        >>> traj = mpd.Trajectory(gdf, 1)
+
+        For more examples, see the tutorial notebooks_.
+
+        .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
         """
         if len(df) < 2:
             raise ValueError("Trajectory dataframe must have at least two rows!")
@@ -88,12 +110,16 @@ class Trajectory:
             These parameters will be passed to the TrajectoryPlotter
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
+
+        Returns
+        -------
+        Matplotlib plot
         """
         return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
     def hvplot(self, *args, **kwargs):
         """
-        Generate an interactive plot using hvplot.
+        Generate an interactive plot using Holoviews.
 
         The following parameters are set by default: geo=True, tiles='OSM'.
 
@@ -103,6 +129,10 @@ class Trajectory:
             These parameters will be passed to the TrajectoryPlotter
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
+
+        Returns
+        -------
+        Holoviews plot
         """
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
@@ -389,7 +419,7 @@ class Trajectory:
         """
         Return the length of the trajectory.
 
-        Length is calculated using CRS units, except if the CRS is WGS84
+        Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
         then length is calculated in metres.
 
         Returns
@@ -477,7 +507,7 @@ class Trajectory:
         """
         Add speed column and values to the trajectory's dataframe.
 
-        Speed is calculated as CRS units per second, except if the CRS is WGS84
+        Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
         then speed is calculated in meters per second.
         """
         if SPEED_COL_NAME in self.df.columns and not overwrite:
@@ -618,7 +648,7 @@ class Trajectory:
 
     def apply_offset_seconds(self, column, offset):
         """
-        Shift column by the specified offset in seconds
+        Shift column by the specified offset in seconds.
 
         Parameters
         ----------
@@ -631,7 +661,7 @@ class Trajectory:
 
     def apply_offset_minutes(self, column, offset):
         """
-        Shift column by the specified offset in minutes
+        Shift column by the specified offset in minutes.
 
         Parameters
         ----------
@@ -645,6 +675,12 @@ class Trajectory:
     def generalize(self, mode, tolerance):
         """
         Generalize the trajectory.
+
+        Supported generalization modes include:
+
+        * 'douglas-peuker' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
+        * 'min-time-delta' (tolerance as datetime.timedelta)
+        * 'min-distance' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
 
         Parameters
         ----------
