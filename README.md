@@ -86,6 +86,17 @@ All contributions, bug reports, bug fixes, documentation improvements, enhanceme
 
 A detailed overview on how to contribute can be found in the [contributing guide](https://github.com/anitagraser/movingpandas/blob/master/CONTRIBUTING.md) on GitHub.
 
+## Related Python Packages
+
+[scikit-mobility](https://github.com/scikit-mobility/scikit-mobility) is a similar package which also deals with movement data. 
+It implements TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas. 
+There is little overlap in the covered use cases and implemented functionality (comparing 
+[MovingPandas tutorials](https://github.com/anitagraser/movingpandas/tree/master/tutorials) and 
+[scikit-mobility tutorials](https://github.com/scikit-mobility/scikit-mobility/tree/master/tutorial)). 
+MovingPandas focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis. 
+scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories 
+and assessing privacy risks.
+
 ## Citation information
 
 Please cite [[0]](#publications) when using MovingPandas in your research.
