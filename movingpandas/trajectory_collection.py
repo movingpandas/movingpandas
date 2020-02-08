@@ -9,7 +9,7 @@ from geopandas import GeoDataFrame
 sys.path.append(os.path.dirname(__file__))
 
 from .trajectory import Trajectory
-from .trajectory_plotter import TrajectoryCollectionPlotter
+from .trajectory_plotter import _TrajectoryCollectionPlotter
 
 
 class TrajectoryCollection:
@@ -125,6 +125,21 @@ class TrajectoryCollection:
         return ends
 
     def generalize(self, mode, tolerance):
+        """
+        Generalize trajectories using Trajectory.generalize().
+
+        Parameters
+        ----------
+        mode : str
+            Generalization mode
+        tolerance : any
+            Tolerance threshold, differs by generalization mode
+
+        Returns
+        -------
+        TrajectoryCollection
+            Resulting generalized subtrajectories
+        """
         generalized = []
         for traj in self.trajectories:
             generalized.append(traj.generalize(mode, tolerance))
@@ -304,7 +319,7 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
         """
-        return TrajectoryCollectionPlotter(self, *args, **kwargs).plot()
+        return _TrajectoryCollectionPlotter(self, *args, **kwargs).plot()
 
     def hvplot(self, *args, **kwargs):
         """
@@ -317,4 +332,4 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
         """
-        return TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()
+        return _TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()

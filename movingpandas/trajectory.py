@@ -17,7 +17,7 @@ sys.path.append(os.path.dirname(__file__))
 from .overlay import clip, intersection, intersects, SpatioTemporalRange, create_entry_and_exit_points
 from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
                                         measure_distance_euclidean
-from .trajectory_plotter import TrajectoryPlotter
+from .trajectory_plotter import _TrajectoryPlotter
 
 
 SPEED_COL_NAME = 'speed'
@@ -89,7 +89,7 @@ class Trajectory:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
         """
-        return TrajectoryPlotter(self, *args, **kwargs).plot()
+        return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
     def hvplot(self, *args, **kwargs):
         """
@@ -104,7 +104,7 @@ class Trajectory:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
         """
-        return TrajectoryPlotter(self, *args, **kwargs).hvplot()
+        return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
     def is_valid(self):
         """

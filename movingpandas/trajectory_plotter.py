@@ -5,7 +5,12 @@ import hvplot.pandas # seems to be necessary for the following import to work
 from holoviews import opts
 
 
-class TrajectoryPlotter:
+class _TrajectoryPlotter:
+    """
+    Utility class for plotting trajectories
+
+    Performs necessary data preprocessing steps and hands over plotting arguments to Matplotlib plot or Holoviews hvplot.
+    """
     def __init__(self, data, *args, **kwargs):
         self.data = data
         self.args = args
@@ -75,7 +80,7 @@ class TrajectoryPlotter:
         return self._hvplot_trajectory(self.data)
 
 
-class TrajectoryCollectionPlotter(TrajectoryPlotter):
+class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
         if self.column:

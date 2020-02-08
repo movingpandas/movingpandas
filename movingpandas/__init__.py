@@ -4,7 +4,6 @@
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-from .trajectory_plotter import TrajectoryPlotter, TrajectoryCollectionPlotter
 from .trajectory_aggregator import TrajectoryCollectionAggregator
 
 name = 'movingpandas'
