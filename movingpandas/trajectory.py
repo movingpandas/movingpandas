@@ -42,19 +42,19 @@ class Trajectory:
 
         Examples
         --------
-
         Creating a trajectory from scratch:
 
         >>> import pandas as pd
         >>> import geopandas as gpd
         >>> import movingpandas as mpd
         >>> from fiona.crs import from_epsg
+        >>>
         >>> df = pd.DataFrame([
-        >>>     {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
-        >>>     {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
-        >>>     {'geometry':Point(6,6), 't':datetime(2018,1,1,12,10,0)},
-        >>>     {'geometry':Point(9,9), 't':datetime(2018,1,1,12,15,0)}
-        >>> ]).set_index('t')
+        ...     {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
+        ...     {'geometry':Point(6,0), 't':datetime(2018,1,1,12,6,0)},
+        ...     {'geometry':Point(6,6), 't':datetime(2018,1,1,12,10,0)},
+        ...     {'geometry':Point(9,9), 't':datetime(2018,1,1,12,15,0)}
+        ... ]).set_index('t')
         >>> gdf = gpd.GeoDataFrame(df, crs=from_epsg(31256))
         >>> traj = mpd.Trajectory(gdf, 1)
 
@@ -114,6 +114,13 @@ class Trajectory:
         Returns
         -------
         Matplotlib plot
+
+        Examples
+        --------
+
+        Plot speed along trajectory (with legend and specified figure size):
+
+        >>> trajectory.plot(column='speed', legend=True, figsize=(9,5))
         """
         return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
@@ -133,6 +140,13 @@ class Trajectory:
         Returns
         -------
         Holoviews plot
+
+        Examples
+        --------
+
+        Plot speed along trajectory (with legend and specified figure size):
+
+        >>> trajectory.hvplot(c='speed', line_width=7.0, width=700, height=400, colorbar=True)
         """
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
@@ -328,7 +342,24 @@ class Trajectory:
         Returns
         -------
         shapely Point
-            Point at time t
+            Position at time t
+
+        Examples
+        --------
+        If the trajectory contains a position at the given timestamp, it is returned:
+
+        >>> traj.get_position_at(datetime(2018, 1, 1, 12, 6))
+        Point (6 0)
+
+        If there is no trajectory position for the given timestamp, the default behaviour is to interpolate the location:
+
+        >>> traj.get_position_at(datetime(2018, 1, 1, 12, 9))
+        POINT (6 4.5)
+
+        To get the trajectory position closest to the given timestamp, specify method='nearest':
+
+        >>> traj.get_position_at(datetime(2018, 1, 1, 12, 9), method='nearest')
+        POINT (6 6)
         """
         if method not in ['nearest', 'interpolated', 'ffill', 'bfill']:
             raise ValueError('Invalid method {}. Must be one of [nearest, interpolated, ffill, bfill]'.
