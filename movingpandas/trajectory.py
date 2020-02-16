@@ -117,7 +117,6 @@ class Trajectory:
 
         Examples
         --------
-
         Plot speed along trajectory (with legend and specified figure size):
 
         >>> trajectory.plot(column='speed', legend=True, figsize=(9,5))
@@ -143,7 +142,6 @@ class Trajectory:
 
         Examples
         --------
-
         Plot speed along trajectory (with legend and specified figure size):
 
         >>> trajectory.hvplot(c='speed', line_width=7.0, width=700, height=400, colorbar=True)

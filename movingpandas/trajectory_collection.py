@@ -8,7 +8,7 @@ from geopandas import GeoDataFrame
 
 sys.path.append(os.path.dirname(__file__))
 
-from .trajectory import Trajectory
+from .trajectory import Trajectory, SPEED_COL_NAME
 from .trajectory_plotter import _TrajectoryCollectionPlotter
 
 
@@ -276,6 +276,16 @@ class TrajectoryCollection:
         result.trajectories = filtered
         return result
 
+    def add_speed(self, overwrite=False):
+        """
+        Add speed column and values to the trajectories.
+
+        Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
+        then speed is calculated in meters per second.
+        """
+        for traj in self.trajectories:
+            traj.add_speed(overwrite)
+
     def get_min(self, column):
         """
         Return minimum value in the provided dataframe column over all trajectories
@@ -318,6 +328,12 @@ class TrajectoryCollection:
             These parameters will be passed to the TrajectoryPlotter
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
+
+        Examples
+        --------
+        Plot speed along trajectories (with legend and specified figure size):
+
+        >>> trajectory_collection.plot(column='speed', legend=True, figsize=(9,5))
         """
         return _TrajectoryCollectionPlotter(self, *args, **kwargs).plot()
 
@@ -331,5 +347,11 @@ class TrajectoryCollection:
             These parameters will be passed to the TrajectoryPlotter
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
+
+        Examples
+        --------
+        Plot speed along trajectories (with legend and specified figure size):
+
+        >>> trajectory_collection.hvplot(c='speed', line_width=7.0, width=700, height=400, colorbar=True)
         """
         return _TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()

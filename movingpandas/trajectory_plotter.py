@@ -24,8 +24,8 @@ class _TrajectoryPlotter:
         self.ax = kwargs.pop('ax', None)
         self.column_to_color = kwargs.pop('column_to_color', None)
 
-        self.min_value = None
-        self.max_value = None
+        self.min_value = self.kwargs.get('vmin', None)
+        self.max_value = self.kwargs.get('vmax', None)
 
         self.overlay = None
         self.hvplot_is_geo = kwargs.pop('geo', True)
@@ -52,6 +52,8 @@ class _TrajectoryPlotter:
                 color = 'grey'
             return temp_df.plot(ax=self.ax, color=color, *self.args, **self.kwargs)
         else:
+            self.kwargs.pop('vmin', None)
+            self.kwargs.pop('vmax', None)
             return temp_df.plot(ax=self.ax, vmin=self.min_value, vmax=self.max_value, *self.args, **self.kwargs)
 
     def _hvplot_trajectory(self, traj):
@@ -83,11 +85,15 @@ class _TrajectoryPlotter:
 class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
-        if self.column:
-            self.min_value = self.data.get_min(self.column)
-            self.max_value = self.data.get_max(self.column)
 
     def plot(self):
+        if self.column:
+            speed_col_name = self.data.trajectories[0].get_speed_column_name()
+            if self.column == speed_col_name and speed_col_name not in self.data.trajectories[0].df.columns:
+                self.data.add_speed(overwrite=True)
+            self.max_value = self.kwargs.pop('vmax', self.data.get_max(self.column))
+            self.min_value = self.kwargs.pop('vmin', self.data.get_min(self.column))
+
         self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
         for traj in self.data.trajectories:
             self.ax = self._plot_trajectory(traj)
