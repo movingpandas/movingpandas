@@ -27,6 +27,16 @@ class TrajectoryCollection:
             Name of the GeoDataFrame column containing moving object IDs
         min_length : numeric
             Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+
+        Examples
+        --------
+        >>> import geopandas as read_file
+        >>> import movingpandas as mpd
+        >>>
+        >>> gdf = read_file('data.gpkg')
+        >>> gdf['t'] = pd.to_datetime(gdf['t'])
+        >>> gdf = gdf.set_index('t')
+        >>> trajectory_collection = mpd.TrajectoryCollection(gdf, 'trajectory_id')
         """
         self.min_length = min_length
         if type(data) == list:
@@ -254,7 +264,8 @@ class TrajectoryCollection:
         """
         Filter trajectories by property
 
-        TODO: explain concept of property, i.e. a value in the df that is constant for the whole traj
+        A property is a value in the df that is constant for the whole traj. The filter only checks if the value
+        on the first row equals the requested property value.
 
         Parameters
         ----------
@@ -267,6 +278,10 @@ class TrajectoryCollection:
         -------
         TrajectoryCollection
             Trajectories that fulfill the filter criteria
+
+        Examples
+        --------
+        >>> filtered = trajectory_collection.filter('object_type', 'TypeA')
         """
         filtered = []
         for traj in self.trajectories:
