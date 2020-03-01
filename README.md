@@ -80,6 +80,16 @@ Known issues:
 
 * On Windows, importing rasterio can lead to DLL errors. If this happens, downgrade the rasterio version to 1.0.13.
 
+### Develop mode
+
+To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use: 
+
+
+
+```
+python setup.py develop
+```
+
 ## Contributing to MovingPandas [![GitHub contributors](https://img.shields.io/github/contributors/anitagraser/movingpandas.svg)](https://github.com/anitagraser/movingpandas/graphs/contributors)
 
 All contributions, bug reports, bug fixes, documentation improvements, enhancements and ideas are welcome.
