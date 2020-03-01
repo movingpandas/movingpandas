@@ -711,7 +711,7 @@ class Trajectory:
 
         Supported generalization modes include:
 
-        * 'douglas-peuker' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
+        * 'douglas-peucker' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
         * 'min-time-delta' (tolerance as datetime.timedelta)
         * 'min-distance' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
 
