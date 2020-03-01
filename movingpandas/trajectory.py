@@ -173,6 +173,10 @@ class Trajectory:
         temp = self.copy()
         temp.crs = crs
         temp.df = temp.df.to_crs(crs)
+        if type(crs) == CRS:
+            temp.is_latlon = crs.is_geographic
+        else:
+            temp.is_latlon = crs['init'] == from_epsg(4326)['init']
         return temp
 
     def get_speed_column_name(self):
