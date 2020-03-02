@@ -15,7 +15,7 @@ affiliations:
     index: 1
   - name: "University of Salzburg, Austria"
     index: 2
-date: 31 January 2020
+date: 3 March 2020
 bibliography: paper.bib
 ---
 
@@ -38,7 +38,7 @@ The above operations are crucial to understanding a dataset and identifying issu
 # MovingPandas Tutorial Notebooks
 
 In addition to detailed API documentation and example code executed by pytest, `MovingPandas` documentation includes multiple [tutorial notebooks](https://github.com/anitagraser/movingpandas/tree/master/tutorials) that demonstrate its functionality using case studies. 
-These notebooks can be executed locally or online using [MyBinder](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag)
+These notebooks can be executed locally or online using [MyBinder](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag).
 These tutorial notebooks document how to use `MovingPandas` to explore different types of movement datasets (including, for example, a day of vessel movements with high temporal resolution and multiple years of bird migration data with low temporal resolution).
 
 ![Example trajectory summarizations included in the interactive notebooks](docs/source/img/flow.png)
@@ -47,7 +47,7 @@ These tutorial notebooks document how to use `MovingPandas` to explore different
 
 `MovingPandas`'s goal is to make working with movment data easier for scientists and data analysist who want to use open source `Python` tools for analysis and visualization.
 
-`MovingPandas` depends upon `GeoPandas` [@kelsey_jordahl_2019_3545747], which facilitates reading and writing movement data from common spatial data formats. It also requires `Matplotlib` for static plots and `hvplot` [@philipp_rudiger_2020_3634720] for interactive plots.
+`MovingPandas` depends upon `GeoPandas` [@kelsey_jordahl_2019_3545747], which facilitates reading and writing movement data from common spatial data formats. It also requires `Matplotlib` [@Hunter:2007] for static plots and `hvplot` [@philipp_rudiger_2020_3634720] for interactive plots.
 
 To simplify dependency management and installation for non-experts, we maintain a version of `MovingPandas` on the `conda-forge` channel, which installs the system libraries upon which `MovingPandas` depends. This lowers the barrier to entry for people, particularly scientists, who are learning how to work with movement data in `Python`.
 
