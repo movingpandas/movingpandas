@@ -17,3 +17,4 @@ dependencies:
   - geoviews
   - scikit-learn
   - geopy
+  - panel
