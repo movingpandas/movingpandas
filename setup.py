@@ -8,7 +8,7 @@ INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely==1.7a3', 'pandas', 'geopanda
 
 setuptools.setup(
     name="movingpandas",
-    version="0.3.rc1",
+    version="0.3.rc2",
     author="Anita Graser",
     author_email="anitagraser@gmx.at",
     description="Implementation of Trajectory classes and functions built on top of GeoPandas",
