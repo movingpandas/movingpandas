@@ -169,11 +169,18 @@ class Trajectory:
         Parameters
         ----------
         crs : pyproj.CRS
-            Target coordinate reference system 
+            Target coordinate reference system
 
         Returns
         -------
         Trajectory
+
+        Examples
+        --------
+        Reproject a trajectory to EPSG:4088
+
+        >>> from pyproj import CRS
+        >>> reprojected = trajectory.to_crs(CRS(4088))
         """
         temp = self.copy()
         temp.crs = crs
