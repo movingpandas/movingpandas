@@ -297,6 +297,11 @@ class TrajectoryCollection:
 
         Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
         then speed is calculated in meters per second.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing speed values (default: False)
         """
         for traj in self.trajectories:
             traj.add_speed(overwrite)

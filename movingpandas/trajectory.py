@@ -166,6 +166,11 @@ class Trajectory:
         """
         Returns the trajectory reprojected to the target CRS.
 
+        Parameters
+        ----------
+        crs : pyproj.CRS
+            Target coordinate reference system 
+
         Returns
         -------
         Trajectory
@@ -529,6 +534,11 @@ class Trajectory:
 
         The direction is calculated between the trajectory's start and end location.
         Direction values are in degrees, starting North turning clockwise.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing direction values (default: False)
         """
         if DIRECTION_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has direction values! Use overwrite=True to overwrite exiting values.')
@@ -542,6 +552,11 @@ class Trajectory:
 
         Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
         then speed is calculated in meters per second.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing speed values (default: False)
         """
         if SPEED_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
