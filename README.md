@@ -5,6 +5,8 @@ based on [GeoPandas](https://geopandas.org).
 
 The official documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
+For an example use case, check out our [movement data exploration tutorial](./exploration.html).
+
 
 ## Features
 
