@@ -1,6 +1,7 @@
 # MovingPandas
 
-MovingPandas implements Trajectory data structures and corresponding methods based on **GeoPandas**.
+MovingPandas implements Trajectory data structures and corresponding methods for handling movement data
+based on [GeoPandas](https://geopandas.org).
 
 The official documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
@@ -30,4 +31,4 @@ All MovingPandas tutorials are available on MyBinder - no installation required:
 
 Please cite Graser (2019) when using MovingPandas in your research.
 
-Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54. URL: https://www.austriaca.at/rootcollection?arp=0x003aba2b
+[Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54.](https://www.austriaca.at/rootcollection?arp=0x003aba2b)
