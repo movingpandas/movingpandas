@@ -24,6 +24,11 @@ class Node:
         return {'geometry': self.geometry, 't': self.t, 'value': self.value}
 
 
+class TestPoint(Point):
+    def __init__(self, data, *args, **kwargs):
+        super().__init__(data, *args, **kwargs)
+
+
 def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None):
     nodes = [node.to_dict() for node in nodes]
     df = pd.DataFrame(nodes).set_index('t')
@@ -282,6 +287,17 @@ class TestTrajectory:
         traj = self.default_traj_metric.copy()
         traj.get_position_at(datetime(1970, 1, 1, 0, 0, 2), method="nearest")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
+
+    def test_support_for_subclasses_of_point(self):
+        df = pd.DataFrame([
+            {'geometry': TestPoint(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': TestPoint(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': TestPoint(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 1)
+        traj.hvplot()
+
 
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134

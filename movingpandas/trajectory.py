@@ -442,7 +442,7 @@ class Trajectory:
     def _compute_distance(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
-        if type(pt0) != Point:
+        if not isinstance(pt0, Point):
             return 0.0
         if pt0 == pt1:
             return 0.0
@@ -498,7 +498,7 @@ class Trajectory:
     def _compute_heading(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
-        if type(pt0) != Point:
+        if not isinstance(pt0, Point):
             return 0.0
         if pt0 == pt1:
             return 0.0
@@ -510,9 +510,9 @@ class Trajectory:
     def _compute_speed(self, row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
-        if type(pt0) != Point:
+        if not isinstance(pt0, Point):
             return 0.0
-        if type(pt1) != Point:
+        if not isinstance(pt1, Point):
             raise ValueError('Invalid trajectory! Got {} instead of point!'.format(pt1))
         if pt0 == pt1:
             return 0.0
@@ -526,9 +526,9 @@ class Trajectory:
     def _connect_prev_pt_and_geometry(row):
         pt0 = row['prev_pt']
         pt1 = row['geometry']
-        if type(pt0) != Point:
+        if not isinstance(pt0, Point):
             return None
-        if type(pt1) != Point:
+        if not isinstance(pt1, Point):
             raise ValueError('Invalid trajectory! Got {} instead of point!'.format(pt1))
         if pt0 == pt1:
             # to avoid intersection issues with zero length lines
