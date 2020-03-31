@@ -312,6 +312,18 @@ class TestTrajectory:
         traj.add_direction()
         traj.hvplot()
 
+    def test_support_for_other_time_column_names(self):
+        df = pd.DataFrame([
+            {'geometry': TestPoint(0, 0), 'xxx': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': TestPoint(6, 0), 'xxx': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': TestPoint(6, 6), 'xxx': datetime(2018, 1, 1, 12, 10, 0)}
+        ]).set_index('xxx')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 1)
+        traj.add_speed()
+        traj.add_direction()
+        traj.hvplot()
+
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
 

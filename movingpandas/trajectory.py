@@ -69,6 +69,7 @@ class Trajectory:
         self.obj_id = obj_id
         df.sort_index(inplace=True)
         self.df = df[~df.index.duplicated(keep='first')]
+        #self.df['t'] = self.df.index
         self.crs = df.crs
         self.parent = parent
         try:
@@ -581,10 +582,9 @@ class Trajectory:
     def _get_df_with_speed(self):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
-        if 't' in temp_df.columns:
-            times = temp_df.t
-        else:
-            times = temp_df.reset_index().t
+        temp_df['t'] = temp_df.index
+        times = temp_df.t
+        temp_df = temp_df.drop(columns=['t'])
         temp_df = temp_df.assign(delta_t=times.diff().values)
         try:
             temp_df[SPEED_COL_NAME] = temp_df.apply(self._compute_speed, axis=1)
