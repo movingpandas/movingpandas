@@ -6,6 +6,7 @@ from shapely.geometry import Point
 
 R_EARTH = 6371000  # radius of earth in meters
 
+
 def measure_distance_spherical(point1, point2):
     """Return spherical distance between two shapely Points as a float."""
     if (type(point1) != Point) or (type(point2) != Point):
@@ -21,12 +22,14 @@ def measure_distance_spherical(point1, point2):
     dist = R_EARTH * c
     return dist
 
+
 def measure_distance_euclidean(point1, point2):
     """Return euclidean distance between two shapely Points as float."""
-    if (type(point1) != Point) or (type(point2) != Point):
+    if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     return point1.distance(point2)
- 
+
+
 def calculate_initial_compass_bearing(point1, point2):
     """Calculate the bearing between two points.
 
@@ -41,7 +44,7 @@ def calculate_initial_compass_bearing(point1, point2):
     :Returns Type:
       float
     """
-    if (type(point1) != Point) or (type(point2) != Point):
+    if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     lat1 = radians(point1.y)
     lat2 = radians(point2.y)
@@ -57,11 +60,12 @@ def calculate_initial_compass_bearing(point1, point2):
 
     return compass_bearing
 
+
 def azimuth(point1, point2):
     """
     Calculates euclidean bearing of line between two points
     """
-    if (type(point1) != Point) or (type(point2) != Point):
+    if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
         
     angle = atan2(point2.x - point1.x, point2.y - point1.y) 
@@ -71,6 +75,7 @@ def azimuth(point1, point2):
     #print("{}->{}: angle={} azimuth={}".format(point1, point2, angle, azimuth))
     return azimuth
 
+
 def angular_difference(degrees1, degrees2):
     """
     Calculates the smaller angle between the provided bearings / headings
@@ -79,6 +84,3 @@ def angular_difference(degrees1, degrees2):
     if diff > 180:
         diff = abs(diff - 360)
     return diff 
-    
-    
-    

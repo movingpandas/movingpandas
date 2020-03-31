@@ -201,6 +201,16 @@ class Trajectory:
         """
         return SPEED_COL_NAME
 
+    def get_geom_column_name(self):
+        """
+        Return name of the geometry column
+
+        Returns
+        -------
+        string
+        """
+        return self.df.geometry.name
+
     def to_linestring(self):
         """
         Return trajectory geometry as LineString.
@@ -441,7 +451,7 @@ class Trajectory:
 
     def _compute_distance(self, row):
         pt0 = row['prev_pt']
-        pt1 = row['geometry']
+        pt1 = row.geometry
         if not isinstance(pt0, Point):
             return 0.0
         if pt0 == pt1:
@@ -497,7 +507,7 @@ class Trajectory:
 
     def _compute_heading(self, row):
         pt0 = row['prev_pt']
-        pt1 = row['geometry']
+        pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
             return 0.0
         if pt0 == pt1:
@@ -509,7 +519,7 @@ class Trajectory:
 
     def _compute_speed(self, row):
         pt0 = row['prev_pt']
-        pt1 = row['geometry']
+        pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
@@ -522,10 +532,9 @@ class Trajectory:
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters / row['delta_t'].total_seconds()
 
-    @staticmethod
-    def _connect_prev_pt_and_geometry(row):
+    def _connect_prev_pt_and_geometry(self, row):
         pt0 = row['prev_pt']
-        pt1 = row['geometry']
+        pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
             return None
         if not isinstance(pt1, Point):
@@ -775,12 +784,12 @@ class Trajectory:
             Generalized trajectory
         """
         temp_df = self.df.copy()
-        prev_pt = temp_df.iloc[0]['geometry']
+        prev_pt = temp_df.iloc[0].geometry
         keep_rows = [0]
         i = 0
 
         for index, row in temp_df.iterrows():
-            pt = row['geometry']
+            pt = row.geometry
             if self.is_latlon:
                 dist = measure_distance_spherical(pt, prev_pt)
             else:
@@ -873,7 +882,7 @@ class Trajectory:
 
     def _to_line_df(self):
         line_df = self.df.copy()
-        line_df['prev_pt'] = line_df['geometry'].shift()
+        line_df['prev_pt'] = line_df.geometry.shift()
         line_df['t'] = self.df.index
         line_df['prev_t'] = line_df['t'].shift()
         line_df['line'] = line_df.apply(self._connect_prev_pt_and_geometry, axis=1)
