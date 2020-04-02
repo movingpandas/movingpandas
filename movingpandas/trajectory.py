@@ -237,7 +237,7 @@ class Trajectory:
         # Shapely only supports x, y, z. Therefore, this is a bit hacky!
         coords = ''
         for index, row in self.df.iterrows():
-            pt = row.geometry
+            pt = row[self.get_geom_column_name()]
             t = to_unixtime(index)
             coords += "{} {} {}, ".format(pt.x, pt.y, t)
         wkt = "LINESTRING M ({})".format(coords[:-2])
@@ -252,7 +252,7 @@ class Trajectory:
         shapely Point
             Trajectory start location
         """
-        return self.df.head(1).geometry[0]
+        return self.df.geometry.iloc[0]
 
     def get_end_location(self):
         """Return the trajectory's end location.
@@ -262,7 +262,7 @@ class Trajectory:
         shapely Point
             Trajectory end location
         """
-        return self.df.tail(1).geometry[0]
+        return self.df.geometry.iloc[-1]
 
     def get_bbox(self):
         """
@@ -347,9 +347,9 @@ class Trajectory:
         next_row = self.get_row_at(t, 'bfill')
         t_diff = next_row.name - prev_row.name
         t_diff_at = t - prev_row.name
-        line = LineString([prev_row.geometry, next_row.geometry])
+        line = LineString([prev_row[self.get_geom_column_name()], next_row[self.get_geom_column_name()]])
         if t_diff == 0 or line.length == 0:
-            return prev_row.geometry
+            return prev_row[self.get_geom_column_name()]
         interpolated_position = line.interpolate(t_diff_at/t_diff*line.length)
         return interpolated_position
 
@@ -394,9 +394,9 @@ class Trajectory:
         else:
             row = self.get_row_at(t, method)
             try:
-                return row.geometry[0]
+                return row[self.get_geom_column_name()][0]
             except TypeError:
-                return row.geometry
+                return row[self.get_geom_column_name()]
 
     def get_linestring_between(self, t1, t2, method='interpolated'):
         """
@@ -452,7 +452,7 @@ class Trajectory:
 
     def _compute_distance(self, row):
         pt0 = row['prev_pt']
-        pt1 = row.geometry
+        pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
             return 0.0
         if pt0 == pt1:
@@ -784,12 +784,12 @@ class Trajectory:
             Generalized trajectory
         """
         temp_df = self.df.copy()
-        prev_pt = temp_df.iloc[0].geometry
+        prev_pt = temp_df.iloc[0][self.get_geom_column_name()]
         keep_rows = [0]
         i = 0
 
         for index, row in temp_df.iterrows():
-            pt = row.geometry
+            pt = row[self.get_geom_column_name()]
             if self.is_latlon:
                 dist = measure_distance_spherical(pt, prev_pt)
             else:
@@ -860,7 +860,7 @@ class Trajectory:
         i = 0
 
         for index, row in self.df.iterrows():
-            current_pt = row.geometry
+            current_pt = row[self.get_geom_column_name()]
             if prev_pt is None:
                 prev_pt = current_pt
                 keep_rows.append(i)
