@@ -124,7 +124,7 @@ class _PtsExtractor:
     def find_significant_points(self):
         while self.j < self.n - 1:
             if self.is_representative_max_distance():
-                self.significant_points.append(self.traj.df.iloc[self.j].geometry)
+                self.significant_points.append(self.traj.df.iloc[self.j][self.traj.get_geom_column_name()])
                 self.i = self.j
                 self.j = self.i + 1
                 continue
@@ -133,7 +133,7 @@ class _PtsExtractor:
                     d_time = self.traj.df.iloc[self.k - 1].name - self.traj.df.iloc[self.j].name
                     if d_time >= self.min_stop_duration:
                         # print("significant stop ({1}) at {0}".format(self.j,d_time))
-                        self.significant_points.append(self.traj.df.iloc[self.j].geometry)
+                        self.significant_points.append(self.traj.df.iloc[self.j][self.traj.get_geom_column_name()])
                         self.i = self.j
                         self.j = self.k
                         continue
@@ -144,7 +144,7 @@ class _PtsExtractor:
                 a_turn = self.compute_angle_between_vectors()
                 if a_turn >= self.min_angle and a_turn <= (360 - self.min_angle):
                     # print("significant angle ({0}) at {1}".format(a_turn,self.j))
-                    self.significant_points.append(self.traj.df.iloc[self.j].geometry)
+                    self.significant_points.append(self.traj.df.iloc[self.j][self.traj.get_geom_column_name()])
                     self.i = self.j
                     self.j = self.k
                 else:
@@ -154,17 +154,17 @@ class _PtsExtractor:
         return self.significant_points
 
     def compute_angle_between_vectors(self):
-        p_i = self.traj.df.iloc[self.i].geometry
-        p_j = self.traj.df.iloc[self.j].geometry
-        p_k = self.traj.df.iloc[self.k].geometry
+        p_i = self.traj.df.iloc[self.i][self.traj.get_geom_column_name()]
+        p_j = self.traj.df.iloc[self.j][self.traj.get_geom_column_name()]
+        p_k = self.traj.df.iloc[self.k][self.traj.get_geom_column_name()]
         azimuth_ij = azimuth(p_i, p_j)
         azimuth_jk = azimuth(p_j, p_k)
         return angular_difference(azimuth_ij, azimuth_jk)
 
     def more_points_further_than_min_distance(self):
         for self.k in range(self.j + 1, self.n):
-            p_j = self.traj.df.iloc[self.j].geometry
-            p_k = self.traj.df.iloc[self.k].geometry
+            p_j = self.traj.df.iloc[self.j][self.traj.get_geom_column_name()]
+            p_k = self.traj.df.iloc[self.k][self.traj.get_geom_column_name()]
             if self.traj.is_latlon:
                 d_space_j_k = measure_distance_spherical(p_j, p_k)
             else:
@@ -174,8 +174,8 @@ class _PtsExtractor:
         return False
 
     def is_representative_max_distance(self):
-        p_i = self.traj.df.iloc[self.i].geometry
-        p_j = self.traj.df.iloc[self.j].geometry
+        p_i = self.traj.df.iloc[self.i][self.traj.get_geom_column_name()]
+        p_j = self.traj.df.iloc[self.j][self.traj.get_geom_column_name()]
         if self.traj.is_latlon:
             d_space = measure_distance_spherical(p_i, p_j)
         else:
@@ -288,7 +288,7 @@ class _SequenceGenerator:
         this_sequence = []
         prev_cell_id = None
         for t, row in trajectory.df.iterrows():
-            nearest_id = self.get_nearest(row.geometry)
+            nearest_id = self.get_nearest(row[trajectory.get_geom_column_name()])
             nearest_cell = self.id_to_centroid[nearest_id][0]
             nearest_cell_id = nearest_cell.name
             if len(this_sequence) >= 1:
