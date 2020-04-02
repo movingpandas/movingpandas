@@ -328,22 +328,6 @@ class TestTrajectory:
         traj.to_linestring()
         traj.to_linestringm_wkt()
 
-    def test_support_for_dataframe_with_additional_columns(self):
-        df = pd.DataFrame([
-            {'geometry': TestPoint(0, 0), 'xxx': datetime(2018, 1, 1, 12, 0, 0), 'test': 1},
-            {'geometry': TestPoint(6, 0), 'xxx': datetime(2018, 1, 1, 12, 6, 0), 'test': 2},
-            {'geometry': TestPoint(6, 6), 'xxx': datetime(2018, 1, 1, 12, 10, 0), 'test': 3}
-        ]).set_index('xxx')
-        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
-        traj = Trajectory(geo_df, 1)
-        traj.add_speed()
-        traj.add_direction()
-        traj.hvplot()
-        traj.plot()
-        traj.get_length()
-        traj.to_linestring()
-        traj.to_linestringm_wkt()
-
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
 
