@@ -323,6 +323,10 @@ class TestTrajectory:
         traj.add_speed()
         traj.add_direction()
         traj.hvplot()
+        traj.plot()
+        traj.get_length()
+        traj.to_linestring()
+        traj.to_linestringm_wkt()
 
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
