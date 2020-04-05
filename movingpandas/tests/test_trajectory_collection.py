@@ -67,12 +67,6 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].val2 in ['d', 'h']
         assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 19)]
 
-    def test_generalize(self):
-        collection = self.collection.generalize(mode='min-time-delta', tolerance=timedelta(minutes=10))
-        assert len(collection) == 2
-        assert collection.trajectories[0].to_linestring().wkt == 'LINESTRING (0 0, 6 6, 9 9)'
-        assert collection.trajectories[1].to_linestring().wkt == 'LINESTRING (10 10, 16 16, 190 19)'
-
     def test_split_by_date(self):
         collection = self.collection.split_by_date(mode='day')
         assert len(collection) == 3

@@ -3,6 +3,7 @@
 """
 
 from .trajectory import Trajectory
+from .trajectory_generalizer import TrajectoryGeneralizer
 from .trajectory_collection import TrajectoryCollection
 from .trajectory_aggregator import TrajectoryCollectionAggregator
 

@@ -226,22 +226,6 @@ class TestTrajectory:
         assert traj.get_duration() == timedelta(days=2)
         assert traj.get_start_location() == Point(2, 2)
 
-    def test_douglas_peucker(self):
-        traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
-        result = traj.generalize(mode='douglas-peucker', tolerance=1)
-        assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
-
-    def test_generalize_min_time_delta(self):
-        traj = make_traj([Node(), Node(1, 0.1, minute=6), Node(2, 0.2, minute=10), Node(3, 0, minute=30), Node(3, 3, minute=59)])
-        result = traj.generalize(mode='min-time-delta', tolerance=timedelta(minutes=10))
-        assert result == make_traj([Node(), Node(2, 0.2, minute=10), Node(3, 0, minute=30), Node(3, 3, minute=59)])
-
-    def test_generalize_min_distance(self):
-        traj = make_traj([Node(), Node(0, 0.1, day=1), Node(0, 0.2, day=2), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC)
-        result = traj.generalize(mode='min-distance', tolerance=1)
-        print(result)
-        assert result == make_traj([Node(), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC)
-
     def test_plot_exists(self):
         from matplotlib.axes import Axes
         result = self.default_traj_metric.plot()
