@@ -27,6 +27,7 @@ MovingPandas classes
 
    trajectory
    trajectorycollection
+   trajectorygeneralizer
    trajectoryaggregator
 
 

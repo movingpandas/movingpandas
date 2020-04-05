@@ -10,77 +10,67 @@ from .geometry_utils import measure_distance_spherical, measure_distance_euclide
 
 class TrajectoryGeneralizer:
     """
-    Class for generalizing Trajectories and TrajectoryCollections
+    Generalizer base class
     """
-
-    @staticmethod
-    def generalize(traj, mode, tolerance):
+    def __init__(self, traj):
         """
-        Generalize the input Trajectory/TrajectoryCollection.
-
-        Supported generalization modes are:
-
-        * 'douglas-peucker' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
-        * 'min-time-delta' (tolerance as datetime.timedelta)
-        * 'min-distance' (tolerance as float in CRS units or meters if CRS is geographic, e.g. EPSG:4326 WGS84)
+        Create TrajectoryGeneralizer
 
         Parameters
         ----------
-        mode : str
-            Generalization mode
+        traj : Trajectory/TrajectoryCollection
+        """
+        self.traj = traj
+
+    def generalize(self, tolerance):
+        """
+        Generalize the input Trajectory/TrajectoryCollection.
+
+        Parameters
+        ----------
         tolerance : any type
-            Tolerance threshold, differs by generalization mode
+            Tolerance threshold, differs by generalizer
 
         Returns
         -------
         Trajectory/TrajectoryCollection
             Generalized Trajectory or TrajectoryCollection
         """
-
-        if isinstance(traj, Trajectory):
-            return TrajectoryGeneralizer._generalize_traj(traj, mode, tolerance)
-        elif isinstance(traj, TrajectoryCollection):
-            return TrajectoryGeneralizer._generalize_traj_collection(traj, mode, tolerance)
+        if isinstance(self.traj, Trajectory):
+            return self._generalize_traj(self.traj, tolerance)
+        elif isinstance(self.traj, TrajectoryCollection):
+            return self._generalize_traj_collection(tolerance)
         else:
             raise TypeError
 
-    @staticmethod
-    def _generalize_traj_collection(traj_collection, mode, tolerance):
+    def _generalize_traj_collection(self, tolerance):
         generalized = []
-        for traj in traj_collection.trajectories:
-            generalized.append(TrajectoryGeneralizer._generalize_traj(traj, mode, tolerance))
-        result = copy(traj_collection)
+        for traj in self.traj.trajectories:
+            generalized.append(self._generalize_traj(traj, tolerance))
+        result = copy(self.traj)
         result.trajectories = generalized
         return result
 
-    @staticmethod
-    def _generalize_traj(traj, mode, tolerance):
-        if mode == 'douglas-peucker':
-            return TrajectoryGeneralizer._douglas_peucker(traj, tolerance)
-        elif mode == 'min-time-delta':
-            return TrajectoryGeneralizer._min_time_delta(traj, tolerance)
-        elif mode == 'min-distance':
-            return TrajectoryGeneralizer._min_distance(traj, tolerance)
-        else:
-            raise ValueError('Invalid generalization mode {}. Must be one of [douglas-peucker, min-time-delta, min-distance]'.format(mode))
+    def _generalize_traj(self, traj, tolerance):
+        return traj
 
-    @staticmethod
-    def _min_distance(traj, tolerance):
-        """
-        Generalize the trajectory based on distance.
 
-        This generalization ensures that consecutive locations are at least a certain distance apart.
+class MinDistanceGeneralizer(TrajectoryGeneralizer):
+    """
+    Generalizes based on distance.
 
-        Parameters
-        ----------
-        tolerance : float
-            Desired minimum distance between consecutive points
+    This generalization ensures that consecutive locations are at least a certain distance apart.
 
-        Returns
-        -------
-        Trajectory
-            Generalized trajectory
-        """
+    tolerance : float
+        Desired minimum distance between consecutive points
+
+    Examples
+    --------
+
+    >>> mpd.MinDistanceGeneralizer(traj).generalize(tolerance=1.0)
+    """
+
+    def _generalize_traj(self, traj, tolerance):
         temp_df = traj.df.copy()
         prev_pt = temp_df.iloc[0][traj.get_geom_column_name()]
         keep_rows = [0]
@@ -102,23 +92,23 @@ class TrajectoryGeneralizer:
         new_traj = Trajectory(new_df, traj.id)
         return new_traj
 
-    @staticmethod
-    def _min_time_delta(traj, tolerance):
-        """
-        Generalize the trajectory based on time.
 
-        This generalization ensures that consecutive rows are at least a certain timedelta apart.
+class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
+    """
+    Generalizes based on time.
 
-        Parameters
-        ----------
-        tolerance : datetime.timedelta
-            Desired minimum time difference between consecutive rows
+    This generalization ensures that consecutive rows are at least a certain timedelta apart.
 
-        Returns
-        -------
-        Trajectory
-            Generalized trajectory
-        """
+    tolerance : datetime.timedelta
+        Desired minimum time difference between consecutive rows
+
+    Examples
+    --------
+
+    >>> mpd.MinTimeDeltaGeneralizer(traj).generalize(tolerance=timedelta(minutes=10))
+    """
+
+    def _generalize_traj(self, traj, tolerance):
         temp_df = traj.df.copy()
         temp_df['t'] = temp_df.index
         prev_t = temp_df.head(1)['t'][0]
@@ -138,21 +128,21 @@ class TrajectoryGeneralizer:
         new_traj = Trajectory(new_df, traj.id)
         return new_traj
 
-    @staticmethod
-    def _douglas_peucker(traj, tolerance):
-        """
-        Generalize the trajectory using Douglas-Peucker algorithm.
 
-        Parameters
-        ----------
-        tolerance : float
-            Distance tolerance
+class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
+    """
+    Generalizes using Douglas-Peucker algorithm.
 
-        Returns
-        -------
-        Trajectory
-            Generalized trajectory
-        """
+    tolerance : float
+        Distance tolerance
+
+    Examples
+    --------
+
+    >>> mpd.DouglasPeuckerGeneralizer(traj).generalize(tolerance=1.0)
+    """
+
+    def _generalize_traj(self, traj, tolerance):
         prev_pt = None
         pts = []
         keep_rows = []

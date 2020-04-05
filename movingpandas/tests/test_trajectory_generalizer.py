@@ -7,7 +7,7 @@ from fiona.crs import from_epsg
 from datetime import datetime, timedelta
 from .test_trajectory import make_traj, Node
 from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_generalizer import TrajectoryGeneralizer
+from movingpandas.trajectory_generalizer import DouglasPeuckerGeneralizer, MinDistanceGeneralizer, MinTimeDeltaGeneralizer
 
 
 CRS_METRIC = from_epsg(31256)
@@ -32,21 +32,21 @@ class TestTrajectoryGeneralizer:
 
     def test_douglas_peucker(self):
         traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
-        result = TrajectoryGeneralizer.generalize(traj, mode='douglas-peucker', tolerance=1)
+        result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
 
     def test_generalize_min_time_delta(self):
         traj = make_traj([Node(), Node(1, 0.1, minute=6), Node(2, 0.2, minute=10), Node(3, 0, minute=30), Node(3, 3, minute=59)])
-        result = TrajectoryGeneralizer.generalize(traj, mode='min-time-delta', tolerance=timedelta(minutes=10))
+        result = MinTimeDeltaGeneralizer(traj).generalize(tolerance=timedelta(minutes=10))
         assert result == make_traj([Node(), Node(2, 0.2, minute=10), Node(3, 0, minute=30), Node(3, 3, minute=59)])
 
     def test_generalize_min_distance(self):
         traj = make_traj([Node(), Node(0, 0.1, day=1), Node(0, 0.2, day=2), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC)
-        result = TrajectoryGeneralizer.generalize(traj, mode='min-distance', tolerance=1)
+        result = MinDistanceGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([Node(), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC)
 
     def test_collection(self):
-        collection = TrajectoryGeneralizer.generalize(self.collection, mode='min-time-delta', tolerance=timedelta(minutes=10))
+        collection = MinTimeDeltaGeneralizer(self.collection).generalize(tolerance=timedelta(minutes=10))
         assert len(collection) == 2
         assert collection.trajectories[0].to_linestring().wkt == 'LINESTRING (0 0, 6 6, 9 9)'
         assert collection.trajectories[1].to_linestring().wkt == 'LINESTRING (10 10, 16 16, 190 19)'
