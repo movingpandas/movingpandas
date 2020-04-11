@@ -129,9 +129,12 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
         return new_traj
 
 
-class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
+class MaxDistanceGeneralizer(TrajectoryGeneralizer):
     """
-    Generalizes using Douglas-Peucker algorithm.
+    Generalizes based on distance.
+
+    Similar to Douglas-Peuker. Single-pass implementation that checks whether the provided distance threshold
+    is exceed.
 
     tolerance : float
         Distance tolerance
@@ -139,7 +142,7 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     Examples
     --------
 
-    >>> mpd.DouglasPeuckerGeneralizer(traj).generalize(tolerance=1.0)
+    >>> mpd.MaxDistanceGeneralizer(traj).generalize(tolerance=1.0)
     """
 
     def _generalize_traj(self, traj, tolerance):
@@ -165,6 +168,35 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
             i += 1
 
         keep_rows.append(i)
+        new_df = traj.df.iloc[keep_rows]
+        new_traj = Trajectory(new_df, traj.id)
+        return new_traj
+
+
+class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
+    """
+    Generalizes using Douglas-Peucker algorithm.
+
+    tolerance : float
+        Distance tolerance
+
+    Examples
+    --------
+
+    >>> mpd.DouglasPeuckerGeneralizer(traj).generalize(tolerance=1.0)
+    """
+
+    def _generalize_traj(self, traj, tolerance):
+        keep_rows = []
+        i = 0
+        simplified = traj.to_linestring().simplify(tolerance).coords
+
+        for index, row in traj.df.iterrows():
+            current_pt = row[traj.get_geom_column_name()]
+            if current_pt.coords[0] in simplified:
+                keep_rows.append(i)
+            i += 1
+
         new_df = traj.df.iloc[keep_rows]
         new_traj = Trajectory(new_df, traj.id)
         return new_traj

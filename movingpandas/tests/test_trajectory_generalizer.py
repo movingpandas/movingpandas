@@ -7,7 +7,8 @@ from fiona.crs import from_epsg
 from datetime import datetime, timedelta
 from .test_trajectory import make_traj, Node
 from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_generalizer import DouglasPeuckerGeneralizer, MinDistanceGeneralizer, MinTimeDeltaGeneralizer
+from movingpandas.trajectory_generalizer import MaxDistanceGeneralizer, MinDistanceGeneralizer, \
+    MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer
 
 
 CRS_METRIC = from_epsg(31256)
@@ -35,12 +36,17 @@ class TestTrajectoryGeneralizer:
         result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
 
-    def test_generalize_min_time_delta(self):
+    def test_max_distance(self):
+        traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
+        result = MaxDistanceGeneralizer(traj).generalize(tolerance=1)
+        assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
+
+    def test_min_time_delta(self):
         traj = make_traj([Node(), Node(1, 0.1, minute=6), Node(2, 0.2, minute=10), Node(3, 0, minute=30), Node(3, 3, minute=59)])
         result = MinTimeDeltaGeneralizer(traj).generalize(tolerance=timedelta(minutes=10))
         assert result == make_traj([Node(), Node(2, 0.2, minute=10), Node(3, 0, minute=30), Node(3, 3, minute=59)])
 
-    def test_generalize_min_distance(self):
+    def test_min_distance(self):
         traj = make_traj([Node(), Node(0, 0.1, day=1), Node(0, 0.2, day=2), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC)
         result = MinDistanceGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([Node(), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC)
