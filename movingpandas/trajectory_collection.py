@@ -43,6 +43,7 @@ class TrajectoryCollection:
             self.trajectories = data
         else:
             self.trajectories = self._df_to_trajectories(data, traj_id_col, obj_id_col)
+        self.df = pd.DataFrame([(traj.id, traj) for traj in self.trajectories], columns=["id", "trajectory"])
 
     def __len__(self):
         return len(self.trajectories)
@@ -282,6 +283,9 @@ class TrajectoryCollection:
         """
         for traj in self.trajectories:
             traj.add_speed(overwrite)
+
+    def add_length(self):
+        self.df["length"] = self.df.trajectory.apply(lambda traj: traj.get_length())
 
     def get_min(self, column):
         """
