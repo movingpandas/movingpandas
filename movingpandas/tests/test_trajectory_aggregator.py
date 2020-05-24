@@ -37,5 +37,5 @@ class TestTrajectoryCollectionAggregator:
         assert self.trajectory_aggregator_latlon.get_flows_gdf().crs == CRS_LATLON
 
     def test_get_clusters_gdf_crs(self):
-        assert self.trajectory_aggregator.get_flows_gdf().crs == CRS_METRIC
-        assert self.trajectory_aggregator_latlon.get_flows_gdf().crs == CRS_LATLON
+        assert self.trajectory_aggregator.get_clusters_gdf().crs == CRS_METRIC
+        assert self.trajectory_aggregator_latlon.get_clusters_gdf().crs == CRS_LATLON
