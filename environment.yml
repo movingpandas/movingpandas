@@ -12,7 +12,7 @@ dependencies:
   - geopandas
   - rasterio
   - hvplot
-  - bokeh<2.0
+  - bokeh
   - proj
   - cartopy
   - geoviews
