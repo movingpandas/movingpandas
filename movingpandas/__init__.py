@@ -9,4 +9,4 @@ from .trajectory_collection import TrajectoryCollection
 from .trajectory_aggregator import TrajectoryCollectionAggregator
 
 name = 'movingpandas'
-__version__ = '0.3.rc1'
+__version__ = '0.4.rc1'
