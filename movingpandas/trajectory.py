@@ -71,6 +71,9 @@ class Trajectory:
         #self.df['t'] = self.df.index
         self.crs = df.crs
         self.parent = parent
+        if self.crs is None:
+            self.is_latlon = False
+            return
         try:
             crs = CRS.from_user_input(self.crs)
             self.is_latlon = crs.is_geographic

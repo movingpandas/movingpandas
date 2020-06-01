@@ -50,6 +50,14 @@ class TestTrajectory:
         self.default_traj_latlon = make_traj(nodes[:3], CRS_LATLON)
         self.default_traj_metric_5 = make_traj(nodes, CRS_METRIC)
 
+    def test_latlon(self):
+        traj = make_traj([Node(0, 0), Node(10, 10, day=2)], CRS_LATLON)
+        assert traj.to_linestring().wkt == "LINESTRING (0 0, 10 10)"
+
+    def test_without_crs(self):
+        traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
+        assert traj.to_linestring().wkt == "LINESTRING (0 0, 10 10)"
+
     def test_endlocation(self):
         assert self.default_traj_metric.get_end_location() == Point(10, 0)
 
@@ -126,6 +134,11 @@ class TestTrajectory:
 
     def test_add_speed(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed()
+        assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+
+    def test_add_speed_without_crs(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
         traj.add_speed()
         assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
 
@@ -234,6 +247,12 @@ class TestTrajectory:
     def test_hvplot_exists(self):
         import holoviews
         result = self.default_traj_latlon.hvplot(geo=True, tiles='OSM')
+        assert isinstance(result, holoviews.core.overlay.Overlay)
+
+    def test_hvplot_exists_without_crs(self):
+        import holoviews
+        traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
+        result = traj.hvplot()
         assert isinstance(result, holoviews.core.overlay.Overlay)
 
     def test_tolinestring_does_not_alter_df(self):
