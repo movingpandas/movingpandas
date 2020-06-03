@@ -28,6 +28,10 @@ class TrajectoryCollectionAggregator:
             Minimum angle for significant point extraction
         """
         self.traj_collection = traj_collection
+        if self.traj_collection.trajectories:
+            self._crs = traj_collection.trajectories[0].crs
+        else:
+            self._crs = None
         self.max_distance = max_distance
         self.min_distance = min_distance
         self.min_stop_duration = min_stop_duration
@@ -55,7 +59,7 @@ class TrajectoryCollectionAggregator:
         if not self.significant_points:
             self._extract_significant_points()
         df = DataFrame(self.significant_points, columns=['geometry'])
-        return GeoDataFrame(df)
+        return GeoDataFrame(df, crs=self._crs)
 
     def get_clusters_gdf(self):
         """
@@ -70,7 +74,7 @@ class TrajectoryCollectionAggregator:
             self._cluster_significant_points()
         df = DataFrame([cluster.centroid for cluster in self.clusters], columns=['geometry'])
         df['n'] = [len(cluster.points) for cluster in self.clusters]
-        return GeoDataFrame(df)
+        return GeoDataFrame(df, crs=self._crs)
 
     def get_flows_gdf(self):
         """
@@ -83,7 +87,7 @@ class TrajectoryCollectionAggregator:
         """
         if not self.flows:
             self._compute_flows_between_clusters()
-        return GeoDataFrame(self.flows)
+        return GeoDataFrame(self.flows, crs=self._crs)
 
     def _extract_significant_points(self):
         significant_points = []
