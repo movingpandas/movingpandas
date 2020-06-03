@@ -1,6 +1,8 @@
 # MovingPandas
 
- ![MovingPandas logo](pics/movingpandas.png)
+<p align="center">
+  <img src="pics/movingpandas.png" alt="MovingPandas logo">
+</p>
 
 MovingPandas implements Trajectory data structures and corresponding methods for handling movement data
 based on [GeoPandas](https://geopandas.org).
