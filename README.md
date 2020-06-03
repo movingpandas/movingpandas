@@ -1,5 +1,7 @@
 # MovingPandas
 
+ ![MovingPandas logo](pics/movingpandas.png)
+
 MovingPandas implements Trajectory data structures and corresponding methods for handling movement data
 based on [GeoPandas](https://geopandas.org).
 
