@@ -37,15 +37,15 @@ class TrajectoryCollectionAggregator:
         self.min_stop_duration = min_stop_duration
         self.min_angle = min_angle
         self.is_latlon = self.traj_collection.trajectories[0].is_latlon
-        print('Extracting significant points ...')
+        #print('Extracting significant points ...')
         self.significant_points = self._extract_significant_points()
-        print('  No. significant points: {}'.format(len(self.significant_points)))
-        print('Clustering significant points ...')
+        #print('  No. significant points: {}'.format(len(self.significant_points)))
+        #print('Clustering significant points ...')
         self.clusters = self._cluster_significant_points()
-        print('  No. clusters: {}'.format(len(self.clusters)))
-        print('Computing flows ...')
+        #print('  No. clusters: {}'.format(len(self.clusters)))
+        #print('Computing flows ...')
         self.flows = self._compute_flows_between_clusters()
-        print('Flows ready!')
+        #print('Flows ready!')
 
     def get_significant_points_gdf(self):
         """

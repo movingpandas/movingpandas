@@ -28,14 +28,20 @@ class TestTrajectoryCollectionAggregator:
         self.collection_latlon = TrajectoryCollection(self.geo_df_latlon, 'id', obj_id_col='obj')
         self.trajectory_aggregator_latlon = TrajectoryCollectionAggregator(self.collection_latlon, 100, 0, min_stop_duration=timedelta(hours=12).seconds)
 
-    def test_get_significant_points_gdf_crs(self):
+    def test_get_significant_points_gdf_crs_metric(self):
         assert self.trajectory_aggregator.get_significant_points_gdf().crs == CRS_METRIC
+
+    def test_get_significant_points_gdf_crs_latlon(self):
         assert self.trajectory_aggregator_latlon.get_significant_points_gdf().crs == CRS_LATLON
 
-    def test_get_flows_gdf_crs(self):
+    def test_get_flows_gdf_crs_metric(self):
         assert self.trajectory_aggregator.get_flows_gdf().crs == CRS_METRIC
+
+    def test_get_flows_gdf_crs_latlon(self):
         assert self.trajectory_aggregator_latlon.get_flows_gdf().crs == CRS_LATLON
 
-    def test_get_clusters_gdf_crs(self):
+    def test_get_clusters_gdf_crs_metric(self):
         assert self.trajectory_aggregator.get_clusters_gdf().crs == CRS_METRIC
+
+    def test_get_clusters_gdf_crs_latlon(self):
         assert self.trajectory_aggregator_latlon.get_clusters_gdf().crs == CRS_LATLON
