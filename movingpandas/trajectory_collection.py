@@ -62,6 +62,7 @@ class TrajectoryCollection:
             trajectory = Trajectory(values, traj_id, obj_id=obj_id)
             if trajectory.get_length() < self.min_length:
                 continue
+            trajectory.crs = df.crs
             trajectories.append(trajectory)
         return trajectories
 

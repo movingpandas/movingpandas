@@ -29,9 +29,12 @@ class TestTrajectoryCollectionAggregator:
         self.trajectory_aggregator_latlon = TrajectoryCollectionAggregator(self.collection_latlon, 100, 0, min_stop_duration=timedelta(hours=12).seconds)
 
     def test_get_significant_points_gdf_crs_metric(self):
-        assert self.trajectory_aggregator.get_significant_points_gdf().crs == CRS_METRIC
+        crs = self.trajectory_aggregator.get_significant_points_gdf().crs
+        print("Expected {} and got {}.".format(CRS_METRIC.name, crs.name))
+        assert crs == CRS_METRIC
 
     def test_get_significant_points_gdf_crs_latlon(self):
+        print("Raw GDF crs: {}".format(self.geo_df_latlon.crs.name))
         crs = self.trajectory_aggregator_latlon.get_significant_points_gdf().crs
         print("Expected {} and got {}.".format(CRS_LATLON.name, crs.name))
         assert crs == CRS_LATLON
