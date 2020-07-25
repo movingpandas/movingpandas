@@ -32,7 +32,9 @@ class TestTrajectoryCollectionAggregator:
         assert self.trajectory_aggregator.get_significant_points_gdf().crs == CRS_METRIC
 
     def test_get_significant_points_gdf_crs_latlon(self):
-        assert self.trajectory_aggregator_latlon.get_significant_points_gdf().crs == CRS_LATLON
+        crs = self.trajectory_aggregator_latlon.get_significant_points_gdf().crs
+        print("Expected {} and got {}.".format(CRS_LATLON.name, crs.name))
+        assert crs == CRS_LATLON
 
     def test_get_flows_gdf_crs_metric(self):
         assert self.trajectory_aggregator.get_flows_gdf().crs == CRS_METRIC
