@@ -13,6 +13,7 @@ install:
   # Install dependencies
   - conda env create --file=environment.yml
   - source activate movingpandas
+  - conda install pytest-cov
 
   - conda list
   - python -c "import geopandas; geopandas.show_versions();"
