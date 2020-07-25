@@ -241,19 +241,20 @@ class TestTrajectory:
 
     def test_plot_exists(self):
         from matplotlib.axes import Axes
-        result = self.default_traj_metric.plot()
-        assert isinstance(result, Axes)
+        plot = self.default_traj_metric.plot()
+        assert isinstance(plot, Axes)
 
     def test_hvplot_exists(self):
         import holoviews
-        result = self.default_traj_latlon.hvplot(geo=True, tiles='OSM')
-        assert isinstance(result, holoviews.core.overlay.Overlay)
+        plot = self.default_traj_latlon.hvplot(geo=True)
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+        assert len(plot.Path.ddims) == 2
 
     def test_hvplot_exists_without_crs(self):
         import holoviews
         traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
-        result = traj.hvplot()
-        assert isinstance(result, holoviews.core.overlay.Overlay)
+        plot = traj.hvplot()
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
 
     def test_tolinestring_does_not_alter_df(self):
         traj = self.default_traj_metric
