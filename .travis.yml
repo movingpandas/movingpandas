@@ -1,15 +1,21 @@
 language: python
 python:
   - "3.7"
-before_install:
-  - pip install Cython --install-option="--no-cython-compile"
-  - pip install scipy
-  - pip install codecov 
-  - pip install pytest-cov
-  - sudo apt-get install -y libproj-dev proj-bin proj-data
-  - sudo apt-get install -y python-pyproj
 install:
-  - python setup.py install
+ # Install conda
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update conda
+  - conda info
+
+  # Install dependencies
+  - conda env create --file=environment.yml
+  - source activate movingpandas
+
+  - conda list
+  - python -c "import geopandas; geopandas.show_versions();"
 script:
   - pytest --cov-report xml --cov=movingpandas
 after_success:
