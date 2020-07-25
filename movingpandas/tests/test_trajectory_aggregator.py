@@ -25,6 +25,7 @@ class TestTrajectoryCollectionAggregator:
         self.collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
         self.trajectory_aggregator = TrajectoryCollectionAggregator(self.collection, 100, 0, min_stop_duration=timedelta(hours=12).seconds)
         self.geo_df_latlon = GeoDataFrame(df, crs=CRS_LATLON)
+        self.geo_df_latlon.crs = CRS_LATLON  # try to fix https://travis-ci.com/github/anitagraser/movingpandas/builds/177149345
         self.collection_latlon = TrajectoryCollection(self.geo_df_latlon, 'id', obj_id_col='obj')
         self.trajectory_aggregator_latlon = TrajectoryCollectionAggregator(self.collection_latlon, 100, 0, min_stop_duration=timedelta(hours=12).seconds)
 
