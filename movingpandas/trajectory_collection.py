@@ -50,6 +50,14 @@ class TrajectoryCollection:
     def __str__(self):
         return 'TrajectoryCollection with {} trajectories'.format(self.__len__())
 
+    def __iter__(self):
+        for traj in self.trajectories:
+            if len(traj.df) >= 2:
+                yield traj
+            else:
+                raise ValueError(f"Trajectory with length >= 2 expected: "
+                                 f"got length {len(traj.df)}")
+
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col):
         trajectories = []
         for traj_id, values in df.groupby([traj_id_col]):
@@ -79,7 +87,7 @@ class TrajectoryCollection:
         -------
         Trajectory
         """
-        for traj in self.trajectories:
+        for traj in self:
             if traj.id == traj_id:
                 return traj
 
@@ -98,7 +106,7 @@ class TrajectoryCollection:
             Trajectory start locations
         """
         starts = []
-        for traj in self.trajectories:
+        for traj in self:
             crs = traj.crs
             traj_start = {'t': traj.get_start_time(), 'geometry': traj.get_start_location(),
                           'traj_id': traj.id, 'obj_id': traj.obj_id}
@@ -124,7 +132,7 @@ class TrajectoryCollection:
             Trajectory end locations
         """
         ends = []
-        for traj in self.trajectories:
+        for traj in self:
             crs = traj.crs
             traj_end = {'t': traj.get_end_time(), 'geometry': traj.get_end_location(),
                           'traj_id': traj.id, 'obj_id': traj.obj_id}
@@ -153,7 +161,7 @@ class TrajectoryCollection:
             Resulting split subtrajectories
         """
         trips = []
-        for traj in self.trajectories:
+        for traj in self:
             for x in traj.split_by_date(mode):
                 if x.get_length() > self.min_length:
                     trips.append(x)
@@ -179,7 +187,7 @@ class TrajectoryCollection:
             Resulting split subtrajectories
         """
         trips = []
-        for traj in self.trajectories:
+        for traj in self:
             for x in traj.split_by_observation_gap(gap_timedelta):
                 if x.get_length() > self.min_length:
                     trips.append(x)
@@ -201,7 +209,7 @@ class TrajectoryCollection:
             Resulting intersecting trajectories
         """
         intersecting = []
-        for traj in self.trajectories:
+        for traj in self:
             try:
                 if traj.intersects(polygon):
                     intersecting.append(traj)
@@ -228,7 +236,7 @@ class TrajectoryCollection:
             Resulting clipped trajectory segments
         """
         clipped = []
-        for traj in self.trajectories:
+        for traj in self:
             try:
                 for intersect in traj.clip(polygon, pointbased):
                     clipped.append(intersect)
@@ -262,7 +270,7 @@ class TrajectoryCollection:
         >>> filtered = trajectory_collection.filter('object_type', 'TypeA')
         """
         filtered = []
-        for traj in self.trajectories:
+        for traj in self:
             if traj.df.iloc[0][property_name] in property_values:
                 filtered.append(traj)
         result = copy(self)
@@ -281,7 +289,7 @@ class TrajectoryCollection:
         overwrite : bool
             Whether to overwrite existing speed values (default: False)
         """
-        for traj in self.trajectories:
+        for traj in self:
             traj.add_speed(overwrite)
 
     def get_min(self, column):
@@ -298,7 +306,7 @@ class TrajectoryCollection:
         Sortable
             Minimum value
         """
-        return min([traj.df[column].min() for traj in self.trajectories])
+        return min([traj.df[column].min() for traj in self])
 
     def get_max(self, column):
         """
@@ -314,7 +322,7 @@ class TrajectoryCollection:
         Sortable
             Maximum value
         """
-        return max([traj.df[column].max() for traj in self.trajectories])
+        return max([traj.df[column].max() for traj in self])
 
     def plot(self, *args, **kwargs):
         """

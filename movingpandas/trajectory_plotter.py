@@ -97,7 +97,7 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
             self.min_value = self.kwargs.pop('vmin', self.data.get_min(self.column))
 
         self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
-        for traj in self.data.trajectories:
+        for traj in self.data:
             self.ax = self._plot_trajectory(traj)
             self.kwargs['legend'] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
 
@@ -108,7 +108,7 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
 
     def hvplot(self):
         opts.defaults(opts.Overlay(width=self.width, height=self.height, active_tools=['wheel_zoom']))
-        for traj in self.data.trajectories:
+        for traj in self.data:
             overlay = self._hvplot_trajectory(traj)
             if self.overlay:
                 self.overlay = self.overlay * overlay
