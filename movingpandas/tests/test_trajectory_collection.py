@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, Polygon
 from fiona.crs import from_epsg
 from datetime import datetime, timedelta
+from copy import copy
 from movingpandas.trajectory_collection import TrajectoryCollection
 
 
@@ -104,3 +106,23 @@ class TestTrajectoryCollection:
         import holoviews
         result = self.collection_latlon.hvplot()
         assert isinstance(result, holoviews.core.overlay.Overlay)
+
+    def test_iteration(self):
+        assert sum([1 for _ in self.collection]) == len(self.collection)
+
+    def test_iteration_error(self):
+        def filter_trajectory(trajectory):
+            trajectory.df = trajectory.df[trajectory.df['val'] >= 7]
+            return trajectory
+
+        trajs = [filter_trajectory(traj) for traj in self.collection]
+
+        lengths = (1, 2)
+        for i, traj in enumerate(trajs):
+            assert len(traj.df) == lengths[i]
+
+        collection = copy(self.collection)
+        collection.trajectories = trajs
+        with pytest.raises(ValueError):
+            for _ in collection:
+                pass

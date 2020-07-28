@@ -45,7 +45,7 @@ class TrajectoryGeneralizer:
 
     def _generalize_traj_collection(self, tolerance):
         generalized = []
-        for traj in self.traj.trajectories:
+        for traj in self.traj:
             generalized.append(self._generalize_traj(traj, tolerance))
         result = copy(self.traj)
         result.trajectories = generalized
