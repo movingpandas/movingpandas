@@ -43,9 +43,6 @@ migration of birds, and tracks from a horse's GPS collar.
 All MovingPandas tutorials are available on MyBinder - no installation required: 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb)
 
-![AIS trajectory example](https://user-images.githubusercontent.com/590385/73123652-4eeab080-3f92-11ea-9fb3-15afafcdb33f.PNG)
-
-
 MovingPandas Trajectory objects are created from GeoPandas GeoDataFrames. A minimal example would be:
 
 ```python
