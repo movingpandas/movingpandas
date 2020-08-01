@@ -11,14 +11,14 @@
 
 MovingPandas implements a Trajectory class and corresponding methods based on **[GeoPandas](https://geopandas.org)**.
 
-Visit http://movingpandas.org for details! 
+Visit **[movingpandas.org](http://movingpandas.org)** for details! 
 
 You can try MovingPandas in a MyBinder notebook - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb)
 
 
 ## Documentation
 
-The official documentation is hosted on ReadTheDocs: https://movingpandas.readthedocs.io
+The official documentation is hosted on **[ReadTheDocs](https://movingpandas.readthedocs.io)**
 
 
 ## Examples
