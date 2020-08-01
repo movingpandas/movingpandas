@@ -1,3 +1,9 @@
 theme: minima
 title: MovingPandas 
 description: Movement data exploration and analysis
+
+minima:
+  # generate social links in footer
+  social_links:
+    twitter: underdarkGIS
+    github:  anitagraser
