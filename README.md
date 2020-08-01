@@ -5,6 +5,8 @@
 MovingPandas implements Trajectory data structures and corresponding methods for handling movement data
 based on [GeoPandas](https://geopandas.org).
 
+The repository is hosted on [Github](https://github.com/anitagraser/movingpandas).
+
 The official documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
 For an example use case, check out our [movement data exploration tutorial](./3_horse_collar.html).
