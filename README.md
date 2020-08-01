@@ -23,7 +23,7 @@ The official documentation is hosted on ReadTheDocs: https://movingpandas.readth
 
 ## Examples
 
-![movingpandas_animated](https://anitagraser.github.io/movingpandas/pics/movingpandas_hvplot2.gif)
+![movingpandas_animated](https://user-images.githubusercontent.com/590385/89099729-a9f1da00-d3f1-11ea-91c2-904d477fdcb2.gif)
 ![movingpandas_ais](https://user-images.githubusercontent.com/590385/73123664-5ad67280-3f92-11ea-8b42-02a0135f0f5c.PNG)
 
 ## Installation
