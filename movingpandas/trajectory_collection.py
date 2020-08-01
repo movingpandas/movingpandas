@@ -51,6 +51,14 @@ class TrajectoryCollection:
         return 'TrajectoryCollection with {} trajectories'.format(self.__len__())
 
     def __iter__(self):
+        """
+        Iterator for trajectories in this collection
+
+        Examples
+        --------
+        >>>  for traj in trajectory_collection:
+        >>>      print(traj)
+        """
         for traj in self.trajectories:
             if len(traj.df) >= 2:
                 yield traj
