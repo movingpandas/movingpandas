@@ -1,5 +1,3 @@
-# MovingPandas
-
 <p align="center">
   <img src="pics/movingpandas.png" alt="MovingPandas logo">
 </p>
