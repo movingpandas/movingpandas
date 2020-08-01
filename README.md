@@ -9,7 +9,7 @@
 
 <img align="right" src="https://anitagraser.github.io/movingpandas/pics/movingpandas.png">
 
-MovingPandas implements a Trajectory class and corresponding methods based on **GeoPandas**.
+MovingPandas implements a Trajectory class and corresponding methods based on **[GeoPandas](https://geopandas.org)**.
 
 Visit http://movingpandas.org for details! 
 
