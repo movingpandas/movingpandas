@@ -91,8 +91,8 @@ df = df.set_index('t')
 tc = mpd.TrajectoryCollection(df, 'CollarID')
 
 daily = tc.split_by_date(mode='day')
-daily_lengths = [traj.get_length() for traj in daily.trajectories]
-daily_t = [traj.get_start_time() for traj in daily.trajectories]
+daily_lengths = [traj.get_length() for traj in daily]
+daily_t = [traj.get_start_time() for traj in daily]
 daily_lengths = pd.DataFrame(daily_lengths, index=daily_t, columns=['length'])
 daily_lengths.hvplot(title='Daily trajectory length')
 ```
