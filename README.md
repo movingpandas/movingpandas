@@ -9,6 +9,7 @@ The official documentation is hosted on [ReadTheDocs](https://movingpandas.readt
 
 For an example use case, check out our [movement data exploration tutorial](./exploration.html).
 
+You can try MovingPandas in a MyBinder notebook - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb)
 
 ## Features
 
