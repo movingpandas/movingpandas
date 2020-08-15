@@ -49,6 +49,13 @@ class TestTrajectoryCollection:
         assert self.collection.get_trajectory(2).id == 2
         assert self.collection.get_trajectory(3) is None
 
+    def test_get_loctions_at(self):
+        locs = self.collection.get_locations_at(datetime(2018,1,1,12,6,0), columns=['val', 'val2'])
+        assert len(locs) == 2
+        assert locs.iloc[0].geometry in [Point(6, 0), Point(16, 10)]
+        assert locs.iloc[1].geometry in [Point(6, 0), Point(16, 10)]
+        assert locs.iloc[0].geometry != locs.iloc[1].geometry
+
     def test_get_start_locations(self):
         locs = self.collection.get_start_locations(columns=['val', 'val2'])
         assert len(locs) == 2
@@ -58,6 +65,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].val in [9, 10]
         assert locs.iloc[0].val2 in ['a', 'e']
         assert locs.iloc[1].geometry in [Point(0, 0), Point(10, 10)]
+        assert locs.iloc[0].geometry != locs.iloc[1].geometry
 
     def test_get_end_locations(self):
         locs = self.collection.get_end_locations(columns=['val', 'val2'])
@@ -68,6 +76,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].val in [4, 3]
         assert locs.iloc[0].val2 in ['d', 'h']
         assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 19)]
+        assert locs.iloc[0].geometry != locs.iloc[1].geometry
 
     def test_split_by_date(self):
         collection = self.collection.split_by_date(mode='day')

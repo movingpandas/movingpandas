@@ -99,6 +99,33 @@ class TrajectoryCollection:
             if traj.id == traj_id:
                 return traj
 
+    def get_locations_at(self, t, columns=None):
+        """
+        Returns GeoDataFrame with trajectory locations at the specified timestamp
+
+        Parameters
+        ----------
+        t : datetime.datetime
+        columns : list[string]
+            List of column names that should be copied from the trajectory's dataframe to the output
+
+        Returns
+        -------
+        GeoDataFrame
+            Trajectory locations at timestamp t
+        """
+        locs = []
+        for traj in self:
+            if t == 'start':
+                loc = _get_location_at(traj, traj.get_start_time(), columns)
+            elif t == 'end':
+                loc = _get_location_at(traj, traj.get_end_time(), columns)
+            else:
+                loc = _get_location_at(traj, t, columns)
+            locs.append(loc)
+        locs = GeoDataFrame(pd.DataFrame(locs), crs=traj.crs)
+        return locs
+
     def get_start_locations(self, columns=None):
         """
         Returns GeoDataFrame with trajectory start locations
@@ -113,17 +140,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory start locations
         """
-        starts = []
-        for traj in self:
-            crs = traj.crs
-            traj_start = {'t': traj.get_start_time(), 'geometry': traj.get_start_location(),
-                          'traj_id': traj.id, 'obj_id': traj.obj_id}
-            if columns and columns != [None]:
-                for column in columns:
-                    traj_start[column] = traj.df.iloc[0][column]
-            starts.append(traj_start)
-        starts = GeoDataFrame(pd.DataFrame(starts), crs=crs)
-        return starts
+        return self.get_locations_at('start', columns)
 
     def get_end_locations(self, columns=None):
         """
@@ -139,17 +156,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory end locations
         """
-        ends = []
-        for traj in self:
-            crs = traj.crs
-            traj_end = {'t': traj.get_end_time(), 'geometry': traj.get_end_location(),
-                          'traj_id': traj.id, 'obj_id': traj.obj_id}
-            if columns and columns != [None]:
-                for column in columns:
-                    traj_end[column] = traj.df.iloc[-1][column]
-            ends.append(traj_end)
-        ends = GeoDataFrame(pd.DataFrame(ends), crs=crs)
-        return ends
+        return self.get_locations_at('end', columns)
 
     def split_by_date(self, mode):
         """
@@ -369,3 +376,12 @@ class TrajectoryCollection:
         >>> trajectory_collection.hvplot(c='speed', line_width=7.0, width=700, height=400, colorbar=True)
         """
         return _TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()
+
+
+def _get_location_at(traj, t, columns=None):
+    loc = {'t': t, 'geometry': traj.get_position_at(t),
+           'traj_id': traj.id, 'obj_id': traj.obj_id}
+    if columns and columns != [None]:
+        for column in columns:
+            loc[column] = traj.df.loc[t][column]
+    return loc
