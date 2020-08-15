@@ -53,33 +53,21 @@ def _dissolve_ranges(ranges):
     """SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissolved (aka. merged)."""
     if len(ranges) == 0:
         raise ValueError("Nothing to dissolve (received empty ranges)!")
-    new = []
-    start = None
-    end = None
-    pt0 = None
-    ptn = None
+    dissolved_ranges = []
+    new_range = None
     for r in ranges:
         if r is None:
             continue  # raise ValueError('Received range that is None!')
-        if start is None:
-            start = r.t_0
-            end = r.t_n
-            pt0 = r.pt_0
-            ptn = r.pt_n
-        elif end == r.t_0:
-            end = r.t_n
-            ptn = r.pt_n
-        elif r.t_0 > end and is_equal(r.t_0, end):
-            end = r.t_n
-            ptn = r.pt_n
+        if new_range is None:
+            new_range = SpatioTemporalRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
+        elif new_range.t_n == r.t_0 or (r.t_0 > new_range.t_n and is_equal(r.t_0, new_range.t_n)):
+            new_range.t_n = r.t_n
+            new_range.pt_n = r.pt_n
         else:
-            new.append(SpatioTemporalRange(pt0, ptn, start, end))
-            start = r.t_0
-            end = r.t_n
-            pt0 = r.pt_0
-            ptn = r.pt_n
-    new.append(SpatioTemporalRange(pt0, ptn, start, end))
-    return new
+            dissolved_ranges.append(new_range)
+            new_range = SpatioTemporalRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
+    dissolved_ranges.append(new_range)
+    return dissolved_ranges
 
 
 def is_equal(t1, t2):
