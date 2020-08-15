@@ -49,12 +49,22 @@ class TestTrajectoryCollection:
         assert self.collection.get_trajectory(2).id == 2
         assert self.collection.get_trajectory(3) is None
 
-    def test_get_loctions_at(self):
+    def test_get_locations_at(self):
         locs = self.collection.get_locations_at(datetime(2018,1,1,12,6,0), columns=['val', 'val2'])
         assert len(locs) == 2
         assert locs.iloc[0].geometry in [Point(6, 0), Point(16, 10)]
+        assert locs.iloc[0].val in [5, 6]
         assert locs.iloc[1].geometry in [Point(6, 0), Point(16, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
+
+    def test_get_locations_at_needing_interpolation(self):
+        locs = self.collection.get_locations_at(datetime(2018,1,1,12,6,1), columns=['val', 'val2'])
+        assert len(locs) == 2
+        assert locs.iloc[0].val in [5, 6]
+
+    def test_get_locations_at_out_of_time_range(self):
+        locs = self.collection.get_locations_at(datetime(2017,1,1,12,6,1), columns=['val', 'val2'])
+        assert len(locs) == 0
 
     def test_get_start_locations(self):
         locs = self.collection.get_start_locations(columns=['val', 'val2'])

@@ -121,6 +121,8 @@ class TrajectoryCollection:
             elif t == 'end':
                 loc = _get_location_at(traj, traj.get_end_time(), columns)
             else:
+                if t < traj.get_start_time() or t > traj.get_end_time():
+                    continue
                 loc = _get_location_at(traj, t, columns)
             locs.append(loc)
         locs = GeoDataFrame(pd.DataFrame(locs), crs=traj.crs)
@@ -383,5 +385,5 @@ def _get_location_at(traj, t, columns=None):
            'traj_id': traj.id, 'obj_id': traj.obj_id}
     if columns and columns != [None]:
         for column in columns:
-            loc[column] = traj.df.loc[t][column]
+            loc[column] = traj.df.iloc[traj.df.index.get_loc(t, method='nearest')][column]
     return loc
