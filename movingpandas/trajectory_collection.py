@@ -99,7 +99,7 @@ class TrajectoryCollection:
             if traj.id == traj_id:
                 return traj
 
-    def get_locations_at(self, t, columns=None):
+    def get_locations_at(self, t):
         """
         Returns GeoDataFrame with trajectory locations at the specified timestamp
 
@@ -114,21 +114,20 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory locations at timestamp t
         """
-        locs = []
+        gdf = GeoDataFrame()
         for traj in self:
             if t == 'start':
-                loc = _get_location_at(traj, traj.get_start_time(), columns)
+                x = traj.get_row_at(traj.get_start_time())
             elif t == 'end':
-                loc = _get_location_at(traj, traj.get_end_time(), columns)
+                x = traj.get_row_at(traj.get_end_time())
             else:
                 if t < traj.get_start_time() or t > traj.get_end_time():
                     continue
-                loc = _get_location_at(traj, t, columns)
-            locs.append(loc)
-        locs = GeoDataFrame(pd.DataFrame(locs), crs=traj.crs)
-        return locs
+                x = traj.get_row_at(t)
+            gdf = gdf.append(x)
+        return gdf
 
-    def get_start_locations(self, columns=None):
+    def get_start_locations(self):
         """
         Returns GeoDataFrame with trajectory start locations
 
@@ -142,9 +141,9 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory start locations
         """
-        return self.get_locations_at('start', columns)
+        return self.get_locations_at('start')
 
-    def get_end_locations(self, columns=None):
+    def get_end_locations(self):
         """
         Returns GeoDataFrame with trajectory end locations
 
@@ -158,7 +157,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory end locations
         """
-        return self.get_locations_at('end', columns)
+        return self.get_locations_at('end')
 
     def split_by_date(self, mode):
         """

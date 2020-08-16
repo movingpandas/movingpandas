@@ -7,6 +7,7 @@ from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import Grouper
+from geopandas import GeoDataFrame
 try:
     from pyproj import CRS
 except ImportError:
@@ -319,7 +320,7 @@ class Trajectory:
         t : datetime.datetime
             Timestamp to extract a row for
         method : str
-            Pandas get_loc method
+            Interpolation method (Pandas get_loc method)
 
         Returns
         -------
@@ -364,7 +365,7 @@ class Trajectory:
         t : datetime.datetime
             Timestamp to extract a row for
         method : str
-            Access method
+            Interpolation method
 
         Returns
         -------

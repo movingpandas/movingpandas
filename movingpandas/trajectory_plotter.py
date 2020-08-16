@@ -102,7 +102,7 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
             self.kwargs['legend'] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
 
         self.kwargs.pop('column', None)  # has to be popped, otherwise there's an error in the following plot call if we don't remove column from kwargs
-        start_locs = self.data.get_start_locations([self.column])
+        start_locs = self.data.get_start_locations()
         ax = start_locs.plot(ax=self.ax, column=self.column, color='white', *self.args, **self.kwargs)
         return ax
 
