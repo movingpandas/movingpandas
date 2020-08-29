@@ -107,10 +107,18 @@ Please cite [[0]](#publications) when using MovingPandas in your research.
 
 ## Publications
 
+### About MovingPandas
+
 [0] [Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54.](https://www.austriaca.at/rootcollection?arp=0x003aba2b)
 
-[1] [Graser, A. (2019). Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school, Münster, Germany.](http://www.youtube.com/watch?v=qeLQfnpJV1g)
+[1] [Graser, A. & Dragaschnig, M. (2020). Exploring movement data in notebook environments. To be presented at MoVIS 2020, IEEE VIS 2020.](http://move.geog.ucsb.edu/movis2020/)
 
-[2] [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y)
+### Referencing MovingPandas
+
+* [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y)
+
+### Workshop Videos
+
+* [Graser, A. (2019). Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school, Münster, Germany.](http://www.youtube.com/watch?v=qeLQfnpJV1g)
 
 [![WorkshopVideo](https://user-images.githubusercontent.com/590385/67161044-f08cb100-f356-11e9-8799-f972175ec7f4.png)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Anita Graser: Analyzing movement data")
