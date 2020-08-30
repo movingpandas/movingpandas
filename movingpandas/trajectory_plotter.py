@@ -88,13 +88,16 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
 
+    def get_min_max_values(self):
+        speed_col_name = self.data.trajectories[0].get_speed_column_name()
+        if self.column == speed_col_name and speed_col_name not in self.data.trajectories[0].df.columns:
+            self.data.add_speed(overwrite=True)
+        self.max_value = self.kwargs.pop('vmax', self.data.get_max(self.column))
+        self.min_value = self.kwargs.pop('vmin', self.data.get_min(self.column))
+
     def plot(self):
         if self.column:
-            speed_col_name = self.data.trajectories[0].get_speed_column_name()
-            if self.column == speed_col_name and speed_col_name not in self.data.trajectories[0].df.columns:
-                self.data.add_speed(overwrite=True)
-            self.max_value = self.kwargs.pop('vmax', self.data.get_max(self.column))
-            self.min_value = self.kwargs.pop('vmin', self.data.get_min(self.column))
+            self.get_min_max_values()
 
         self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
         for traj in self.data:

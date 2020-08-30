@@ -88,14 +88,6 @@ class TestTrajectoryCollection:
         assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 19)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
 
-    def test_split_by_date(self):
-        collection = self.collection.split_by_date(mode='day')
-        assert len(collection) == 3
-
-    def test_split_by_observation_gap(self):
-        collection = self.collection.split_by_observation_gap(timedelta(hours=1))
-        assert len(collection) == 4
-
     def test_get_intersecting(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
         collection = self.collection.get_intersecting(polygon)
@@ -125,6 +117,11 @@ class TestTrajectoryCollection:
         import holoviews
         result = self.collection_latlon.hvplot()
         assert isinstance(result, holoviews.core.overlay.Overlay)
+
+    def test_plot_exist_column(self):
+        from matplotlib.axes import Axes
+        result = self.collection.plot(column='val')
+        assert isinstance(result, Axes)
 
     def test_iteration(self):
         assert sum([1 for _ in self.collection]) == len(self.collection)

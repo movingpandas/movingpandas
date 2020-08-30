@@ -7,6 +7,7 @@ from .trajectory_generalizer import TrajectoryGeneralizer, MaxDistanceGeneralize
     MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer
 from .trajectory_collection import TrajectoryCollection
 from .trajectory_aggregator import TrajectoryCollectionAggregator
+from .trajectory_splitter import TemporalSplitter, ObservationGapSplitter
 
 name = 'movingpandas'
-__version__ = '0.4.rc1'
+__version__ = '0.5.rc1'

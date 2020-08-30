@@ -659,59 +659,6 @@ class Trajectory:
         """
         return intersection(self, feature, pointbased)
 
-    def split_by_date(self, mode='day'):
-        """
-        Split trajectory into subtrajectories using regular time intervals.
-
-        Parameters
-        ----------
-        mode : str
-            Split mode
-
-        Returns
-        -------
-        list
-            List of trajectories
-        """
-        result = []
-        if mode == 'day':
-            grouped = self.df.groupby(Grouper(freq="D"))
-        elif mode == 'month':
-            grouped = self.df.groupby(Grouper(freq="M"))
-        elif mode == 'year':
-            grouped = self.df.groupby(Grouper(freq="Y"))
-        else:
-            raise ValueError('Invalid split mode {}. Must be one of [day, month, year]'.format(mode))
-        for key, values in grouped:
-            if len(values) > 1:
-                result.append(Trajectory(values, '{}_{}'.format(self.id, key)))
-        return result
-
-    def split_by_observation_gap(self, gap):
-        """
-        Split the trajectory into subtrajectories whenever there is a gap in the observations.
-
-        Parameters
-        ----------
-        gap : datetime.timedelta
-            Time gap threshold
-
-        Returns
-        -------
-        list
-            List of trajectories
-        """
-        result = []
-        temp_df = self.df.copy()
-        temp_df['t'] = temp_df.index
-        temp_df['gap'] = temp_df['t'].diff() > gap
-        temp_df['gap'] = temp_df['gap'].apply(lambda x: 1 if x else 0).cumsum()
-        dfs = [group[1] for group in temp_df.groupby(temp_df['gap'])]
-        for i, df in enumerate(dfs):
-            df = df.drop(columns=['t', 'gap'])
-            if len(df) > 1:
-                result.append(Trajectory(df, '{}_{}'.format(self.id, i)))
-        return result
 
     def apply_offset_seconds(self, column, offset):
         """
