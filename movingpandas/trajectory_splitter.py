@@ -60,7 +60,7 @@ class TrajectorySplitter:
 
 class TemporalSplitter(TrajectorySplitter):
     """
-    Split trajectory into subtrajectories using regular time intervals.
+    Split trajectories into subtrajectories using regular time intervals.
 
     Parameters
     ----------
@@ -91,7 +91,7 @@ class TemporalSplitter(TrajectorySplitter):
 
 class ObservationGapSplitter(TrajectorySplitter):
     """
-    Split the trajectory into subtrajectories whenever there is a gap in the observations.
+    Split trajectories into subtrajectories whenever there is a gap in the observations.
 
     Parameters
     ----------
@@ -116,3 +116,29 @@ class ObservationGapSplitter(TrajectorySplitter):
             if len(df) > 1:
                 result.append(Trajectory(df, '{}_{}'.format(traj.id, i)))
         return TrajectoryCollection(result)
+
+
+class SpeedSplitter(TrajectorySplitter):
+    """
+    Split trajectories when speed is under the specified limit for at least the specified duration.
+
+    Parameters
+    ----------
+    speed : float
+        Speed limit
+    duration : datetime.timedelta
+        Minimum stop duration
+
+    Examples
+    --------
+
+    >>> mpd.SpeedSplitter(traj).split(speed=10, duration=timedelta(minutes=5))
+    """
+    def _split_traj(self, traj, speed, duration):
+        traj = traj.copy()
+        speed_col_name = traj.get_speed_column_name()
+        if speed_col_name not in traj.df.columns:
+            traj.add_speed(overwrite=True)
+        traj.df = traj.df[traj.df[speed_col_name] >= speed]
+        return ObservationGapSplitter(traj).split(gap=duration)
+

@@ -90,6 +90,9 @@ class Trajectory:
             self.df.geometry.count(), self.id, self.get_start_time(),
             self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
 
+    def __len__(self):
+        return self.get_length()
+
     def __eq__(self, other):
         # TODO: make bullet proof
         return str(self) == str(other) and self.crs == other.crs and self.parent == other.parent

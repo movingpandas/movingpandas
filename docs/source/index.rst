@@ -29,6 +29,7 @@ MovingPandas classes
    trajectorycollection
    trajectorygeneralizer
    trajectoryaggregator
+   trajectorysplitter
 
 
 All Functions
