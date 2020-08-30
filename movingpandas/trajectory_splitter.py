@@ -120,7 +120,7 @@ class ObservationGapSplitter(TrajectorySplitter):
 
 class SpeedSplitter(TrajectorySplitter):
     """
-    Split trajectories when speed is under the specified limit for at least the specified duration.
+    Split trajectories if there are no speed measurements above the speed limit for the specified duration.
 
     Parameters
     ----------
