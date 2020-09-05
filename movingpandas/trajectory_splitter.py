@@ -2,11 +2,12 @@
 
 from copy import copy
 from pandas import Grouper
-from shapely.geometry import LineString
 
+from .trajectory_stop_detector import TrajectoryStopDetector
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-from .geometry_utils import measure_distance_spherical, measure_distance_euclidean
+from .trajectory_utils import convert_time_ranges_to_segments
+from .time_range_utils import TemporalRange
 
 
 class TrajectorySplitter:
@@ -66,6 +67,8 @@ class TemporalSplitter(TrajectorySplitter):
     ----------
     mode : str
         Split mode
+    min_length : numeric
+        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
 
     Examples
     --------
@@ -73,7 +76,7 @@ class TemporalSplitter(TrajectorySplitter):
     >>> mpd.TemporalSplitter(traj).split(mode="year")
     """
 
-    def _split_traj(self, traj, mode='day'):
+    def _split_traj(self, traj, mode='day', min_length=0):
         result = []
         if mode == 'day':
             grouped = traj.df.groupby(Grouper(freq="D"))
@@ -86,7 +89,7 @@ class TemporalSplitter(TrajectorySplitter):
         for key, values in grouped:
             if len(values) > 1:
                 result.append(Trajectory(values, '{}_{}'.format(traj.id, key)))
-        return TrajectoryCollection(result)
+        return TrajectoryCollection(result, min_length=min_length)
 
 
 class ObservationGapSplitter(TrajectorySplitter):
@@ -97,6 +100,8 @@ class ObservationGapSplitter(TrajectorySplitter):
     ----------
     gap : datetime.timedelta
         Time gap threshold
+    min_length : numeric
+        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
 
     Examples
     --------
@@ -104,7 +109,7 @@ class ObservationGapSplitter(TrajectorySplitter):
     >>> mpd.ObservationGapSplitter(traj).split(gap=timedelta(hours=1))
     """
 
-    def _split_traj(self, traj, gap):
+    def _split_traj(self, traj, gap, min_length=0):
         result = []
         temp_df = traj.df.copy()
         temp_df['t'] = temp_df.index
@@ -115,7 +120,7 @@ class ObservationGapSplitter(TrajectorySplitter):
             df = df.drop(columns=['t', 'gap'])
             if len(df) > 1:
                 result.append(Trajectory(df, '{}_{}'.format(traj.id, i)))
-        return TrajectoryCollection(result)
+        return TrajectoryCollection(result, min_length=min_length)
 
 
 class SpeedSplitter(TrajectorySplitter):
@@ -128,17 +133,55 @@ class SpeedSplitter(TrajectorySplitter):
         Speed limit
     duration : datetime.timedelta
         Minimum stop duration
+    min_length : numeric
+        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
 
     Examples
     --------
 
     >>> mpd.SpeedSplitter(traj).split(speed=10, duration=timedelta(minutes=5))
     """
-    def _split_traj(self, traj, speed, duration):
+    def _split_traj(self, traj, speed, duration, min_length=0):
         traj = traj.copy()
         speed_col_name = traj.get_speed_column_name()
         if speed_col_name not in traj.df.columns:
             traj.add_speed(overwrite=True)
         traj.df = traj.df[traj.df[speed_col_name] >= speed]
-        return ObservationGapSplitter(traj).split(gap=duration)
+        return ObservationGapSplitter(traj).split(gap=duration, min_length=min_length)
 
+
+class StopSplitter(TrajectorySplitter):
+    """
+    Split trajectories at detected stops.
+    A stop is detected if the movement stays within an area of specified size for at least the specified duration.
+
+    Parameters
+    ----------
+    max_diameter : float
+        Maximum diameter for stop detection
+    min_duration : datetime.timedelta
+        Minimum stop duration
+    min_length : numeric
+        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+
+    Examples
+    --------
+
+    >>> mpd.StopSplitter(traj).split(max_diameter=30, min_duration=timedelta(seconds=60))
+    """
+    def _split_traj(self, traj, max_diameter, min_duration, min_length=0):
+        stop_detector = TrajectoryStopDetector(traj)
+        stop_time_ranges = stop_detector.get_stop_time_ranges(max_diameter, min_duration)
+        between_stops = self.get_time_ranges_between_stops(stop_time_ranges)
+        result = convert_time_ranges_to_segments(traj, between_stops)
+        return TrajectoryCollection(result, min_length=min_length)
+
+    def get_time_ranges_between_stops(self, stop_ranges):
+        result = []
+        for i in range(0, len(stop_ranges)):
+            if i == 0:
+                result.append(TemporalRange(self.traj.get_start_time(), stop_ranges[i].t_0))
+                continue
+            result.append(TemporalRange(stop_ranges[i-1].t_n, stop_ranges[i].t_0))
+        result.append(TemporalRange(stop_ranges[-1].t_n, self.traj.get_end_time()))
+        return result

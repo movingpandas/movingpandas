@@ -9,7 +9,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from .test_trajectory import make_traj, Node
 from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_splitter import TemporalSplitter, ObservationGapSplitter, SpeedSplitter
+from movingpandas.trajectory_splitter import TemporalSplitter, ObservationGapSplitter, SpeedSplitter, StopSplitter
 
 
 CRS_METRIC = from_epsg(31256)
@@ -103,6 +103,27 @@ class TestTrajectorySplitter:
         assert type(split) == TrajectoryCollection
         assert len(split) == 2
 
+    def test_stop_splitter(self):
+        traj = make_traj([Node(0, 0), Node(0, 10, second=1), Node(0, 20, second=2), Node(0, 21, second=4),
+                          Node(0, 22, second=6), Node(0, 30, second=8), Node(0, 40, second=10), Node(1, 50, second=15)])
+        traj_copy = traj.copy()
+        split = StopSplitter(traj).split(max_diameter=3, min_duration=timedelta(seconds=2))
+        assert_frame_equal(traj.df, traj_copy.df)
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 2
+        assert split.trajectories[0].to_linestring().wkt == 'LINESTRING (0 0, 0 10, 0 20)'
+        assert split.trajectories[1].to_linestring().wkt == 'LINESTRING (0 22, 0 30, 0 40, 1 50)'
+
+    def test_stop_splitter_min_length(self):
+        traj = make_traj([Node(0, 0), Node(0, 10, second=1), Node(0, 20, second=2), Node(0, 21, second=4),
+                          Node(0, 22, second=6), Node(0, 30, second=8), Node(0, 40, second=10), Node(1, 100, second=15)])
+        traj_copy = traj.copy()
+        split = StopSplitter(traj).split(max_diameter=3, min_duration=timedelta(seconds=2), min_length=25)
+        assert_frame_equal(traj.df, traj_copy.df)
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 1
+        assert split.trajectories[0].to_linestring().wkt == 'LINESTRING (0 22, 0 30, 0 40, 1 100)'
+
     def test_collection_split_by_date(self):
         split = TemporalSplitter(self.collection).split(mode='day')
         assert type(split) == TrajectoryCollection
@@ -112,3 +133,13 @@ class TestTrajectorySplitter:
         split = ObservationGapSplitter(self.collection).split(gap=timedelta(hours=1))
         assert type(split) == TrajectoryCollection
         assert len(split) == 4
+
+    def test_stop_splitter_stop_at_start(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, second=1), Node(0, 2, second=2), Node(0, 1, second=3),
+                          Node(0, 22, second=4), Node(0, 30, second=8), Node(0, 40, second=10), Node(1, 50, second=15)])
+        traj_copy = traj.copy()
+        split = StopSplitter(traj).split(max_diameter=3, min_duration=timedelta(seconds=2))
+        assert_frame_equal(traj.df, traj_copy.df)
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 1
+        assert split.trajectories[0].to_linestring().wkt == 'LINESTRING (0 1, 0 22, 0 30, 0 40, 1 50)'

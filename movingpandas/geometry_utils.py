@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from math import sin, cos, atan2, radians, degrees, sqrt
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
 
 
 R_EARTH = 6371000  # radius of earth in meters
 
 
 def measure_distance_spherical(point1, point2):
-    """Return spherical distance between two shapely Points as a float."""
+    """
+    Return spherical distance between two shapely Points as a float.
+    """
     if (type(point1) != Point) or (type(point2) != Point):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     lon1 = float(point1.x)
@@ -24,14 +26,27 @@ def measure_distance_spherical(point1, point2):
 
 
 def measure_distance_euclidean(point1, point2):
-    """Return euclidean distance between two shapely Points as float."""
+    """
+    Return euclidean distance between two shapely Points as float.
+    """
     if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     return point1.distance(point2)
 
 
+def _measure_distance(point1, point2, spherical=False):
+    """
+    Convenience function that returns either euclidean or spherical distance between two points
+    """
+    if spherical:
+        return measure_distance_spherical(point1, point2)
+    else:
+        return measure_distance_euclidean(point1, point2)
+
+
 def calculate_initial_compass_bearing(point1, point2):
-    """Calculate the bearing between two points.
+    """
+    Calculate the bearing between two points.
 
     The formulae used is the following:
         θ = atan2(sin(Δlong).cos(lat2),
@@ -63,7 +78,7 @@ def calculate_initial_compass_bearing(point1, point2):
 
 def azimuth(point1, point2):
     """
-    Calculates euclidean bearing of line between two points
+    Calculates euclidean bearing of line between two points.
     """
     if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
@@ -78,9 +93,25 @@ def azimuth(point1, point2):
 
 def angular_difference(degrees1, degrees2):
     """
-    Calculates the smaller angle between the provided bearings / headings
+    Calculates the smaller angle between the provided bearings / headings.
     """
     diff = abs(degrees1 - degrees2)
     if diff > 180:
         diff = abs(diff - 360)
     return diff 
+
+
+def mrr_diagonal(geom, spherical=False):
+    """
+    Calculate the length of the diagonal of the minimum rotated rectangle of the input geometry.
+    """
+    if len(geom) == 1:
+        return 0
+    if len(geom) == 2:
+        return _measure_distance(geom[0], geom[1], spherical)
+    mrr = LineString(geom).minimum_rotated_rectangle
+    try:  # usually mrr is a Polygon
+        x, y = mrr.exterior.coords.xy
+    except AttributeError:  # thrown if mrr is a LineString
+        return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1], spherical))
+    return _measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)

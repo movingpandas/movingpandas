@@ -6,7 +6,6 @@ import sys
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
-from pandas import Grouper
 from geopandas import GeoDataFrame
 try:
     from pyproj import CRS
@@ -15,7 +14,8 @@ except ImportError:
 
 sys.path.append(os.path.dirname(__file__))
 
-from .overlay import clip, intersection, intersects, SpatioTemporalRange, create_entry_and_exit_points
+from .overlay import clip, intersection, intersects, create_entry_and_exit_points
+from .time_range_utils import SpatioTemporalRange
 from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
                                         measure_distance_euclidean
 from .trajectory_plotter import _TrajectoryPlotter
@@ -451,7 +451,7 @@ class Trajectory:
         Trajectory
             Extracted trajectory segment
         """
-        segment = Trajectory(self.df[t1:t2], self.id, parent=self)
+        segment = Trajectory(self.df[t1:t2], '{}_{}'.format(self.id, t1), parent=self)
         if not segment.is_valid():
             raise RuntimeError("Failed to extract valid trajectory segment between {} and {}".format(t1, t2))
         return segment

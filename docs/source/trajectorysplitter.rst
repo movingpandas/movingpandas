@@ -19,3 +19,6 @@ MovingPandas.TrajectorySplitter
 .. autoclass:: SpeedSplitter
    :members:
 
+.. autoclass:: StopSplitter
+   :members:
+

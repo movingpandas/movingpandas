@@ -5,19 +5,7 @@ from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
 from datetime import datetime, timedelta
 
-
-class SpatioTemporalRange:
-    def __init__(self, pt_0, pt_n, t_0, t_n):
-        self.pt_0 = pt_0
-        self.pt_n = pt_n
-        self.t_0 = t_0
-        self.t_n= t_n
-
-
-class TemporalRange:
-    def __init__(self, t_0, t_n):
-        self.t_0 = t_0
-        self.t_n= t_n
+from .time_range_utils import TemporalRange, SpatioTemporalRange
 
 
 def _get_spatiotemporal_ref(row):

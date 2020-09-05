@@ -99,16 +99,24 @@ class TestTrajectory:
     def test_get_segment_between_existing_timestamps(self):
         segment = self.default_traj_metric_5\
             .get_segment_between(datetime(1970, 1, 1, 0, 0, 10), datetime(1970, 1, 1, 0, 0, 30))
-        expected = make_traj([Node(6, 0, second=10), Node(10, 0, second=20), Node(10, 10, second=30)], parent=self.default_traj_metric_5)
+        expected = make_traj([Node(6, 0, second=10), Node(10, 0, second=20), Node(10, 10, second=30)],
+                             parent=self.default_traj_metric_5, id='1_1970-01-01 00:00:10')
         assert segment == expected
-        not_expected = make_traj([Node(6, 0, second=10), Node(10, 0, second=20), Node(10, 10, second=40)], parent=self.default_traj_metric_5)
+        not_expected = make_traj([Node(6, 0, second=10), Node(10, 0, second=20), Node(10, 10, second=40)],
+                                 parent=self.default_traj_metric_5)
         assert segment != not_expected
 
     def test_get_segment_between_new_timestamps(self):
         segment = self.default_traj_metric_5\
             .get_segment_between(datetime(1970, 1, 1, 0, 0, 5), datetime(1970, 1, 1, 0, 0, 25))
-        expected = make_traj([Node(6, 0, second=10), Node(10, 0, second=20)], parent=self.default_traj_metric_5)
+        expected = make_traj([Node(6, 0, second=10), Node(10, 0, second=20)],
+                             parent=self.default_traj_metric_5, id='1_1970-01-01 00:00:05')
         assert segment == expected
+
+    def test_get_segment_between_start_and_end(self):
+        segment = self.default_traj_metric_5\
+            .get_segment_between(self.default_traj_metric_5.get_start_time(), self.default_traj_metric_5.get_end_time())
+        assert segment.to_linestring().wkt == self.default_traj_metric_5.to_linestring().wkt
 
     def test_get_linestring_between_interpolate(self):
         result = self.default_traj_metric_5\

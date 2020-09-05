@@ -8,7 +8,7 @@ from geopandas import GeoDataFrame
 
 sys.path.append(os.path.dirname(__file__))
 
-from .trajectory import Trajectory, SPEED_COL_NAME
+from .trajectory import Trajectory
 from .trajectory_plotter import _TrajectoryCollectionPlotter
 
 
@@ -40,7 +40,7 @@ class TrajectoryCollection:
         """
         self.min_length = min_length
         if type(data) == list:
-            self.trajectories = data
+            self.trajectories = [traj for traj in data if traj.get_length() >= min_length]
         else:
             self.trajectories = self._df_to_trajectories(data, traj_id_col, obj_id_col)
 
@@ -158,58 +158,6 @@ class TrajectoryCollection:
             Trajectory end locations
         """
         return self.get_locations_at('end')
-
-    def split_by_date(self, mode):
-        """
-        Split trajectories into subtrajectories using regular time intervals.
-
-        Resulting subtrajectories that are shorter than the TrajectoryCollection's
-        min_length threshold are discarded.
-
-        Parameters
-        ----------
-        mode : str
-            Split mode
-
-        Returns
-        -------
-        TrajectoryCollection
-            Resulting split subtrajectories
-        """
-        trips = []
-        for traj in self:
-            for x in traj.split_by_date(mode):
-                if x.get_length() > self.min_length:
-                    trips.append(x)
-        result = copy(self)
-        result.trajectories = trips
-        return result
-
-    def split_by_observation_gap(self, gap_timedelta):
-        """
-        Split trajectories into subtrajectories whenever there is a gap in the observations.
-
-        Resulting subtrajectories that are shorter than the TrajectoryCollection's
-        min_length threshold are discarded.
-
-        Parameters
-        ----------
-        gap : datetime.timedelta
-            Time gap threshold
-
-        Returns
-        -------
-        TrajectoryCollection
-            Resulting split subtrajectories
-        """
-        trips = []
-        for traj in self:
-            for x in traj.split_by_observation_gap(gap_timedelta):
-                if x.get_length() > self.min_length:
-                    trips.append(x)
-        result = copy(self)
-        result.trajectories = trips
-        return result
 
     def get_intersecting(self, polygon):
         """

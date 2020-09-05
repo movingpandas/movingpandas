@@ -30,6 +30,7 @@ MovingPandas classes
    trajectorygeneralizer
    trajectoryaggregator
    trajectorysplitter
+   trajectorystopdetector
 
 
 All Functions

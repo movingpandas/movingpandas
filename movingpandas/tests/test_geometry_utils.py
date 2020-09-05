@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from shapely.geometry import Point
-from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, angular_difference
+from math import sqrt
+from shapely.geometry import Point, LineString
+from movingpandas.geometry_utils import azimuth, calculate_initial_compass_bearing, angular_difference, mrr_diagonal
 
  
 class TestGeometryUtils:
@@ -61,3 +62,6 @@ class TestGeometryUtils:
         
     def test_anglular_difference_twonegative(self):
         assert angular_difference(-200, -160) == 40
+
+    def test_mrr_diagonal(self):
+        assert mrr_diagonal([Point(0, 0), Point(0, 2), Point(2, 0), Point(2, 2)]) == sqrt(8)
