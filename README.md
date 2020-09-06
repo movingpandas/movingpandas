@@ -28,11 +28,11 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 
 ## Installation
 
-MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas): and can be installed using `conda install -c conda-forge movingpandas`.
+MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using `conda install -c conda-forge movingpandas`.
 
 Note that it is **NOT recommended** to install MovingPandas from [PyPI](https://pypi.org/project/movingpandas/)!
 If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed 
-(for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/install.html#installing-with-pip)).
+(for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/getting_started/install.html)).
 On Ubuntu, pip install fails on cartopy with "Proj 4.9.0 must be installed".
 
 ## Development Installation 
