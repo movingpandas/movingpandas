@@ -1,5 +1,3 @@
-# Changelog
-
 <img align="right" src="https://anitagraser.github.io/movingpandas/pics/movingpandas.png">
 
 ## 0.4 (released August 2020)
