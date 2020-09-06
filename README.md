@@ -7,6 +7,8 @@ It provides trajectory data structures and functions for analysis and visualizat
 
 The MovingPandas repository is hosted on [Github](https://github.com/anitagraser/movingpandas).
 
+For more information on individual releases, check out the [Changelog](./changelog).
+
 The official documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
 For an example use case, check out our [movement data exploration tutorial](./3_horse_collar.html).
