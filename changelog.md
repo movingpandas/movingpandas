@@ -4,7 +4,7 @@
 
 Version 0.4 focuses on support for updated dependencies, including GeoPandas, Shapely, and Bokeh. 
 
-For full details, see the [commit history](https://github.com/anitagraser/movingpandas/commits/v0.4.rc1).
+For full details, see the [commit history](https://github.com/anitagraser/movingpandas/commits/v0.4rc1).
 
 ## 0.3 (released March 2020)
 
