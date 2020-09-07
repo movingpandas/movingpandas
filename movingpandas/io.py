@@ -44,9 +44,11 @@ def read_gpx_to_trajectory(fname, to_crs=None):
         ]).set_index('t')
     geo_df = GeoDataFrame(df, crs=track_points.crs)
 
+    # Project it if desired
     if to_crs is not None:
         geo_df = geo_df.to_crs(to_crs)
 
+    # Make the Trajectory
     traj = Trajectory(geo_df, 1)
     return traj
 
