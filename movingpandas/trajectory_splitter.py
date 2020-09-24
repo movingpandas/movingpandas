@@ -20,7 +20,7 @@ class TrajectorySplitter:
 
         Parameters
         ----------
-        traj : Trajectory/TrajectoryCollection
+        traj : Trajectory or TrajectoryCollection
         """
         self.traj = traj
 

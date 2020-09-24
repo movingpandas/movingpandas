@@ -18,7 +18,7 @@ class TrajectoryStopDetector:
 
         Parameters
         ----------
-        traj : Trajectory
+        traj : Trajectory or TrajectoryCollection
         """
         self.traj = traj
 

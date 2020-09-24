@@ -18,7 +18,7 @@ class TrajectoryGeneralizer:
 
         Parameters
         ----------
-        traj : Trajectory/TrajectoryCollection
+        traj : Trajectory or TrajectoryCollection
         """
         self.traj = traj
 
