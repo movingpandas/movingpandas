@@ -2,6 +2,7 @@
 
 import os
 import sys
+import warnings
 
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
@@ -22,6 +23,10 @@ from .trajectory_plotter import _TrajectoryPlotter
 
 SPEED_COL_NAME = 'speed'
 DIRECTION_COL_NAME = 'direction'
+
+
+class MissingCRSWarning(UserWarning, ValueError):
+    pass
 
 
 class Trajectory:
@@ -69,10 +74,11 @@ class Trajectory:
         self.obj_id = obj_id
         df.sort_index(inplace=True)
         self.df = df[~df.index.duplicated(keep='first')]
-        #self.df['t'] = self.df.index
         self.crs = df.crs
         self.parent = parent
         if self.crs is None:
+            warnings.warn('Trajectory generated without CRS! Computations will use Euclidean distances.',
+                          category=MissingCRSWarning)
             self.is_latlon = False
             return
         try:

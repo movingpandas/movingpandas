@@ -2,12 +2,13 @@
 
 import pytest
 import pandas as pd
+import warnings
 from pandas.util.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
-from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME
+from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, MissingCRSWarning
 
 
 CRS_METRIC = from_epsg(31256)
@@ -55,7 +56,8 @@ class TestTrajectory:
         assert traj.to_linestring().wkt == "LINESTRING (0 0, 10 10)"
 
     def test_without_crs(self):
-        traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
+        with pytest.warns(MissingCRSWarning):
+            traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
         assert traj.to_linestring().wkt == "LINESTRING (0 0, 10 10)"
 
     def test_endlocation(self):
