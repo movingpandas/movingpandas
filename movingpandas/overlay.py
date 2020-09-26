@@ -9,8 +9,8 @@ from .time_range_utils import TemporalRange, SpatioTemporalRange
 
 
 def _get_spatiotemporal_ref(row):
-    """Returns the SpatioTemporalRange for the input row's spatial_intersection LineString
-    by interpolating timestamps.
+    """
+    Returns the SpatioTemporalRange for the input row's spatial_intersection LineString by interpolating timestamps.
     """
     if type(row['spatial_intersection']) == LineString:
         pt0 = Point(row['spatial_intersection'].coords[0])
@@ -38,7 +38,9 @@ def _get_spatiotemporal_ref(row):
 
 
 def _dissolve_ranges(ranges):
-    """SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissolved (aka. merged)."""
+    """
+    SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissolved (aka. merged).
+    """
     if len(ranges) == 0:
         raise ValueError("Nothing to dissolve (received empty ranges)!")
     dissolved_ranges = []
@@ -59,7 +61,9 @@ def _dissolve_ranges(ranges):
 
 
 def is_equal(t1, t2):
-    """Similar timestamps are considered equal to avoid numerical issues."""
+    """
+    Similar timestamps are considered equal to avoid numerical issues.
+    """
     if type(t2) == pd.Timestamp:
         td = abs(t1 - t2.tz_localize(t1.tzinfo).to_pydatetime())
     else:
@@ -76,7 +80,9 @@ def intersects(traj, polygon):
 
 
 def create_entry_and_exit_points(traj, range):
-    """Returns a dataframe with inserted entry and exit points according to the provided SpatioTemporalRange"""
+    """
+    Returns a dataframe with inserted entry and exit points according to the provided SpatioTemporalRange.
+    """
     if type(range) != SpatioTemporalRange:
         raise TypeError("Input range has to be a SpatioTemporalRange!")
     # Create row at entry point with attributes from previous row = pad
@@ -126,7 +132,9 @@ def _determine_time_ranges_pointbased(traj, polygon):
 
 
 def _get_potentially_intersecting_lines(traj, polygon):
-    """Uses a spatial index to determine which parts of the trajectory may be intersecting with the polygon"""
+    """
+    Uses a spatial index to determine which parts of the trajectory may be intersecting with the polygon
+    """
     line_df = traj._to_line_df()
     spatial_index = line_df.sindex
     if spatial_index:
@@ -138,7 +146,9 @@ def _get_potentially_intersecting_lines(traj, polygon):
 
 
 def _determine_time_ranges_linebased(traj, polygon):
-    """Returns list of SpatioTemporalRanges that describe trajectory intersections with the provided polygon."""
+    """
+    Returns list of SpatioTemporalRanges that describe trajectory intersections with the provided polygon.
+    """
     # Note: If the trajectory contains consecutive rows without location change
     #       these will result in zero length lines that return an empty
     #       intersection.
@@ -150,7 +160,9 @@ def _determine_time_ranges_linebased(traj, polygon):
 
 
 def clip(traj, polygon, pointbased=False):
-    """Returns a list of trajectory segments clipped by the given feature."""
+    """
+    Returns a list of trajectory segments clipped by the given feature.
+    """
     if not intersects(traj, polygon):
         return []
     if pointbased:
@@ -161,7 +173,9 @@ def clip(traj, polygon, pointbased=False):
 
 
 def _get_geometry_and_properties_from_feature(feature):
-    """Provides convenience access to geometry and properties of a Shapely feature."""
+    """
+    Provides convenience access to geometry and properties of a Shapely feature.
+    """
     if type(feature) != dict:
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
     try:
@@ -173,7 +187,8 @@ def _get_geometry_and_properties_from_feature(feature):
 
 
 def intersection(traj, feature, pointbased=False):
-    """Returns a list of trajectory segments that intersect the given feature.
+    """
+    Returns a list of trajectory segments that intersect the given feature.
     Resulting trajectories include the intersecting feature's attributes.
     """
     geometry, properties = _get_geometry_and_properties_from_feature(feature)
