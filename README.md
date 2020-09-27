@@ -108,6 +108,8 @@ and assessing privacy risks.
 
 Please cite [[0]](#publications) when using MovingPandas in your research.
 
+All releases of MovingPandas have DOIs via Zenodo: https://doi.org/10.5281/zenodo.3710950
+
 ## Publications
 
 ### About MovingPandas
@@ -118,7 +120,11 @@ Please cite [[0]](#publications) when using MovingPandas in your research.
 
 ### Referencing MovingPandas
 
+
+* [Pappalardo, L., Simini, F., Barlacchi, G., & Pellungrini, R. (2019). scikit-mobility: A Python library for the analysis, generation and risk assessment of mobility data. arXiv preprint arXiv:1907.07062.](https://arxiv.org/abs/1907.07062)
 * [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y)
+
+[Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
 ### Workshop Videos
 
