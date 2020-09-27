@@ -15,11 +15,9 @@ Visit **[movingpandas.org](http://movingpandas.org)** for details!
 
 You can try MovingPandas in a MyBinder notebook - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb)
 
-
 ## Documentation
 
 The official documentation is hosted on **[ReadTheDocs](https://movingpandas.readthedocs.io)**
-
 
 ## Examples
 
@@ -29,6 +27,13 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 ## Installation
 
 MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using `conda install -c conda-forge movingpandas`.
+
+**Conda status**
+
+[![Conda Recipe](https://img.shields.io/badge/recipe-movingpandas-green.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas)
 
 Note that it is **NOT recommended** to install MovingPandas from [PyPI](https://pypi.org/project/movingpandas/)!
 If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed 
@@ -77,8 +82,6 @@ Known issues:
 ### Develop mode
 
 To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use: 
-
-
 
 ```
 python setup.py develop
