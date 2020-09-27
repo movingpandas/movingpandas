@@ -20,3 +20,6 @@ class TemporalRangeWithTrajId:
         self.t_0 = t_0
         self.t_n = t_n
         self.traj_id = traj_id
+
+    def __str__(self):
+        return f'Traj {self.traj_id}: {self.t_0} - {self.t_n} (duration: {self.t_n-self.t_0})'
