@@ -1,5 +1,4 @@
 -r requirements.txt
 hvplot
 bokeh
-cartopy
 geoviews
