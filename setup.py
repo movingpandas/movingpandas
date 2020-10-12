@@ -26,6 +26,7 @@ def parse_requirements(path):
 # Packages that MovingPandas uses explicitly:
 INSTALL_REQUIRES = list(parse_requirements('requirements.txt'))
 VIZ_INSTALL_REQUIRES = list(parse_requirements('viz-requirements.txt'))
+DEV_INSTALL_REQUIRES = list(parse_requirements('dev-requirements.txt'))
 
 
 setuptools.setup(
@@ -46,6 +47,7 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'viz': VIZ_INSTALL_REQUIRES
+        'viz': VIZ_INSTALL_REQUIRES,
+        'dev': DEV_INSTALL_REQUIRES
     }
 )
