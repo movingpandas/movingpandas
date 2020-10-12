@@ -9,7 +9,7 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no
   - conda update conda
-  - pip install tox-travis
+  - pip install tox-travis tox-conda
 script:
   - tox
 after_success:
