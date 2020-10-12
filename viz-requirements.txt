@@ -1,4 +1,4 @@
 -r requirements.txt
 hvplot
-bokeh
+bokeh>=2.0.0
 geoviews
