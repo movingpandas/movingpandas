@@ -1,4 +1,6 @@
 -r viz-requirements.txt
 pytest
+pytest-xdist
 tox
 tox-conda
+tox-travis
