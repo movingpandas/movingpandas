@@ -270,7 +270,12 @@ class TestTrajectory:
         traj = Trajectory(geo_df, 1)
         traj.add_speed()
         traj.add_direction()
-        traj.hvplot()
+        try:
+            import holoviews
+        except ModuleNotFoundError:
+            traj.plot()
+        else:
+            traj.hvplot()
 
     def test_support_for_other_geometry_column_names(self):
         df = pd.DataFrame([
@@ -282,7 +287,12 @@ class TestTrajectory:
         traj = Trajectory(geo_df, 1)
         traj.add_speed()
         traj.add_direction()
-        traj.hvplot()
+        try:
+            import holoviews
+        except ModuleNotFoundError:
+            pass
+        else:
+            traj.hvplot()
 
     def test_support_for_other_time_column_names(self):
         df = pd.DataFrame([
@@ -294,7 +304,12 @@ class TestTrajectory:
         traj = Trajectory(geo_df, 1)
         traj.add_speed()
         traj.add_direction()
-        traj.hvplot()
+        try:
+            import holoviews
+        except ModuleNotFoundError:
+            pass
+        else:
+            traj.hvplot()
         traj.plot()
         traj.get_length()
         traj.to_linestring()
