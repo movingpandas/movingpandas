@@ -114,7 +114,7 @@ class TestTrajectoryCollection:
         assert isinstance(result, Axes)
 
     def test_hvplot_exists(self):
-        import holoviews
+        holoviews = pytest.importorskip("holoviews")
         result = self.collection_latlon.hvplot()
         assert isinstance(result, holoviews.core.overlay.Overlay)
 

@@ -1,2 +1,4 @@
 -r viz-requirements.txt
 pytest
+tox
+tox-conda

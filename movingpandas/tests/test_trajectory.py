@@ -218,13 +218,13 @@ class TestTrajectory:
         assert isinstance(plot, Axes)
 
     def test_hvplot_exists(self):
-        import holoviews
+        holoviews = pytest.importorskip("holoviews")
         plot = self.default_traj_latlon.hvplot(geo=True)
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 2
 
     def test_hvplot_exists_without_crs(self):
-        import holoviews
+        holoviews = pytest.importorskip("holoviews")
         traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
         plot = traj.hvplot()
         assert isinstance(plot, holoviews.core.overlay.Overlay)
@@ -300,7 +300,7 @@ class TestTrajectory:
         traj.to_linestring()
         traj.to_linestringm_wkt()
 
-    """ 
+    """
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
 
     def test_crs(self):
@@ -308,4 +308,3 @@ class TestTrajectory:
         new_df = traj.df.to_crs(epsg=3857)
         self.assertEqual(new_df.crs, from_epsg(3857))
     """
-
