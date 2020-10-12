@@ -4,3 +4,4 @@ shapely
 pandas
 geopandas
 pyproj
+rtree
