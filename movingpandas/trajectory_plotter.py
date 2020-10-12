@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-import hvplot.pandas # seems to be necessary for the following import to work
-from holoviews import opts, dim
 
 
 class _TrajectoryPlotter:
@@ -80,6 +78,11 @@ class _TrajectoryPlotter:
         return ax
 
     def hvplot(self):
+        try:
+            import hvplot.pandas  # seems to be necessary for the following import to work
+            from holoviews import opts, dim
+        except ImportError:
+            raise ImportError('hvplot, bokeh, and geoviews must be installed for hvplot. Run `pip install "movingpandas[viz]"`')
         opts.defaults(opts.Overlay(width=self.width, height=self.height, active_tools=['wheel_zoom']))
         return self._hvplot_trajectory(self.data)
 
@@ -110,6 +113,11 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
         return ax
 
     def hvplot(self):
+        try:
+            import hvplot.pandas  # seems to be necessary for the following import to work
+            from holoviews import opts, dim
+        except ImportError:
+            raise ImportError('hvplot, bokeh, and geoviews must be installed for hvplot. Run `pip install "movingpandas[viz]"`')
         opts.defaults(opts.Overlay(width=self.width, height=self.height, active_tools=['wheel_zoom']))
         for traj in self.data:
             overlay = self._hvplot_trajectory(traj)
