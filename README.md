@@ -11,7 +11,7 @@
 
 MovingPandas implements a Trajectory class and corresponding methods based on **[GeoPandas](https://geopandas.org)**.
 
-Visit **[movingpandas.org](http://movingpandas.org)** for details! 
+Visit **[movingpandas.org](http://movingpandas.org)** for details!
 
 You can try MovingPandas in a MyBinder notebook - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/tutorial_getting_started.ipynb)
 
@@ -39,29 +39,28 @@ MovingPandas for Python >= 3.7 and all it's dependencies are available from [con
 
 **Conda status**
 
-[![Conda Recipe](https://img.shields.io/badge/recipe-movingpandas-green.svg)](https://anaconda.org/conda-forge/movingpandas) 
-[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Recipe](https://img.shields.io/badge/recipe-movingpandas-green.svg)](https://anaconda.org/conda-forge/movingpandas)
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas)
 [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas)
 
 Note that it is **NOT recommended** to install MovingPandas from [PyPI](https://pypi.org/project/movingpandas/)!
-If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed 
+If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed
 (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/getting_started/install.html)).
-On Ubuntu, pip install fails on cartopy with "Proj 4.9.0 must be installed".
 
-## Development Installation 
+## Development Installation
 
 Use the following steps to run the notebooks using the current development version:
 
 ### Using conda
 
-**Linux/Mac**:  
+**Linux/Mac**:
 
 ```
 conda env create -f environment.yml
 ```
 
-**Windows**: 
+**Windows**:
 
 ```
 conda config --add channels conda-forge
@@ -90,7 +89,7 @@ Known issues:
 
 ### Develop mode
 
-To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use: 
+To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use:
 
 ```
 python setup.py develop
@@ -104,13 +103,13 @@ A detailed overview on how to contribute can be found in the [contributing guide
 
 ## Related Python Packages
 
-[scikit-mobility](https://github.com/scikit-mobility/scikit-mobility) is a similar package which also deals with movement data. 
-It implements TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas. 
-There is little overlap in the covered use cases and implemented functionality (comparing 
-[MovingPandas tutorials](https://github.com/anitagraser/movingpandas/tree/master/tutorials) and 
-[scikit-mobility tutorials](https://github.com/scikit-mobility/tutorials)). 
-MovingPandas focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis. 
-scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories 
+[scikit-mobility](https://github.com/scikit-mobility/scikit-mobility) is a similar package which also deals with movement data.
+It implements TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas.
+There is little overlap in the covered use cases and implemented functionality (comparing
+[MovingPandas tutorials](https://github.com/anitagraser/movingpandas/tree/master/tutorials) and
+[scikit-mobility tutorials](https://github.com/scikit-mobility/tutorials)).
+MovingPandas focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis.
+scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories
 and assessing privacy risks.
 
 ## Citation information
