@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from copy import copy
 from movingpandas.trajectory_collection import TrajectoryCollection
 
+from .markers import importthenskip
+
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -117,6 +119,11 @@ class TestTrajectoryCollection:
         holoviews = pytest.importorskip("holoviews")
         result = self.collection_latlon.hvplot()
         assert isinstance(result, holoviews.core.overlay.Overlay)
+
+    def test_hvplot_fails_without_holoviews(self):
+        importthenskip('holoviews', minversion='1')
+        with pytest.raises(ImportError):
+            self.collection_latlon.hvplot()
 
     def test_plot_exist_column(self):
         from matplotlib.axes import Axes

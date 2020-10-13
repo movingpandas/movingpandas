@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 from fiona.crs import from_epsg
 from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, MissingCRSWarning
 
+from .markers import importthenskip
+
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -228,6 +230,12 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
         plot = traj.hvplot()
         assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+    def test_hvplot_fails_without_holoviews(self):
+        importthenskip('holoviews')
+        traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
+        with pytest.raises(ImportError):
+            traj.hvplot()
 
     def test_tolinestring_does_not_alter_df(self):
         traj = self.default_traj_metric
