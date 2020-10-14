@@ -66,6 +66,19 @@ class TrajectoryCollection:
                 raise ValueError(f"Trajectory with length >= 2 expected: "
                                  f"got length {len(traj.df)}")
 
+    def copy(self):
+        """
+        Return a copy of the trajectory collection.
+
+        Returns
+        -------
+        TrajectoryCollection
+        """
+        trajectories = [traj.copy() for traj in self.trajectories]
+        # NOTE: traj_id_col and obj_id_col not needed since trajectories are already preprocessed
+        #       on __init__().
+        return TrajectoryCollection(trajectories, min_length=self.min_length)
+
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col):
         trajectories = []
         for traj_id, values in df.groupby([traj_id_col]):
