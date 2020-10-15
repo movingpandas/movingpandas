@@ -99,7 +99,9 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
         if self.column:
             self.get_min_max_values()
 
-        self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
+        if not self.ax:
+            self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
+
         for traj in self.data:
             self.ax = self._plot_trajectory(traj)
             self.kwargs['legend'] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
