@@ -37,6 +37,31 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 
 MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using `conda install -c conda-forge movingpandas`.
 
+Moving pandas can be installed via pip though this may be difficult; some of the dependencies cannot be pip installed (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/getting_started/install.html)). *However* if you have the following required dependencies available then moving pandas can be installed via pip:
+
+- numpy
+- cython
+- matplotlib
+- shapely
+- pandas
+- geopandas
+- pyproj
+- rtree
+
+(in practice this is easily achieved by doing a `conda install -c conda-forge geopandas`).
+
+Doing this gives the option of using either:
+
+```bash
+pip install movingpandas
+```
+
+which will install the base `movingpandas`, or if you require plotting with holoviews, then you can use:
+
+```bash
+pip install "movingpandas[viz]"
+``` 
+
 **Conda status**
 
 [![Conda Recipe](https://img.shields.io/badge/recipe-movingpandas-green.svg)](https://anaconda.org/conda-forge/movingpandas)
@@ -92,7 +117,7 @@ Known issues:
 To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use:
 
 ```
-python setup.py develop
+pip install -e .
 ```
 
 ## Contributing to MovingPandas [![GitHub contributors](https://img.shields.io/github/contributors/anitagraser/movingpandas.svg)](https://github.com/anitagraser/movingpandas/graphs/contributors)

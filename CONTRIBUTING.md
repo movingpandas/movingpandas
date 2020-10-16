@@ -19,10 +19,32 @@ create a development environment that is separate from your existing Python
 environment so that you can make and test changes without compromising your
 own work environment.
 
+### Development library installation
+
+To setup you should install moving pandas in editable mode with:
+
+```bash
+pip install -e .
+pip install -r dev-requirements.txt
+```
+
+Alternately you can install the development requirements in a single line with:
+
+```bash
+pip install -e ".[dev]"
+``` 
+
 ### Run the tests
 
 Before submitting your changes for review, make sure to check that your changes
-do not break any tests by running: ``pytest``
+do not break any tests. There are two methods to run tests:
+
+1. To run tests in the current development environment run `pytest` or 
+   `pytest -cov=movingpandas` to check code coverage for the unit tests.
+2. To run more complete integration tests in multiple environments you can use `tox`
+   instead. **Note** this assumes you are developing in an Anaconda development
+   environment. Also, be warned running in this way takes *much* longer (and will
+   create 4 new Anaconda environments to work in).
 
 ### Raising Pull Requests
 
