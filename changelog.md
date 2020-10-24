@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 0.5 (released September 2020)
+
+Version 0.5 adds stop detection and stop-based trajectory splitting.
+
+For full details, see the [commit history](https://github.com/anitagraser/movingpandas/commits/v0.5rc1).
+
 ## 0.4 (released August 2020)
 
 Version 0.4 focuses on support for updated dependencies, including GeoPandas, Shapely, and Bokeh. 
