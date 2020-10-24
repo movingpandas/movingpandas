@@ -5,11 +5,9 @@ MovingPandas implements trajectory classes and functions built on top of GeoPand
 
 The project home is: http://movingpandas.org
 
-You can find extensive usage examples in the tutorial notebooks included in the
-repository_ and on MyBinder_.
+The code repository is: https://github.com/anitagraser/movingpandas
 
-.. _repository: https://github.com/anitagraser/movingpandas/tree/master/tutorials
-.. _MyBinder: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/tutorial_getting_started.ipynb
+Extensive analysis examples are available from: https://github.com/anitagraser/movingpandas-examples
 
 MovingPandas classes
 --------------------
