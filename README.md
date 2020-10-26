@@ -13,7 +13,9 @@ MovingPandas implements a Trajectory class and corresponding methods based on **
 
 Visit **[movingpandas.org](http://movingpandas.org)** for details! 
 
-You can try MovingPandas in a MyBinder notebook - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/tutorial_getting_started.ipynb)
+You can run **MovingPandas examples** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
+
+To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/tutorial_getting_started.ipynb).
 
 ## Documentation
 
