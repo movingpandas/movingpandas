@@ -2,52 +2,190 @@
 
 import pandas as pd
 from geopandas import GeoDataFrame
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
 from pyproj import CRS
 from datetime import datetime, timedelta
+from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_aggregator import TrajectoryCollectionAggregator
+from movingpandas.trajectory_aggregator import TrajectoryCollectionAggregator, _cluster_significant_points, _PtsExtractor
 
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
 
 
+class TestClustering:
+
+    def test_cluster_points(self):
+        pts = [Point(0, 0), Point(10, 10), Point(10.2, 10.2)]
+        expected = GeoDataFrame(pd.DataFrame([
+            {'geometry': Point(0, 0), 'n': 1},
+            {'geometry': Point(10.1, 10.1), 'n': 2}]
+        ))
+        actual = _cluster_significant_points(pts, max_distance=3, is_latlon=False)
+        actual = [(c.centroid, len(c.points)) for c in actual]
+        expected = [(c.geometry, c.n) for key, c in expected.iterrows()]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
+
+    def test_cluster_points2(self):
+        pts = [Point(0, 0), Point(6, 0), Point(6, 6), Point(0.2, 0.2), Point(6.2, 0.2), Point(6.2, 6.2)]
+        expected = GeoDataFrame(pd.DataFrame([
+            {'geometry': Point(0.1, 0.1), 'n': 2},
+            {'geometry': Point(6.1, 0.1), 'n': 2},
+            {'geometry': Point(6.1, 6.1), 'n': 2}]
+        ))
+        actual = _cluster_significant_points(pts, max_distance=5, is_latlon=False)
+        actual = [(c.centroid, len(c.points)) for c in actual]
+        expected = [(c.geometry, c.n) for key, c in expected.iterrows()]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
+
+
+class TestPtsExtractor:
+
+    def test_sparse_trajectory(self):
+        df = pd.DataFrame([
+            {'id': 1, 'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'id': 1, 'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'id': 1, 'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 14, 10, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 'id')
+        extractor = _PtsExtractor(traj, 5, 0, min_stop_duration=timedelta(hours=12))
+        actual = extractor.find_significant_points()
+        expected = [Point(0, 0), Point(6, 0), Point(6, 6)]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
+
+    def test_dense_trajectory(self):
+        df = pd.DataFrame([
+            {'id': 1, 'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'id': 1, 'geometry': Point(1, 0), 't': datetime(2018, 1, 1, 12, 1, 0)},
+            {'id': 1, 'geometry': Point(2, 0), 't': datetime(2018, 1, 1, 12, 2, 0)},
+            {'id': 1, 'geometry': Point(3, 0), 't': datetime(2018, 1, 1, 12, 3, 0)},
+            {'id': 1, 'geometry': Point(4, 0), 't': datetime(2018, 1, 1, 12, 4, 0)},
+            {'id': 1, 'geometry': Point(5, 0), 't': datetime(2018, 1, 1, 12, 5, 0)},
+            {'id': 1, 'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'id': 1, 'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 14, 10, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 'id')
+        extractor = _PtsExtractor(traj, 4, 0, min_stop_duration=timedelta(hours=12))
+        actual = extractor.find_significant_points()
+        expected = [Point(0, 0), Point(4, 0), Point(6, 0), Point(6, 6)]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
+
+    def test_no_stops_found(self):
+        df = pd.DataFrame([
+            {'id': 1, 'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 10, 0, 0)},
+            {'id': 1, 'geometry': Point(1, 0), 't': datetime(2018, 1, 1, 10, 1, 0)},
+            {'id': 1, 'geometry': Point(2, 0), 't': datetime(2018, 1, 1, 10, 2, 0)},
+            {'id': 1, 'geometry': Point(3, 0), 't': datetime(2018, 1, 1, 12, 3, 0)},
+            {'id': 1, 'geometry': Point(4, 0), 't': datetime(2018, 1, 1, 12, 4, 0)},
+            {'id': 1, 'geometry': Point(5, 0), 't': datetime(2018, 1, 1, 12, 5, 0)},
+            {'id': 1, 'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 14, 6, 0)},
+            {'id': 1, 'geometry': Point(7, 0), 't': datetime(2018, 1, 1, 14, 7, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 'id')
+        extractor = _PtsExtractor(traj, 10, 2, min_stop_duration=timedelta(hours=10))
+        actual = extractor.find_significant_points()
+        for pt in actual: print(pt)
+        expected = [Point(0, 0), Point(7, 0)]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
+
+    def test_stops_found(self):
+        df = pd.DataFrame([
+            {'id': 1, 'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 10, 0, 0)},
+            {'id': 1, 'geometry': Point(1, 0), 't': datetime(2018, 1, 1, 10, 1, 0)},
+            {'id': 1, 'geometry': Point(2, 0), 't': datetime(2018, 1, 1, 10, 2, 0)},
+            {'id': 1, 'geometry': Point(3, 0), 't': datetime(2018, 1, 1, 12, 3, 0)},
+            {'id': 1, 'geometry': Point(4, 0), 't': datetime(2018, 1, 1, 12, 4, 0)},
+            {'id': 1, 'geometry': Point(5, 0), 't': datetime(2018, 1, 1, 12, 5, 0)},
+            {'id': 1, 'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 14, 6, 0)},
+            {'id': 1, 'geometry': Point(7, 0), 't': datetime(2018, 1, 1, 14, 7, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 'id')
+        extractor = _PtsExtractor(traj, 10, 2, min_stop_duration=timedelta(hours=1))
+        actual = extractor.find_significant_points()
+        for pt in actual: print(pt)
+        expected = [Point(0, 0), Point(2, 0), Point(5, 0), Point(7, 0)]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
+
+
 class TestTrajectoryCollectionAggregator:
 
     def setup_method(self):
+        self.pts = [Point(0, 0), Point(6, 0), Point(6, 6), Point(0.2, 0.2), Point(6.2, 0.2), Point(6.2, 6.2)]
         df = pd.DataFrame([
-            {'id': 1, 'obj': 'A', 'geometry': Point(0, 0), 't': datetime(2018,1,1,12,0,0), 'val': 9, 'val2': 'a'},
-            {'id': 1, 'obj': 'A', 'geometry': Point(6, 0), 't': datetime(2018,1,1,12,6,0), 'val': 5, 'val2': 'b'},
-            {'id': 1, 'obj': 'A', 'geometry': Point(6, 6), 't': datetime(2018,1,1,14,10,0), 'val': 2, 'val2': 'c'}
+            {'id': 1, 'obj': 'A', 'geometry': Point(0, 0), 't': datetime(2018,1,1,12,0,0)},
+            {'id': 1, 'obj': 'A', 'geometry': Point(6, 0), 't': datetime(2018,1,1,12,6,0)},
+            {'id': 1, 'obj': 'A', 'geometry': Point(6, 6), 't': datetime(2018,1,1,14,10,0)},
+            {'id': 2, 'obj': 'A', 'geometry': Point(0.2, 0.2), 't': datetime(2019,1,1,12,0,0)},
+            {'id': 2, 'obj': 'A', 'geometry': Point(6.2, 0.2), 't': datetime(2019,1,1,12,6,0)},
+            {'id': 2, 'obj': 'A', 'geometry': Point(6.2, 6.2), 't': datetime(2019,1,1,14,10,0)}
         ]).set_index('t')
         self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         self.collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
-        self.trajectory_aggregator = TrajectoryCollectionAggregator(self.collection, 100, 0, min_stop_duration=timedelta(hours=12).seconds)
+        self.trajectory_aggregator = TrajectoryCollectionAggregator(self.collection, 5, 0, min_stop_duration=timedelta(hours=12))
+        self.expected_clusters = GeoDataFrame(pd.DataFrame([
+            {'geometry': Point(0.1, 0.1), 'n': 2},
+            {'geometry': Point(6.1, 0.1), 'n': 2},
+            {'geometry': Point(6.1, 6.1), 'n': 2}]
+        ))
+        self.expected_flows = GeoDataFrame(pd.DataFrame([
+            {'geometry': LineString([Point(0.1, 0.1), Point(6.1, 0.1)]), 'weight': 2},
+            {'geometry': LineString([Point(6.1, 0.1), Point(6.1, 6.1)]), 'weight': 2}
+        ]))
         self.geo_df_latlon = GeoDataFrame(df, crs=CRS_LATLON)
         self.geo_df_latlon.crs = CRS_LATLON  # try to fix https://travis-ci.com/github/anitagraser/movingpandas/builds/177149345
         self.collection_latlon = TrajectoryCollection(self.geo_df_latlon, 'id', obj_id_col='obj')
-        self.trajectory_aggregator_latlon = TrajectoryCollectionAggregator(self.collection_latlon, 100, 0, min_stop_duration=timedelta(hours=12).seconds)
+        self.trajectory_aggregator_latlon = TrajectoryCollectionAggregator(self.collection_latlon, 100, 0, min_stop_duration=timedelta(hours=12))
 
     def test_get_significant_points_gdf_crs_metric(self):
-        crs = self.trajectory_aggregator.get_significant_points_gdf().crs
-        print("Expected {} and got {}.".format(CRS_METRIC.name, crs.name))
-        assert crs == CRS_METRIC
+        sig_points = self.trajectory_aggregator.get_significant_points_gdf()
+        assert sig_points.crs == CRS_METRIC
+        actual = sig_points.geometry.tolist()
+        expected = self.pts
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
 
     def test_get_significant_points_gdf_crs_latlon(self):
-        print("Raw GDF crs: {}".format(self.geo_df_latlon.crs.name))
         crs = self.trajectory_aggregator_latlon.get_significant_points_gdf().crs
-        print("Expected {} and got {}.".format(CRS_LATLON.name, crs.name))
         assert crs == CRS_LATLON
 
     def test_get_flows_gdf_crs_metric(self):
-        assert self.trajectory_aggregator.get_flows_gdf().crs == CRS_METRIC
+        flows = self.trajectory_aggregator.get_flows_gdf()
+        assert flows.crs == CRS_METRIC
+        actual = [(f.geometry, f.weight) for key, f in flows.iterrows()]
+        expected = [(f.geometry, f.weight) for key, f in self.expected_flows.iterrows()]
+        assert len(actual) == len(expected)
+        for pt in expected:
+            assert pt in actual
 
     def test_get_flows_gdf_crs_latlon(self):
         assert self.trajectory_aggregator_latlon.get_flows_gdf().crs == CRS_LATLON
 
     def test_get_clusters_gdf_crs_metric(self):
-        assert self.trajectory_aggregator.get_clusters_gdf().crs == CRS_METRIC
+        clusters = self.trajectory_aggregator.get_clusters_gdf()
+        assert clusters.crs == CRS_METRIC
+        print(clusters)
+        actual = [(c.geometry, c.n) for key, c in clusters.iterrows()]
+        expected = [(c.geometry, c.n) for key, c in self.expected_clusters.iterrows()]
+        for pt in expected:
+            assert pt in actual
 
     def test_get_clusters_gdf_crs_latlon(self):
         assert self.trajectory_aggregator_latlon.get_clusters_gdf().crs == CRS_LATLON

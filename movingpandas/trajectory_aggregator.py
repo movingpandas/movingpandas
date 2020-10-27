@@ -41,7 +41,7 @@ class TrajectoryCollectionAggregator:
         self.significant_points = self._extract_significant_points()
         #print('  No. significant points: {}'.format(len(self.significant_points)))
         #print('Clustering significant points ...')
-        self.clusters = self._cluster_significant_points()
+        self.clusters = _cluster_significant_points(self.significant_points, self.max_distance, self.is_latlon)
         #print('  No. clusters: {}'.format(len(self.clusters)))
         #print('Computing flows ...')
         self.flows = self._compute_flows_between_clusters()
@@ -96,27 +96,25 @@ class TrajectoryCollectionAggregator:
             significant_points = significant_points + a.find_significant_points()
         return significant_points
 
-    def _cluster_significant_points(self):
-        points = self.significant_points
-        bbox = self.get_significant_points_gdf().total_bounds
-        cell_size = self.max_distance / 10
-        if self.is_latlon:
-            cell_size = cell_size / R_EARTH * 360
-        grid = _Grid(bbox, cell_size)
-        grid.insert_points(points)
-        grid.redistribute_points(points)
-        return grid.resulting_clusters
-
     def _compute_flows_between_clusters(self):
         sg = _SequenceGenerator(self.get_clusters_gdf(), self.traj_collection)
         return sg.create_flow_lines()
 
 
+def _cluster_significant_points(points, max_distance, is_latlon):
+    df = DataFrame(points, columns=['geometry'])
+    bbox = GeoDataFrame(df).total_bounds
+    cell_size = max_distance / 10
+    if is_latlon:
+        cell_size = cell_size / R_EARTH * 360
+    grid = _Grid(bbox, cell_size)
+    grid.insert_points(points)
+    grid.redistribute_points(points)
+    return grid.resulting_clusters
+
+
 class _PtsExtractor:
-    def __init__(self, traj, max_distance, min_distance, min_stop_duration, min_angle):
-        self.i = 0
-        self.j = 1
-        self.k = 2
+    def __init__(self, traj, max_distance, min_distance, min_stop_duration, min_angle=45):
         self.traj = traj
         self.n = self.traj.df.geometry.count()
         self.max_distance = max_distance
@@ -126,70 +124,83 @@ class _PtsExtractor:
         self.significant_points = [self.traj.get_start_location(), self.traj.get_end_location()]
 
     def find_significant_points(self):
-        while self.j < self.n - 1:
-            if self.is_representative_max_distance():
-                self.significant_points.append(self.traj.df.iloc[self.j][self.traj.get_geom_column_name()])
-                self.i = self.j
-                self.j = self.i + 1
+        i = 0
+        j = 1
+        while j < self.n - 1:
+            if self.is_significant_distance(i, j):
+                self.add_point(j)
+                i = j
+                j = i + 1
                 continue
-            elif self.more_points_further_than_min_distance():
-                if self.k > self.j + 1:
-                    d_time = self.traj.df.iloc[self.k - 1].name - self.traj.df.iloc[self.j].name
-                    if d_time >= self.min_stop_duration:
-                        # print("significant stop ({1}) at {0}".format(self.j,d_time))
-                        self.significant_points.append(self.traj.df.iloc[self.j][self.traj.get_geom_column_name()])
-                        self.i = self.j
-                        self.j = self.k
+            k, has_points = self.locate_points_beyond_min_distance(j)
+            if has_points:
+                #print(f"has points (i={i} | j={j} | k={k})")
+                if k > j + 1:
+                    if self.is_significant_stop(j, k):
+                        self.add_point(j)
+                        i = j
+                        j = k
                         continue
-                    else:
-                        # compute the average spatial position to represent the similar points
-                        m = self.j + (self.k - 1 - self.j) / 2
-                        self.j = int(m)
-                a_turn = self.compute_angle_between_vectors()
-                if a_turn >= self.min_angle and a_turn <= (360 - self.min_angle):
-                    # print("significant angle ({0}) at {1}".format(a_turn,self.j))
-                    self.significant_points.append(self.traj.df.iloc[self.j][self.traj.get_geom_column_name()])
-                    self.i = self.j
-                    self.j = self.k
+                    else:  # compute the average spatial position to represent the similar points
+                        m = j + (k - 1 - j) / 2
+                        j = int(m)
+                if self.is_significant_turn(i, j, k):
+                    self.add_point(j)
+                    i = j
+                    j = k
                 else:
-                    self.j += 1
+                    j += 1
             else:
                 return self.significant_points
         return self.significant_points
 
-    def compute_angle_between_vectors(self):
-        p_i = self.traj.df.iloc[self.i][self.traj.get_geom_column_name()]
-        p_j = self.traj.df.iloc[self.j][self.traj.get_geom_column_name()]
-        p_k = self.traj.df.iloc[self.k][self.traj.get_geom_column_name()]
+    def is_significant_turn(self, i, j, k):
+        turn_angle = self.compute_angle_between_vectors(i, j, k)
+        return turn_angle >= self.min_angle and turn_angle <= (360 - self.min_angle)
+
+    def is_significant_stop(self, j, k):
+        delta_t = self.traj.df.iloc[k - 1].name - self.traj.df.iloc[j].name
+        return delta_t >= self.min_stop_duration
+
+    def add_point(self, j):
+        pt = self.get_pt(j)
+        self.append_point(pt)
+
+    def append_point(self, pt):
+        if pt != self.traj.get_start_location():
+            self.significant_points.append(pt)
+
+    def compute_angle_between_vectors(self, i, j, k):
+        p_i = self.get_pt(i)
+        p_j = self.get_pt(j)
+        p_k = self.get_pt(k)
         azimuth_ij = azimuth(p_i, p_j)
         azimuth_jk = azimuth(p_j, p_k)
         return angular_difference(azimuth_ij, azimuth_jk)
 
-    def more_points_further_than_min_distance(self):
-        for self.k in range(self.j + 1, self.n):
-            p_j = self.traj.df.iloc[self.j][self.traj.get_geom_column_name()]
-            p_k = self.traj.df.iloc[self.k][self.traj.get_geom_column_name()]
-            if self.traj.is_latlon:
-                d_space_j_k = measure_distance_spherical(p_j, p_k)
-            else:
-                d_space_j_k = measure_distance_euclidean(p_j, p_k)
-            if d_space_j_k >= self.min_distance:
-                return True
-        return False
+    def locate_points_beyond_min_distance(self, j):
+        for k in range(j + 1, self.n):
+            if self.distance_greater_than(j, k, self.min_distance):
+                return k, True
+        return k, False
 
-    def is_representative_max_distance(self):
-        p_i = self.traj.df.iloc[self.i][self.traj.get_geom_column_name()]
-        p_j = self.traj.df.iloc[self.j][self.traj.get_geom_column_name()]
+    def distance_greater_than(self, loc1, loc2, dist):
+        pt1 = self.get_pt(loc1)
+        pt2 = self.get_pt(loc2)
         if self.traj.is_latlon:
-            d_space = measure_distance_spherical(p_i, p_j)
+            d = measure_distance_spherical(pt1, pt2)
         else:
-            d_space = measure_distance_euclidean(p_i, p_j)
+            d = measure_distance_euclidean(pt1, pt2)
+        return d >= dist
 
-        if d_space >= self.max_distance:
-            self.significant_points.append(p_i)
+    def get_pt(self, the_loc):
+        return self.traj.df.iloc[the_loc][self.traj.get_geom_column_name()]
+
+    def is_significant_distance(self, i, j):
+        if self.distance_greater_than(i, j, self.max_distance):
+            self.append_point(self.get_pt(i))
             return True
-        else:
-            return False
+        return False
 
 
 class _PointCluster:
