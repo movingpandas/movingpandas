@@ -68,7 +68,7 @@ class Trajectory:
         .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
         """
         if len(df) < 2:
-            raise ValueError("Trajectory dataframe must have at least two rows!")
+            raise ValueError("Trajectory DataFrame must have at least two rows!")
 
         self.id = traj_id
         self.obj_id = obj_id
@@ -115,7 +115,7 @@ class Trajectory:
 
     def plot(self, *args, **kwargs):
         """
-        Generate a plot using geopandas default plotting (matplotlib).
+        Generate a plot using GeoPandas default plotting (Matplotlib).
 
         Parameters
         ----------
@@ -138,7 +138,7 @@ class Trajectory:
 
     def hvplot(self, *args, **kwargs):
         """
-        Generate an interactive plot using Holoviews.
+        Generate an interactive plot using HoloViews.
 
         The following parameters are set by default: geo=True, tiles='OSM'.
 
@@ -622,7 +622,7 @@ class Trajectory:
         """
         return intersects(self, polygon)
 
-    def clip(self, polygon, pointbased=False):
+    def clip(self, polygon, point_based=False):
         """
         Return trajectory clipped by the given polygon.
 
@@ -634,7 +634,7 @@ class Trajectory:
         ----------
         polygon : shapely Polygon
             Polygon to clip with
-        pointbased : bool
+        point_based : bool
             Clipping method
 
         Returns
@@ -642,9 +642,9 @@ class Trajectory:
         list
             Clipped trajectory segments
         """
-        return clip(self, polygon, pointbased)
+        return clip(self, polygon, point_based)
 
-    def intersection(self, feature, pointbased=False):
+    def intersection(self, feature, point_based=False):
         """
         Return the trajectory segment that intersects the given feature.
 
@@ -658,7 +658,7 @@ class Trajectory:
         ----------
         feature : shapely Feature
             Feature to intersect with
-        pointbased : bool
+        point_based : bool
             Clipping method
 
         Returns
@@ -666,8 +666,7 @@ class Trajectory:
         Trajectory
             Trajectory segment intersecting with the feature
         """
-        return intersection(self, feature, pointbased)
-
+        return intersection(self, feature, point_based)
 
     def apply_offset_seconds(self, column, offset):
         """

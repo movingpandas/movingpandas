@@ -51,7 +51,7 @@ class TestOverlay:
         polygon = Polygon([(5.1, -5), (7.5, -5), (7.5, 12), (5.1, 12), (5.1, -5)])
         traj = make_traj([Node(), Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30), Node(7, 0, minute=7),
                           Node(10, 0, minute=10)])
-        intersections = traj.clip(polygon, pointbased=True)
+        intersections = traj.clip(polygon, point_based=True)
         assert len(intersections) == 1
         assert intersections[0] == \
                make_traj([Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30), Node(7, 0, minute=7)], id='1_0', parent=traj)
@@ -60,12 +60,12 @@ class TestOverlay:
         polygon = Polygon([(5.1, -5), (6.4, -5), (6.4, 12), (5.1, 12), (5.1, -5)])
         traj = make_traj([Node(), Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30), Node(7, 0, minute=7),
                           Node(10, 0, minute=10)])
-        assert traj.clip(polygon, pointbased=True) == []
+        assert traj.clip(polygon, point_based=True) == []
 
     def test_clip_interpolated_singlepoint(self):
         polygon = Polygon([(5.1, -5), (6.4, -5), (6.4, 12), (5.1, 12), (5.1, -5)])
         traj = make_traj([Node(0, 0, minute=5), Node(6, 0, minute=6), Node(6.5, 0, minute=6, second=30)])
-        intersections = traj.clip(polygon, pointbased=False)
+        intersections = traj.clip(polygon, point_based=False)
         assert len(intersections) == 1
         assert intersections[0] == \
                make_traj([Node(5.1, 0, minute=5, second=51), Node(6, 0, minute=6), Node(6.4, 0, minute=6, second=24)], id='1_0', parent=traj)

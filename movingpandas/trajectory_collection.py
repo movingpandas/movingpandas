@@ -106,8 +106,6 @@ class TrajectoryCollection:
         Parameters
         ----------
         t : datetime.datetime
-        columns : list[string]
-            List of column names that should be copied from the trajectory's dataframe to the output
 
         Returns
         -------
@@ -131,11 +129,6 @@ class TrajectoryCollection:
         """
         Returns GeoDataFrame with trajectory start locations
 
-        Parameters
-        ----------
-        columns : list[string]
-            List of column names that should be copied from the trajectory's dataframe to the output
-
         Returns
         -------
         GeoDataFrame
@@ -146,11 +139,6 @@ class TrajectoryCollection:
     def get_end_locations(self):
         """
         Returns GeoDataFrame with trajectory end locations
-
-        Parameters
-        ----------
-        columns : list[string]
-            List of column names that should be copied from the trajectory's dataframe to the output
 
         Returns
         -------
@@ -183,7 +171,7 @@ class TrajectoryCollection:
         result.trajectories = intersecting
         return result
 
-    def clip(self, polygon, pointbased=False):
+    def clip(self, polygon, point_based=False):
         """
         Clip trajectories by the given polygon.
 
@@ -191,7 +179,7 @@ class TrajectoryCollection:
         ----------
         polygon : shapely Polygon
             Polygon to clip with
-        pointbased : bool
+        point_based : bool
             Clipping method
 
         Returns
@@ -202,7 +190,7 @@ class TrajectoryCollection:
         clipped = []
         for traj in self:
             try:
-                for intersect in traj.clip(polygon, pointbased):
+                for intersect in traj.clip(polygon, point_based):
                     clipped.append(intersect)
             except:
                 pass
@@ -214,13 +202,13 @@ class TrajectoryCollection:
         """
         Filter trajectories by property
 
-        A property is a value in the df that is constant for the whole traj. The filter only checks if the value
+        A property is a value in the df that is constant for the whole trajectory. The filter only checks if the value
         on the first row equals the requested property value.
 
         Parameters
         ----------
         property_name : string
-            Name of the dataframe column containing the property
+            Name of the DataFrame column containing the property
         property_values : any
             Desired property value
 
@@ -258,12 +246,12 @@ class TrajectoryCollection:
 
     def get_min(self, column):
         """
-        Return minimum value in the provided dataframe column over all trajectories
+        Return minimum value in the provided DataFrame column over all trajectories
 
         Parameters
         ----------
         column : string
-            Name of the dataframe column
+            Name of the DataFrame column
 
         Returns
         -------
@@ -274,12 +262,12 @@ class TrajectoryCollection:
 
     def get_max(self, column):
         """
-        Return maximum value in the provided dataframe column over all trajectories
+        Return maximum value in the provided DataFrame column over all trajectories
 
         Parameters
         ----------
         column : string
-            Name of the dataframe column
+            Name of the DataFrame column
 
         Returns
         -------
