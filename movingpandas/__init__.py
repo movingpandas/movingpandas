@@ -10,6 +10,7 @@ from .trajectory_aggregator import TrajectoryCollectionAggregator
 from .trajectory_splitter import TrajectorySplitter, TemporalSplitter, ObservationGapSplitter, SpeedSplitter, \
     StopSplitter
 from .trajectory_stop_detector import TrajectoryStopDetector
+from .point_clusterer import PointClusterer
 
 name = 'movingpandas'
 __version__ = '0.5.rc1'

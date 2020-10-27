@@ -7,41 +7,10 @@ from pyproj import CRS
 from datetime import datetime, timedelta
 from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_aggregator import TrajectoryCollectionAggregator, _cluster_significant_points, _PtsExtractor
-
+from movingpandas.trajectory_aggregator import TrajectoryCollectionAggregator, _PtsExtractor
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
-
-
-class TestClustering:
-
-    def test_cluster_points(self):
-        pts = [Point(0, 0), Point(10, 10), Point(10.2, 10.2)]
-        expected = GeoDataFrame(pd.DataFrame([
-            {'geometry': Point(0, 0), 'n': 1},
-            {'geometry': Point(10.1, 10.1), 'n': 2}]
-        ))
-        actual = _cluster_significant_points(pts, max_distance=3, is_latlon=False)
-        actual = [(c.centroid, len(c.points)) for c in actual]
-        expected = [(c.geometry, c.n) for key, c in expected.iterrows()]
-        assert len(actual) == len(expected)
-        for pt in expected:
-            assert pt in actual
-
-    def test_cluster_points2(self):
-        pts = [Point(0, 0), Point(6, 0), Point(6, 6), Point(0.2, 0.2), Point(6.2, 0.2), Point(6.2, 6.2)]
-        expected = GeoDataFrame(pd.DataFrame([
-            {'geometry': Point(0.1, 0.1), 'n': 2},
-            {'geometry': Point(6.1, 0.1), 'n': 2},
-            {'geometry': Point(6.1, 6.1), 'n': 2}]
-        ))
-        actual = _cluster_significant_points(pts, max_distance=5, is_latlon=False)
-        actual = [(c.centroid, len(c.points)) for c in actual]
-        expected = [(c.geometry, c.n) for key, c in expected.iterrows()]
-        assert len(actual) == len(expected)
-        for pt in expected:
-            assert pt in actual
 
 
 class TestPtsExtractor:

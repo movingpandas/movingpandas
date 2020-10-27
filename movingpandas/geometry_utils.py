@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from math import sin, cos, atan2, radians, degrees, sqrt
+from math import sin, cos, atan2, radians, degrees, sqrt, pi
 from shapely.geometry import Point, LineString
 
 
 R_EARTH = 6371000  # radius of earth in meters
+C_EARTH = 2 * R_EARTH * pi  # circumference
 
 
 def measure_distance_spherical(point1, point2):
