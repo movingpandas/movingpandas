@@ -15,7 +15,7 @@ Visit **[movingpandas.org](http://movingpandas.org)** for details!
 
 You can run **MovingPandas examples** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
 
-To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/tutorial_getting_started.ipynb).
+To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/1-getting-started.ipynb).
 
 ## Documentation
 
