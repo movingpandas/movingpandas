@@ -1,8 +1,6 @@
 from copy import copy
-from shapely.geometry import LineString
 from abc import ABC, abstractmethod
 
-import utm
 import numpy as np
 from stonesoup.types.detection import Detection
 from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, ConstantVelocity
