@@ -87,13 +87,23 @@ class _TrajectoryPlotter:
 class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
+        self._speeds = []
 
     def get_min_max_values(self):
         speed_col_name = self.data.trajectories[0].get_speed_column_name()
-        if self.column == speed_col_name and speed_col_name not in self.data.trajectories[0].df.columns:
-            self.data.add_speed(overwrite=True)
-        self.max_value = self.kwargs.pop('vmax', self.data.get_max(self.column))
-        self.min_value = self.kwargs.pop('vmin', self.data.get_min(self.column))
+        min_value, max_value = (None, None)
+        if self.column == speed_col_name:
+            for traj in self.data:
+                if self.column not in traj.df.columns:
+                    temp = traj.copy()
+                    temp.add_speed(overwrite=True)
+                    self._speeds.append(temp.df[self.column])
+                else:
+                    self._speeds.append(traj.df[self.column])
+            min_value = min([min(s.tolist()) for s in self._speeds])
+            max_value = max([max(s.tolist()) for s in self._speeds])
+        self.min_value = self.kwargs.pop('vmin', min_value)
+        self.max_value = self.kwargs.pop('vmax', max_value)
 
     def plot(self):
         if self.column:
@@ -102,8 +112,14 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
         if not self.ax:
             self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
 
-        for traj in self.data:
-            self.ax = self._plot_trajectory(traj)
+        for i, traj in enumerate(self.data):
+            speed_col_name = traj.get_speed_column_name()
+            if self.column == speed_col_name and self.column not in traj.df.columns:
+                temp = traj.copy()
+                temp.df[self.column] = self._speeds[i]
+                self.ax = self._plot_trajectory(temp)
+            else:
+                self.ax = self._plot_trajectory(traj)
             self.kwargs['legend'] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
 
         self.kwargs.pop('column', None)  # has to be popped, otherwise there's an error in the following plot call if we don't remove column from kwargs
