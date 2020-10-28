@@ -123,6 +123,11 @@ class TestTrajectoryCollection:
         result = self.collection.plot(column='val')
         assert isinstance(result, Axes)
 
+    def test_plot_speed_not_altering_collection(self):
+        self.collection.plot(column='speed')
+        assert(all(['speed' not in traj.df.columns.values
+                    for traj in self.collection.trajectories]))
+
     def test_iteration(self):
         assert sum([1 for _ in self.collection]) == len(self.collection)
 
