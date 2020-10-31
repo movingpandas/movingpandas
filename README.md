@@ -113,12 +113,12 @@ There is little overlap in the covered use cases and implemented functionality (
 [scikit-mobility tutorials](https://github.com/scikit-mobility/tutorials)). 
 MovingPandas focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis. 
 scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories 
-and assessing privacy risks.
+and assessing privacy risks. Plotting is based on Folium. 
 
 [PyMove](https://github.com/InsightLab/PyMove) provides functionality similar to MovingPandas. 
 It implements PandasMoveDataFrames and DaskMoveDataFrame on top of Pandas and Dask DataFrames. Plotting is based on Folium. 
 
-[Tracktable](https://github.com/sandialabs/tracktable) is a related Python package with its core data structures and algorithms implemented in C++, i.e. it is not based on Pandas. 
+[Tracktable](https://github.com/sandialabs/tracktable) is a related Python package with its core data structures and algorithms implemented in C++, i.e. it is not based on Pandas. Plotting is based on Cartopy (for still images) and Folium (for interactive rendering).
 
 ## Citation information
 
