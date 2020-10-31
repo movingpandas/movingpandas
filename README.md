@@ -118,6 +118,8 @@ and assessing privacy risks.
 [PyMove](https://github.com/InsightLab/PyMove) provides functionality similar to MovingPandas. 
 It implements PandasMoveDataFrames and DaskMoveDataFrame on top of Pandas and Dask DataFrames. Plotting is based on Folium. 
 
+[Tracktable](https://github.com/sandialabs/tracktable) is a related Python package with its core data structures and algorithms implemented in C++, i.e. it is not based on Pandas. 
+
 ## Citation information
 
 Please cite [[0]](#publications) when using MovingPandas in your research.
