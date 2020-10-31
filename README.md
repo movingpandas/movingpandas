@@ -115,6 +115,9 @@ MovingPandas focuses on spatio-temporal data exploration with corresponding func
 scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories 
 and assessing privacy risks.
 
+[PyMove](https://github.com/InsightLab/PyMove) provides functionality similar to MovingPandas. 
+It implements PandasMoveDataFrames and DaskMoveDataFrame on top of Pandas and Dask DataFrames. Plotting is based on Folium. 
+
 ## Citation information
 
 Please cite [[0]](#publications) when using MovingPandas in your research.
@@ -127,7 +130,7 @@ All releases of MovingPandas have DOIs via Zenodo: https://doi.org/10.5281/zenod
 
 [0] [Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54.](https://www.austriaca.at/rootcollection?arp=0x003aba2b)
 
-[1] [Graser, A. & Dragaschnig, M. (2020). Exploring movement data in notebook environments. To be presented at MoVIS 2020, IEEE VIS 2020.](http://move.geog.ucsb.edu/movis2020/)
+[1] [Graser, A. & Dragaschnig, M. (2020). Exploring movement data in notebook environments. Presented at MoVIS 2020, IEEE VIS 2020.](http://move.geog.ucsb.edu/movis2020/)
 
 ### Referencing MovingPandas
 
