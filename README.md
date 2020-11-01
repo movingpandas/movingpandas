@@ -115,6 +115,8 @@ MovingPandas focuses on spatio-temporal data exploration with corresponding func
 scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories 
 and assessing privacy risks. Plotting is based on Folium. 
 
+[Traja](https://github.com/traja-team/traja) extends the capabilitis of Pandas DataFrames specific for animal trajectory analysis in 2D. Plotting (static) are based on seaborn. 
+
 [PyMove](https://github.com/InsightLab/PyMove) provides functionality similar to MovingPandas. 
 It implements PandasMoveDataFrames and DaskMoveDataFrame on top of Pandas and Dask DataFrames. Plotting is based on Folium. 
 
