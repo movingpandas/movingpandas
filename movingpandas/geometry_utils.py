@@ -2,6 +2,7 @@
 
 from math import sin, cos, atan2, radians, degrees, sqrt, pi
 from shapely.geometry import Point, LineString
+from geopy import distance
 
 
 R_EARTH = 6371000  # radius of earth in meters
@@ -34,6 +35,19 @@ def measure_distance_euclidean(point1, point2):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
     return point1.distance(point2)
 
+def measure_distance_geodesic(point1, point2):
+    """
+    Return the geodesic distance between two points as a float of (SI) unit meters.
+    """
+    if (type(point1) != Point) or (type(point2) != Point):
+        raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
+    lon1 = float(point1.x)
+    lon2 = float(point2.x)
+    lat1 = float(point1.y)
+    lat2 = float(point2.y)
+    dist = distance.distance((lat1,lon1), (lat2,lon2)).meters #uses geodesic dist and defaults to WGS84
+    return dist
+
 
 def _measure_distance(point1, point2, spherical=False):
     """
@@ -42,7 +56,7 @@ def _measure_distance(point1, point2, spherical=False):
     if spherical:
         return measure_distance_spherical(point1, point2)
     else:
-        return measure_distance_euclidean(point1, point2)
+        return measure_distance_geodesic(point1, point2)
 
 
 def calculate_initial_compass_bearing(point1, point2):
