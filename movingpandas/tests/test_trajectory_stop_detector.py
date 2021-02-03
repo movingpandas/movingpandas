@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pandas as pd
-import pytest
-from fiona.crs import from_epsg
-from datetime import timedelta, datetime
-from .test_trajectory import make_traj, Node
-from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_stop_detector import TrajectoryStopDetector
-from movingpandas.trajectory_splitter import StopSplitter
+from datetime import datetime, timedelta
 
+from fiona.crs import from_epsg
+
+from movingpandas.trajectory_collection import TrajectoryCollection
+from movingpandas.trajectory_splitter import StopSplitter
+from movingpandas.trajectory_stop_detector import TrajectoryStopDetector
+from .test_trajectory import Node, make_traj
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
