@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pandas as pd
-import pytest
-from fiona.crs import from_epsg
-from datetime import timedelta, datetime
-from .test_trajectory import make_traj, Node
-from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_stop_detector import TrajectoryStopDetector
+from datetime import datetime, timedelta
 
+from fiona.crs import from_epsg
+
+from movingpandas.trajectory_collection import TrajectoryCollection
+from movingpandas.trajectory_splitter import StopSplitter
+from movingpandas.trajectory_stop_detector import TrajectoryStopDetector
+from .test_trajectory import Node, make_traj
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -67,3 +67,23 @@ class TestTrajectorySplitter:
         stop_segments = detector.get_stop_segments(max_diameter=3, min_duration=timedelta(seconds=2))
         assert len(stop_times) == 2
         assert len(stop_segments) == 2
+
+    def test_stop_detector_no_stops(self):
+        traj1 = make_traj(
+            [
+                Node(0, 0),
+                Node(0, 10, second=10),
+                Node(0, 20, second=20),
+                Node(0, 30, second=30),
+                Node(0, 40, second=40),
+                Node(0, 50, second=50),
+            ],
+            id=1,
+        )
+        collection = TrajectoryCollection([traj1])
+        detector = StopSplitter(collection)
+        stops = detector.split(
+            max_diameter=1,
+            min_duration=timedelta(seconds=1),
+        )
+        assert len(stops) == 1

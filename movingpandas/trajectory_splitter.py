@@ -172,16 +172,21 @@ class StopSplitter(TrajectorySplitter):
     def _split_traj(self, traj, max_diameter, min_duration, min_length=0):
         stop_detector = TrajectoryStopDetector(traj)
         stop_time_ranges = stop_detector.get_stop_time_ranges(max_diameter, min_duration)
-        between_stops = self.get_time_ranges_between_stops(stop_time_ranges)
+        between_stops = self.get_time_ranges_between_stops(traj, stop_time_ranges)
         result = convert_time_ranges_to_segments(traj, between_stops)
         return TrajectoryCollection(result, min_length=min_length)
 
-    def get_time_ranges_between_stops(self, stop_ranges):
+    @staticmethod
+    def get_time_ranges_between_stops(traj, stop_ranges):
         result = []
-        for i in range(0, len(stop_ranges)):
-            if i == 0:
-                result.append(TemporalRange(self.traj.get_start_time(), stop_ranges[i].t_0))
-                continue
-            result.append(TemporalRange(stop_ranges[i-1].t_n, stop_ranges[i].t_0))
-        result.append(TemporalRange(stop_ranges[-1].t_n, self.traj.get_end_time()))
+        if stop_ranges:
+            for i in range(0, len(stop_ranges)):
+                if i == 0:
+                    result.append(TemporalRange(traj.get_start_time(), stop_ranges[i].t_0))
+                    continue
+                result.append(TemporalRange(stop_ranges[i-1].t_n, stop_ranges[i].t_0))
+            result.append(TemporalRange(stop_ranges[-1].t_n, traj.get_end_time()))
+        else:
+            result.append(
+                TemporalRange(traj.get_start_time(), traj.get_end_time()))
         return result
