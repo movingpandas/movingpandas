@@ -6,7 +6,7 @@ from shapely.geometry import LineString
 from shapely.ops import nearest_points
 
 from movingpandas.point_clusterer import PointClusterer
-from .geometry_utils import azimuth, angular_difference, measure_distance_spherical, measure_distance_euclidean
+from .geometry_utils import azimuth, angular_difference, measure_distance_geodesic, measure_distance_euclidean
 
 
 class TrajectoryCollectionAggregator:
@@ -180,7 +180,7 @@ class _PtsExtractor:
         pt1 = self.get_pt(loc1)
         pt2 = self.get_pt(loc2)
         if self.traj.is_latlon:
-            d = measure_distance_spherical(pt1, pt2)
+            d = measure_distance_geodesic(pt1, pt2)
         else:
             d = measure_distance_euclidean(pt1, pt2)
         return d >= dist
