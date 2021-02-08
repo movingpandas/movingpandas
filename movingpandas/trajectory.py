@@ -17,7 +17,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
 from .time_range_utils import SpatioTemporalRange
-from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_spherical, \
+from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_distance_geodesic, \
                                         measure_distance_euclidean
 from .trajectory_plotter import _TrajectoryPlotter
 
@@ -470,7 +470,7 @@ class Trajectory:
         if pt0 == pt1:
             return 0.0
         if self.is_latlon:
-            dist_meters = measure_distance_spherical(pt0, pt1)
+            dist_meters = measure_distance_geodesic(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters
@@ -540,7 +540,7 @@ class Trajectory:
         if pt0 == pt1:
             return 0.0
         if self.is_latlon:
-            dist_meters = measure_distance_spherical(pt0, pt1)
+            dist_meters = measure_distance_geodesic(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
             dist_meters = measure_distance_euclidean(pt0, pt1)
         return dist_meters / row['delta_t'].total_seconds()

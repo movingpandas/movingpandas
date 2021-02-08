@@ -5,7 +5,7 @@ from shapely.geometry import LineString
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-from .geometry_utils import measure_distance_spherical, measure_distance_euclidean
+from .geometry_utils import measure_distance_geodesic, measure_distance_euclidean
 
 
 class TrajectoryGeneralizer:
@@ -79,7 +79,7 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
         for index, row in temp_df.iterrows():
             pt = row[traj.get_geom_column_name()]
             if traj.is_latlon:
-                dist = measure_distance_spherical(pt, prev_pt)
+                dist = measure_distance_geodesic(pt, prev_pt)
             else:
                 dist = measure_distance_euclidean(pt, prev_pt)
             if dist >= tolerance:
