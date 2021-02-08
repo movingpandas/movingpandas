@@ -40,11 +40,17 @@ def measure_distance_geodesic(point1, point2):
     This function calculates the geodesic distance between two points 
     as a float of (SI) unit meters.
 
-    inputs:
-    * point1 - a shapely.geometry.Point object containing latitude / longitude defining a starting location
-    * point1 - a shapely.geometry.Point object containing latitude / longitude defining a termination location
-    Output:
-    * dist - a float describing the geodesic distance (on a WGS84 ellipsoid) in meters
+    Parameters
+    ----------
+    point1 : shapely.geometry.Point 
+        point object containing latitude / longitude defining a starting location
+    point2 : shapely.geometry.Point 
+        object containing latitude / longitude defining a termination location
+        
+    Returns
+    -------
+    dist : float 
+        geodesic distance (on a WGS84 ellipsoid) in meters
     """
     if (type(point1) != Point) or (type(point2) != Point):
         raise TypeError("Only Points are supported as arguments, got {} and {}".format(point1, point2))
