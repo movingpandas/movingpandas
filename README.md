@@ -43,7 +43,7 @@ The MovingPandas repository contains multiple tutorials in the form of Jupyter n
 illustrate diverse analysis capabilities using different datasets, including: tracking data of ships, 
 migration of birds, and tracks from a horse's GPS collar. 
 All MovingPandas tutorials are available on MyBinder - no installation required: 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb)
+[![Binder](https://mybinder.org/v2/gh/anitagraser/movingpandas-examples/main)
 
 MovingPandas Trajectory objects are created from GeoPandas GeoDataFrames. A minimal example would be:
 
