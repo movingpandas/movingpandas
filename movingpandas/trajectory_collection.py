@@ -89,7 +89,7 @@ class TrajectoryCollection:
             else:
                 obj_id = None
             trajectory = Trajectory(values, traj_id, obj_id=obj_id)
-            if trajectory.get_length() < self.min_length:
+            if trajectory.get_length() < self.min_length or trajectory.df.geometry.count() < 2:
                 continue
             trajectory.crs = df.crs
             trajectories.append(trajectory)
@@ -167,7 +167,7 @@ class TrajectoryCollection:
         Parameters
         ----------
         polygon : shapely Polygon
-            Polygon to clip with
+            Polygon to intersect with
         Returns
         -------
         TrajectoryCollection

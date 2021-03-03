@@ -128,6 +128,23 @@ class TestTrajectoryCollection:
         assert(all(['speed' not in traj.df.columns.values
                     for traj in self.collection.trajectories]))
 
+    def test_traj_with_less_than_two_points(self):
+        df = pd.DataFrame([
+            {'id': 1, 'obj': 'A', 'geometry': Point(0, 0), 't': datetime(2018,1,1,12,0,0), 'val': 9, 'val2': 'a'}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        tc = TrajectoryCollection(geo_df, 'id', obj_id_col='obj')
+        assert len(tc) == 0
+
+    def test_traj_with_two_points_at_the_same_time(self):
+        df = pd.DataFrame([
+            {'id': 1, 'obj': 'A', 'geometry': Point(0, 0), 't': datetime(2018,1,1,12,0,0), 'val': 9, 'val2': 'a'},
+            {'id': 1, 'obj': 'A', 'geometry': Point(0, 0), 't': datetime(2018,1,1,12,0,0), 'val': 9, 'val2': 'a'},
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        tc = TrajectoryCollection(geo_df, 'id', obj_id_col='obj')
+        assert len(tc) == 0
+
     def test_iteration(self):
         assert sum([1 for _ in self.collection]) == len(self.collection)
 
