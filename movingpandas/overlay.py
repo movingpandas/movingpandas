@@ -134,6 +134,11 @@ def _determine_time_ranges_pointbased(traj, polygon):
 def _get_potentially_intersecting_lines(traj, polygon):
     """
     Uses a spatial index to determine which parts of the trajectory may be intersecting with the polygon
+
+    Returns
+    -------
+    possible_matches : GeoDataFrame
+        GeoDataFrame of potentially intersecting lines
     """
     line_df = traj._to_line_df()
     spatial_index = line_df.sindex

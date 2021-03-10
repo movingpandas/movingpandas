@@ -92,9 +92,9 @@ class Trajectory:
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
-        return "Trajectory {1} ({2} to {3}) | Size: {0} | Length: {6:.1f}m\nBounds: {5}\n{4}".format(
-            self.df.geometry.count(), self.id, self.get_start_time(),
-            self.get_end_time(), line.wkt[:100], self.get_bbox(), self.get_length())
+        return "Trajectory {id} ({t0} to {tn}) | Size: {n} | Length: {len:.1f}m\nBounds: {bbox}\n{wkt}".format(
+            id=self.id, t0=self.get_start_time(), tn=self.get_end_time(), n=self.size(),
+            wkt=line.wkt[:100], bbox=self.get_bbox(), len=self.get_length())
 
     def __len__(self):
         return self.get_length()
@@ -102,6 +102,17 @@ class Trajectory:
     def __eq__(self, other):
         # TODO: make bullet proof
         return str(self) == str(other) and self.crs == other.crs and self.parent == other.parent
+
+    def size(self):
+        """
+        Returns number of rows in Trajectory.df
+
+        Returns
+        -------
+        size : int
+            Number of rows
+        """
+        return len(self.df.index)
 
     def copy(self):
         """
@@ -695,6 +706,15 @@ class Trajectory:
         self.df[column] = self.df[column].shift(offset, freq='1min')
 
     def _to_line_df(self):
+        """
+        Convert trajectory data GeoDataFrame of points to GeoDataFrame of lines that
+        connect consecutive points.
+
+        Returns
+        -------
+        line_df : GeoDataFrame
+            GeoDataFrame of line segements
+        """
         line_df = self.df.copy()
         line_df['prev_pt'] = line_df.geometry.shift()
         line_df['t'] = self.df.index

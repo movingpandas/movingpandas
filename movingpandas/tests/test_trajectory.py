@@ -60,6 +60,14 @@ class TestTrajectory:
             traj = make_traj([Node(0, 0), Node(10, 10, day=2)], None)
         assert traj.to_linestring().wkt == "LINESTRING (0 0, 10 10)"
 
+    def test_str(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        assert str(traj) == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
+
+    def test_size(self):
+        assert self.default_traj_metric.size() == 3
+        assert self.default_traj_metric_5.size() == 5
+
     def test_endlocation(self):
         assert self.default_traj_metric.get_end_location() == Point(10, 0)
 

@@ -4,21 +4,22 @@ from pandas.util.testing import assert_frame_equal
 from shapely.geometry import Polygon
 from datetime import datetime, timedelta
 from movingpandas.tests.test_trajectory import Node, make_traj, CRS_METRIC, CRS_LATLON
+from movingpandas.overlay import _get_potentially_intersecting_lines
 
  
 class TestOverlay:
 
     def setup_method(self):
-        nodes = [
+        self.nodes = [
             Node( 0,  0, 1970, 1, 1, 0, 0,  0),
             Node( 6,  0, 1970, 1, 1, 0, 0,  6),
             Node(10,  0, 1970, 1, 1, 0, 0, 10),
             Node(10, 10, 1970, 1, 1, 0, 0, 20),
             Node( 0, 10, 1970, 1, 1, 0, 0, 30)
         ]
-        self.default_traj_metric = make_traj(nodes[:3], CRS_METRIC)
-        self.default_traj_latlon = make_traj(nodes[:3], CRS_LATLON)
-        self.default_traj_metric_5 = make_traj(nodes, CRS_METRIC)
+        self.default_traj_metric = make_traj(self.nodes[:3], CRS_METRIC)
+        self.default_traj_latlon = make_traj(self.nodes[:3], CRS_LATLON)
+        self.default_traj_metric_5 = make_traj(self.nodes, CRS_METRIC)
 
     def test_clip_one_intersections(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 8), (5, 8), (5, -5)])
@@ -27,6 +28,14 @@ class TestOverlay:
         assert len(intersections) == 1
         assert intersections[0] == \
                make_traj([Node(5, 0, second=5), Node(6, 0, second=6), Node(7, 0, second=7)], id='1_0', parent=traj)
+
+    def test_get_potentially_intersecting_lines(self):
+        polygon = Polygon([(5, -5), (7, -5), (7, 8), (5, 8), (5, -5)])
+        traj = self.default_traj_metric_5
+        result = _get_potentially_intersecting_lines(traj, polygon)
+        assert result.shape[0] == 2
+        expected = make_traj(self.nodes[:3])._to_line_df()
+        assert_frame_equal(expected, result)
 
     def test_clip_two_intersections_with_same_polygon(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 12), (5, 12), (5, -5)])
