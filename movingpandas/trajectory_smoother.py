@@ -11,17 +11,14 @@ from stonesoup.types.array import CovarianceMatrix, StateVector
 from stonesoup.types.prediction import GaussianStatePrediction
 from stonesoup.initiator.simple import SimpleMeasurementInitiator
 from stonesoup.types.hypothesis import SingleHypothesis
-from stonesoup.smoother.lineargaussian import Backward
+from stonesoup.smoother.kalman import KalmanSmoother
 from stonesoup.reader.base import DetectionReader
-from stonesoup.feeder.geo import LongLatToUTMConverter
 from stonesoup.base import Property
 from stonesoup.buffered_generator import BufferedGenerator
 from shapely.geometry import Point
-from geopandas import GeoDataFrame
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-
 
 
 class TrajectorySmoother(ABC):
@@ -123,7 +120,7 @@ class KalmanSmootherCV(TrajectorySmoother):
         track = None
         for i, (timestamp, detections) in enumerate(detector):
             if i == 0:
-                tracks = initiator.initiate(detections)
+                tracks = initiator.initiate(detections, timestamp)
                 track = tracks.pop()
             else:
                 detection = detections.pop()
@@ -132,8 +129,8 @@ class KalmanSmootherCV(TrajectorySmoother):
                 posterior = updater.update(hypothesis)
                 track.append(posterior)
         # Smoothing
-        smoother = Backward(transition_model)
-        smooth_track = smoother.track_smooth(track)
+        smoother = KalmanSmoother(transition_model)
+        smooth_track = smoother.smooth(track)
 
         # Create new trajectory
         df = traj.df.to_crs('EPSG:3395')
@@ -143,7 +140,8 @@ class KalmanSmootherCV(TrajectorySmoother):
         new_traj = Trajectory(geo_df, traj.id)
         return new_traj
 
-    def _get_detector(self, traj):
+    @staticmethod
+    def _get_detector(traj):
         class Detector(DetectionReader):
             trajectory: Trajectory = Property(doc='')
 
