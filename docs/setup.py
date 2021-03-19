@@ -3,12 +3,11 @@ import setuptools
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
-# Packages that MovingPandas uses explicitly:
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas', 'geopandas', 'hvplot', 'bokeh', 'cartopy', 'geoviews', 'pyproj', 'geopy']
+INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas']
 
 setuptools.setup(
     name="movingpandas",
-    version="0.5.rc1",
+    version="master",
     author="Anita Graser",
     author_email="anitagraser@gmx.at",
     description="Implementation of Trajectory classes and functions built on top of GeoPandas",
