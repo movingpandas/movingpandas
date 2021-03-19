@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'MovingPandas'
-copyright = '2019, Anita Graser'
+copyright = '2021, Anita Graser'
 author = 'Anita Graser'
 
 # The full version, including alpha/beta/rc tags
