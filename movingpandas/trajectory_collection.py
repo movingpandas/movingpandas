@@ -166,7 +166,7 @@ class TrajectoryCollection:
 
         Parameters
         ----------
-        polygon : shapely Polygon
+        polygon : shapely.geometry.Polygon
             Polygon to intersect with
         Returns
         -------
@@ -190,7 +190,7 @@ class TrajectoryCollection:
 
         Parameters
         ----------
-        polygon : shapely Polygon
+        polygon : shapely.geometry.Polygon
             Polygon to clip with
         point_based : bool
             Clipping method
@@ -222,8 +222,8 @@ class TrajectoryCollection:
         ----------
         property_name : string
             Name of the DataFrame column containing the property
-        property_values : any
-            Desired property value
+        property_values : list(any)
+            Desired property values
 
         Returns
         -------
