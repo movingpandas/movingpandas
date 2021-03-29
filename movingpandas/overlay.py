@@ -12,6 +12,8 @@ def _get_spatiotemporal_ref(row):
     """
     Returns the SpatioTemporalRange for the input row's spatial_intersection LineString by interpolating timestamps.
     """
+    if row['spatial_intersection'].is_empty:
+        return None
     if type(row['spatial_intersection']) == LineString:
         pt0 = Point(row['spatial_intersection'].coords[0])
         ptn = Point(row['spatial_intersection'].coords[-1])

@@ -29,6 +29,14 @@ class TestOverlay:
         assert intersections[0] == \
                make_traj([Node(5, 0, second=5), Node(6, 0, second=6), Node(7, 0, second=7)], id='1_0', parent=traj)
 
+    def test_clip_no_node_in_poly(self):
+        polygon = Polygon([(1, -5), (2, -5), (2, 8), (1, 8), (1, -5)])
+        traj = self.default_traj_metric_5
+        intersections = traj.clip(polygon)
+        assert len(intersections) == 1
+        assert intersections[0] == \
+               make_traj([Node(1, 0, second=1), Node(2, 0, second=2)], id='1_0', parent=traj)
+
     def test_get_potentially_intersecting_lines(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 8), (5, 8), (5, -5)])
         traj = self.default_traj_metric_5
@@ -123,3 +131,25 @@ class TestOverlay:
         assert len(intersections[0].df.columns) == len(['geometry', 'value', 'intersecting_id', 'intersecting_name'])
         assert intersections[0].df.iloc[0]['intersecting_id'] == 1
         assert intersections[0].df.iloc[0]['intersecting_name'] == 'foo'
+
+    def test_clip_with_empty_spatial_intersection_linestrings(self):
+        polygon = Polygon([(-92.98830, 35.38896), (-92.35109, 33.96139), (-93.27393, 33.61437),
+                           (-93.99904, 34.88572), (-92.98830, 35.38896)])
+        traj = make_traj([
+            Node(-92.00000, 35.35000, 2020, 8, 5, 21, 33),
+            Node(-92.10000, 35.30000, 2020, 8, 5, 21, 34),
+            Node(-92.48333, 35.05000, 2020, 8, 5, 21, 38),
+            Node(-92.68333, 34.95000, 2020, 8, 5, 21, 40),
+            Node(-92.80000, 34.86667, 2020, 8, 5, 21, 41),
+            Node(-93.15000, 34.66667, 2020, 8, 5, 21, 44),
+            Node(-93.31667, 34.55000, 2020, 8, 5, 21, 45),
+            Node(-93.66667, 34.35000, 2020, 8, 5, 21, 48),
+            Node(-93.88333, 34.20000, 2020, 8, 5, 21, 50),
+            Node(-94.00000, 34.16904, 2020, 8, 5, 21, 51)
+        ])
+        result = traj.clip(polygon)
+        assert len(result) == 1
+        expected = "LINESTRING (-92.76600766934008 34.89094857130274, -92.8 34.86667, -93.15000000000001 34.66667, -93.31667 34.55, -93.66667 34.35, -93.68590048921358 34.33668617473444)"
+        assert result[0].to_linestring().wkt == expected
+
+
