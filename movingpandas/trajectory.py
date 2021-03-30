@@ -96,6 +96,9 @@ class Trajectory:
             id=self.id, t0=self.get_start_time(), tn=self.get_end_time(), n=self.size(),
             wkt=line.wkt[:100], bbox=self.get_bbox(), len=self.get_length())
 
+    def __repr__(self):
+        return self.__str__()
+
     def __len__(self):
         return self.get_length()
 

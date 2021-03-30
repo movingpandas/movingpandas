@@ -50,6 +50,9 @@ class TrajectoryCollection:
     def __str__(self):
         return 'TrajectoryCollection with {} trajectories'.format(self.__len__())
 
+    def __repr__(self):
+        return self.__str__()
+
     def __iter__(self):
         """
         Iterator for trajectories in this collection
