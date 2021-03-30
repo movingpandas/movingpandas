@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from geopandas import GeoDataFrame
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .geometry_utils import mrr_diagonal
@@ -103,9 +104,8 @@ class TrajectoryStopDetector:
 
         Returns
         -------
-        list
+        TrajectoryCollection
             Trajectory segments
-
 
         Examples
         --------
@@ -114,3 +114,38 @@ class TrajectoryStopDetector:
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
         return TrajectoryCollection(convert_time_ranges_to_segments(self.traj, stop_time_ranges))
+
+    def get_stop_points(self, max_diameter, min_duration):
+        """
+        Returns detected stop location points
+
+        Parameters
+        ----------
+        max_diameter : float
+            Maximum diameter for stop detection
+        min_duration : datetime.timedelta
+            Minimum stop duration
+
+        Returns
+        -------
+        geopandas.GeoDataFrame
+            Stop locations as points
+
+        Examples
+        --------
+
+        >>> mpd.TrajectoryStopDetector(traj).get_stop_segments(min_duration=timedelta(seconds=60), max_diameter=100)
+        """
+        stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
+        stops = TrajectoryCollection(convert_time_ranges_to_segments(self.traj, stop_time_ranges))
+
+        stop_pts = GeoDataFrame(columns=['geometry']).set_geometry('geometry')
+        stop_pts['stop_id'] = [track.id for track in stops.trajectories]
+        stop_pts = stop_pts.set_index('stop_id')
+
+        for stop in stops:
+            stop_pts.at[stop.id, 'start_time'] = stop.get_start_time()
+            stop_pts.at[stop.id, 'end_time'] = stop.get_end_time()
+            stop_pts.at[stop.id, 'geometry'] = stop.get_start_location()
+
+        return stop_pts
