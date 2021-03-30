@@ -232,12 +232,17 @@ class TrajectoryCollection:
 
         Examples
         --------
-        >>> filtered = trajectory_collection.filter('object_type', 'TypeA')
+        >>> filtered = trajectory_collection.filter('object_type', ['TypeA', 'TypeB'])
         """
         filtered = []
         for traj in self:
-            if traj.df.iloc[0][property_name] in property_values:
-                filtered.append(traj)
+            if type(property_values) == list:
+                if traj.df.iloc[0][property_name] in property_values:
+                    filtered.append(traj)
+            else:
+                if traj.df.iloc[0][property_name] == property_values:
+                    filtered.append(traj)
+
         result = copy(self)
         result.trajectories = filtered
         return result

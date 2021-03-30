@@ -102,7 +102,9 @@ class TestTrajectoryCollection:
 
     def test_filter(self):
         assert len(self.collection.filter('obj', 'A')) == 2
-        assert len(self.collection.filter('obj', 'B')) == 0
+        assert len(self.collection.filter('obj', ['A'])) == 2
+        assert len(self.collection.filter('obj', ['B'])) == 0
+        assert len(self.collection.filter('obj', [1])) == 0
 
     def test_get_min_and_max(self):
         assert self.collection.get_min('val') == 2
