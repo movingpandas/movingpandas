@@ -13,4 +13,4 @@ from .trajectory_stop_detector import TrajectoryStopDetector
 from .point_clusterer import PointClusterer
 
 name = 'movingpandas'
-__version__ = '0.5.rc1'
+__version__ = '0.6.rc1'
