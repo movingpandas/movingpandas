@@ -2,6 +2,7 @@
 
 from copy import copy
 from pandas import Grouper
+import numpy as np
 
 from .trajectory_stop_detector import TrajectoryStopDetector
 from .trajectory import Trajectory
@@ -135,18 +136,20 @@ class SpeedSplitter(TrajectorySplitter):
         Minimum stop duration
     min_length : numeric
         Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+    max_speed: float
+        Max speed limit
 
     Examples
     --------
 
     >>> mpd.SpeedSplitter(traj).split(speed=10, duration=timedelta(minutes=5))
     """
-    def _split_traj(self, traj, speed, duration, min_length=0):
+    def _split_traj(self, traj, speed, duration, min_length=0, max_speed=np.inf):
         traj = traj.copy()
         speed_col_name = traj.get_speed_column_name()
         if speed_col_name not in traj.df.columns:
             traj.add_speed(overwrite=True)
-        traj.df = traj.df[traj.df[speed_col_name] >= speed]
+        traj.df = traj.df[traj.df[speed_col_name].between(speed, max_speed)]
         return ObservationGapSplitter(traj).split(gap=duration, min_length=min_length)
 
 
