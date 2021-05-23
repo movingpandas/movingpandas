@@ -129,7 +129,7 @@ class TrajectoryStopDetector:
         Returns
         -------
         geopandas.GeoDataFrame
-            Stop locations as points
+            Stop locations as points with start and end time and stop duration in seconds
 
         Examples
         --------
@@ -147,5 +147,7 @@ class TrajectoryStopDetector:
             stop_pts.at[stop.id, 'start_time'] = stop.get_start_time()
             stop_pts.at[stop.id, 'end_time'] = stop.get_end_time()
             stop_pts.at[stop.id, 'geometry'] = stop.get_start_location()
+
+        stop_pts['duration_s'] = (stop_pts['end_time'] - stop_pts['start_time']).dt.total_seconds()
 
         return stop_pts

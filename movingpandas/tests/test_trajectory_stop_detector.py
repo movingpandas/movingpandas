@@ -38,6 +38,7 @@ class TestTrajectorySplitter:
         assert stop_points.iloc[0].geometry.y == 20
         assert stop_points.iloc[0].start_time == datetime(1970, 1, 1, 0, 0, 2)
         assert stop_points.iloc[0].end_time == datetime(1970, 1, 1, 0, 0, 6)
+        assert stop_points.iloc[0].duration_s == 4
 
     def test_stop_detector_start_stop(self):
         traj = make_traj([Node(0, 0), Node(0, 1, second=1), Node(0, 2, second=2), Node(0, 1, second=3),
