@@ -7,6 +7,7 @@ import warnings
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
+from pandas import DataFrame
 from geopandas import GeoDataFrame
 try:
     from pyproj import CRS
@@ -268,6 +269,50 @@ class Trajectory:
             coords += "{} {} {}, ".format(pt.x, pt.y, t)
         wkt = "LINESTRING M ({})".format(coords[:-2])
         return wkt
+
+    def to_point_gdf(self):
+        """
+        Return the trajectory's points as GeoDataFrame.
+
+        Returns
+        -------
+        GeoDataFrame
+        """
+        return self.df
+
+    def to_line_gdf(self):
+        """
+        Return the trajectory's line segments as GeoDataFrame.
+
+        Returns
+        -------
+        GeoDataFrame
+        """
+        line_gdf = self._to_line_df()
+        line_gdf.drop(columns=['geometry', 'prev_pt'], inplace=True)
+        line_gdf.reset_index(drop=True, inplace=True)
+        line_gdf.rename(columns={'line': 'geometry'}, inplace=True)
+        return line_gdf
+
+    def to_traj_gdf(self, wkt=False):
+        """
+        Return a GeoDataFrame with one row containing the trajectory as a single LineString
+
+        Returns
+        -------
+        GeoDataFrame
+        """
+        properties = {
+            'id': self.id,
+            'start_t': self.get_start_time(),
+            'end_t': self.get_end_time(),
+            'geometry': self.to_linestring()
+        }
+        if wkt:
+            properties['wkt'] = self.to_linestringm_wkt()
+        df = DataFrame([properties])
+        traj_gdf = GeoDataFrame(df, crs=self.crs)
+        return traj_gdf
 
     def get_start_location(self):
         """

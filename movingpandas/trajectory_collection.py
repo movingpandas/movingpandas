@@ -82,6 +82,43 @@ class TrajectoryCollection:
         #       on __init__().
         return TrajectoryCollection(trajectories, min_length=self.min_length)
 
+    def to_point_gdf(self):
+        """
+        Return the trajectories' points as GeoDataFrame.
+
+        Returns
+        -------
+        GeoDataFrame
+        """
+        gdfs = [traj.df for traj in self.trajectories]
+        return pd.concat(gdfs)
+
+    def to_line_gdf(self):
+        """
+        Return the trajectories' line segments as GeoDataFrame.
+
+        Returns
+        -------
+        GeoDataFrame
+        """
+        gdfs = [traj.to_line_gdf() for traj in self.trajectories]
+        gdf = pd.concat(gdfs)
+        gdf.reset_index(drop=True, inplace=True)
+        return gdf
+
+    def to_traj_gdf(self, wkt=False):
+        """
+        Return a GeoDataFrame with one row per Trajectory within the TrajectoryCollection
+
+        Returns
+        -------
+        GeoDataFrame
+        """
+        gdfs = [traj.to_traj_gdf(wkt) for traj in self.trajectories]
+        gdf = pd.concat(gdfs)
+        gdf.reset_index(drop=True, inplace=True)
+        return gdf
+
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col):
         trajectories = []
         for traj_id, values in df.groupby([traj_id_col]):

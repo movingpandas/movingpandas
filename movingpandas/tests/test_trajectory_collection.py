@@ -2,13 +2,13 @@
 
 import pandas as pd
 import pytest
+from pandas.util.testing import assert_frame_equal
 from geopandas import GeoDataFrame
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, LineString
 from fiona.crs import from_epsg
 from datetime import datetime, timedelta
 from copy import copy
 from movingpandas.trajectory_collection import TrajectoryCollection
-
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -166,3 +166,37 @@ class TestTrajectoryCollection:
         with pytest.raises(ValueError):
             for _ in collection:
                 pass
+
+    def test_to_point_gdf(self):
+        point_gdf = self.collection.to_point_gdf()
+        assert_frame_equal(point_gdf, self.geo_df)
+
+    def test_to_line_gdf(self):
+        temp_df = self.geo_df.drop(columns=['obj', 'val', 'val2'])
+        tc = TrajectoryCollection(temp_df, 'id')
+        line_gdf = tc.to_line_gdf()
+
+        df2 = pd.DataFrame([
+            {'id': 1, 't': datetime(2018, 1, 1, 12,  6, 0), 'prev_t': datetime(2018, 1, 1, 12, 0, 0), 'geometry': LineString([(0, 0), (6, 0)])},
+            {'id': 1, 't': datetime(2018, 1, 1, 14, 10, 0), 'prev_t': datetime(2018, 1, 1, 12, 6, 0), 'geometry': LineString([(6, 0), (6, 6)])},
+            {'id': 1, 't': datetime(2018, 1, 1, 14, 15, 0), 'prev_t': datetime(2018, 1, 1, 14, 10, 0), 'geometry': LineString([(6, 6), (9, 9)])},
+            {'id': 2, 't': datetime(2018, 1, 1, 12, 6, 0), 'prev_t': datetime(2018, 1, 1, 12, 0, 0), 'geometry': LineString([(10, 10), (16, 10)])},
+            {'id': 2, 't': datetime(2018, 1, 2, 13, 10, 0), 'prev_t': datetime(2018, 1, 1, 12, 6, 0), 'geometry': LineString([(16, 10), (16, 16)])},
+            {'id': 2, 't': datetime(2018, 1, 2, 13, 15, 0), 'prev_t': datetime(2018, 1, 2, 13, 10, 0), 'geometry': LineString([(16, 16), (190, 19)])}
+        ])
+        expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
+
+        assert_frame_equal(line_gdf, expected_line_gdf)
+
+    def test_to_traj_gdf(self):
+        temp_df = self.geo_df.drop(columns=['obj', 'val', 'val2'])
+        tc = TrajectoryCollection(temp_df, 'id')
+        traj_gdf = tc.to_traj_gdf()
+
+        rows = [{'id': 1, 'start_t': datetime(2018, 1, 1, 12, 0, 0), 'end_t': datetime(2018, 1, 1, 14, 15, 0), 'geometry': LineString([(0, 0), (6, 0), (6, 6), (9, 9)])},
+                {'id': 2, 'start_t': datetime(2018, 1, 1, 12, 0, 0), 'end_t': datetime(2018, 1, 2, 13, 15, 0), 'geometry': LineString([(10, 10), (16, 10), (16, 16), (190, 19)])}]
+        df2 = pd.DataFrame(rows)
+        expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
+
+        assert_frame_equal(traj_gdf, expected_line_gdf)
+

@@ -5,7 +5,7 @@ import pandas as pd
 import warnings
 from pandas.util.testing import assert_frame_equal
 from geopandas import GeoDataFrame
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
 from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, MissingCRSWarning
@@ -282,9 +282,9 @@ class TestTrajectory:
 
     def test_support_for_other_geometry_column_names(self):
         df = pd.DataFrame([
-            {'xxx': TestPoint(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
-            {'xxx': TestPoint(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
-            {'xxx': TestPoint(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)}
+            {'xxx': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'xxx': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'xxx': Point(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)}
         ]).set_index('t')
         geo_df = GeoDataFrame(df, geometry='xxx', crs=CRS_METRIC)
         traj = Trajectory(geo_df, 1)
@@ -294,9 +294,9 @@ class TestTrajectory:
 
     def test_support_for_other_time_column_names(self):
         df = pd.DataFrame([
-            {'geometry': TestPoint(0, 0), 'xxx': datetime(2018, 1, 1, 12, 0, 0)},
-            {'geometry': TestPoint(6, 0), 'xxx': datetime(2018, 1, 1, 12, 6, 0)},
-            {'geometry': TestPoint(6, 6), 'xxx': datetime(2018, 1, 1, 12, 10, 0)}
+            {'geometry': Point(0, 0), 'xxx': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 'xxx': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(6, 6), 'xxx': datetime(2018, 1, 1, 12, 10, 0)}
         ]).set_index('xxx')
         geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         traj = Trajectory(geo_df, 1)
@@ -307,6 +307,58 @@ class TestTrajectory:
         traj.get_length()
         traj.to_linestring()
         traj.to_linestringm_wkt()
+
+    def test_to_point_gdf(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 1)
+        point_gdf = traj.to_point_gdf()
+        assert_frame_equal(point_gdf, geo_df)
+
+    def test_to_line_gdf(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 1)
+        line_gdf = traj.to_line_gdf()
+
+        df2 = pd.DataFrame([
+            {'t': datetime(2018, 1, 1, 12,  6, 0), 'prev_t': datetime(2018, 1, 1, 12, 0, 0), 'geometry': LineString([(0, 0), (6, 0)])},
+            {'t': datetime(2018, 1, 1, 12, 10, 0), 'prev_t': datetime(2018, 1, 1, 12, 6, 0), 'geometry': LineString([(6, 0), (6, 6)])}
+        ])
+        expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
+
+        assert_frame_equal(line_gdf, expected_line_gdf)
+
+    def test_to_traj_gdf(self):
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(1970, 1, 1, 0, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(1970, 1, 1, 0, 6, 0)},
+            {'geometry': Point(6, 6), 't': datetime(1970, 1, 1, 0, 10, 0)}
+        ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 1)
+        traj_gdf = traj.to_traj_gdf()
+
+        props = {'id': 1, 'start_t': datetime(1970, 1, 1, 0,  0, 0), 'end_t': datetime(1970, 1, 1, 0, 10, 0), 'geometry': LineString([(0, 0), (6, 0), (6, 6)])}
+        df2 = pd.DataFrame([props])
+        expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
+
+        assert_frame_equal(traj_gdf, expected_line_gdf)
+
+        traj_gdf_wkt = traj.to_traj_gdf(wkt=True)
+        props['wkt'] = 'LINESTRING M (0.0 0.0 0.0, 6.0 0.0 360.0, 6.0 6.0 600.0)'
+        df2 = pd.DataFrame([props])
+        expected_line_gdf_wkt = GeoDataFrame(df2, crs=CRS_METRIC)
+
+        assert_frame_equal(traj_gdf_wkt, expected_line_gdf_wkt)
 
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
