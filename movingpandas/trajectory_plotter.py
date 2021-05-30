@@ -90,20 +90,25 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
         self._speeds = []
 
     def get_min_max_values(self):
-        speed_col_name = self.data.trajectories[0].get_speed_column_name()
-        min_value, max_value = (None, None)
-        if self.column == speed_col_name:
-            for traj in self.data:
-                if self.column not in traj.df.columns:
-                    temp = traj.copy()
-                    temp.add_speed(overwrite=True)
-                    self._speeds.append(temp.df[self.column])
-                else:
-                    self._speeds.append(traj.df[self.column])
-            min_value = min([min(s.tolist()) for s in self._speeds])
-            max_value = max([max(s.tolist()) for s in self._speeds])
+        column_names = self.data.trajectories[0].df.columns
+        speed_column_name = self.data.trajectories[0].get_speed_column_name()
+        if self.column == speed_column_name and self.column not in column_names:
+            min_value, max_value = self.get_min_max_speed()
+        else:
+            min_value = self.data.get_min(self.column)
+            max_value = self.data.get_max(self.column)
         self.min_value = self.kwargs.pop('vmin', min_value)
         self.max_value = self.kwargs.pop('vmax', max_value)
+        return min_value, max_value
+
+    def get_min_max_speed(self):
+        for traj in self.data:
+            temp = traj.copy()
+            temp.add_speed(overwrite=True)
+            self._speeds.append(temp.df[self.column])
+        min_value = min([min(s.tolist()) for s in self._speeds])
+        max_value = max([max(s.tolist()) for s in self._speeds])
+        return min_value, max_value
 
     def plot(self):
         if self.column:
@@ -122,10 +127,7 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
                 self.ax = self._plot_trajectory(traj)
             self.kwargs['legend'] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
 
-        self.kwargs.pop('column', None)  # has to be popped, otherwise there's an error in the following plot call if we don't remove column from kwargs
-        start_locs = self.data.get_start_locations()
-        ax = start_locs.plot(ax=self.ax, column=self.column, color='white', *self.args, **self.kwargs)
-        return ax
+        return self.ax
 
     def hvplot(self):
         opts.defaults(opts.Overlay(width=self.width, height=self.height, active_tools=['wheel_zoom']))
