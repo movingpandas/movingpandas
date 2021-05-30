@@ -103,6 +103,16 @@ class TestTrajectorySplitter:
         assert type(split) == TrajectoryCollection
         assert len(split) == 2
 
+    def test_speed_splitter_max_speed(self):
+        traj = make_traj([Node(0, 0), Node(0, 2, second=1), Node(0, 12, second=2), Node(0, 22, second=3),
+                          Node(0, 24, second=4), Node(0, 26, second=5), Node(0, 27, second=6),
+                          Node(0, 28, second=7), Node(0, 30, second=8), Node(0, 32, second=9)])
+        traj_copy = traj.copy()
+        split = SpeedSplitter(traj).split(speed=2, duration=timedelta(seconds=2), max_speed=8)
+        assert_frame_equal(traj.df, traj_copy.df)
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 3
+
     def test_stop_splitter(self):
         traj = make_traj([Node(0, 0), Node(0, 10, second=1), Node(0, 20, second=2), Node(0, 21, second=4),
                           Node(0, 22, second=6), Node(0, 30, second=8), Node(0, 40, second=10), Node(1, 50, second=15)])
