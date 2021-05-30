@@ -60,7 +60,7 @@ class _TrajectoryPlotter:
         line_gdf = self._make_line_df(traj)
         if not traj.is_latlon and traj.crs is not None:
             line_gdf = line_gdf.to_crs(epsg=4326)
-        if self.column and type(self.column) == str:
+        if self.column and isinstance(self.column, str):
             self.kwargs['c'] = dim(self.column)  # fixes https://github.com/anitagraser/movingpandas/issues/71
         if self.column and self.column_to_color:
             try:
