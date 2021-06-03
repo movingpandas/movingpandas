@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 0.7 (released June 2021)
+
+[Version 0.7](https://github.com/anitagraser/movingpandas/releases/tag/v0.7rc1) adds functionality to convert Trajectory and TrajectoryCollection objects back to GeoDataFrames.
+
+For full details, see the [commit history](https://github.com/anitagraser/movingpandas/compare/v0.6rc1...v0.7rc1).
+
 ## 0.6 (released May 2021)
 
 [Version 0.6](https://github.com/anitagraser/movingpandas/releases/tag/v0.6rc1) focuses on bug fixes and improvements to stop detection usability.
