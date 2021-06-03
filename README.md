@@ -103,10 +103,10 @@ daily_lengths.hvplot(title='Daily trajectory length')
 
 In this case, the movement data, which comes from a GPS collar of a horse, reveals that the animal tends to travel farther during summer days than during shorter winter days.  
 
-Other functions deal with trajectory generalization, splitting trajectories into subtrajectories, clipping trajectories to an area of interest, and extracting trajectory start and end times and locations.
+Other functions deal with generalizing trajectories, detecting stops, splitting trajectories into subtrajectories, clipping trajectories to an area of interest, and extracting trajectory start and end times and locations.
 
 
-![Bird migration trajectory example](https://user-images.githubusercontent.com/590385/73123664-5ad67280-3f92-11ea-8b42-02a0135f0f5c.PNG)
+![Stop detection example](https://user-images.githubusercontent.com/590385/94711867-fbaed600-0348-11eb-8a43-4541d2d3205b.png)
 
 
 

@@ -119,3 +119,5 @@ demo/demodata_geolife_large.gpkg
 goth.tif
 .Rproj.user
 tutorials/demodata_geolife.gpkg
+tutorials/temp.gpkg
+tutorials/Blogpost.ipynb
