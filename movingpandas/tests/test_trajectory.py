@@ -181,7 +181,7 @@ class TestTrajectory:
         from shapely.geometry import Polygon
         traj = make_traj([Node(33.3545, 28.1335, 2010, 10, 4, 8), Node(35.817, 23.78383, 2010, 10, 4, 20)], CRS_LATLON)
         area_of_interest = Polygon([(30, 25), (50, 25), (50, 15), (30, 15), (30, 25)])
-        traj = traj.clip(area_of_interest)[0]
+        traj = traj.clip(area_of_interest).get_trajectory('1_0')
         traj.add_speed()
         traj.add_speed(overwrite=True)
 

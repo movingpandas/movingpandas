@@ -683,7 +683,7 @@ class Trajectory:
 
     def clip(self, polygon, point_based=False):
         """
-        Return trajectory clipped by the given polygon.
+        Return trajectory segments clipped by the given polygon.
 
         By default, the trajectory's line representation is clipped by the polygon.
         If pointbased=True, the trajectory's point representation is used instead, leading to shorter
@@ -698,14 +698,16 @@ class Trajectory:
 
         Returns
         -------
-        list
+        TrajectoryCollection
             Clipped trajectory segments
         """
-        return clip(self, polygon, point_based)
+        from .trajectory_collection import TrajectoryCollection
+        segments = clip(self, polygon, point_based)
+        return TrajectoryCollection(segments)
 
     def intersection(self, feature, point_based=False):
         """
-        Return the trajectory segment that intersects the given feature.
+        Return the trajectory segments that intersects the given feature.
 
         Feature attributes are appended to the trajectory's dataframe.
 
@@ -722,10 +724,12 @@ class Trajectory:
 
         Returns
         -------
-        Trajectory
-            Trajectory segment intersecting with the feature
+        TrajectoryCollection
+            Ssegments intersecting with the feature
         """
-        return intersection(self, feature, point_based)
+        from .trajectory_collection import TrajectoryCollection
+        segments = intersection(self, feature, point_based)
+        return TrajectoryCollection(segments)
 
     def apply_offset_seconds(self, column, offset):
         """
