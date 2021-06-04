@@ -134,7 +134,7 @@ class TrajectoryStopDetector:
         Examples
         --------
 
-        >>> mpd.TrajectoryStopDetector(traj).get_stop_segments(min_duration=timedelta(seconds=60), max_diameter=100)
+        >>> mpd.TrajectoryStopDetector(traj).get_stop_points(min_duration=timedelta(seconds=60), max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
         stops = TrajectoryCollection(convert_time_ranges_to_segments(self.traj, stop_time_ranges))
