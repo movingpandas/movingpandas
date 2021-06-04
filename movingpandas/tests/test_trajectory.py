@@ -3,7 +3,7 @@
 import pytest
 import pandas as pd
 import warnings
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
@@ -11,8 +11,8 @@ from fiona.crs import from_epsg
 from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, MissingCRSWarning
 
 
-CRS_METRIC = from_epsg(31256)
-CRS_LATLON = from_epsg(4326)
+CRS_METRIC = 31256
+CRS_LATLON = 4326
 
 
 class Node:
@@ -132,6 +132,23 @@ class TestTrajectory:
         result = self.default_traj_metric_5\
             .get_linestring_between(datetime(1970, 1, 1, 0, 0, 5), datetime(1970, 1, 1, 0, 0, 25), method='interpolated').wkt
         assert result == "LINESTRING (3 0, 6 0, 10 0, 10 5)"
+
+    def test_get_linestring_between_interpolate_existing_timestamps(self):
+        result = self.default_traj_metric_5\
+            .get_linestring_between(datetime(1970, 1, 1, 0, 0, 10), datetime(1970, 1, 1, 0, 0, 15), method='interpolated').wkt
+        assert result == "LINESTRING (6 0, 8 0)"
+
+    def test_get_linestring_between_interpolate_ValueError(self):
+        # test for https://github.com/anitagraser/movingpandas/issues/118 (not sure what causes this problem)
+        df = pd.DataFrame([
+            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
+            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
+            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)},
+            {'geometry': Point(9, 9), 't': datetime(2018, 1, 1, 12, 15, 0)}
+        ]).set_index('t')
+        toy_traj = Trajectory(GeoDataFrame(df, crs=31256), 1)
+        result = toy_traj.get_linestring_between(datetime(2018,1,1,12,6,0), datetime(2018,1,1,12,11,0), method='interpolated').wkt
+        assert result == "LINESTRING (6 0, 6 6, 6.6 6.6)"
 
     def test_get_linestring_between_within(self):
         result = self.default_traj_metric_5\

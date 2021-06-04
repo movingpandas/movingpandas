@@ -95,8 +95,24 @@ def create_entry_and_exit_points(traj, range):
     rown['geometry'] = range.pt_n
     # Insert rows
     temp_df = traj.df.copy()
-    temp_df.loc[range.t_0] = row0
-    temp_df.loc[range.t_n] = rown
+
+    try:
+        temp_df.loc[range.t_0] = row0
+    except ValueError as err:
+        if str(err) == "cannot set a single element with an array":
+            # fix for https://github.com/anitagraser/movingpandas/issues/118 (not sure what causes this problem)
+            pass
+        else:
+            raise err
+
+    try:
+        temp_df.loc[range.t_n] = rown
+    except ValueError as err:
+        if str(err) == "cannot set a single element with an array":
+            pass
+        else:
+            raise err
+
     return temp_df.sort_index()
 
 
