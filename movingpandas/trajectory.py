@@ -8,6 +8,7 @@ from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import DataFrame
+from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
 try:
     from pyproj import CRS
@@ -69,7 +70,9 @@ class Trajectory:
         .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
         """
         if len(df) < 2:
-            raise ValueError("Trajectory DataFrame must have at least two rows!")
+            raise ValueError("Trajectory GeoDataFrame must have at least two rows!")
+        if not isinstance(df.index, DatetimeIndex):
+            raise TypeError("Trajectory GeoDataFrame must have a DatetimeIndex! Use the Pandas set_index() method to specify the correct datetime column.")
 
         self.id = traj_id
         self.obj_id = obj_id

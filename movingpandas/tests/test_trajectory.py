@@ -2,7 +2,6 @@
 
 import pytest
 import pandas as pd
-import warnings
 from pandas.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
@@ -11,8 +10,8 @@ from fiona.crs import from_epsg
 from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, MissingCRSWarning
 
 
-CRS_METRIC = 31256
-CRS_LATLON = 4326
+CRS_METRIC = from_epsg(31256)
+CRS_LATLON = from_epsg(4326)
 
 
 class Node:
@@ -33,8 +32,8 @@ class TestPoint(Point):
 def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None):
     nodes = [node.to_dict() for node in nodes]
     df = pd.DataFrame(nodes).set_index('t')
-    geo_df = GeoDataFrame(df, crs=crs)
-    return Trajectory(geo_df, id, parent=parent)
+    gdf = GeoDataFrame(df, crs=crs)
+    return Trajectory(gdf, id, parent=parent)
 
 
 class TestTrajectory:
@@ -386,6 +385,16 @@ class TestTrajectory:
         expected_line_gdf_wkt = GeoDataFrame(df2, crs=CRS_METRIC)
 
         assert_frame_equal(traj_gdf_wkt, expected_line_gdf_wkt)
+
+    def test_error_due_to_wrong_gdf_index(self):
+        with pytest.raises(TypeError):
+            df = pd.DataFrame([
+                {'geometry': Point(0, 0), 't': datetime(1970, 1, 1, 0, 0, 0)},
+                {'geometry': Point(6, 0), 't': datetime(1970, 1, 1, 0, 6, 0)},
+                {'geometry': Point(6, 6), 't': datetime(1970, 1, 1, 0, 10, 0)}
+            ])
+            geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+            Trajectory(geo_df, 1)
 
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
