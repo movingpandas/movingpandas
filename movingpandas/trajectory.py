@@ -248,7 +248,7 @@ class Trajectory:
         shapely LineString
         """
         try:
-            return point_gdf_to_linestring(self.df)
+            return point_gdf_to_linestring(self.df, self.get_geom_column_name())
         except RuntimeError:
             raise RuntimeError("Cannot generate LineString")
 
@@ -289,7 +289,7 @@ class Trajectory:
         GeoDataFrame
         """
         line_gdf = self._to_line_df()
-        line_gdf.drop(columns=['geometry', 'prev_pt'], inplace=True)
+        line_gdf.drop(columns=[self.get_geom_column_name(), 'prev_pt'], inplace=True)
         line_gdf.reset_index(drop=True, inplace=True)
         line_gdf.rename(columns={'line': 'geometry'}, inplace=True)
         return line_gdf
@@ -493,10 +493,10 @@ class Trajectory:
             st_range = SpatioTemporalRange(self.get_position_at(t1), self.get_position_at(t2), t1, t2)
             temp_df = create_entry_and_exit_points(self, st_range)
             temp_df = temp_df[t1:t2]
-            return point_gdf_to_linestring(temp_df)
+            return point_gdf_to_linestring(temp_df, self.get_geom_column_name())
         else:
             try:
-                return point_gdf_to_linestring(self.get_segment_between(t1, t2).df)
+                return point_gdf_to_linestring(self.get_segment_between(t1, t2).df, self.get_geom_column_name())
             except RuntimeError:
                 raise RuntimeError("Cannot generate linestring between {0} and {1}".format(t1, t2))
 
@@ -782,12 +782,12 @@ def to_unixtime(t):
     return (t - datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
 
 
-def point_gdf_to_linestring(df):
+def point_gdf_to_linestring(df, geom_col_name):
     """
     Convert GeoDataFrame of Points to shapely LineString
     """
     if len(df) > 1:
-        return df.groupby([True] * len(df)).geometry.apply(
+        return df.groupby([True] * len(df))[geom_col_name].apply(
             lambda x: LineString(x.tolist())).values[0]
     else:
         raise RuntimeError('Dataframe needs at least two points to make line!')

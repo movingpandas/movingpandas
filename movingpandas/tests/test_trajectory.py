@@ -307,7 +307,17 @@ class TestTrajectory:
         traj = Trajectory(geo_df, 1)
         traj.add_speed()
         traj.add_direction()
+        traj.get_bbox()
+        traj.get_length()
+        traj.get_linestring_between(datetime(2018, 1, 1, 12, 0, 0), datetime(2018, 1, 1, 12, 6, 0))
+        traj.get_start_location()
         traj.hvplot()
+        traj.size()
+        traj.to_line_gdf()
+        traj.to_linestringm_wkt()
+        traj.to_linestring()
+        traj.to_point_gdf()
+        traj.to_traj_gdf()
 
     def test_support_for_other_time_column_names(self):
         df = pd.DataFrame([
