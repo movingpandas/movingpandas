@@ -149,7 +149,8 @@ class TrajectoryStopDetector:
             stop_pts.at[stop.id, 'geometry'] = stop.get_start_location()
             stop_pts.at[stop.id, 'traj_id'] = stop.parent.id
 
-        stop_pts['duration_s'] = (stop_pts['end_time'] - stop_pts['start_time']).dt.total_seconds()
-        stop_pts['traj_id'] = stop_pts['traj_id'].astype(type(stop.parent.id))
+        if len(stops) > 0:
+            stop_pts['duration_s'] = (stop_pts['end_time'] - stop_pts['start_time']).dt.total_seconds()
+            stop_pts['traj_id'] = stop_pts['traj_id'].astype(type(stop.parent.id))
 
         return stop_pts
