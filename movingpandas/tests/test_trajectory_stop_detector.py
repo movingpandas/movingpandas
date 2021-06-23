@@ -85,6 +85,17 @@ class TestTrajectorySplitter:
         assert stop_times[1].t_0 == datetime(1970,1,1,0,0,8)
         assert stop_times[1].t_n == datetime(1970,1,1,0,0,15)
 
+    def test_stop_detector_no_stops(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, second=1), Node(0, 2, second=2), Node(0, 1, second=3),
+                          Node(0, 22, second=4), Node(0, 30, second=8), Node(0, 31, second=10), Node(1, 32, second=15)])
+        detector = TrajectoryStopDetector(traj)
+        stop_times = detector.get_stop_time_ranges(max_diameter=1, min_duration=timedelta(seconds=1))
+        stop_segments = detector.get_stop_segments(max_diameter=1, min_duration=timedelta(seconds=1))
+        stop_points = detector.get_stop_points(max_diameter=1, min_duration=timedelta(seconds=1))
+        assert len(stop_times) == 0
+        assert len(stop_segments) == 0
+        assert len(stop_points) == 0
+
     def test_stop_detector_collection(self):
         traj1 = make_traj([Node(0, 0), Node(0, 1, second=1), Node(0, 2, second=2), Node(0, 1, second=3),
                           Node(0, 22, second=4), Node(0, 30, second=8), Node(0, 40, second=10), Node(1, 50, second=15)], id=1)
@@ -94,8 +105,10 @@ class TestTrajectorySplitter:
         detector = TrajectoryStopDetector(collection)
         stop_times = detector.get_stop_time_ranges(max_diameter=3, min_duration=timedelta(seconds=2))
         stop_segments = detector.get_stop_segments(max_diameter=3, min_duration=timedelta(seconds=2))
+        stop_points = detector.get_stop_points(max_diameter=3, min_duration=timedelta(seconds=2))
         assert len(stop_times) == 2
         assert len(stop_segments) == 2
+        assert len(stop_points) == 2
 
     def test_stop_splitter_no_stops(self):
         traj1 = make_traj([Node(0, 0), Node(0, 10, second=10), Node(0, 20, second=20), Node(0, 30, second=30),
