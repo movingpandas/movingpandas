@@ -23,7 +23,8 @@ class TrajectoryCollectionAggregator:
         traj_collection : TrajectoryCollection
             TrajectoryCollection to be aggregated
         max_distance : float
-            Maximum distance between significant points
+            Maximum distance between significant points (distance is calculated in CRS units, except if the CRS
+            is geographic, e.g. EPSG:4326 WGS84, then distance is calculated in meters)
         min_distance : float
             Minimum distance between significant points
         min_stop_duration : integer
