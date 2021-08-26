@@ -396,6 +396,10 @@ class TestTrajectory:
             geo_df = GeoDataFrame(df, crs=CRS_METRIC)
             Trajectory(geo_df, 1)
 
+    def test_mcp(self):
+        mcp = self.default_traj_metric_5.get_mcp()
+        assert mcp.wkt == 'POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'
+
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
 

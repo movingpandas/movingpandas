@@ -777,6 +777,15 @@ class Trajectory:
         line_df['line'] = line_df.apply(self._connect_prev_pt_and_geometry, axis=1)
         return line_df.set_geometry('line')[1:]
 
+    def get_mcp(self):
+        """Return the Minimum Convex Polygon of the trajectory data
+
+        Returns
+        -------
+        mcp : Shapely Polygon
+            The polygon of the Minimum Convex Polygon
+        """
+        return self.df.geometry.unary_union.convex_hull
 
 def to_unixtime(t):
     """
