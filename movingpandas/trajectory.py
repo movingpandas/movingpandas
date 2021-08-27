@@ -782,8 +782,9 @@ class Trajectory:
 
         Returns
         -------
-        mcp : Shapely Polygon
-            The polygon of the Minimum Convex Polygon
+        mcp : Shapely object
+            The polygon or line (in case of only two points)
+            of the Minimum Convex Polygon
         """
         return self.df.geometry.unary_union.convex_hull
 
