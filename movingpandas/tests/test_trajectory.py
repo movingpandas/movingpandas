@@ -396,6 +396,20 @@ class TestTrajectory:
             geo_df = GeoDataFrame(df, crs=CRS_METRIC)
             Trajectory(geo_df, 1)
 
+    def test_mcp_poly(self):
+        mcp = self.default_traj_metric_5.get_mcp()
+        assert mcp.wkt == 'POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'
+
+    def test_mcp_line(self):
+        df = pd.DataFrame([
+                    {'geometry': Point(0, 0), 't': datetime(1970, 1, 1, 0, 0, 0)},
+                    {'geometry': Point(6, 0), 't': datetime(1970, 1, 1, 0, 6, 0)},
+             ]).set_index('t')
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = Trajectory(geo_df, 1)
+        mcp = traj.get_mcp()
+        assert mcp.wkt == 'LINESTRING (0 0, 6 0)'
+
     """ 
     This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
 
