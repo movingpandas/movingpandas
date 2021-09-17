@@ -53,8 +53,10 @@ class _Grid:
         self.y_min = bbox[1]
         self.cell_size = cell_size
         self.cells = []
-        self.n_rows = int(math.ceil(h / self.cell_size))
-        self.n_cols = int(math.ceil(w / self.cell_size))
+        # in the rare case that the points are horizontal or vertical,
+        # fallback to a 1x1 cell matrix
+        self.n_rows = max(1, int(math.ceil(h / self.cell_size)))
+        self.n_cols = max(1, int(math.ceil(w / self.cell_size)))
         for i in range(0, self.n_cols):
             self.cells.append([])
             for j in range(0, self.n_rows):
