@@ -134,8 +134,7 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [1] [Graser, A. & Dragaschnig, M. (2020). Exploring movement data in notebook environments. Presented at MoVIS 2020, IEEE VIS 2020.](http://move.geog.ucsb.edu/wp-content/uploads/2020/10/MoVIS20_paper_4.pdf)
 
-### Referencing MovingPandas
-
+### Scientific Publications Referencing MovingPandas
 
 * [Pappalardo, L., Simini, F., Barlacchi, G., & Pellungrini, R. (2019). scikit-mobility: A Python library for the analysis, generation and risk assessment of mobility data. arXiv preprint arXiv:1907.07062.](https://arxiv.org/abs/1907.07062)
 * [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y)
@@ -145,6 +144,10 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 * [Mehri, S., Alesheikh, A. A., & Basiri, A. (2021). A Contextual Hybrid Model for Vessel Movement Prediction. IEEE Access, 9, 45600-45613.](https://ieeexplore.ieee.org/abstract/document/9380635/)
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
+
+### Teaching Material Referencing MovingPandas
+
+* [Aalto University. Spatial data science for sustainable development course](https://sustainability-gis.readthedocs.io/en/latest/lessons/L3/mobility-analytics.html)
 
 ### Workshop Videos
 
