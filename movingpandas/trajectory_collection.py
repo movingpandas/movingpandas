@@ -13,18 +13,26 @@ from .trajectory_plotter import _TrajectoryCollectionPlotter
 
 
 class TrajectoryCollection:
-    def __init__(self, data, traj_id_col=None, obj_id_col=None, min_length=0):
+    def __init__(self, data, traj_id_col=None, obj_id_col=None, t=None, x=None, y=None, crs='epsg:4326', min_length=0):
         """
         Create TrajectoryCollection from list of trajectories or GeoDataFrame
 
         Parameters
         ----------
-        data : list[Trajectory] or GeoDataFrame
+        data : list[Trajectory] or GeoDataFrame or DataFrame
             List of Trajectory objects or a GeoDataFrame with trajectory IDs, point geometry column and timestamp index
         traj_id_col : string
             Name of the GeoDataFrame column containing trajectory IDs
         obj_id_col : string
             Name of the GeoDataFrame column containing moving object IDs
+        t : string
+            Name of the DataFrame column containing the timestamp
+        x : string
+            Name of the DataFrame column containing the x coordinate
+        y : string
+            Name of the DataFrame column containing the y coordinate
+        crs : string
+            CRS of the x/y coordinates
         min_length : numeric
             Desired minimum length of trajectories. (Shorter trajectories are discarded.)
 
@@ -42,7 +50,7 @@ class TrajectoryCollection:
         if type(data) == list:
             self.trajectories = [traj for traj in data if traj.get_length() >= min_length]
         else:
-            self.trajectories = self._df_to_trajectories(data, traj_id_col, obj_id_col)
+            self.trajectories = self._df_to_trajectories(data, traj_id_col, obj_id_col, t, x, y, crs)
 
     def __len__(self):
         return len(self.trajectories)
@@ -119,7 +127,7 @@ class TrajectoryCollection:
         gdf.reset_index(drop=True, inplace=True)
         return gdf
 
-    def _df_to_trajectories(self, df, traj_id_col, obj_id_col):
+    def _df_to_trajectories(self, df, traj_id_col, obj_id_col, t, x, y, crs):
         trajectories = []
         for traj_id, values in df.groupby([traj_id_col]):
             if len(values) < 2:
@@ -128,10 +136,13 @@ class TrajectoryCollection:
                 obj_id = values.iloc[0][obj_id_col]
             else:
                 obj_id = None
-            trajectory = Trajectory(values, traj_id, obj_id=obj_id)
+            trajectory = Trajectory(values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs)
             if trajectory.get_length() < self.min_length or trajectory.df.geometry.count() < 2:
                 continue
-            trajectory.crs = df.crs
+            if isinstance(df, GeoDataFrame):
+                trajectory.crs = df.crs
+            else:
+                trajectory.crs = crs
             trajectories.append(trajectory)
         return trajectories
 

@@ -7,7 +7,7 @@ import warnings
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
-from pandas import DataFrame
+from pandas import DataFrame, to_datetime
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
 try:
@@ -32,7 +32,7 @@ class MissingCRSWarning(UserWarning, ValueError):
 
 
 class Trajectory:
-    def __init__(self, df, traj_id, obj_id=None, parent=None):
+    def __init__(self, df, traj_id, obj_id=None, t=None, x=None, y=None, crs='epsg:4326', parent=None):
         """
         Create Trajectory from GeoDataFrame.
 
@@ -44,6 +44,14 @@ class Trajectory:
             Trajectory ID
         obj_id : any
             Moving object ID
+        t : string
+            Name of the DataFrame column containing the timestamp
+        x : string
+            Name of the DataFrame column containing the x coordinate
+        y : string
+            Name of the DataFrame column containing the y coordinate
+        crs : string
+            CRS of the x/y coordinates
         parent : Trajectory
             Parent trajectory
 
@@ -70,9 +78,17 @@ class Trajectory:
         .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
         """
         if len(df) < 2:
-            raise ValueError("Trajectory GeoDataFrame must have at least two rows!")
+            raise ValueError("The input DataFrame must have at least two rows.")
+        if not isinstance(df, GeoDataFrame):
+            if x is None or y is None:
+                raise ValueError("The input DataFrame needs to be a GeoDataFrame or x and y columns need to be specified.")
+            df = GeoDataFrame(df.drop([x,y], axis=1), crs=crs, geometry=[Point(xy) for xy in zip(df[x], df[y])])
         if not isinstance(df.index, DatetimeIndex):
-            raise TypeError("Trajectory GeoDataFrame must have a DatetimeIndex! Use the Pandas set_index() method to specify the correct datetime column.")
+            if t is None:
+                raise TypeError(
+                    "The input DataFrame needs a DatetimeIndex or a timestamp column needs to be specified. Use Pandas' set_index() method to create an index or specify the timestamp column name.")
+            df[t] = to_datetime(df[t])
+            df = df.set_index(t).tz_localize(None)
 
         self.id = traj_id
         self.obj_id = obj_id
@@ -81,7 +97,7 @@ class Trajectory:
         self.crs = df.crs
         self.parent = parent
         if self.crs is None:
-            warnings.warn('Trajectory generated without CRS! Computations will use Euclidean distances.',
+            warnings.warn('Trajectory generated without CRS. Computations will use Euclidean distances.',
                           category=MissingCRSWarning)
             self.is_latlon = False
             return
