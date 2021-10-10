@@ -102,7 +102,9 @@ class ObservationGapSplitter(TrajectorySplitter):
     gap : datetime.timedelta
         Time gap threshold
     min_length : numeric
-        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
+        then length is calculated in metres.)
 
     Examples
     --------
@@ -135,9 +137,13 @@ class SpeedSplitter(TrajectorySplitter):
     duration : datetime.timedelta
         Minimum stop duration
     min_length : numeric
-        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
+        then length is calculated in metres.)
     max_speed: float
         Max speed limit
+        (Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
+        then speed is calculated in meters per second.)
 
     Examples
     --------
@@ -165,7 +171,9 @@ class StopSplitter(TrajectorySplitter):
     min_duration : datetime.timedelta
         Minimum stop duration
     min_length : numeric
-        Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
+        then length is calculated in metres.)
 
     Examples
     --------
