@@ -25,15 +25,15 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 
 ### Trajectory plots
 
-![movingpandas_animated](https://user-images.githubusercontent.com/590385/89099729-a9f1da00-d3f1-11ea-91c2-904d477fdcb2.gif)
+![movingpandas_animated](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
 ### Stop detection
 
-![movingpandas_stop_detection_clip](https://user-images.githubusercontent.com/590385/94711867-fbaed600-0348-11eb-8a43-4541d2d3205b.png)
+![movingpandas_stop_detection_clip](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
 
 ### Trajectory aggregation
 
-![movingpandas_ais](https://user-images.githubusercontent.com/590385/73123664-5ad67280-3f92-11ea-8b42-02a0135f0f5c.PNG)
+![movingpandas_ais](https://user-images.githubusercontent.com/590385/137953890-d43c7fe5-5aea-4e29-8ce1-f0d529c3220f.png)
 
 ## Installation
 
