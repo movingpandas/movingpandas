@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
-from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, MissingCRSWarning
+from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, DISTANCE_COL_NAME, MissingCRSWarning
 
 
 CRS_METRIC = from_epsg(31256)
@@ -200,6 +200,41 @@ class TestTrajectory:
         traj = traj.clip(area_of_interest).get_trajectory('1_0')
         traj.add_speed()
         traj.add_speed(overwrite=True)
+
+    def test_add_distance(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance()
+        assert traj.df[DISTANCE_COL_NAME].tolist() == [0, 6.0]
+
+    def test_add_distance_without_crs(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
+        traj.add_distance()
+        assert traj.df[DISTANCE_COL_NAME].tolist() == [0, 6.0]
+
+    def test_add_distance_can_overwrite(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance()
+        traj.add_distance(overwrite=True)
+        assert traj.df[DISTANCE_COL_NAME].tolist() == [0, 6.0]
+
+    def test_add_distance_only_adds_distance_column_and_doesnt_otherwise_alter_df(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.add_distance()
+        traj.df = traj.df.drop(columns=['distance'])
+        assert_frame_equal(self.default_traj_metric_5.df, traj.df)
+
+    def test_add_distance_latlon(self):
+        traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
+        traj.add_distance()
+        assert traj.df[DISTANCE_COL_NAME].tolist()[1] / 1000 == pytest.approx(676.3, 1)
+
+    def test_add_distance_latlon_numerical_issues(self):
+        from shapely.geometry import Polygon
+        traj = make_traj([Node(33.3545, 28.1335, 2010, 10, 4, 8), Node(35.817, 23.78383, 2010, 10, 4, 20)], CRS_LATLON)
+        area_of_interest = Polygon([(30, 25), (50, 25), (50, 15), (30, 15), (30, 25)])
+        traj = traj.clip(area_of_interest).get_trajectory('1_0')
+        traj.add_distance()
+        traj.add_distance(overwrite=True)
 
     def test_get_bbox(self):
         result = make_traj([Node(0, 1), Node(6, 5, day=2)], CRS_LATLON).get_bbox()
