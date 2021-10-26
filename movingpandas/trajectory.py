@@ -25,6 +25,7 @@ from .trajectory_plotter import _TrajectoryPlotter
 
 SPEED_COL_NAME = 'speed'
 DIRECTION_COL_NAME = 'direction'
+DISTANCE_COL_NAME = 'distance'
 
 
 class MissingCRSWarning(UserWarning, ValueError):
@@ -247,6 +248,16 @@ class Trajectory:
         string
         """
         return SPEED_COL_NAME
+
+    def get_distance_column_name(self):
+        """
+        Return name of the distance column
+
+        Returns
+        -------
+        string
+        """
+        return DISTANCE_COL_NAME
 
     def get_geom_column_name(self):
         """
@@ -653,6 +664,22 @@ class Trajectory:
         self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
         self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][DIRECTION_COL_NAME]
 
+    def add_distance(self, overwrite=False):
+        """
+        Add distance column and values to the trajectory's dataframe.
+
+        Distance is calculated as CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
+        then distance is calculated in meters.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing distance values (default: False)
+        """
+        if DISTANCE_COL_NAME in self.df.columns and not overwrite:
+            raise RuntimeError('Trajectory already has distance values! Use overwrite=True to overwrite exiting values.')
+        self.df = self._get_df_with_distance()
+
     def add_speed(self, overwrite=False):
         """
         Add speed column and values to the trajectory's dataframe.
@@ -668,6 +695,18 @@ class Trajectory:
         if SPEED_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
         self.df = self._get_df_with_speed()
+
+    def _get_df_with_distance(self):
+        temp_df = self.df.copy()
+        temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
+        try:
+            temp_df[DISTANCE_COL_NAME] = temp_df.apply(self._compute_distance, axis=1)
+        except ValueError as e:
+            raise e
+        # set the distance in the first row to zero
+        temp_df.at[self.get_start_time(), DISTANCE_COL_NAME] = 0
+        temp_df = temp_df.drop(columns=['prev_pt'])
+        return temp_df
 
     def _get_df_with_speed(self):
         temp_df = self.df.copy()
