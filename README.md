@@ -34,7 +34,7 @@ In 2020, MovingPandas was approved for [pyOpenSci](https://www.pyopensci.org/).
 * Aggregate TrajectoryCollections into flow maps
 * Create static and interactive visualizations for data exploration
 
- ![Interactive trajectory visualization using hvplot](pics/movingpandas_hvplot2.gif)
+ ![Interactive trajectory visualization using hvplot](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
 
 ## Tutorials
@@ -89,8 +89,7 @@ For example, we can explore the daily travelled distance as recorded by a GPS tr
 
 ```python
 df = read_file('tracker.gpkg')
-df = df.set_index('t')
-tc = mpd.TrajectoryCollection(df, 'CollarID')
+tc = mpd.TrajectoryCollection(df, 'CollarID', t='t')
 
 daily = mpd.TemporalSplitter(tc).split(mode='day')
 daily_lengths = [traj.get_length() for traj in daily]
@@ -106,7 +105,7 @@ In this case, the movement data, which comes from a GPS collar of a horse, revea
 Other functions deal with generalizing trajectories, detecting stops, splitting trajectories into subtrajectories, clipping trajectories to an area of interest, and extracting trajectory start and end times and locations.
 
 
-![Stop detection example](https://user-images.githubusercontent.com/590385/94711867-fbaed600-0348-11eb-8a43-4541d2d3205b.png)
+![Stop detection example](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
 
 
 
