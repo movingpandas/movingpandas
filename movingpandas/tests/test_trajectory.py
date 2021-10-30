@@ -166,6 +166,18 @@ class TestTrajectory:
         assert result[0] == pytest.approx(44.561451413257714, 5)
         assert result[1] == pytest.approx(44.561451413257714, 5)
 
+    def test_add_direction_can_overwrite(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)])
+        traj.add_direction()
+        traj.add_direction(overwrite=True)
+        assert traj.df[DIRECTION_COL_NAME].tolist() == [90.0, 90.0, 180.0, 270]
+
+    def test_add_direction_overwrite_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)])
+        traj.add_direction()
+        with pytest.raises(RuntimeError):
+            traj.add_direction()
+
     def test_add_speed(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
         traj.add_speed()
@@ -181,6 +193,12 @@ class TestTrajectory:
         traj.add_speed()
         traj.add_speed(overwrite=True)
         assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+
+    def test_add_speed_overwrite_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed()
+        with pytest.raises(RuntimeError):
+            traj.add_speed()
 
     def test_add_speed_only_adds_speed_column_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
@@ -216,6 +234,12 @@ class TestTrajectory:
         traj.add_distance()
         traj.add_distance(overwrite=True)
         assert traj.df[DISTANCE_COL_NAME].tolist() == [0, 6.0]
+
+    def test_add_distance_overwrite_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance()
+        with pytest.raises(RuntimeError):
+            traj.add_distance()
 
     def test_add_distance_only_adds_distance_column_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
