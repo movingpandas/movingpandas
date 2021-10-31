@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pytest import approx
 from pandas.util.testing import assert_frame_equal
 from shapely.geometry import Polygon
 from datetime import datetime, timedelta
@@ -151,7 +152,16 @@ class TestOverlay:
         ])
         result = traj.clip(polygon)
         assert len(result) == 1
-        expected = "LINESTRING (-92.76600766934008 34.89094857130274, -92.8 34.86667, -93.15000000000001 34.66667, -93.31667 34.55, -93.66667 34.35, -93.68590048921358 34.33668617473444)"
-        assert result.get_trajectory('1_0').to_linestring().wkt == expected
-
+        coords = result.get_trajectory('1_0').to_linestring().coords
+        expected = [
+            [-92.76600766934008, 34.89094857130274],
+            [-92.8, 34.86667],
+            [-93.15000000000001, 34.66667],
+            [-93.31667, 34.55],
+            [-93.66667, 34.35],
+            [-93.68590048921358, 34.33668617473444],
+        ]
+        assert len(coords) == len(expected)
+        for o, e in zip(coords, expected):
+            assert o == approx(e, 0.1)
 
