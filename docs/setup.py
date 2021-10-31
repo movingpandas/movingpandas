@@ -3,7 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas']
+INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely', 'pandas', 'docutils>=0.14,<0.18']
 
 setuptools.setup(
     name="movingpandas",
