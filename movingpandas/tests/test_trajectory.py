@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
-from movingpandas.trajectory import Trajectory, SPEED_COL_NAME, DIRECTION_COL_NAME, DISTANCE_COL_NAME, MissingCRSWarning
+from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, DISTANCE_COL_NAME, MissingCRSWarning
 
 
 CRS_METRIC = from_epsg(31256)
