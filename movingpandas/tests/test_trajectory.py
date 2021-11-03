@@ -13,6 +13,17 @@ from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NA
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
 
+# Taken from https://stackoverflow.com/a/38778401/6046019
+def assert_frame_not_equal(*args, **kwargs):
+    try:
+        assert_frame_equal(*args, **kwargs)
+    except AssertionError:
+        # frames are not equal
+        pass
+    else:
+        # frames are equal
+        raise AssertionError
+
 
 class Node:
     def __init__(self, x=0, y=0, year=1970, month=1, day=1, hour=0, minute=0, second=0, millisec=0, value=0):
@@ -204,6 +215,12 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
         traj.add_speed(name="speed2")
         assert "speed2" in traj.df.columns
+
+    def test_add_speed_doesnt_change_existing_speed(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.df["existing_speed"] = [1, 2, 3, 4, 5]
+        traj.add_speed()
+        assert_frame_not_equal(traj.df["existing_speed"], traj.df[SPEED_COL_NAME])
 
     def test_add_speed_only_adds_speed_column_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
