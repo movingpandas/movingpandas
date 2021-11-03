@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
-from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, DISTANCE_COL_NAME, MissingCRSWarning
+from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, DISTANCE_COL_NAME, MissingCRSWarning
 
 
 CRS_METRIC = from_epsg(31256)
@@ -181,24 +181,29 @@ class TestTrajectory:
     def test_add_speed(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
         traj.add_speed()
-        assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+        assert traj.df["speed"].tolist() == [6.0, 6.0]
 
     def test_add_speed_without_crs(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
         traj.add_speed()
-        assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+        assert traj.df["speed"].tolist() == [6.0, 6.0]
 
     def test_add_speed_can_overwrite(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
         traj.add_speed()
         traj.add_speed(overwrite=True)
-        assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+        assert traj.df["speed"].tolist() == [6.0, 6.0]
 
     def test_add_speed_overwrite_raises_error(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
         traj.add_speed()
         with pytest.raises(RuntimeError):
             traj.add_speed()
+
+    def test_add_speed_with_name(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed(name="speed2")
+        assert "speed2" in traj.df.columns
 
     def test_add_speed_only_adds_speed_column_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
@@ -209,7 +214,7 @@ class TestTrajectory:
     def test_add_speed_latlon(self):
         traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
         traj.add_speed()
-        assert traj.df[SPEED_COL_NAME].tolist()[0] / 1000 == pytest.approx(676.3, 1)
+        assert traj.df["speed"].tolist()[0] / 1000 == pytest.approx(676.3, 1)
 
     def test_add_speed_latlon_numerical_issues(self):
         from shapely.geometry import Polygon
