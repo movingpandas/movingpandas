@@ -23,6 +23,7 @@ from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_
                                         measure_distance_euclidean
 from .trajectory_plotter import _TrajectoryPlotter
 
+SPEED_COL_NAME = 'speed'
 DIRECTION_COL_NAME = 'direction'
 DISTANCE_COL_NAME = 'distance'
 
@@ -249,7 +250,7 @@ class Trajectory:
         if hasattr(self, "speed_col_name"):
             return self.speed_col_name
         else:
-            return "speed"
+            return SPEED_COL_NAME
 
     def get_distance_column_name(self):
         """
@@ -682,7 +683,7 @@ class Trajectory:
             raise RuntimeError('Trajectory already has distance values! Use overwrite=True to overwrite exiting values.')
         self.df = self._get_df_with_distance()
 
-    def add_speed(self, overwrite=False, name="speed"):
+    def add_speed(self, overwrite=False, name=SPEED_COL_NAME):
         """
         Add speed column and values to the trajectory's dataframe.
 
@@ -698,7 +699,7 @@ class Trajectory:
         """
         self.speed_col_name = name
         if self.speed_col_name in self.df.columns and not overwrite:
-            raise RuntimeError(f'Trajectory already has a column named {self.speed_col_name}! Use overwrite=True to overwrite exiting values.')
+            raise RuntimeError(f'Trajectory already has a column named {self.speed_col_name}! Use overwrite=True to overwrite exiting values or update the name arg.')
         self.df = self._get_df_with_speed(name)
 
     def _get_df_with_distance(self):
