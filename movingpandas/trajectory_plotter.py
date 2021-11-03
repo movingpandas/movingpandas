@@ -35,8 +35,7 @@ class _TrajectoryPlotter:
         temp = traj.copy()
 
         if self.column:
-            speed_col_name = traj.get_speed_column_name()
-            if self.column == speed_col_name and speed_col_name not in traj.df.columns:
+            if self.column == "speed" and "speed" not in traj.df.columns:
                 temp.add_speed(overwrite=True)
 
         line_gdf = temp._to_line_df().drop([temp.get_geom_column_name(), 'prev_pt'], axis=1)
