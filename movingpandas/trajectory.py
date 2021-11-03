@@ -246,7 +246,10 @@ class Trajectory:
         -------
         string
         """
-        return self.speed_col_name
+        if hasattr(self, "speed_col_name"):
+            return self.speed_col_name
+        else:
+            return "speed"
 
     def get_distance_column_name(self):
         """
