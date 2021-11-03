@@ -208,7 +208,7 @@ class TestTrajectory:
     def test_add_speed_only_adds_speed_column_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
         traj.add_speed()
-        traj.df = traj.df.drop(columns=[SPEED_COL_NAME])
+        traj.df = traj.df.drop(columns=['speed'])
         assert_frame_equal(self.default_traj_metric_5.df, traj.df)
 
     def test_add_speed_latlon(self):
