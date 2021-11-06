@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import sin, cos, atan2, radians, degrees, sqrt, pi
-from shapely.geometry import Point, LineString
+from shapely.geometry import MultiPoint, Point
 from geopy import distance
 
 
@@ -137,7 +137,7 @@ def mrr_diagonal(geom, spherical=False):
         return 0
     if len(geom) == 2:
         return _measure_distance(geom[0], geom[1], spherical)
-    mrr = LineString(geom).minimum_rotated_rectangle
+    mrr = MultiPoint(geom).minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
     except AttributeError:  # thrown if mrr is a LineString
