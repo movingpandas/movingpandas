@@ -19,3 +19,4 @@ dependencies:
   - scikit-learn
   - geopy
   - panel
+  - pytest

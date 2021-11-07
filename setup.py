@@ -4,7 +4,9 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that MovingPandas uses explicitly:
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely<1.8', 'pandas', 'geopandas', 'hvplot', 'bokeh', 'cartopy', 'geoviews', 'pyproj', 'geopy']
+INSTALL_REQUIRES = [
+    'numpy', 'matplotlib', 'shapely<1.8',  # Geoviews is not yet compatible with shapely-1.8.0 https://github.com/holoviz/geoviews/issues/533
+    'pandas', 'geopandas', 'hvplot', 'bokeh', 'cartopy', 'geoviews', 'pyproj', 'geopy']
 
 setuptools.setup(
     name="movingpandas",
