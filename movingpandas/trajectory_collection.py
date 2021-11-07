@@ -13,7 +13,7 @@ from .trajectory_plotter import _TrajectoryCollectionPlotter
 
 
 class TrajectoryCollection:
-    def __init__(self, data, traj_id_col=None, obj_id_col=None, t=None, x=None, y=None, crs='epsg:4326', min_length=0):
+    def __init__(self, data, traj_id_col=None, obj_id_col=None, t=None, x=None, y=None, crs='epsg:4326', min_length=0, min_duration=None):
         """
         Create TrajectoryCollection from list of trajectories or GeoDataFrame
 
@@ -35,6 +35,8 @@ class TrajectoryCollection:
             CRS of the x/y coordinates
         min_length : numeric
             Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+        min_duration : timedelta
+            Desired minimum duration of trajectories. (Shorter trajectories are discarded.)
 
         Examples
         --------
@@ -47,8 +49,11 @@ class TrajectoryCollection:
         >>> trajectory_collection = mpd.TrajectoryCollection(gdf, 'trajectory_id')
         """
         self.min_length = min_length
+        self.min_duration = min_duration
         if type(data) == list:
             self.trajectories = [traj for traj in data if traj.get_length() >= min_length]
+            if min_duration:
+                self.trajectories = [traj for traj in self.trajectories if traj.get_duration() >= min_duration]
         else:
             self.trajectories = self._df_to_trajectories(data, traj_id_col, obj_id_col, t, x, y, crs)
 
@@ -137,6 +142,9 @@ class TrajectoryCollection:
             else:
                 obj_id = None
             trajectory = Trajectory(values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs)
+            if self.min_duration:
+                if trajectory.get_duration() < self.min_duration:
+                    continue
             if trajectory.get_length() < self.min_length or trajectory.df.geometry.count() < 2:
                 continue
             if isinstance(df, GeoDataFrame):

@@ -43,6 +43,18 @@ class TestTrajectoryCollection:
         collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj', min_length=1000)
         assert len(collection) == 0
 
+    def test_number_of_trajectories_min_duration(self):
+        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj', min_duration=timedelta(days=1))
+        assert len(collection) == 1
+
+    def test_number_of_trajectories_min_duration_from_list(self):
+        collection = TrajectoryCollection(self.collection.trajectories, min_duration=timedelta(days=1))
+        assert len(collection) == 1
+
+    def test_number_of_trajectories_min_duration_never_reached(self):
+        collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj', min_duration=timedelta(weeks=1))
+        assert len(collection) == 0
+
     def test_get_trajectory(self):
         assert self.collection.get_trajectory(1).id == 1
         assert self.collection.get_trajectory(1).obj_id == 'A'
