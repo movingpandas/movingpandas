@@ -218,8 +218,9 @@ class TestTrajectory:
 
     def test_add_speed_doesnt_change_existing_speed(self):
         traj = self.default_traj_metric_5.copy()
-        traj.df["speed"] = [1, 2, 3, 4, 5]
+        traj.df[SPEED_COL_NAME] = [1, 2, 3, 4, 5]
         traj.add_speed(name="speed2")
+        assert list(traj.df[SPEED_COL_NAME]) == [1, 2, 3, 4, 5]
         assert_frame_not_equal(traj.df[SPEED_COL_NAME], traj.df["speed2"])
 
     def test_add_speed_only_adds_speed_column_and_doesnt_otherwise_alter_df(self):
