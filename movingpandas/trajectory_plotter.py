@@ -139,4 +139,3 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
                 self.overlay = overlay
             self.hvplot_tiles = False  # has to be removed after the first iteration, otherwise tiles will cover trajectories!
         return self.overlay
-

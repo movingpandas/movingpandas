@@ -247,7 +247,10 @@ class Trajectory:
         -------
         string
         """
-        return SPEED_COL_NAME
+        if hasattr(self, "speed_col_name"):
+            return self.speed_col_name
+        else:
+            return SPEED_COL_NAME
 
     def get_distance_column_name(self):
         """
@@ -680,7 +683,7 @@ class Trajectory:
             raise RuntimeError('Trajectory already has distance values! Use overwrite=True to overwrite exiting values.')
         self.df = self._get_df_with_distance()
 
-    def add_speed(self, overwrite=False):
+    def add_speed(self, overwrite=False, name=SPEED_COL_NAME):
         """
         Add speed column and values to the trajectory's dataframe.
 
@@ -691,10 +694,13 @@ class Trajectory:
         ----------
         overwrite : bool
             Whether to overwrite existing speed values (default: False)
+        name : str
+            Name of the speed column (default: "speed")
         """
-        if SPEED_COL_NAME in self.df.columns and not overwrite:
-            raise RuntimeError('Trajectory already has speed values! Use overwrite=True to overwrite exiting values.')
-        self.df = self._get_df_with_speed()
+        self.speed_col_name = name
+        if self.speed_col_name in self.df.columns and not overwrite:
+            raise RuntimeError(f'Trajectory already has a column named {self.speed_col_name}! Use overwrite=True to overwrite exiting values or update the name arg.')
+        self.df = self._get_df_with_speed(name)
 
     def _get_df_with_distance(self):
         temp_df = self.df.copy()
@@ -708,7 +714,7 @@ class Trajectory:
         temp_df = temp_df.drop(columns=['prev_pt'])
         return temp_df
 
-    def _get_df_with_speed(self):
+    def _get_df_with_speed(self, name):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         temp_df['t'] = temp_df.index
@@ -716,11 +722,11 @@ class Trajectory:
         temp_df = temp_df.drop(columns=['t'])
         temp_df = temp_df.assign(delta_t=times.diff().values)
         try:
-            temp_df[SPEED_COL_NAME] = temp_df.apply(self._compute_speed, axis=1)
+            temp_df[name] = temp_df.apply(self._compute_speed, axis=1)
         except ValueError as e:
             raise e
         # set the speed in the first row to the speed of the second row
-        temp_df.at[self.get_start_time(), SPEED_COL_NAME] = temp_df.iloc[1][SPEED_COL_NAME]
+        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
         temp_df = temp_df.drop(columns=['prev_pt', 'delta_t'])
         return temp_df
 
