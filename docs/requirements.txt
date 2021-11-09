@@ -1,2 +1,6 @@
 sphinx<2
 docutils<0.18
+
+# Build dependencies of Cartopy
+numpy
+cython
