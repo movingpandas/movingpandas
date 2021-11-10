@@ -3,9 +3,11 @@ channels:
   - conda-forge
 dependencies:
   - python=3.9
+  - black
   - cartopy
   - cython
   - hvplot
+  - flake8
   - geopandas
   - geoviews
   - geopy
