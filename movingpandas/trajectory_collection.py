@@ -44,9 +44,7 @@ class TrajectoryCollection:
         >>> import movingpandas as mpd
         >>>
         >>> gdf = read_file('data.gpkg')
-        >>> gdf['t'] = pd.to_datetime(gdf['t'])
-        >>> gdf = gdf.set_index('t')
-        >>> trajectory_collection = mpd.TrajectoryCollection(gdf, 'trajectory_id')
+        >>> trajectory_collection = mpd.TrajectoryCollection(gdf, 'trajectory_id', t='t')
         """
         self.min_length = min_length
         self.min_duration = min_duration
