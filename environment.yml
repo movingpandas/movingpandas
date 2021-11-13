@@ -1,22 +1,23 @@
 name: movingpandas
 channels:
   - conda-forge
-  - default
 dependencies:
-  - python=3.7
-  - numpy
-  - cython
-  - matplotlib
-  - seaborn
-  - pandas
-  - geopandas
-  - rasterio
-  - hvplot
-  - bokeh
-  - proj
+  - python=3.9
+  - black
   - cartopy
+  - cython
+  - hvplot
+  - flake8
+  - geopandas
   - geoviews
-  - scikit-learn
   - geopy
+  - matplotlib
+  - numpy
+  - pandas
   - panel
+  - pre-commit
   - pytest
+  - rasterio
+  - scikit-learn
+  - seaborn
+  
