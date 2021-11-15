@@ -55,6 +55,14 @@ class TestTrajectorySplitter:
         assert split.trajectories[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01 00:00:00')
         assert split.trajectories[1] == make_traj([Node(year=2000), Node(year=2000, second=1)], id='1_2000-01-01 00:00:00')
 
+    def test_split_by_hour(self):
+        traj = make_traj([Node(), Node(second=1), Node(hour=2), Node(hour=2, second=1)])
+        split = TemporalSplitter(traj).split(mode='hour')
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 2
+        assert split.trajectories[0] == make_traj([Node(), Node(second=1)], id='1_1970-01-01 00:00:00')
+        assert split.trajectories[1] == make_traj([Node(hour=2), Node(hour=2, second=1)], id='1_1970-01-01 02:00:00')
+
     def test_split_by_month(self):
         traj = make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1),
                           Node(month=2), Node(month=2, second=1)])

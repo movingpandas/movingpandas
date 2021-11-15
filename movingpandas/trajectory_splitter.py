@@ -67,7 +67,7 @@ class TemporalSplitter(TrajectorySplitter):
     Parameters
     ----------
     mode : str
-        Split mode
+        Split mode. (hour, day, month or year)
     min_length : numeric
         Desired minimum length of trajectories. (Shorter trajectories are discarded.)
 
@@ -79,14 +79,16 @@ class TemporalSplitter(TrajectorySplitter):
 
     def _split_traj(self, traj, mode='day', min_length=0):
         result = []
-        if mode == 'day':
+        if mode == 'hour':
+            grouped = traj.df.groupby(Grouper(freq="H"))
+        elif mode == 'day':
             grouped = traj.df.groupby(Grouper(freq="D"))
         elif mode == 'month':
             grouped = traj.df.groupby(Grouper(freq="M"))
         elif mode == 'year':
             grouped = traj.df.groupby(Grouper(freq="Y"))
         else:
-            raise ValueError('Invalid split mode {}. Must be one of [day, month, year]'.format(mode))
+            raise ValueError('Invalid split mode {}. Must be one of [hour, day, month, year]'.format(mode))
         for key, values in grouped:
             if len(values) > 1:
                 result.append(Trajectory(values, '{}_{}'.format(traj.id, key)))
