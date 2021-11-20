@@ -4,5 +4,5 @@
 @import "jekyll-theme-cayman";
 .page-header {
     background-image: linear-gradient(120deg, #26224f, #e31b84);
-    background-image: url("../img/movingpandas-banner.png"), linear-gradient(120deg, #26224f, #e31b84);
+    background-image: url("../img/movingpandas-banner.png") center center no-repeat, linear-gradient(120deg, #26224f, #e31b84);
 }
