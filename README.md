@@ -2,10 +2,10 @@
 [![pyOpenSci](https://camo.githubusercontent.com/63ff31cdb80a06361e53ac2b9ac0d184118ebd0b/68747470733a2f2f74696e7975726c2e636f6d2f7932326e62387570)](https://github.com/pyOpenSci/software-review/issues/18)
 [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
 
-MovingPandas is a Python library for handling movement data based on Pandas and [GeoPandas](https://geopandas.org). 
-It provides trajectory data structures and functions for analysis and visualization.
+MovingPandas is a Python library for handling movement data based on Pandas, [GeoPandas](https://geopandas.org), and [HoloViz](https://holoviz.org). 
 
-MovingPandas has been peer-reviewed by [pyOpenSci](https://www.pyopensci.org/).
+MovingPandas provides trajectory data structures and functions for movement data exploration and analysis.
+
 
 ## Features
 
