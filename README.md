@@ -1,26 +1,30 @@
+[![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=master)](https://movingpandas.readthedocs.io/en/master/)
+[![pyOpenSci](https://camo.githubusercontent.com/63ff31cdb80a06361e53ac2b9ac0d184118ebd0b/68747470733a2f2f74696e7975726c2e636f6d2f7932326e62387570)](https://github.com/pyOpenSci/software-review/issues/18)
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
+
 MovingPandas is a Python library for handling movement data based on Pandas and [GeoPandas](https://geopandas.org). 
 It provides trajectory data structures and functions for analysis and visualization.
 
 MovingPandas has been peer-reviewed by [pyOpenSci](https://www.pyopensci.org/).
 
-
 ## Features
 
 * Easily create trajectories from diverse sources, including CSV files, GIS file formats, and (Geo)DataFrames 
 * Compute movement speed / direction and extract stops 
-* Split continuous observations into individual trips
+* Split trajectories into individual trips
 * Generalize and aggregate trajectories 
-* Create static and interactive visualizations for data exploration
+* Create static and interactive visualizations 
 
  ![Interactive trajectory visualization using hvplot](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
 
 ## Documentation
 
+You can run **[MovingPandas examples](https://github.com/anitagraser/movingpandas-examples)** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas-examples/main) 
 
-The official documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
+The official MovingPandas API documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
-For more information on individual releases, check out the [Changelog](./changelog).
+For more information about individual releases, check out the [Changelog](./changelog).
 
 
 ## What's next?
