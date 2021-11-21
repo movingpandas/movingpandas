@@ -29,7 +29,11 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 
 ### Stop detection
 
-![movingpandas_stop_detection_clip](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
+![movingpandas_stop_detection](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
+
+### Trajectory generalization
+
+![movingpandas_generalize](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
 
 ### Trajectory aggregation
 
