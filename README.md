@@ -17,6 +17,8 @@ MovingPandas provides trajectory data structures and functions for movement data
 
  ![Interactive trajectory visualization using hvplot](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
+![Trajectory generalization and linked plots](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
+
 
 ## Documentation
 
