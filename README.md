@@ -7,7 +7,7 @@
 [![DOI](https://zenodo.org/badge/161995245.svg)](https://zenodo.org/badge/latestdoi/161995245)
 [![pyOpenSci](https://camo.githubusercontent.com/63ff31cdb80a06361e53ac2b9ac0d184118ebd0b/68747470733a2f2f74696e7975726c2e636f6d2f7932326e62387570)](https://github.com/pyOpenSci/software-review/issues/18)
 
-<img align="right" src="https://anitagraser.github.io/movingpandas/pics/movingpandas.png">
+<img align="right" src="https://anitagraser.github.io/movingpandas/assets/img/movingpandas.png">
 
 MovingPandas implements a Trajectory class and corresponding methods based on **[GeoPandas](https://geopandas.org)**.
 
