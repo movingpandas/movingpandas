@@ -79,16 +79,10 @@ class TemporalSplitter(TrajectorySplitter):
 
     def _split_traj(self, traj, mode='day', min_length=0):
         result = []
-        if mode == 'hour':
-            grouped = traj.df.groupby(Grouper(freq="H"))
-        elif mode == 'day':
-            grouped = traj.df.groupby(Grouper(freq="D"))
-        elif mode == 'month':
-            grouped = traj.df.groupby(Grouper(freq="M"))
-        elif mode == 'year':
-            grouped = traj.df.groupby(Grouper(freq="Y"))
-        else:
-            raise ValueError('Invalid split mode {}. Must be one of [hour, day, month, year]'.format(mode))
+        modes = {'hour': 'H', 'day': 'D', 'month': 'M', 'year': 'Y'}
+        if mode in modes.keys():
+            mode = modes[mode]
+        grouped = traj.df.groupby(Grouper(freq=mode))
         for key, values in grouped:
             if len(values) > 1:
                 result.append(Trajectory(values, '{}_{}'.format(traj.id, key)))
