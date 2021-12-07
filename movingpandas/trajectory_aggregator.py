@@ -109,6 +109,7 @@ class TrajectoryCollectionAggregator:
 class _PtsExtractor:
     def __init__(self, traj, max_distance, min_distance, min_stop_duration, min_angle=45):
         self.traj = traj
+        self.traj_geom = traj.df[traj.get_geom_column_name()]
         self.n = self.traj.df.geometry.count()
         self.max_distance = max_distance
         self.min_distance = min_distance
@@ -187,7 +188,7 @@ class _PtsExtractor:
         return d >= dist
 
     def get_pt(self, the_loc):
-        return self.traj.df.iloc[the_loc][self.traj.get_geom_column_name()]
+        return self.traj_geom.iloc[the_loc]
 
     def is_significant_distance(self, i, j):
         if self.distance_greater_than(i, j, self.max_distance):
@@ -199,6 +200,8 @@ class _PtsExtractor:
 class _SequenceGenerator:
     def __init__(self, cells, traj_collection):
         self.cells = cells
+        self.cells_union = cells.geometry.unary_union
+
         self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
         self.sequences = {}
         for traj in traj_collection:
@@ -207,8 +210,8 @@ class _SequenceGenerator:
     def evaluate_trajectory(self, trajectory):
         this_sequence = []
         prev_cell_id = None
-        for t, row in trajectory.df.iterrows():
-            nearest_id = self.get_nearest(row[trajectory.get_geom_column_name()])
+        for t, geom in trajectory.df[trajectory.get_geom_column_name()].iteritems():
+            nearest_id = self.get_nearest(geom)
             nearest_cell = self.id_to_centroid[nearest_id][0]
             nearest_cell_id = nearest_cell.name
             if len(this_sequence) >= 1:
@@ -235,8 +238,7 @@ class _SequenceGenerator:
 
 
     def get_nearest(self, pt):
-        pts = self.cells.geometry.unary_union
-        nearest = self.cells.geometry.geom_equals(nearest_points(pt, pts)[1])
+        nearest = self.cells.geometry.geom_equals(nearest_points(pt, self.cells_union)[1])
         return self.cells[nearest].iloc[0].name
 
 
