@@ -7,7 +7,8 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
 from fiona.crs import from_epsg
-from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, DISTANCE_COL_NAME, MissingCRSWarning
+from movingpandas.trajectory import Trajectory, DIRECTION_COL_NAME, SPEED_COL_NAME, DISTANCE_COL_NAME, \
+    TRAJ_ID_COL_NAME, MissingCRSWarning
 
 
 CRS_METRIC = from_epsg(31256)
@@ -164,6 +165,25 @@ class TestTrajectory:
         result = self.default_traj_metric_5\
             .get_linestring_between(datetime(1970, 1, 1, 0, 0, 5), datetime(1970, 1, 1, 0, 0, 25), method='within').wkt
         assert result == "LINESTRING (6 0, 10 0)"
+
+    def test_add_traj_id(self):
+        traj = self.default_traj_metric
+        traj.add_traj_id()
+        assert traj.df[TRAJ_ID_COL_NAME].tolist() == [1, 1, 1]
+
+    def test_add_traj_id_overwrite_raises_error(self):
+        df = self.default_traj_metric.df.copy()
+        df[TRAJ_ID_COL_NAME] = 1
+        traj = Trajectory(df, 'b')
+        with pytest.raises(RuntimeError):
+            traj.add_traj_id()
+
+    def test_add_traj_id_can_overwrite(self):
+        df = self.default_traj_metric.df.copy()
+        df[TRAJ_ID_COL_NAME] = 1
+        traj = Trajectory(df, 'b')
+        traj.add_traj_id(overwrite=True)
+        assert traj.df[TRAJ_ID_COL_NAME].tolist() == ['b', 'b', 'b']
 
     def test_add_direction(self):
         traj = make_traj([Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)])
@@ -417,13 +437,8 @@ class TestTrajectory:
         traj.to_linestringm_wkt()
 
     def test_to_point_gdf(self):
-        df = pd.DataFrame([
-            {'geometry': Point(0, 0), 't': datetime(2018, 1, 1, 12, 0, 0)},
-            {'geometry': Point(6, 0), 't': datetime(2018, 1, 1, 12, 6, 0)},
-            {'geometry': Point(6, 6), 't': datetime(2018, 1, 1, 12, 10, 0)}
-        ]).set_index('t')
-        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
-        traj = Trajectory(geo_df, 1)
+        traj = self.default_traj_metric
+        geo_df = traj.df.copy()
         point_gdf = traj.to_point_gdf()
         assert_frame_equal(point_gdf, geo_df)
 
@@ -455,7 +470,9 @@ class TestTrajectory:
         traj = Trajectory(geo_df, 1)
         traj_gdf = traj.to_traj_gdf()
 
-        props = {'id': 1, 'start_t': datetime(1970, 1, 1, 0,  0, 0), 'end_t': datetime(1970, 1, 1, 0, 10, 0), 'geometry': LineString([(0, 0), (6, 0), (6, 6)])}
+        props = {'traj_id': 1, 'start_t': datetime(1970, 1, 1, 0,  0, 0), 'end_t': datetime(1970, 1, 1, 0, 10, 0),
+                 'geometry': LineString([(0, 0), (6, 0), (6, 6)]), 'length': 12.0, 'direction': 45.0
+                 }
         df2 = pd.DataFrame([props])
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
 

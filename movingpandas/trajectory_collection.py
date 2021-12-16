@@ -101,7 +101,7 @@ class TrajectoryCollection:
         -------
         GeoDataFrame
         """
-        gdfs = [traj.df for traj in self.trajectories]
+        gdfs = [traj.to_point_gdf() for traj in self.trajectories]
         return pd.concat(gdfs)
 
     def to_line_gdf(self):
@@ -318,6 +318,33 @@ class TrajectoryCollection:
         """
         for traj in self:
             traj.add_speed(overwrite)
+
+    def add_direction(self, overwrite=False):
+        """
+        Add direction column and values to the trajectories.
+
+        The direction is calculated between consecutive locations.
+        Direction values are in degrees, starting North turning clockwise.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing speed values (default: False)
+        """
+        for traj in self:
+            traj.add_direction(overwrite)
+
+    def add_traj_id(self, overwrite=False):
+        """
+        Add trajectory id column and values to the trajectories.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing speed values (default: False)
+        """
+        for traj in self:
+            traj.add_traj_id(overwrite)
 
     def get_min(self, column):
         """

@@ -23,6 +23,7 @@ from .geometry_utils import azimuth, calculate_initial_compass_bearing, measure_
                                         measure_distance_euclidean
 from .trajectory_plotter import _TrajectoryPlotter
 
+TRAJ_ID_COL_NAME = 'traj_id'
 SPEED_COL_NAME = 'speed'
 DIRECTION_COL_NAME = 'direction'
 DISTANCE_COL_NAME = 'distance'
@@ -336,10 +337,12 @@ class Trajectory:
         GeoDataFrame
         """
         properties = {
-            'id': self.id,
+            TRAJ_ID_COL_NAME: self.id,
             'start_t': self.get_start_time(),
             'end_t': self.get_end_time(),
-            'geometry': self.to_linestring()
+            'geometry': self.to_linestring(),
+            'length': self.get_length(),
+            'direction': self.get_direction()
         }
         if wkt:
             properties['wkt'] = self.to_linestringm_wkt()
@@ -649,11 +652,25 @@ class Trajectory:
             pt1 = translate(pt1, 0.00000001, 0.00000001)
         return LineString(list(pt0.coords) + list(pt1.coords))
 
+    def add_traj_id(self, overwrite=False):
+        """
+        Add trajectory id column and values to the trajectory's dataframe.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing trajectory id values (default: False)
+        """
+        if TRAJ_ID_COL_NAME in self.df.columns and not overwrite:
+            raise RuntimeError(
+                f'Trajectory already contains a {TRAJ_ID_COL_NAME} column! Use overwrite=True to overwrite exiting values.')
+        self.df[TRAJ_ID_COL_NAME] = self.id
+
     def add_direction(self, overwrite=False):
         """
         Add direction column and values to the trajectory's dataframe.
 
-        The direction is calculated between the trajectory's start and end location.
+        The direction is calculated between consecutive locations.
         Direction values are in degrees, starting North turning clockwise.
 
         Parameters

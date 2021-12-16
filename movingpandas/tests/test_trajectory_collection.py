@@ -8,7 +8,9 @@ from shapely.geometry import Point, Polygon, LineString
 from fiona.crs import from_epsg
 from datetime import datetime, timedelta
 from copy import copy
+from math import sqrt
 from movingpandas.trajectory_collection import TrajectoryCollection
+from movingpandas.trajectory import TRAJ_ID_COL_NAME
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -25,7 +27,7 @@ class TestTrajectoryCollection:
             {'id': 2, 'obj': 'A', 'geometry': Point(10, 10), 't': datetime(2018,1,1,12,0,0), 'val': 10, 'val2': 'e'},
             {'id': 2, 'obj': 'A', 'geometry': Point(16, 10), 't': datetime(2018,1,1,12,6,0), 'val': 6, 'val2': 'f'},
             {'id': 2, 'obj': 'A', 'geometry': Point(16, 16), 't': datetime(2018,1,2,13,10,0), 'val': 7, 'val2': 'g'},
-            {'id': 2, 'obj': 'A', 'geometry': Point(190, 19), 't': datetime(2018,1,2,13,15,0), 'val': 3, 'val2': 'h'}
+            {'id': 2, 'obj': 'A', 'geometry': Point(190, 10), 't': datetime(2018,1,2,13,15,0), 'val': 3, 'val2': 'h'}
         ]).set_index('t')
         self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         self.collection = TrajectoryCollection(self.geo_df, 'id', obj_id_col='obj')
@@ -92,12 +94,12 @@ class TestTrajectoryCollection:
     def test_get_end_locations(self):
         locs = self.collection.get_end_locations()
         assert len(locs) == 2
-        assert locs.iloc[0].geometry in [Point(9, 9), Point(190, 19)]
+        assert locs.iloc[0].geometry in [Point(9, 9), Point(190, 10)]
         assert locs.iloc[0].id in [1, 2]
         assert locs.iloc[0].obj == 'A'
         assert locs.iloc[0].val in [4, 3]
         assert locs.iloc[0].val2 in ['d', 'h']
-        assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 19)]
+        assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
 
     def test_get_intersecting(self):
@@ -179,6 +181,18 @@ class TestTrajectoryCollection:
             for _ in collection:
                 pass
 
+    def test_add_traj_id(self):
+        self.collection.add_traj_id()
+        assert self.collection.trajectories[0].df[TRAJ_ID_COL_NAME].tolist() == [1, 1, 1, 1]
+        assert self.collection.trajectories[1].df[TRAJ_ID_COL_NAME].tolist() == [2, 2, 2, 2]
+
+    def test_add_traj_id_overwrite_raises_error(self):
+        gdf = self.geo_df.copy()
+        gdf[TRAJ_ID_COL_NAME] = 'a'
+        collection = TrajectoryCollection(gdf, 'id', obj_id_col='obj')
+        with pytest.raises(RuntimeError):
+            collection.add_traj_id()
+
     def test_to_point_gdf(self):
         point_gdf = self.collection.to_point_gdf()
         assert_frame_equal(point_gdf, self.geo_df)
@@ -194,7 +208,7 @@ class TestTrajectoryCollection:
             {'id': 1, 't': datetime(2018, 1, 1, 14, 15, 0), 'prev_t': datetime(2018, 1, 1, 14, 10, 0), 'geometry': LineString([(6, 6), (9, 9)])},
             {'id': 2, 't': datetime(2018, 1, 1, 12, 6, 0), 'prev_t': datetime(2018, 1, 1, 12, 0, 0), 'geometry': LineString([(10, 10), (16, 10)])},
             {'id': 2, 't': datetime(2018, 1, 2, 13, 10, 0), 'prev_t': datetime(2018, 1, 1, 12, 6, 0), 'geometry': LineString([(16, 10), (16, 16)])},
-            {'id': 2, 't': datetime(2018, 1, 2, 13, 15, 0), 'prev_t': datetime(2018, 1, 2, 13, 10, 0), 'geometry': LineString([(16, 16), (190, 19)])}
+            {'id': 2, 't': datetime(2018, 1, 2, 13, 15, 0), 'prev_t': datetime(2018, 1, 2, 13, 10, 0), 'geometry': LineString([(16, 16), (190, 10)])}
         ])
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
 
@@ -205,8 +219,11 @@ class TestTrajectoryCollection:
         tc = TrajectoryCollection(temp_df, 'id')
         traj_gdf = tc.to_traj_gdf()
 
-        rows = [{'id': 1, 'start_t': datetime(2018, 1, 1, 12, 0, 0), 'end_t': datetime(2018, 1, 1, 14, 15, 0), 'geometry': LineString([(0, 0), (6, 0), (6, 6), (9, 9)])},
-                {'id': 2, 'start_t': datetime(2018, 1, 1, 12, 0, 0), 'end_t': datetime(2018, 1, 2, 13, 15, 0), 'geometry': LineString([(10, 10), (16, 10), (16, 16), (190, 19)])}]
+        rows = [{'traj_id': 1, 'start_t': datetime(2018, 1, 1, 12, 0, 0), 'end_t': datetime(2018, 1, 1, 14, 15, 0),
+                 'geometry': LineString([(0, 0), (6, 0), (6, 6), (9, 9)]), 'length': 12+sqrt(18), 'direction': 45.0},
+                {'traj_id': 2, 'start_t': datetime(2018, 1, 1, 12, 0, 0), 'end_t': datetime(2018, 1, 2, 13, 15, 0),
+                 'geometry': LineString([(10, 10), (16, 10), (16, 16), (190, 10)]), 'length': 12+sqrt(174*174+36),
+                 'direction': 90.0}]
         df2 = pd.DataFrame(rows)
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
 
