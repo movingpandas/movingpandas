@@ -22,4 +22,3 @@ dependencies:
   - rasterio
   - scikit-learn
   - seaborn
-  
