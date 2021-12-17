@@ -23,7 +23,7 @@ jobs:
 
   Test:
     needs: Linting
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }}, ${{ matrix.env }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -35,9 +35,12 @@ jobs:
         env:
           - environment.yml
         include:
-          os: macos-latest
-          os: windows-latest
-          os: ubuntu-latest
+          - env: environment.yml
+            os: macos-latest
+          - env: environment.yml            
+            os: windows-latest
+          - env: environment.yml
+            os: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -45,8 +48,7 @@ jobs:
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file:
-            - environment.yml
+          environment-file: ${{ matrix.env }}
           miniforge-version: latest
           miniforge-variant: Mambaforge
           use-mamba: true
