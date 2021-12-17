@@ -119,8 +119,8 @@ class KalmanSmootherCV(TrajectorySmoother):
         predictor = KalmanPredictor(transition_model)
         updater = KalmanUpdater(measurement_model)
         # Initiator
-        state_vector = StateVector([0, 0, 0, 0])
-        covar = CovarianceMatrix(np.diag([0, 0, 0, 0]))
+        state_vector = StateVector([0., 0., 0., 0.])
+        covar = CovarianceMatrix(np.diag([0., 0., 0., 0.]))
         prior_state = GaussianStatePrediction(state_vector, covar)
         initiator = SimpleMeasurementInitiator(prior_state, measurement_model)
         # Filtering
@@ -140,11 +140,16 @@ class KalmanSmootherCV(TrajectorySmoother):
         smooth_track = smoother.smooth(track)
 
         # Create new trajectory
-        df = traj.df.to_crs('EPSG:3395')
-        df.geometry = [Point(state.state_vector[0], state.state_vector[2])
-                       for state in smooth_track]
-        geo_df = df.to_crs(traj.crs)
-        new_traj = Trajectory(geo_df, traj.id)
+        if traj.is_latlon:
+            df = traj.df.to_crs('EPSG:3395')
+            df.geometry = [Point(state.state_vector[0], state.state_vector[2])
+                           for state in smooth_track]
+            df.to_crs(traj.crs, inplace=True)
+        else:
+            df = traj.df.copy()
+            df.geometry = [Point(state.state_vector[0], state.state_vector[2])
+                           for state in smooth_track]
+        new_traj = Trajectory(df, traj.id)
         return new_traj
 
     @staticmethod
@@ -154,7 +159,9 @@ class KalmanSmootherCV(TrajectorySmoother):
 
             @BufferedGenerator.generator_method
             def detections_gen(self):
-                detections_df = traj.df[['geometry']].to_crs('EPSG:3395')
+                detections_df = traj.df[['geometry']]
+                if traj.is_latlon:
+                    detections_df.to_crs('EPSG:3395', inplace=True)
                 detections_df['x'] = [row.geometry.coords[0][0]
                                       for _, row in detections_df.iterrows()]
                 detections_df['y'] = [row.geometry.coords[0][1]
