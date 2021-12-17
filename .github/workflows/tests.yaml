@@ -20,3 +20,45 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - uses: pre-commit/action@v2.0.3
+
+  Test:
+    needs: Linting
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        env:
+          - environment.yml
+        include:
+          os: macos-latest
+          os: windows-latest
+          os: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file:
+            - environment.yml
+          miniforge-version: latest
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: Check and Log Environment
+        run: |
+          python -V
+          python -c "import geopandas; geopandas.show_versions();"
+          conda info
+
+      - name: Test
+        run: |
+          pytest -v -r s -n auto --color=yes --cov=movingpandas --cov-append --cov-report term-missing --cov-report xml movingpandas/
+
+      - uses: codecov/codecov-action@v2
