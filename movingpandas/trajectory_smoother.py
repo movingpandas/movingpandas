@@ -84,21 +84,41 @@ class KalmanSmootherCV(TrajectorySmoother):
     Smooths using a Kalman Filter with a Constant Velocity model.
 
     The Constant Velocity model assumes that the speed between consecutive locations is nearly
-    constant. The smoother converts to EPSG:3395 (World Mercator) internally to perform filtering
-    and smoothing.
+    constant. For trajectories where ``traj.is_latlon = True`` the smoother converts
+    to EPSG:3395 (World Mercator) internally to perform filtering and smoothing.
 
-    process_noise_std: float or sequence of floats of length 2, default is 1e-5.
-        The process (acceleration) noise standard deviation defined in m/s^2.
-        If a sequence (e.g. list, tuple, etc.) is provided, the first index is used for the
-        easting coordinate, while the second is used for the northing coordinate (in EPSG:3395).
-        Alternatively, a single float can be provided, which is assumed to be the same for both
-        coordinates.
-    measurement_noise_std: float or sequence of floats of length 2, default is 1e-3.
-        The measurement noise standard deviation defined in meters. If a sequence is provided,
-        the first index is used for the easting coordinate, while the second is used for the
-        northing coordinate (in EPSG:3395). Alternatively, a single float can be provided, which
-        is assumed to be the same for both coordinates.
+    .. note::
+        This class makes use of `Stone Soup <https://stonesoup.readthedocs.io/en/v0.1b7/>`_, which is an
+        optional dependency and not installed by default. To use this class, you need to install Stone Soup
+        directly (see `here <https://stonesoup.readthedocs.io/en/v0.1b7/#installation>`_).
     """
+
+    def smooth(self, process_noise_std=0.5, measurement_noise_std=1):
+        """
+        Smooth the input Trajectory/TrajectoryCollection
+
+        Parameters
+        ----------
+        process_noise_std: float or sequence of floats of length 2, default is 1e-5.
+            The process (acceleration) noise standard deviation.
+
+            If a sequence (e.g. list, tuple, etc.) is provided, the first index is used for the
+            x coordinate, while the second is used for the y coordinate. If ``traj.is_latlon=True``
+            the values are applied to the  easting and northing coordinate (in EPSG:3395) respectively.
+
+            Alternatively, a single float can be provided, which is assumed to be the same for both
+            coordinates.
+        measurement_noise_std: float or sequence of floats of length 2, default is 1.
+            The measurement noise standard deviation.
+
+            If a sequence (e.g. list, tuple, etc.) is provided, the first index is used for the
+            x coordinate, while the second is used for the y coordinate. If ``traj.is_latlon=True``
+            the values are applied to the  easting and northing coordinate (in EPSG:3395) respectively.
+
+            Alternatively, a single float can be provided, which is assumed to be the same for both
+            coordinates.
+        """
+        super().smooth(process_noise_std=process_noise_std, measurement_noise_std=measurement_noise_std)
 
     def _smooth_traj(self, traj, process_noise_std=0.5, measurement_noise_std=1):
         # Get detector
