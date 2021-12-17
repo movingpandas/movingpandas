@@ -24,5 +24,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
-    install_requires=INSTALL_REQUIRES
+    install_requires=INSTALL_REQUIRES,
+    extras_require={
+        'smoothing': ['stonesoup']
+    }
+
 )

@@ -11,7 +11,10 @@ from .trajectory_splitter import TrajectorySplitter, TemporalSplitter, Observati
     StopSplitter
 from .trajectory_stop_detector import TrajectoryStopDetector
 from .point_clusterer import PointClusterer
-from .trajectory_smoother import KalmanSmootherCV
+try:
+    from .trajectory_smoother import KalmanSmootherCV
+except ImportError:
+    pass
 
 name = 'movingpandas'
 __version__ = '0.8.rc1'

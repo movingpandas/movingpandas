@@ -2,20 +2,27 @@ from copy import copy
 from abc import ABC, abstractmethod
 
 import numpy as np
-from stonesoup.types.detection import Detection
-from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, ConstantVelocity
-from stonesoup.models.measurement.linear import LinearGaussian
-from stonesoup.predictor.kalman import KalmanPredictor
-from stonesoup.updater.kalman import KalmanUpdater
-from stonesoup.types.array import CovarianceMatrix, StateVector
-from stonesoup.types.prediction import GaussianStatePrediction
-from stonesoup.initiator.simple import SimpleMeasurementInitiator
-from stonesoup.types.hypothesis import SingleHypothesis
-from stonesoup.smoother.kalman import KalmanSmoother
-from stonesoup.reader.base import DetectionReader
-from stonesoup.base import Property
-from stonesoup.buffered_generator import BufferedGenerator
 from shapely.geometry import Point
+
+try:
+    from stonesoup.types.detection import Detection
+    from stonesoup.models.transition.linear import CombinedLinearGaussianTransitionModel, ConstantVelocity
+    from stonesoup.models.measurement.linear import LinearGaussian
+    from stonesoup.predictor.kalman import KalmanPredictor
+    from stonesoup.updater.kalman import KalmanUpdater
+    from stonesoup.types.array import CovarianceMatrix, StateVector
+    from stonesoup.types.prediction import GaussianStatePrediction
+    from stonesoup.initiator.simple import SimpleMeasurementInitiator
+    from stonesoup.types.hypothesis import SingleHypothesis
+    from stonesoup.smoother.kalman import KalmanSmoother
+    from stonesoup.reader.base import DetectionReader
+    from stonesoup.base import Property
+    from stonesoup.buffered_generator import BufferedGenerator
+except ImportError as error:
+    raise ImportError(
+        "Missing optional dependencies. To use the smoother classes please install movingpandas along with the "
+        "'smoothing' optional dependencies (e.g. pip install 'movingpandas[smoothing]')."
+    ) from error
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
