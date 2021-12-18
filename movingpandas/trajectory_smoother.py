@@ -20,8 +20,8 @@ try:
     from stonesoup.buffered_generator import BufferedGenerator
 except ImportError as error:
     raise ImportError(
-        "Missing optional dependencies. To use the smoother classes please install movingpandas along with the "
-        "'smoothing' optional dependencies (e.g. pip install 'movingpandas[smoothing]')."
+        "Missing optional dependencies. To use the trajectory smoother classes please install Stone Soup "
+        "(see https://stonesoup.readthedocs.io/en/latest/#installation)."
     ) from error
 
 from .trajectory import Trajectory
@@ -88,9 +88,9 @@ class KalmanSmootherCV(TrajectorySmoother):
     to EPSG:3395 (World Mercator) internally to perform filtering and smoothing.
 
     .. note::
-        This class makes use of `Stone Soup <https://stonesoup.readthedocs.io/en/v0.1b7/>`_, which is an
+        This class makes use of `Stone Soup <https://stonesoup.readthedocs.io/en/latest/>`_, which is an
         optional dependency and not installed by default. To use this class, you need to install Stone Soup
-        directly (see `here <https://stonesoup.readthedocs.io/en/v0.1b7/#installation>`_).
+        directly (see `here <https://stonesoup.readthedocs.io/en/latest/#installation>`_).
     """
 
     def smooth(self, process_noise_std=0.5, measurement_noise_std=1):
