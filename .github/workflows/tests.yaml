@@ -22,7 +22,7 @@ jobs:
       - uses: pre-commit/action@v2.0.3
 
   Test:
-    needs: Linting
+    #needs: Linting
     name: ${{ matrix.os }}, ${{ matrix.env }}
     runs-on: ${{ matrix.os }}
     defaults:
