@@ -61,6 +61,6 @@ jobs:
 
       - name: Test
         run: |
-          pytest -v -r s -n auto --color=yes --cov=movingpandas --cov-append --cov-report term-missing --cov-report xml movingpandas/
+          pytest -v -r s --color=yes --cov=movingpandas --cov-append --cov-report term-missing --cov-report xml movingpandas/
 
       - uses: codecov/codecov-action@v2
