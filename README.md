@@ -1,7 +1,7 @@
 # MovingPandas
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![build status](https://travis-ci.com/anitagraser/movingpandas.svg?branch=master)](https://travis-ci.com/anitagraser/movingpandas)
+[![Tests](https://github.com/anitagraser/movingpandas/actions/workflows/tests.yaml/badge.svg)](https://github.com/anitagraser/movingpandas/actions/workflows/tests.yaml)
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=master)](https://movingpandas.readthedocs.io/en/master/)
 [![codecov](https://codecov.io/gh/anitagraser/movingpandas/branch/master/graph/badge.svg)](https://codecov.io/gh/anitagraser/movingpandas)
 [![DOI](https://zenodo.org/badge/161995245.svg)](https://zenodo.org/badge/latestdoi/161995245)
