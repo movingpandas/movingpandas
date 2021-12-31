@@ -4,7 +4,7 @@
 
 from .trajectory import Trajectory
 from .trajectory_generalizer import TrajectoryGeneralizer, MaxDistanceGeneralizer, MinDistanceGeneralizer, \
-    MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer
+    MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer, TopDownTimeRatioGeneralizer
 from .trajectory_collection import TrajectoryCollection
 from .trajectory_aggregator import TrajectoryCollectionAggregator
 from .trajectory_splitter import TrajectorySplitter, TemporalSplitter, ObservationGapSplitter, SpeedSplitter, \
