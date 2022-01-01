@@ -6,11 +6,23 @@ from shapely.geometry import LineString
 from shapely.ops import nearest_points
 
 from movingpandas.point_clusterer import PointClusterer
-from .geometry_utils import azimuth, angular_difference, measure_distance_geodesic, measure_distance_euclidean
+from .geometry_utils import (
+    azimuth,
+    angular_difference,
+    measure_distance_geodesic,
+    measure_distance_euclidean,
+)
 
 
 class TrajectoryCollectionAggregator:
-    def __init__(self, traj_collection, max_distance, min_distance, min_stop_duration, min_angle=45):
+    def __init__(
+        self,
+        traj_collection,
+        max_distance,
+        min_distance,
+        min_stop_duration,
+        min_angle=45,
+    ):
         """
         Aggregates trajectories by extracting significant points, clustering those points, and extracting
         flows between clusters.
@@ -42,15 +54,17 @@ class TrajectoryCollectionAggregator:
         self.min_stop_duration = min_stop_duration
         self.min_angle = min_angle
         self.is_latlon = self.traj_collection.trajectories[0].is_latlon
-        #print('Extracting significant points ...')
+        # print('Extracting significant points ...')
         self.significant_points = self._extract_significant_points()
-        #print('  No. significant points: {}'.format(len(self.significant_points)))
-        #print('Clustering significant points ...')
-        self.clusters = PointClusterer(self.significant_points, self.max_distance, self.is_latlon).get_clusters()
-        #print('  No. clusters: {}'.format(len(self.clusters)))
-        #print('Computing flows ...')
+        # print('  No. significant points: {}'.format(len(self.significant_points)))
+        # print('Clustering significant points ...')
+        self.clusters = PointClusterer(
+            self.significant_points, self.max_distance, self.is_latlon
+        ).get_clusters()
+        # print('  No. clusters: {}'.format(len(self.clusters)))
+        # print('Computing flows ...')
         self.flows = self._compute_flows_between_clusters()
-        #print('Flows ready!')
+        # print('Flows ready!')
 
     def get_significant_points_gdf(self):
         """
@@ -63,7 +77,7 @@ class TrajectoryCollectionAggregator:
         """
         if not self.significant_points:
             self._extract_significant_points()
-        df = DataFrame(self.significant_points, columns=['geometry'])
+        df = DataFrame(self.significant_points, columns=["geometry"])
         return GeoDataFrame(df, crs=self._crs)
 
     def get_clusters_gdf(self):
@@ -77,8 +91,10 @@ class TrajectoryCollectionAggregator:
         """
         if not self.clusters:
             self._cluster_significant_points()
-        df = DataFrame([cluster.centroid for cluster in self.clusters], columns=['geometry'])
-        df['n'] = [len(cluster.points) for cluster in self.clusters]
+        df = DataFrame(
+            [cluster.centroid for cluster in self.clusters], columns=["geometry"]
+        )
+        df["n"] = [len(cluster.points) for cluster in self.clusters]
         return GeoDataFrame(df, crs=self._crs)
 
     def get_flows_gdf(self):
@@ -97,7 +113,13 @@ class TrajectoryCollectionAggregator:
     def _extract_significant_points(self):
         significant_points = []
         for traj in self.traj_collection:
-            a = _PtsExtractor(traj, self.max_distance, self.min_distance, self.min_stop_duration, self.min_angle)
+            a = _PtsExtractor(
+                traj,
+                self.max_distance,
+                self.min_distance,
+                self.min_stop_duration,
+                self.min_angle,
+            )
             significant_points = significant_points + a.find_significant_points()
         return significant_points
 
@@ -107,7 +129,9 @@ class TrajectoryCollectionAggregator:
 
 
 class _PtsExtractor:
-    def __init__(self, traj, max_distance, min_distance, min_stop_duration, min_angle=45):
+    def __init__(
+        self, traj, max_distance, min_distance, min_stop_duration, min_angle=45
+    ):
         self.traj = traj
         self.traj_geom = traj.df[traj.get_geom_column_name()]
         self.n = self.traj.df.geometry.count()
@@ -115,7 +139,10 @@ class _PtsExtractor:
         self.min_distance = min_distance
         self.min_stop_duration = min_stop_duration
         self.min_angle = min_angle
-        self.significant_points = [self.traj.get_start_location(), self.traj.get_end_location()]
+        self.significant_points = [
+            self.traj.get_start_location(),
+            self.traj.get_end_location(),
+        ]
 
     def find_significant_points(self):
         i = 0
@@ -128,7 +155,7 @@ class _PtsExtractor:
                 continue
             k, has_points = self.locate_points_beyond_min_distance(j)
             if has_points:
-                #print(f"has points (i={i} | j={j} | k={k})")
+                # print(f"has points (i={i} | j={j} | k={k})")
                 if k > j + 1:
                     if self.is_significant_stop(j, k):
                         self.add_point(j)
@@ -233,13 +260,11 @@ class _SequenceGenerator:
         for key, value in self.sequences.items():
             p1 = self.id_to_centroid[key[0]][0].geometry
             p2 = self.id_to_centroid[key[1]][0].geometry
-            lines.append({'geometry': LineString([p1, p2]), 'weight': value})
+            lines.append({"geometry": LineString([p1, p2]), "weight": value})
         return lines
 
-
     def get_nearest(self, pt):
-        nearest = self.cells.geometry.geom_equals(nearest_points(pt, self.cells_union)[1])
+        nearest = self.cells.geometry.geom_equals(
+            nearest_points(pt, self.cells_union)[1]
+        )
         return self.cells[nearest].iloc[0].name
-
-
-

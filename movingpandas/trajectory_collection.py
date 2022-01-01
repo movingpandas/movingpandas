@@ -13,7 +13,18 @@ from .trajectory_plotter import _TrajectoryCollectionPlotter
 
 
 class TrajectoryCollection:
-    def __init__(self, data, traj_id_col=None, obj_id_col=None, t=None, x=None, y=None, crs='epsg:4326', min_length=0, min_duration=None):
+    def __init__(
+        self,
+        data,
+        traj_id_col=None,
+        obj_id_col=None,
+        t=None,
+        x=None,
+        y=None,
+        crs="epsg:4326",
+        min_length=0,
+        min_duration=None,
+    ):
         """
         Create TrajectoryCollection from list of trajectories or GeoDataFrame
 
@@ -49,17 +60,25 @@ class TrajectoryCollection:
         self.min_length = min_length
         self.min_duration = min_duration
         if type(data) == list:
-            self.trajectories = [traj for traj in data if traj.get_length() >= min_length]
+            self.trajectories = [
+                traj for traj in data if traj.get_length() >= min_length
+            ]
             if min_duration:
-                self.trajectories = [traj for traj in self.trajectories if traj.get_duration() >= min_duration]
+                self.trajectories = [
+                    traj
+                    for traj in self.trajectories
+                    if traj.get_duration() >= min_duration
+                ]
         else:
-            self.trajectories = self._df_to_trajectories(data, traj_id_col, obj_id_col, t, x, y, crs)
+            self.trajectories = self._df_to_trajectories(
+                data, traj_id_col, obj_id_col, t, x, y, crs
+            )
 
     def __len__(self):
         return len(self.trajectories)
 
     def __str__(self):
-        return 'TrajectoryCollection with {} trajectories'.format(self.__len__())
+        return "TrajectoryCollection with {} trajectories".format(self.__len__())
 
     def __repr__(self):
         return self.__str__()
@@ -77,8 +96,10 @@ class TrajectoryCollection:
             if len(traj.df) >= 2:
                 yield traj
             else:
-                raise ValueError(f"Trajectory with length >= 2 expected: "
-                                 f"got length {len(traj.df)}")
+                raise ValueError(
+                    f"Trajectory with length >= 2 expected: "
+                    f"got length {len(traj.df)}"
+                )
 
     def copy(self):
         """
@@ -139,11 +160,16 @@ class TrajectoryCollection:
                 obj_id = values.iloc[0][obj_id_col]
             else:
                 obj_id = None
-            trajectory = Trajectory(values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs)
+            trajectory = Trajectory(
+                values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs
+            )
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:
                     continue
-            if trajectory.get_length() < self.min_length or trajectory.df.geometry.count() < 2:
+            if (
+                trajectory.get_length() < self.min_length
+                or trajectory.df.geometry.count() < 2
+            ):
                 continue
             if isinstance(df, GeoDataFrame):
                 trajectory.crs = df.crs
@@ -184,9 +210,9 @@ class TrajectoryCollection:
         """
         gdf = GeoDataFrame()
         for traj in self:
-            if t == 'start':
+            if t == "start":
                 x = traj.get_row_at(traj.get_start_time())
-            elif t == 'end':
+            elif t == "end":
                 x = traj.get_row_at(traj.get_end_time())
             else:
                 if t < traj.get_start_time() or t > traj.get_end_time():
@@ -204,7 +230,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory start locations
         """
-        return self.get_locations_at('start')
+        return self.get_locations_at("start")
 
     def get_end_locations(self):
         """
@@ -215,7 +241,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory end locations
         """
-        return self.get_locations_at('end')
+        return self.get_locations_at("end")
 
     def get_intersecting(self, polygon):
         """
@@ -418,9 +444,15 @@ class TrajectoryCollection:
 
 
 def _get_location_at(traj, t, columns=None):
-    loc = {'t': t, 'geometry': traj.get_position_at(t),
-           'traj_id': traj.id, 'obj_id': traj.obj_id}
+    loc = {
+        "t": t,
+        "geometry": traj.get_position_at(t),
+        "traj_id": traj.id,
+        "obj_id": traj.obj_id,
+    }
     if columns and columns != [None]:
         for column in columns:
-            loc[column] = traj.df.iloc[traj.df.index.get_loc(t, method='nearest')][column]
+            loc[column] = traj.df.iloc[traj.df.index.get_loc(t, method="nearest")][
+                column
+            ]
     return loc

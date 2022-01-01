@@ -31,11 +31,15 @@ def convert_time_ranges_to_segments(traj, time_ranges):
     for time_range in time_ranges:
         try:
             if handle_collection:
-                segments.append(traj.get_trajectory(time_range.traj_id).get_segment_between(time_range.t_0, time_range.t_n))
+                segments.append(
+                    traj.get_trajectory(time_range.traj_id).get_segment_between(
+                        time_range.t_0, time_range.t_n
+                    )
+                )
             else:
-                segments.append(traj.get_segment_between(time_range.t_0, time_range.t_n))
+                segments.append(
+                    traj.get_segment_between(time_range.t_0, time_range.t_n)
+                )
         except ValueError:
             pass
     return segments
-
-

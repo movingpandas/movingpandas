@@ -14,8 +14,9 @@ class PointClusterer:
     Based on the algorithm described by Andrienko, N., & Andrienko, G. (2011). Spatial generalization and
     aggregation of massive movement data. IEEE Transactions on visualization and computer graphics, 17(2), 205-219.
     """
+
     def __init__(self, points, max_distance, is_latlon):
-        df = DataFrame(points, columns=['geometry'])
+        df = DataFrame(points, columns=["geometry"])
         bbox = GeoDataFrame(df).total_bounds
         cell_size = max_distance
         if is_latlon:
@@ -82,7 +83,7 @@ class _Grid:
                     print(pt)
 
     def get_group(self, centroid):
-        """ returns the group with the provided centroid """
+        """returns the group with the provided centroid"""
         for g in self.resulting_clusters:
             if g.centroid.compare(centroid):
                 return g

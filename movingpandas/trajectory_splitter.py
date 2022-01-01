@@ -15,6 +15,7 @@ class TrajectorySplitter:
     """
     Splitter base class
     """
+
     def __init__(self, traj):
         """
         Create TrajectoryGeneralizer
@@ -77,15 +78,15 @@ class TemporalSplitter(TrajectorySplitter):
     >>> mpd.TemporalSplitter(traj).split(mode="year")
     """
 
-    def _split_traj(self, traj, mode='day', min_length=0):
+    def _split_traj(self, traj, mode="day", min_length=0):
         result = []
-        modes = {'hour': 'H', 'day': 'D', 'month': 'M', 'year': 'Y'}
+        modes = {"hour": "H", "day": "D", "month": "M", "year": "Y"}
         if mode in modes.keys():
             mode = modes[mode]
         grouped = traj.df.groupby(Grouper(freq=mode))
         for key, values in grouped:
             if len(values) > 1:
-                result.append(Trajectory(values, '{}_{}'.format(traj.id, key)))
+                result.append(Trajectory(values, "{}_{}".format(traj.id, key)))
         return TrajectoryCollection(result, min_length=min_length)
 
 
@@ -111,14 +112,14 @@ class ObservationGapSplitter(TrajectorySplitter):
     def _split_traj(self, traj, gap, min_length=0):
         result = []
         temp_df = traj.df.copy()
-        temp_df['t'] = temp_df.index
-        temp_df['gap'] = temp_df['t'].diff() > gap
-        temp_df['gap'] = temp_df['gap'].apply(lambda x: 1 if x else 0).cumsum()
-        dfs = [group[1] for group in temp_df.groupby(temp_df['gap'])]
+        temp_df["t"] = temp_df.index
+        temp_df["gap"] = temp_df["t"].diff() > gap
+        temp_df["gap"] = temp_df["gap"].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in temp_df.groupby(temp_df["gap"])]
         for i, df in enumerate(dfs):
-            df = df.drop(columns=['t', 'gap'])
+            df = df.drop(columns=["t", "gap"])
             if len(df) > 1:
-                result.append(Trajectory(df, '{}_{}'.format(traj.id, i)))
+                result.append(Trajectory(df, "{}_{}".format(traj.id, i)))
         return TrajectoryCollection(result, min_length=min_length)
 
 
@@ -146,6 +147,7 @@ class SpeedSplitter(TrajectorySplitter):
 
     >>> mpd.SpeedSplitter(traj).split(speed=10, duration=timedelta(minutes=5))
     """
+
     def _split_traj(self, traj, speed, duration, min_length=0, max_speed=np.inf):
         traj = traj.copy()
         speed_col_name = traj.get_speed_column_name()
@@ -176,9 +178,12 @@ class StopSplitter(TrajectorySplitter):
 
     >>> mpd.StopSplitter(traj).split(max_diameter=30, min_duration=timedelta(seconds=60))
     """
+
     def _split_traj(self, traj, max_diameter, min_duration, min_length=0):
         stop_detector = TrajectoryStopDetector(traj)
-        stop_time_ranges = stop_detector.get_stop_time_ranges(max_diameter, min_duration)
+        stop_time_ranges = stop_detector.get_stop_time_ranges(
+            max_diameter, min_duration
+        )
         between_stops = self.get_time_ranges_between_stops(traj, stop_time_ranges)
         result = convert_time_ranges_to_segments(traj, between_stops)
         return TrajectoryCollection(result, min_length=min_length)
@@ -189,11 +194,12 @@ class StopSplitter(TrajectorySplitter):
         if stop_ranges:
             for i in range(0, len(stop_ranges)):
                 if i == 0:
-                    result.append(TemporalRange(traj.get_start_time(), stop_ranges[i].t_0))
+                    result.append(
+                        TemporalRange(traj.get_start_time(), stop_ranges[i].t_0)
+                    )
                     continue
-                result.append(TemporalRange(stop_ranges[i-1].t_n, stop_ranges[i].t_0))
+                result.append(TemporalRange(stop_ranges[i - 1].t_n, stop_ranges[i].t_0))
             result.append(TemporalRange(stop_ranges[-1].t_n, traj.get_end_time()))
         else:
-            result.append(
-                TemporalRange(traj.get_start_time(), traj.get_end_time()))
+            result.append(TemporalRange(traj.get_start_time(), traj.get_end_time()))
         return result
