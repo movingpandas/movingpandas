@@ -62,6 +62,9 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
 
     This generalization ensures that consecutive locations are at least a certain distance apart.
 
+    Distance is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84) then distance is
+    calculated in metres.
+
     tolerance : float
         Desired minimum distance between consecutive points
 
@@ -138,7 +141,7 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
     is exceed.
 
     tolerance : float
-        Distance tolerance
+        Distance tolerance in trajectory CRS units
 
     Examples
     --------
@@ -179,7 +182,7 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     Generalizes using Douglas-Peucker algorithm (as implemented in shapely/Geos).
 
     tolerance : float
-        Distance tolerance
+        Distance tolerance in trajectory CRS units
 
     Examples
     --------
