@@ -210,14 +210,9 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes using Top-Down Time Ratio algorithm proposed by Meratnia and De By (DOI: 10.1007/978-3-540-24741-8_44).
 
-<<<<<<< HEAD
     Points are projected on the line that connects the starting point SP with the end point EP of the trajectory. These projections are
     calculated based on the ratios de and di that correspond to the travel time from SP to P and from P to EP respectively. Iterativelly,
     when the furthest point P is found (granted its distance is greater that the tolerance), that point is kept and the process is
-=======
-    Points are projected on the line that connects the starting point (SP) with the end point (EP) of the trajectory. Iterativelly,
-    when the furthest point P is found (granted its distance is greater than the tolerance), that point is kept and the process is
->>>>>>> 8fd0c34f523eb85566e42765370d830e2634684c
     repeated for the two trajectories that are defined as follows: (SP,P) and (P,EP). The process is stopped when any indivudiual 
     subtrajectory is small enough (len<=2). 
 
