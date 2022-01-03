@@ -117,7 +117,7 @@ class TrajectoryCollectionAggregator:
         return GeoDataFrame(self.flows, crs=self._crs)
 
     def _extract_significant_points(self):
-        sig_points = []
+        significant_points = []
         for traj in self.traj_collection:
             a = _PtsExtractor(
                 traj,
@@ -126,8 +126,9 @@ class TrajectoryCollectionAggregator:
                 self.min_stop_duration,
                 self.min_angle,
             )
-            sig_points = sig_points + a.find_significant_points()
-        return sig_points
+            a_significant_points = a.find_significant_points()
+            significant_points = significant_points + a_significant_points
+        return significant_points
 
     def _compute_flows_between_clusters(self):
         sg = _SequenceGenerator(self.get_clusters_gdf(), self.traj_collection)
