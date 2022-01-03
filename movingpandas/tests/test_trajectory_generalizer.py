@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from .test_trajectory import make_traj, Node
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.trajectory_generalizer import MaxDistanceGeneralizer, MinDistanceGeneralizer, \
-    MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer
+    MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer, TopDownTimeRatioGeneralizer
 
 
 CRS_METRIC = from_epsg(31256)
@@ -34,6 +34,11 @@ class TestTrajectoryGeneralizer:
     def test_douglas_peucker(self):
         traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
         result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
+        assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
+
+    def test_tdtr(self):
+        traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
+        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=3)
         assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
 
     def test_max_distance(self):

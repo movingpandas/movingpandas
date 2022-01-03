@@ -229,10 +229,11 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
         return Trajectory(self.td_tr(traj.df.copy(), tolerance), traj.id)
         
     def td_tr(self, df, tolerance):
+        # print(df)
         if len(df)<=2:
             return df
         else:
-            de = (df.index.max().to_pydatetime() - df.index.min().to_pydatetime()).seconds
+            de = (df.index.max().to_pydatetime() - df.index.min().to_pydatetime()).total_seconds()
             
             dx = df.geometry.iloc[-1].x - df.geometry.iloc[0].x
             dy = df.geometry.iloc[-1].y - df.geometry.iloc[0].y
