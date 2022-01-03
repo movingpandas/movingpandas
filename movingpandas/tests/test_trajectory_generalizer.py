@@ -38,68 +38,52 @@ class TestTrajectoryGeneralizer:
         self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
 
     def test_douglas_peucker(self):
-        traj = make_traj(
-            [
-                Node(),
-                Node(1, 0.1, day=2),
-                Node(2, 0.2, day=3),
-                Node(3, 0, day=4),
-                Node(3, 3, day=5),
-            ]
-        )
+        nodes = [
+            Node(0, 0, day=1),
+            Node(1, 0.1, day=2),
+            Node(2, 0.2, day=3),
+            Node(3, 0, day=4),
+            Node(3, 3, day=5),
+        ]
+        traj = make_traj(nodes)
         result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([Node(), Node(3, 0, day=4), Node(3, 3, day=5)])
+        assert result == make_traj([nodes[0], nodes[3], nodes[4]])
 
     def test_max_distance(self):
-        traj = make_traj(
-            [
-                Node(),
-                Node(1, 0.1, day=2),
-                Node(2, 0.2, day=3),
-                Node(3, 0, day=4),
-                Node(3, 3, day=5),
-            ]
-        )
+        nodes = [
+            Node(0, 0, day=1),
+            Node(1, 0.1, day=2),
+            Node(2, 0.2, day=3),
+            Node(3, 0, day=4),
+            Node(3, 3, day=5),
+        ]
+        traj = make_traj(nodes)
         result = MaxDistanceGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([Node(), Node(3, 0, day=4), Node(3, 3, day=5)])
+        assert result == make_traj([nodes[0], nodes[3], nodes[4]])
 
     def test_min_time_delta(self):
-        traj = make_traj(
-            [
-                Node(),
-                Node(1, 0.1, minute=6),
-                Node(2, 0.2, minute=10),
-                Node(3, 0, minute=30),
-                Node(3, 3, minute=59),
-            ]
-        )
-        result = MinTimeDeltaGeneralizer(traj).generalize(
-            tolerance=timedelta(minutes=10)
-        )
-        assert result == make_traj(
-            [
-                Node(),
-                Node(2, 0.2, minute=10),
-                Node(3, 0, minute=30),
-                Node(3, 3, minute=59),
-            ]
-        )
+        nodes = [
+            Node(),
+            Node(1, 0.1, minute=6),
+            Node(2, 0.2, minute=10),
+            Node(3, 0, minute=30),
+            Node(3, 3, minute=59),
+        ]
+        traj = make_traj(nodes)
+        result = MinTimeDeltaGeneralizer(traj).generalize(timedelta(minutes=10))
+        assert result == make_traj([nodes[0], nodes[2], nodes[3], nodes[4]])
 
     def test_min_distance(self):
-        traj = make_traj(
-            [
+        nodes = [
                 Node(),
                 Node(0, 0.1, day=2),
                 Node(0, 0.2, day=3),
                 Node(0, 1, day=4),
                 Node(0, 3, day=5),
-            ],
-            CRS_METRIC,
-        )
+            ]
+        traj = make_traj(nodes, CRS_METRIC)
         result = MinDistanceGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj(
-            [Node(), Node(0, 1, day=4), Node(0, 3, day=5)], CRS_METRIC
-        )
+        assert result == make_traj([nodes[0], nodes[3], nodes[4]], CRS_METRIC)
 
     def test_collection(self):
         collection = MinTimeDeltaGeneralizer(self.collection).generalize(
