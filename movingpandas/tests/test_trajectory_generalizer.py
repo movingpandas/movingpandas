@@ -39,17 +39,29 @@ class TestTrajectoryGeneralizer:
 
     def test_douglas_peucker(self):
         traj = make_traj(
-            [Node(), Node(1, 0.1), Node(2, 0.2), Node(3, 0, day=3), Node(3, 3, day=4)]
+            [
+                Node(),
+                Node(1, 0.1, day=2),
+                Node(2, 0.2, day=3),
+                Node(3, 0, day=4),
+                Node(3, 3, day=5),
+            ]
         )
         result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
+        assert result == make_traj([Node(), Node(3, 0, day=4), Node(3, 3, day=5)])
 
     def test_max_distance(self):
         traj = make_traj(
-            [Node(), Node(1, 0.1), Node(2, 0.2), Node(3, 0, day=3), Node(3, 3, day=4)]
+            [
+                Node(),
+                Node(1, 0.1, day=2),
+                Node(2, 0.2, day=3),
+                Node(3, 0, day=4),
+                Node(3, 3, day=5),
+            ]
         )
         result = MaxDistanceGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
+        assert result == make_traj([Node(), Node(3, 0, day=4), Node(3, 3, day=5)])
 
     def test_min_time_delta(self):
         traj = make_traj(
@@ -75,12 +87,18 @@ class TestTrajectoryGeneralizer:
 
     def test_min_distance(self):
         traj = make_traj(
-            [Node(), Node(0, 0.1), Node(0, 0.2), Node(0, 1, day=3), Node(0, 3, day=4)],
+            [
+                Node(),
+                Node(0, 0.1, day=2),
+                Node(0, 0.2, day=3),
+                Node(0, 1, day=4),
+                Node(0, 3, day=5),
+            ],
             CRS_METRIC,
         )
         result = MinDistanceGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj(
-            [Node(), Node(0, 1, day=3), Node(0, 3, day=4)], CRS_METRIC
+            [Node(), Node(0, 1, day=4), Node(0, 3, day=5)], CRS_METRIC
         )
 
     def test_collection(self):
