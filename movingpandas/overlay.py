@@ -10,7 +10,8 @@ from .time_range_utils import TemporalRange, SpatioTemporalRange
 
 def _get_spatiotemporal_ref(row):
     """
-    Returns the SpatioTemporalRange for the input row's spatial_intersection LineString by interpolating timestamps.
+    Returns the SpatioTemporalRange for the input row's spatial_intersection
+    LineString by interpolating timestamps.
     """
     if row["spatial_intersection"].is_empty:
         return None
@@ -22,7 +23,8 @@ def _get_spatiotemporal_ref(row):
         length = row["line"].length
         t0 = t + (t_delta * row["line"].project(pt0) / length)
         tn = t + (t_delta * row["line"].project(ptn) / length)
-        # to avoid numerical issues with microseconds beyond six digits, we reconstruct the timestamps
+        # to avoid numerical issues with microseconds beyond six digits,
+        # we reconstruct the timestamps
         t0 = datetime(
             t0.year, t0.month, t0.day, t0.hour, t0.minute, t0.second, t0.microsecond
         )
@@ -45,7 +47,8 @@ def _get_spatiotemporal_ref(row):
 
 def _dissolve_ranges(ranges):
     """
-    SpatioTemporalRanges that touch (i.e. the end of one equals the start of another) are dissolved (aka. merged).
+    SpatioTemporalRanges that touch (i.e. the end of one equals the start of
+    another) are dissolved (aka. merged).
     """
     if len(ranges) == 0:
         raise ValueError("Nothing to dissolve (received empty ranges)!")
@@ -82,14 +85,15 @@ def is_equal(t1, t2):
 def intersects(traj, polygon):
     try:
         line = traj.to_linestring()
-    except:
+    except:  # noqa: E722
         return False
     return line.intersects(polygon)
 
 
 def create_entry_and_exit_points(traj, range):
     """
-    Returns a dataframe with inserted entry and exit points according to the provided SpatioTemporalRange.
+    Returns a dataframe with inserted entry and exit points according to the
+    provided SpatioTemporalRange.
     """
     if type(range) != SpatioTemporalRange:
         raise TypeError("Input range has to be a SpatioTemporalRange!")
@@ -106,7 +110,8 @@ def create_entry_and_exit_points(traj, range):
         temp_df.loc[range.t_0] = row0
     except ValueError as err:
         if str(err) == "cannot set a single element with an array":
-            # fix for https://github.com/anitagraser/movingpandas/issues/118 (not sure what causes this problem)
+            # fix for https://github.com/anitagraser/movingpandas/issues/118
+            # (not sure what causes this problem)
             pass
         else:
             raise err
@@ -131,7 +136,7 @@ def _get_segments_for_ranges(traj, ranges):
             temp_traj.df = create_entry_and_exit_points(traj, the_range)
         try:
             segment = temp_traj.get_segment_between(the_range.t_0, the_range.t_n)
-        except ValueError as e:
+        except ValueError:
             continue
         segment.id = "{}_{}".format(traj.id, counter)
         segment.parent = traj
@@ -159,7 +164,8 @@ def _determine_time_ranges_pointbased(traj, polygon):
 
 def _get_potentially_intersecting_lines(traj, polygon):
     """
-    Uses a spatial index to determine which parts of the trajectory may be intersecting with the polygon
+    Uses a spatial index to determine which parts of the trajectory may be
+    intersecting with the polygon
 
     Returns
     -------
@@ -178,7 +184,8 @@ def _get_potentially_intersecting_lines(traj, polygon):
 
 def _determine_time_ranges_linebased(traj, polygon):
     """
-    Returns list of SpatioTemporalRanges that describe trajectory intersections with the provided polygon.
+    Returns list of SpatioTemporalRanges that describe trajectory intersections
+    with the provided polygon.
     """
     # Note: If the trajectory contains consecutive rows without location change
     #       these will result in zero length lines that return an empty
@@ -214,7 +221,7 @@ def _get_geometry_and_properties_from_feature(feature):
     try:
         geometry = shape(feature["geometry"])
         properties = feature["properties"]
-    except:
+    except:  # noqa: E722
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
     return geometry, properties
 

@@ -81,7 +81,8 @@ def measure_distance_geodesic(point1, point2):
 
 def _measure_distance(point1, point2, spherical=False):
     """
-    Convenience function that returns either euclidean or geodesic distance between two points
+    Convenience function that returns either euclidean or geodesic distance
+    between two points
     """
     if spherical:
         return measure_distance_geodesic(point1, point2)
@@ -140,7 +141,6 @@ def azimuth(point1, point2):
     azimuth = degrees(angle)
     if angle < 0:
         azimuth += 360
-    # print("{}->{}: angle={} azimuth={}".format(point1, point2, angle, azimuth))
     return azimuth
 
 
@@ -156,7 +156,8 @@ def angular_difference(degrees1, degrees2):
 
 def mrr_diagonal(geom, spherical=False):
     """
-    Calculate the length of the diagonal of the minimum rotated rectangle of the input geometry.
+    Calculate the length of the diagonal of the minimum rotated rectangle of
+    the input geometry.
     """
     if len(geom) == 1:
         return 0

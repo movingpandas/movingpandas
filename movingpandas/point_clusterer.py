@@ -9,10 +9,14 @@ from movingpandas.geometry_utils import C_EARTH, measure_distance_euclidean
 
 class PointClusterer:
     """
-    Clusters points using a grid-based approach. Cluster seeds are a regular point grid.
+    Clusters points using a grid-based approach. Cluster seeds are a regular
+    point grid.
 
-    Based on the algorithm described by Andrienko, N., & Andrienko, G. (2011). Spatial generalization and
-    aggregation of massive movement data. IEEE Transactions on visualization and computer graphics, 17(2), 205-219.
+    References
+    ----------
+    * Andrienko, N., & Andrienko, G. (2011). Spatial generalization and
+      aggregation of massive movement data. IEEE Transactions on
+      visualization and computer graphics, 17(2), 205-219.
     """
 
     def __init__(self, points, max_distance, is_latlon):
@@ -112,7 +116,7 @@ class _Grid:
             g.delete_points()
         for pt in points:
             (i, j) = self.get_closest_centroid(pt, self.cell_size * 20)
-            if i != None and j != None:
+            if i is not None and j is not None:
                 g = self.cells[i][j]
                 g.add_point(pt)
             else:

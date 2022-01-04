@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-import hvplot.pandas  # seems to be necessary for the following import to work
+import hvplot.pandas  # noqa F401, seems necessary for the following import to work
 from holoviews import opts, dim
 
 
@@ -9,7 +9,8 @@ class _TrajectoryPlotter:
     """
     Utility class for plotting trajectories
 
-    Performs necessary data preprocessing steps and hands over plotting arguments to Matplotlib plot or Holoviews hvplot.
+    Performs necessary data preprocessing steps and hands over plotting
+    arguments to Matplotlib plot or Holoviews hvplot.
     """
 
     def __init__(self, data, *args, **kwargs):
@@ -101,13 +102,13 @@ class _TrajectoryPlotter:
         ax = self._plot_trajectory(self.data)
         self.kwargs[
             "legend"
-        ] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
+        ] = False  # has to be removed after the first iteration, otherwise we get multiple legends!  # noqa E501
         self.kwargs.pop(
             "column", None
-        )  # has to be popped, otherwise there's an error in the following plot call if we don't remove column from kwargs
+        )  # has to be popped, otherwise there's an error in the following plot call
         return ax
 
-    def hvplot(self):
+    def hvplot(self):  # noqa F811
         opts.defaults(
             opts.Overlay(
                 width=self.width, height=self.height, active_tools=["wheel_zoom"]
@@ -159,11 +160,11 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
                 self.ax = self._plot_trajectory(traj)
             self.kwargs[
                 "legend"
-            ] = False  # has to be removed after the first iteration, otherwise we get multiple legends!
+            ] = False  # has to be removed after the first iteration, otherwise we get multiple legends!  # noqa E501
 
         return self.ax
 
-    def hvplot(self):
+    def hvplot(self):  # noqa F811
         opts.defaults(
             opts.Overlay(
                 width=self.width, height=self.height, active_tools=["wheel_zoom"]
@@ -175,5 +176,5 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
                 self.overlay = self.overlay * overlay
             else:
                 self.overlay = overlay
-            self.hvplot_tiles = False  # has to be removed after the first iteration, otherwise tiles will cover trajectories!
+            self.hvplot_tiles = False  # has to be removed after the first iteration, otherwise tiles will cover trajectories!  # noqa E501
         return self.overlay

@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import pandas as pd
 from copy import copy
 from geopandas import GeoDataFrame
-
-sys.path.append(os.path.dirname(__file__))
-
 from .trajectory import Trajectory
 from .trajectory_plotter import _TrajectoryCollectionPlotter
 
@@ -31,7 +26,8 @@ class TrajectoryCollection:
         Parameters
         ----------
         data : list[Trajectory] or GeoDataFrame or DataFrame
-            List of Trajectory objects or a GeoDataFrame with trajectory IDs, point geometry column and timestamp index
+            List of Trajectory objects or a GeoDataFrame with trajectory IDs,
+            point geometry column and timestamp index
         traj_id_col : string
             Name of the GeoDataFrame column containing trajectory IDs
         obj_id_col : string
@@ -45,9 +41,11 @@ class TrajectoryCollection:
         crs : string
             CRS of the x/y coordinates
         min_length : numeric
-            Desired minimum length of trajectories. (Shorter trajectories are discarded.)
+            Desired minimum length of trajectories. (Shorter trajectories are
+            discarded.)
         min_duration : timedelta
-            Desired minimum duration of trajectories. (Shorter trajectories are discarded.)
+            Desired minimum duration of trajectories. (Shorter trajectories are
+            discarded.)
 
         Examples
         --------
@@ -55,7 +53,7 @@ class TrajectoryCollection:
         >>> import movingpandas as mpd
         >>>
         >>> gdf = read_file('data.gpkg')
-        >>> trajectory_collection = mpd.TrajectoryCollection(gdf, 'trajectory_id', t='t')
+        >>> collection = mpd.TrajectoryCollection(gdf, 'trajectory_id', t='t')
         """
         self.min_length = min_length
         self.min_duration = min_duration
@@ -110,8 +108,8 @@ class TrajectoryCollection:
         TrajectoryCollection
         """
         trajectories = [traj.copy() for traj in self.trajectories]
-        # NOTE: traj_id_col and obj_id_col not needed since trajectories are already preprocessed
-        #       on __init__().
+        # NOTE: traj_id_col and obj_id_col not needed since trajectories are
+        # already preprocessed on __init__().
         return TrajectoryCollection(trajectories, min_length=self.min_length)
 
     def to_point_gdf(self):
@@ -140,7 +138,8 @@ class TrajectoryCollection:
 
     def to_traj_gdf(self, wkt=False):
         """
-        Return a GeoDataFrame with one row per Trajectory within the TrajectoryCollection
+        Return a GeoDataFrame with one row per Trajectory within the
+        TrajectoryCollection
 
         Returns
         -------
@@ -261,7 +260,7 @@ class TrajectoryCollection:
             try:
                 if traj.intersects(polygon):
                     intersecting.append(traj)
-            except:
+            except:  # noqa E722
                 pass
         result = copy(self)
         result.trajectories = intersecting
@@ -288,7 +287,7 @@ class TrajectoryCollection:
             try:
                 for intersect in traj.clip(polygon, point_based):
                     clipped.append(intersect)
-            except:
+            except:  # noqa E722
                 pass
         result = copy(self)
         result.trajectories = clipped
@@ -298,8 +297,9 @@ class TrajectoryCollection:
         """
         Filter trajectories by property
 
-        A property is a value in the df that is constant for the whole trajectory. The filter only checks if the value
-        on the first row equals the requested property value.
+        A property is a value in the df that is constant for the whole trajectory.
+        The filter only checks if the value on the first row equals the requested
+        property value.
 
         Parameters
         ----------
@@ -334,8 +334,8 @@ class TrajectoryCollection:
         """
         Add speed column and values to the trajectories.
 
-        Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then speed is calculated in meters per second.
+        Speed is calculated as CRS units per second, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then speed is calculated in meters per second.
 
         Parameters
         ----------
@@ -438,7 +438,8 @@ class TrajectoryCollection:
         --------
         Plot speed along trajectories (with legend and specified figure size):
 
-        >>> trajectory_collection.hvplot(c='speed', line_width=7.0, width=700, height=400, colorbar=True)
+        >>> collection.hvplot(c='speed', line_width=7.0, width=700, height=400,
+                              colorbar=True)
         """
         return _TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()
 

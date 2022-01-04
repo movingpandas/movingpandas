@@ -60,10 +60,11 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes based on distance.
 
-    This generalization ensures that consecutive locations are at least a certain distance apart.
+    This generalization ensures that consecutive locations are at least a
+    certain distance apart.
 
-    Distance is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84) then distance is
-    calculated in metres.
+    Distance is calculated using CRS units, except if the CRS is geographic
+    (e.g. EPSG:4326 WGS84) then distance is calculated in metres.
 
     tolerance : float
         Desired minimum distance between consecutive points
@@ -101,7 +102,8 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes based on time.
 
-    This generalization ensures that consecutive rows are at least a certain timedelta apart.
+    This generalization ensures that consecutive rows are at least a certain
+    timedelta apart.
 
     tolerance : datetime.timedelta
         Desired minimum time difference between consecutive rows
@@ -137,8 +139,8 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes based on distance.
 
-    Similar to Douglas-Peuker. Single-pass implementation that checks whether the provided distance threshold
-    is exceed.
+    Similar to Douglas-Peuker. Single-pass implementation that checks whether
+    the provided distance threshold is exceed.
 
     tolerance : float
         Distance tolerance in trajectory CRS units

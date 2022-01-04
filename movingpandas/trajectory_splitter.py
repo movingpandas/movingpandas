@@ -100,8 +100,8 @@ class ObservationGapSplitter(TrajectorySplitter):
         Time gap threshold
     min_length : numeric
         Desired minimum length of trajectories. Shorter trajectories are discarded.
-        (Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then length is calculated in metres.)
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
 
     Examples
     --------
@@ -125,7 +125,8 @@ class ObservationGapSplitter(TrajectorySplitter):
 
 class SpeedSplitter(TrajectorySplitter):
     """
-    Split trajectories if there are no speed measurements above the speed limit for the specified duration.
+    Split trajectories if there are no speed measurements above the speed limit
+    for the specified duration.
 
     Parameters
     ----------
@@ -135,12 +136,12 @@ class SpeedSplitter(TrajectorySplitter):
         Minimum stop duration
     min_length : numeric
         Desired minimum length of trajectories. Shorter trajectories are discarded.
-        (Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then length is calculated in metres.)
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
     max_speed: float
         Max speed limit
-        (Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then speed is calculated in meters per second.)
+        (Speed is calculated as CRS units per second, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then speed is calculated in meters per second.)
 
     Examples
     --------
@@ -160,7 +161,8 @@ class SpeedSplitter(TrajectorySplitter):
 class StopSplitter(TrajectorySplitter):
     """
     Split trajectories at detected stops.
-    A stop is detected if the movement stays within an area of specified size for at least the specified duration.
+    A stop is detected if the movement stays within an area of specified size for
+    at least the specified duration.
 
     Parameters
     ----------
@@ -170,13 +172,13 @@ class StopSplitter(TrajectorySplitter):
         Minimum stop duration
     min_length : numeric
         Desired minimum length of trajectories. Shorter trajectories are discarded.
-        (Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then length is calculated in metres.)
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
 
     Examples
     --------
 
-    >>> mpd.StopSplitter(traj).split(max_diameter=30, min_duration=timedelta(seconds=60))
+    >>> mpd.StopSplitter(traj).split(max_diameter=7, min_duration=timedelta(seconds=60))
     """
 
     def _split_traj(self, traj, max_diameter, min_duration, min_length=0):

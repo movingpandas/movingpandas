@@ -11,7 +11,8 @@ from .time_range_utils import TemporalRangeWithTrajId
 class TrajectoryStopDetector:
     """
     Detects stops in a trajectory.
-    A stop is detected if the movement stays within an area of specified size for at least the specified duration.
+    A stop is detected if the movement stays within an area of specified size for
+    at least the specified duration.
     """
 
     def __init__(self, traj):
@@ -123,7 +124,9 @@ class TrajectoryStopDetector:
         Examples
         --------
 
-        >>> mpd.TrajectoryStopDetector(traj).get_stop_segments(min_duration=timedelta(seconds=60), max_diameter=100)
+        >>> detector = mpd.TrajectoryStopDetector(traj)
+        >>> stops = detector.get_stop_segments(min_duration=timedelta(seconds=60),
+                                               max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
         return TrajectoryCollection(
@@ -144,12 +147,15 @@ class TrajectoryStopDetector:
         Returns
         -------
         geopandas.GeoDataFrame
-            Stop locations as points with start and end time and stop duration in seconds
+            Stop locations as points with start and end time and stop duration
+            in seconds
 
         Examples
         --------
 
-        >>> mpd.TrajectoryStopDetector(traj).get_stop_points(min_duration=timedelta(seconds=60), max_diameter=100)
+        >>> detector = mpd.TrajectoryStopDetector(traj)
+        >>> stops = detector.get_stop_points(min_duration=timedelta(seconds=60),
+                                             max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
         stops = TrajectoryCollection(

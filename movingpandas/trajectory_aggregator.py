@@ -237,19 +237,7 @@ class _SequenceGenerator:
         self.cells = cells
         self.cells_union = cells.geometry.unary_union
 
-        self.id_to_centroid = {
-            i: [
-                f,
-                [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ],
-            ]
-            for i, f in cells.iterrows()
-        }
+        self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
         self.sequences = {}
         for traj in traj_collection:
             self.evaluate_trajectory(traj)
