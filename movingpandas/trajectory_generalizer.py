@@ -265,7 +265,7 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
                             df.iloc[: df.index.get_loc(dists.idxmax()) + 1], tolerance
                         ),
                         self.td_tr(
-                            df.iloc[df.index.get_loc(dists.idxmax()) :], tolerance
+                            df.iloc[df.index.get_loc(dists.idxmax()):], tolerance
                         ),
                     ]
                 )
