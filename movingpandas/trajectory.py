@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import warnings
 
 from shapely.affinity import translate
@@ -15,8 +13,6 @@ try:
     from pyproj import CRS
 except ImportError:
     from fiona.crs import from_epsg
-
-sys.path.append(os.path.dirname(__file__))
 
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
 from .time_range_utils import SpatioTemporalRange
@@ -93,13 +89,14 @@ class Trajectory:
         For more examples, see the tutorial notebooks_.
 
         .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
-        """
+        """  # noqa: E501
         if len(df) < 2:
             raise ValueError("The input DataFrame must have at least two rows.")
         if not isinstance(df, GeoDataFrame):
             if x is None or y is None:
                 raise ValueError(
-                    "The input DataFrame needs to be a GeoDataFrame or x and y columns need to be specified."
+                    "The input DataFrame needs to be a GeoDataFrame or x and y columns"
+                    "need to be specified."
                 )
             df = GeoDataFrame(
                 df.drop([x, y], axis=1),
@@ -109,7 +106,9 @@ class Trajectory:
         if not isinstance(df.index, DatetimeIndex):
             if t is None:
                 raise TypeError(
-                    "The input DataFrame needs a DatetimeIndex or a timestamp column needs to be specified. Use Pandas' set_index() method to create an index or specify the timestamp column name."
+                    "The input DataFrame needs a DatetimeIndex or a timestamp column"
+                    "needs to be specified. Use Pandas' set_index() method to create an"
+                    "index or specify the timestamp column name."
                 )
             df[t] = to_datetime(df[t])
             df = df.set_index(t).tz_localize(None)
@@ -122,7 +121,8 @@ class Trajectory:
         self.parent = parent
         if self.crs is None:
             warnings.warn(
-                "Trajectory generated without CRS. Computations will use Euclidean distances.",
+                "Trajectory generated without CRS. Computations will use Euclidean"
+                "distances.",
                 category=MissingCRSWarning,
             )
             self.is_latlon = False
@@ -138,14 +138,17 @@ class Trajectory:
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
-        return "Trajectory {id} ({t0} to {tn}) | Size: {n} | Length: {len:.1f}m\nBounds: {bbox}\n{wkt}".format(
-            id=self.id,
-            t0=self.get_start_time(),
-            tn=self.get_end_time(),
-            n=self.size(),
-            wkt=line.wkt[:100],
-            bbox=self.get_bbox(),
-            len=self.get_length(),
+        return (
+            "Trajectory {id} ({t0} to {tn}) | Size: {n} | Length: {len:.1f}m\n"
+            "Bounds: {bbox}\n{wkt}".format(
+                id=self.id,
+                t0=self.get_start_time(),
+                tn=self.get_end_time(),
+                n=self.size(),
+                wkt=line.wkt[:100],
+                bbox=self.get_bbox(),
+                len=self.get_length(),
+            )
         )
 
     def __repr__(self):
@@ -228,7 +231,7 @@ class Trajectory:
         Plot speed along trajectory (with legend and specified figure size):
 
         >>> trajectory.hvplot(c='speed', line_width=7.0, width=700, height=400, colorbar=True)
-        """
+        """  # noqa: E501
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
     def is_valid(self):
@@ -364,7 +367,8 @@ class Trajectory:
 
     def to_traj_gdf(self, wkt=False):
         """
-        Return a GeoDataFrame with one row containing the trajectory as a single LineString
+        Return a GeoDataFrame with one row containing the trajectory as a single
+        LineString
 
         Returns
         -------
@@ -524,21 +528,22 @@ class Trajectory:
         >>> traj.get_position_at(datetime(2018, 1, 1, 12, 6))
         Point (6 0)
 
-        If there is no trajectory position for the given timestamp, the default behaviour is to interpolate the location:
+        If there is no trajectory position for the given timestamp, the default
+        behaviour is to interpolate the location:
 
         >>> traj.get_position_at(datetime(2018, 1, 1, 12, 9))
         POINT (6 4.5)
 
-        To get the trajectory position closest to the given timestamp, specify method='nearest':
+        To get the trajectory position closest to the given timestamp, specify
+        method='nearest':
 
         >>> traj.get_position_at(datetime(2018, 1, 1, 12, 9), method='nearest')
         POINT (6 6)
         """
         if method not in ["nearest", "interpolated", "ffill", "bfill"]:
             raise ValueError(
-                "Invalid method {}. Must be one of [nearest, interpolated, ffill, bfill]".format(
-                    method
-                )
+                "Invalid method {}. Must be one of [nearest, interpolated, ffill,"
+                "bfill]".format(method)
             )
         if method == "interpolated":
             return self.interpolate_position_at(t)
@@ -640,8 +645,8 @@ class Trajectory:
         """
         Return the length of the trajectory.
 
-        Length is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then length is calculated in metres.
+        Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.
 
         Returns
         -------
@@ -723,7 +728,8 @@ class Trajectory:
         """
         if TRAJ_ID_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError(
-                f"Trajectory already contains a {TRAJ_ID_COL_NAME} column! Use overwrite=True to overwrite exiting values."
+                f"Trajectory already contains a {TRAJ_ID_COL_NAME} column! "
+                f"Use overwrite=True to overwrite exiting values."
             )
         self.df[TRAJ_ID_COL_NAME] = self.id
 
@@ -741,7 +747,8 @@ class Trajectory:
         """
         if DIRECTION_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError(
-                "Trajectory already has direction values! Use overwrite=True to overwrite exiting values."
+                "Trajectory already has direction values! "
+                "Use overwrite=True to overwrite exiting values."
             )
         self._add_prev_pt()
         self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
@@ -753,8 +760,8 @@ class Trajectory:
         """
         Add distance column and values to the trajectory's dataframe.
 
-        Distance is calculated as CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then distance is calculated in meters.
+        Distance is calculated as CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then distance is calculated in meters.
 
         Parameters
         ----------
@@ -763,7 +770,8 @@ class Trajectory:
         """
         if DISTANCE_COL_NAME in self.df.columns and not overwrite:
             raise RuntimeError(
-                "Trajectory already has distance values! Use overwrite=True to overwrite exiting values."
+                "Trajectory already has distance values! "
+                "Use overwrite=True to overwrite exiting values."
             )
         self.df = self._get_df_with_distance()
 
@@ -771,8 +779,8 @@ class Trajectory:
         """
         Add speed column and values to the trajectory's dataframe.
 
-        Speed is calculated as CRS units per second, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
-        then speed is calculated in meters per second.
+        Speed is calculated as CRS units per second, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then speed is calculated in meters per second.
 
         Parameters
         ----------
@@ -784,7 +792,9 @@ class Trajectory:
         self.speed_col_name = name
         if self.speed_col_name in self.df.columns and not overwrite:
             raise RuntimeError(
-                f"Trajectory already has a column named {self.speed_col_name}! Use overwrite=True to overwrite exiting values or update the name arg."
+                f"Trajectory already has a column named {self.speed_col_name}! "
+                f"Use overwrite=True to overwrite exiting values or update the "
+                f"name arg."
             )
         self.df = self._get_df_with_speed(name)
 
@@ -836,8 +846,8 @@ class Trajectory:
         Return trajectory segments clipped by the given polygon.
 
         By default, the trajectory's line representation is clipped by the polygon.
-        If pointbased=True, the trajectory's point representation is used instead, leading to shorter
-        segments.
+        If pointbased=True, the trajectory's point representation is used instead,
+        leading to shorter segments.
 
         Parameters
         ----------
@@ -863,8 +873,8 @@ class Trajectory:
         Feature attributes are appended to the trajectory's dataframe.
 
         By default, the trajectory's line representation is clipped by the polygon.
-        If pointbased=True, the trajectory's point representation is used instead, leading to shorter
-        segments.
+        If pointbased=True, the trajectory's point representation is used instead,
+        leading to shorter segments.
 
         Parameters
         ----------
