@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
+import pandas as pd
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
@@ -208,3 +209,70 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
         new_df = traj.df.iloc[keep_rows]
         new_traj = Trajectory(new_df, traj.id)
         return new_traj
+
+
+class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
+    """
+    Generalizes using Top-Down Time Ratio algorithm proposed by Meratnia & de By (2004).
+
+    This is a spatiotemporal trajectory generalization algorithm. Where Douglas-Peucker
+    simply measures the spatial distance between points and original line geometry,
+    Top-Down Time Ratio (TDTR) measures the distance between points and their
+    spatiotemporal projection on the trajectory. These projections are calculated based
+    on the ratio of travel times between the segment start and end times and the point
+    time.
+
+    tolerance : float
+        Distance tolerance (distance returned by shapely Point.distance function)
+
+    References
+    ----------
+    * Meratnia, N., & de By, R.A. (2004). Spatiotemporal compression techniques for
+      moving point objects. In International Conference on Extending Database Technology
+      (pp. 765-782). Springer, Berlin, Heidelberg.
+
+    Examples
+    --------
+
+    >>> mpd.TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1.0)
+    """
+
+    def _generalize_traj(self, traj, tolerance):
+        return Trajectory(self.td_tr(traj.df.copy(), tolerance), traj.id)
+
+    def td_tr(self, df, tolerance):
+        if len(df) <= 2:
+            return df
+        else:
+            de = (
+                df.index.max().to_pydatetime() - df.index.min().to_pydatetime()
+            ).total_seconds()
+
+            dx = df.geometry.iloc[-1].x - df.geometry.iloc[0].x
+            dy = df.geometry.iloc[-1].y - df.geometry.iloc[0].y
+
+            dists = df.apply(
+                lambda rec: self._dist_from_calced(
+                    rec, df.index.min().to_pydatetime(), df.geometry.iloc[0], de, dx, dy
+                ),
+                axis=1,
+            )
+
+            if dists.max() > tolerance:
+                return pd.concat(
+                    [
+                        self.td_tr(
+                            df.iloc[: df.index.get_loc(dists.idxmax()) + 1], tolerance
+                        ),
+                        self.td_tr(
+                            df.iloc[df.index.get_loc(dists.idxmax()) :], tolerance
+                        ),
+                    ]
+                )
+            else:
+                return df.iloc[[0, -1]]
+
+    def _dist_from_calced(self, rec, start_t, start_geom, de, dx, dy):
+        di = (rec.name - start_t).total_seconds()
+        calced = Point(start_geom.x + dx * di / de, start_geom.y + dy * di / de)
+        return rec.geometry.distance(calced)

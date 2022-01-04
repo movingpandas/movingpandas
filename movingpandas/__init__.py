@@ -10,6 +10,7 @@ from .trajectory_generalizer import (  # noqa F401
     MinDistanceGeneralizer,
     MinTimeDeltaGeneralizer,
     DouglasPeuckerGeneralizer,
+    TopDownTimeRatioGeneralizer,
 )
 from .trajectory_collection import TrajectoryCollection  # noqa F401
 from .trajectory_aggregator import TrajectoryCollectionAggregator  # noqa F401

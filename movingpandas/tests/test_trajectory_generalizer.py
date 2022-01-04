@@ -12,6 +12,7 @@ from movingpandas.trajectory_generalizer import (
     MinDistanceGeneralizer,
     MinTimeDeltaGeneralizer,
     DouglasPeuckerGeneralizer,
+    TopDownTimeRatioGeneralizer,
 )
 
 
@@ -48,6 +49,31 @@ class TestTrajectoryGeneralizer:
         traj = make_traj(nodes)
         result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([nodes[0], nodes[3], nodes[4]])
+
+    def test_tdtr(self):
+        nodes = [
+            Node(0, 0, day=1),
+            Node(1, 0.1, day=2),
+            Node(2, 0.2, day=3),
+            Node(3, 0, day=4),
+            Node(3, 3, day=5),
+        ]
+        traj = make_traj(nodes)
+        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
+        assert result == make_traj([nodes[0], nodes[3], nodes[4]])
+
+    def test_tdtr_different_than_dp(self):
+        nodes = [
+            Node(),
+            Node(1, 0.1, hour=1),
+            Node(1, 2, hour=7),
+            Node(2, 2, hour=15),
+            Node(3, 0, hour=16),
+            Node(3, 3, hour=17),
+        ]
+        traj = make_traj(nodes)
+        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
+        assert result == make_traj([nodes[0], nodes[2], nodes[3], nodes[4], nodes[5]])
 
     def test_max_distance(self):
         nodes = [
