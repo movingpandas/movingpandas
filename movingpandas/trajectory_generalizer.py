@@ -12,6 +12,7 @@ class TrajectoryGeneralizer:
     """
     Generalizer base class
     """
+
     def __init__(self, traj):
         """
         Create TrajectoryGeneralizer
@@ -59,10 +60,11 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes based on distance.
 
-    This generalization ensures that consecutive locations are at least a certain distance apart.
+    This generalization ensures that consecutive locations are at least a
+    certain distance apart.
 
-    Distance is calculated using CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84) then distance is
-    calculated in metres.
+    Distance is calculated using CRS units, except if the CRS is geographic
+    (e.g. EPSG:4326 WGS84) then distance is calculated in metres.
 
     tolerance : float
         Desired minimum distance between consecutive points
@@ -90,7 +92,7 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
                 prev_pt = pt
             i += 1
 
-        keep_rows.append(len(traj.df)-1)
+        keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
         new_traj = Trajectory(new_df, traj.id)
         return new_traj
@@ -100,7 +102,8 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes based on time.
 
-    This generalization ensures that consecutive rows are at least a certain timedelta apart.
+    This generalization ensures that consecutive rows are at least a certain
+    timedelta apart.
 
     tolerance : datetime.timedelta
         Desired minimum time difference between consecutive rows
@@ -113,20 +116,20 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
 
     def _generalize_traj(self, traj, tolerance):
         temp_df = traj.df.copy()
-        temp_df['t'] = temp_df.index
-        prev_t = temp_df.head(1)['t'][0]
+        temp_df["t"] = temp_df.index
+        prev_t = temp_df.head(1)["t"][0]
         keep_rows = [0]
         i = 0
 
         for index, row in temp_df.iterrows():
-            t = row['t']
+            t = row["t"]
             tdiff = t - prev_t
             if tdiff >= tolerance:
                 keep_rows.append(i)
                 prev_t = t
             i += 1
 
-        keep_rows.append(len(traj.df)-1)
+        keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
         new_traj = Trajectory(new_df, traj.id)
         return new_traj
@@ -136,8 +139,8 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
     """
     Generalizes based on distance.
 
-    Similar to Douglas-Peuker. Single-pass implementation that checks whether the provided distance threshold
-    is exceed.
+    Similar to Douglas-Peuker. Single-pass implementation that checks whether
+    the provided distance threshold is exceed.
 
     tolerance : float
         Distance tolerance in trajectory CRS units
@@ -192,7 +195,9 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     def _generalize_traj(self, traj, tolerance):
         keep_rows = []
         i = 0
-        simplified = traj.to_linestring().simplify(tolerance, preserve_topology=False).coords
+        simplified = (
+            traj.to_linestring().simplify(tolerance, preserve_topology=False).coords
+        )
 
         for index, row in traj.df.iterrows():
             current_pt = row[traj.get_geom_column_name()]

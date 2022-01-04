@@ -11,8 +11,10 @@ from .time_range_utils import TemporalRangeWithTrajId
 class TrajectoryStopDetector:
     """
     Detects stops in a trajectory.
-    A stop is detected if the movement stays within an area of specified size for at least the specified duration.
+    A stop is detected if the movement stays within an area of specified size for
+    at least the specified duration.
     """
+
     def __init__(self, traj):
         """
         Create StopDetector
@@ -66,11 +68,17 @@ class TrajectoryStopDetector:
             segment_times.append(index)
 
             if not is_stopped:  # remove points to the specified min_duration
-                while len(segment_geoms) > 2 and segment_times[-1] - segment_times[0] >= min_duration:
+                while (
+                    len(segment_geoms) > 2
+                    and segment_times[-1] - segment_times[0] >= min_duration
+                ):
                     segment_geoms.pop(0)
                     segment_times.pop(0)
 
-            if len(segment_geoms) > 1 and mrr_diagonal(segment_geoms, traj.is_latlon) < max_diameter:
+            if (
+                len(segment_geoms) > 1
+                and mrr_diagonal(segment_geoms, traj.is_latlon) < max_diameter
+            ):
                 is_stopped = True
             else:
                 is_stopped = False
@@ -79,15 +87,21 @@ class TrajectoryStopDetector:
                 segment_end = segment_times[-2]
                 segment_begin = segment_times[0]
                 if not is_stopped and previously_stopped:
-                    if segment_end - segment_begin >= min_duration:  # detected end of a stop
-                        detected_stops.append(TemporalRangeWithTrajId(segment_begin, segment_end, traj.id))
+                    if (
+                        segment_end - segment_begin >= min_duration
+                    ):  # detected end of a stop
+                        detected_stops.append(
+                            TemporalRangeWithTrajId(segment_begin, segment_end, traj.id)
+                        )
                         segment_geoms = []
                         segment_times = []
 
             previously_stopped = is_stopped
 
         if is_stopped and segment_times[-1] - segment_times[0] >= min_duration:
-            detected_stops.append(TemporalRangeWithTrajId(segment_times[0], segment_times[-1], traj.id))
+            detected_stops.append(
+                TemporalRangeWithTrajId(segment_times[0], segment_times[-1], traj.id)
+            )
 
         return detected_stops
 
@@ -110,10 +124,14 @@ class TrajectoryStopDetector:
         Examples
         --------
 
-        >>> mpd.TrajectoryStopDetector(traj).get_stop_segments(min_duration=timedelta(seconds=60), max_diameter=100)
+        >>> detector = mpd.TrajectoryStopDetector(traj)
+        >>> stops = detector.get_stop_segments(min_duration=timedelta(seconds=60),
+                                               max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
-        return TrajectoryCollection(convert_time_ranges_to_segments(self.traj, stop_time_ranges))
+        return TrajectoryCollection(
+            convert_time_ranges_to_segments(self.traj, stop_time_ranges)
+        )
 
     def get_stop_points(self, max_diameter, min_duration):
         """
@@ -129,28 +147,35 @@ class TrajectoryStopDetector:
         Returns
         -------
         geopandas.GeoDataFrame
-            Stop locations as points with start and end time and stop duration in seconds
+            Stop locations as points with start and end time and stop duration
+            in seconds
 
         Examples
         --------
 
-        >>> mpd.TrajectoryStopDetector(traj).get_stop_points(min_duration=timedelta(seconds=60), max_diameter=100)
+        >>> detector = mpd.TrajectoryStopDetector(traj)
+        >>> stops = detector.get_stop_points(min_duration=timedelta(seconds=60),
+                                             max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
-        stops = TrajectoryCollection(convert_time_ranges_to_segments(self.traj, stop_time_ranges))
+        stops = TrajectoryCollection(
+            convert_time_ranges_to_segments(self.traj, stop_time_ranges)
+        )
 
-        stop_pts = GeoDataFrame(columns=['geometry']).set_geometry('geometry')
-        stop_pts['stop_id'] = [track.id for track in stops.trajectories]
-        stop_pts = stop_pts.set_index('stop_id')
+        stop_pts = GeoDataFrame(columns=["geometry"]).set_geometry("geometry")
+        stop_pts["stop_id"] = [track.id for track in stops.trajectories]
+        stop_pts = stop_pts.set_index("stop_id")
 
         for stop in stops:
-            stop_pts.at[stop.id, 'start_time'] = stop.get_start_time()
-            stop_pts.at[stop.id, 'end_time'] = stop.get_end_time()
-            stop_pts.at[stop.id, 'geometry'] = stop.get_start_location()
-            stop_pts.at[stop.id, 'traj_id'] = stop.parent.id
+            stop_pts.at[stop.id, "start_time"] = stop.get_start_time()
+            stop_pts.at[stop.id, "end_time"] = stop.get_end_time()
+            stop_pts.at[stop.id, "geometry"] = stop.get_start_location()
+            stop_pts.at[stop.id, "traj_id"] = stop.parent.id
 
         if len(stops) > 0:
-            stop_pts['duration_s'] = (stop_pts['end_time'] - stop_pts['start_time']).dt.total_seconds()
-            stop_pts['traj_id'] = stop_pts['traj_id'].astype(type(stop.parent.id))
+            stop_pts["duration_s"] = (
+                stop_pts["end_time"] - stop_pts["start_time"]
+            ).dt.total_seconds()
+            stop_pts["traj_id"] = stop_pts["traj_id"].astype(type(stop.parent.id))
 
         return stop_pts
