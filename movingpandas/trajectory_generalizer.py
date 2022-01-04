@@ -229,7 +229,6 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
         return Trajectory(self.td_tr(traj.df.copy(), tolerance), traj.id)
         
     def td_tr(self, df, tolerance):
-        print(df)
         if len(df)<=2:
             return df
         else:
