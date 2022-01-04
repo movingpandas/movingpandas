@@ -61,15 +61,15 @@ class TestTrajectoryGeneralizer:
         traj = make_traj(nodes)
         result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([nodes[0], nodes[3], nodes[4]])
-    
+
     def test_tdtr_different_than_dp(self):
         nodes = [
-            Node(), 
-            Node(1, 0.1, hour=1), 
-            Node(1, 2, hour=7), 
-            Node(2, 2, hour=15), 
-            Node(3, 0, hour=16), 
-            Node(3, 3, hour=17)
+            Node(),
+            Node(1, 0.1, hour=1),
+            Node(1, 2, hour=7),
+            Node(2, 2, hour=15),
+            Node(3, 0, hour=16),
+            Node(3, 3, hour=17),
         ]
         traj = make_traj(nodes)
         result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
