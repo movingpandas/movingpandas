@@ -20,8 +20,9 @@ from movingpandas.trajectory import (
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
 
-# Taken from https://stackoverflow.com/a/38778401/6046019
+
 def assert_frame_not_equal(*args, **kwargs):
+    # Taken from https://stackoverflow.com/a/38778401/6046019
     try:
         assert_frame_equal(*args, **kwargs)
     except AssertionError:
@@ -92,7 +93,8 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
         assert (
             str(traj)
-            == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
+            == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | "
+               "Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
 
     def test_size(self):
@@ -211,7 +213,8 @@ class TestTrajectory:
         assert result == "LINESTRING (6 0, 8 0)"
 
     def test_get_linestring_between_interpolate_ValueError(self):
-        # test for https://github.com/anitagraser/movingpandas/issues/118 (not sure what causes this problem)
+        # test for https://github.com/anitagraser/movingpandas/issues/118
+        # (not sure what causes this problem)
         df = pd.DataFrame(
             [
                 {"geometry": Point(0, 0), "t": datetime(2018, 1, 1, 12, 0, 0)},
@@ -641,8 +644,9 @@ class TestTrajectory:
         mcp = traj.get_mcp()
         assert mcp.wkt == "LINESTRING (0 0, 6 0)"
 
-    """ 
-    This test should work but fails in my PyCharm probably due to https://github.com/pyproj4/pyproj/issues/134
+    """
+    This test should work but fails in my PyCharm probably due to
+    https://github.com/pyproj4/pyproj/issues/134
 
     def test_crs(self):
         traj = self.default_traj_latlon

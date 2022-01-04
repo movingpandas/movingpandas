@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import pandas as pd
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
@@ -140,7 +139,8 @@ class TestTrajectoryCollectionAggregator:
             )
         )
         self.geo_df_latlon = GeoDataFrame(df, crs=CRS_LATLON)
-        self.geo_df_latlon.crs = CRS_LATLON  # try to fix https://travis-ci.com/github/anitagraser/movingpandas/builds/177149345
+        self.geo_df_latlon.crs = CRS_LATLON  # try to fix
+        # https://travis-ci.com/github/anitagraser/movingpandas/builds/177149345
         self.collection_latlon = TrajectoryCollection(
             self.geo_df_latlon, "id", obj_id_col="obj"
         )

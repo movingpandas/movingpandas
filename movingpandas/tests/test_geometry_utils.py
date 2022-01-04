@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 from math import sqrt
-from shapely.geometry import Point, LineString
+from shapely.geometry import Point
 from movingpandas.geometry_utils import (
     azimuth,
     calculate_initial_compass_bearing,
@@ -74,7 +73,8 @@ class TestGeometryUtils:
         ) == sqrt(8)
 
     def test_geodesic_distance(self):
-        """Distance between NYC, NY USA and Los Angeles, CA USA is 3944411.0951634306 meters"""
+        # Distance between NYC, NY USA and Los Angeles, CA USA is
+        # 3944411.0951634306 meters
         assert (
             measure_distance_geodesic(
                 Point(-74.00597, 40.71427), Point(-118.24368, 34.05223)

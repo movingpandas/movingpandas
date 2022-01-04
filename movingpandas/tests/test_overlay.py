@@ -205,7 +205,9 @@ class TestOverlay:
         result = traj.clip(polygon).get_trajectory("1_0").to_linestring().wkt
         assert (
             result
-            == "LINESTRING (116.36855 39.904926, 116.368612 39.904877, 116.368644 39.90484)"
+            == "LINESTRING (116.36855 39.904926, "
+               "116.368612 39.904877, "
+               "116.368644 39.90484)"
         )
 
     def test_clip_with_no_intersection(self):

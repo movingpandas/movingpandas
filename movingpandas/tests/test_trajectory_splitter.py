@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import pytest
 from pandas.util.testing import assert_frame_equal
 from fiona.crs import from_epsg
 from datetime import timedelta, datetime
@@ -162,7 +161,7 @@ class TestTrajectorySplitter:
     def test_splitbyobservationgap_does_not_alter_df(self):
         traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=7)])
         traj_copy = traj.copy()
-        split = ObservationGapSplitter(traj).split(gap=timedelta(minutes=5))
+        ObservationGapSplitter(traj).split(gap=timedelta(minutes=5))  # noqa: F841
         assert_frame_equal(traj.df, traj_copy.df)
 
     def test_speed_splitter(self):

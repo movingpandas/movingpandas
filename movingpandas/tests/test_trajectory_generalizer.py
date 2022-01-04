@@ -2,7 +2,7 @@
 
 import pandas as pd
 from geopandas import GeoDataFrame
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point
 from fiona.crs import from_epsg
 from datetime import datetime, timedelta
 from .test_trajectory import make_traj, Node
@@ -75,12 +75,12 @@ class TestTrajectoryGeneralizer:
 
     def test_min_distance(self):
         nodes = [
-                Node(),
-                Node(0, 0.1, day=2),
-                Node(0, 0.2, day=3),
-                Node(0, 1, day=4),
-                Node(0, 3, day=5),
-            ]
+            Node(),
+            Node(0, 0.1, day=2),
+            Node(0, 0.2, day=3),
+            Node(0, 1, day=4),
+            Node(0, 3, day=5),
+        ]
         traj = make_traj(nodes, CRS_METRIC)
         result = MinDistanceGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([nodes[0], nodes[3], nodes[4]], CRS_METRIC)
