@@ -94,7 +94,7 @@ class TestTrajectory:
         assert (
             str(traj)
             == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | "
-               "Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
+            "Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
 
     def test_size(self):
