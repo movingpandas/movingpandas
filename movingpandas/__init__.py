@@ -21,6 +21,7 @@ from .trajectory_splitter import (  # noqa F401
     SpeedSplitter,
     StopSplitter,
 )
+from .trajectory_cleaner import OutlierCleaner # noqa F401
 from .trajectory_stop_detector import TrajectoryStopDetector  # noqa F401
 from .point_clusterer import PointClusterer  # noqa F401
 
