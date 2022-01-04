@@ -40,6 +40,11 @@ class TestTrajectoryGeneralizer:
         traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
         result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
+    
+    def test_tdtr_different_than_dp(self):
+        traj = make_traj([Node(), Node(1, 0.1, hour=1), Node(1, 2, hour=7), Node(2, 2, hour=15), Node(3, 0, hour=16), Node(3, 3, hour=17)])
+        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
+        assert result == make_traj([Node(), Node(1, 2, hour=7), Node(2, 2, hour=15), Node(3, 0, hour=16), Node(3, 3, hour=17)])
 
     def test_max_distance(self):
         traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
