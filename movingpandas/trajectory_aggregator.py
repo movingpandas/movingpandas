@@ -24,25 +24,29 @@ class TrajectoryCollectionAggregator:
         min_angle=45,
     ):
         """
-        Aggregates trajectories by extracting significant points, clustering those points, and extracting
-        flows between clusters.
-
-        Based on the algorithm described by Andrienko, N., & Andrienko, G. (2011). Spatial generalization and
-        aggregation of massive movement data. IEEE Transactions on visualization and computer graphics, 17(2), 205-219.
+        Aggregates trajectories by extracting significant points,
+        clustering those points, and extracting flows between clusters.
 
         Parameters
         ----------
         traj_collection : TrajectoryCollection
             TrajectoryCollection to be aggregated
         max_distance : float
-            Maximum distance between significant points (distance is calculated in CRS units, except if the CRS
-            is geographic, e.g. EPSG:4326 WGS84, then distance is calculated in meters)
+            Maximum distance between significant points (distance is
+            calculated in CRS units, except if the CRS is geographic, e.g.
+            EPSG:4326 WGS84, then distance is calculated in meters)
         min_distance : float
             Minimum distance between significant points
         min_stop_duration : integer
             Minimum duration required for stop detection (in seconds)
         min_angle : float
             Minimum angle for significant point extraction
+
+        References
+        ----------
+        * Andrienko, N., & Andrienko, G. (2011). Spatial generalization and
+          aggregation of massive movement data. IEEE Transactions on
+          visualization and computer graphics, 17(2), 205-219.
         """
         self.traj_collection = traj_collection
         if self.traj_collection.trajectories:
@@ -56,7 +60,6 @@ class TrajectoryCollectionAggregator:
         self.is_latlon = self.traj_collection.trajectories[0].is_latlon
         # print('Extracting significant points ...')
         self.significant_points = self._extract_significant_points()
-        # print('  No. significant points: {}'.format(len(self.significant_points)))
         # print('Clustering significant points ...')
         self.clusters = PointClusterer(
             self.significant_points, self.max_distance, self.is_latlon
@@ -87,12 +90,14 @@ class TrajectoryCollectionAggregator:
         Returns
         -------
         GeoDataFrame
-            Cluster centroids, incl. the number of clustered significant points (n)
+            Cluster centroids, incl. the number of clustered significant
+            points (n).
         """
         if not self.clusters:
             self._cluster_significant_points()
         df = DataFrame(
-            [cluster.centroid for cluster in self.clusters], columns=["geometry"]
+            [cluster.centroid for cluster in self.clusters],
+            columns=["geometry"],
         )
         df["n"] = [len(cluster.points) for cluster in self.clusters]
         return GeoDataFrame(df, crs=self._crs)
@@ -104,14 +109,15 @@ class TrajectoryCollectionAggregator:
         Returns
         -------
         GeoDataFrame
-            Flow lines, incl. the number of trajectories summarized in the flow (weight)
+            Flow lines, incl. the number of trajectories summarized in the
+            flow (weight).
         """
         if not self.flows:
             self._compute_flows_between_clusters()
         return GeoDataFrame(self.flows, crs=self._crs)
 
     def _extract_significant_points(self):
-        significant_points = []
+        sig_points = []
         for traj in self.traj_collection:
             a = _PtsExtractor(
                 traj,
@@ -120,8 +126,8 @@ class TrajectoryCollectionAggregator:
                 self.min_stop_duration,
                 self.min_angle,
             )
-            significant_points = significant_points + a.find_significant_points()
-        return significant_points
+            sig_points = sig_points + a.find_significant_points()
+        return sig_points
 
     def _compute_flows_between_clusters(self):
         sg = _SequenceGenerator(self.get_clusters_gdf(), self.traj_collection)
@@ -162,7 +168,9 @@ class _PtsExtractor:
                         i = j
                         j = k
                         continue
-                    else:  # compute the average spatial position to represent the similar points
+                    # compute the average spatial position to represent
+                    # the similar points
+                    else:
                         m = j + (k - 1 - j) / 2
                         j = int(m)
                 if self.is_significant_turn(i, j, k):
@@ -176,8 +184,8 @@ class _PtsExtractor:
         return self.significant_points
 
     def is_significant_turn(self, i, j, k):
-        turn_angle = self.compute_angle_between_vectors(i, j, k)
-        return turn_angle >= self.min_angle and turn_angle <= (360 - self.min_angle)
+        angle = self.compute_angle_between_vectors(i, j, k)
+        return angle >= self.min_angle and angle <= (360 - self.min_angle)
 
     def is_significant_stop(self, j, k):
         delta_t = self.traj.df.iloc[k - 1].name - self.traj.df.iloc[j].name
@@ -229,7 +237,19 @@ class _SequenceGenerator:
         self.cells = cells
         self.cells_union = cells.geometry.unary_union
 
-        self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
+        self.id_to_centroid = {
+            i: [
+                f,
+                [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+            ]
+            for i, f in cells.iterrows()
+        }
         self.sequences = {}
         for traj in traj_collection:
             self.evaluate_trajectory(traj)
@@ -237,7 +257,8 @@ class _SequenceGenerator:
     def evaluate_trajectory(self, trajectory):
         this_sequence = []
         prev_cell_id = None
-        for t, geom in trajectory.df[trajectory.get_geom_column_name()].iteritems():
+        geom_name = trajectory.get_geom_column_name()
+        for t, geom in trajectory.df[geom_name].iteritems():
             nearest_id = self.get_nearest(geom)
             nearest_cell = self.id_to_centroid[nearest_id][0]
             nearest_cell_id = nearest_cell.name
