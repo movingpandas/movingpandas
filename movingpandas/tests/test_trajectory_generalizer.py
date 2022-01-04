@@ -38,7 +38,7 @@ class TestTrajectoryGeneralizer:
 
     def test_tdtr(self):
         traj = make_traj([Node(), Node(1, 0.1, day=1), Node(2, 0.2, day=2), Node(3, 0, day=3), Node(3, 3, day=4)])
-        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=3)
+        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([Node(), Node(3, 0, day=3), Node(3, 3, day=4)])
 
     def test_max_distance(self):

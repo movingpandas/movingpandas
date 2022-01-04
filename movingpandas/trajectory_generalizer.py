@@ -229,7 +229,7 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
         return Trajectory(self.td_tr(traj.df.copy(), tolerance), traj.id)
         
     def td_tr(self, df, tolerance):
-        # print(df)
+        print(df)
         if len(df)<=2:
             return df
         else:
@@ -238,15 +238,14 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
             dx = df.geometry.iloc[-1].x - df.geometry.iloc[0].x
             dy = df.geometry.iloc[-1].y - df.geometry.iloc[0].y
 
-            # distances for each point and the calulated one based on it and start
             dists = df.apply(lambda rec: self._dist_from_calced(rec, df.index.min().to_pydatetime(), df.geometry.iloc[0], de, dx, dy), axis=1) 
 
             if dists.max()>tolerance:
-                return pd.concat([self.td_tr(df.iloc[:df.index.get_loc(dists.idxmax())], tolerance), self.td_tr(df.iloc[df.index.get_loc(dists.idxmax()):], tolerance)])
+                return pd.concat([self.td_tr(df.iloc[:df.index.get_loc(dists.idxmax())+1], tolerance), self.td_tr(df.iloc[df.index.get_loc(dists.idxmax()):], tolerance)])
             else:
                 return df.iloc[[0,-1]]
     
     def _dist_from_calced(self, rec, start_t, start_geom, de, dx, dy):
-        di = (rec.name - start_t).seconds
+        di = (rec.name - start_t).total_seconds()
         calced = Point(start_geom.x + dx * di / de, start_geom.y + dy * di / de)
         return rec.geometry.distance(calced)
