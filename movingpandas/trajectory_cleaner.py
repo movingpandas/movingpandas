@@ -84,8 +84,8 @@ class OutlierCleaner(TrajectoryCleaner):
 
     def _calc_outliers(self, series, alpha=3):
         """
-        Returns a series of indexes of row that are to be concidered outliers
-        using the quantilies of the data.
+        Returns a series of indexes of row that are to be considered outliers
+        using the quantiles of the data.
         """
         q25, q75 = series.quantile((0.25, 0.75))
         iqr = q75 - q25
