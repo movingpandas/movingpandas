@@ -1,20 +1,32 @@
 """
-`movingpandas`: Implementation of Trajectory classes and functions built on top of GeoPandas
+`movingpandas`: Implementation of Trajectory classes and functions built on top
+of GeoPandas
 """
 
-from .trajectory import Trajectory
-from .trajectory_generalizer import TrajectoryGeneralizer, MaxDistanceGeneralizer, MinDistanceGeneralizer, \
-    MinTimeDeltaGeneralizer, DouglasPeuckerGeneralizer
-from .trajectory_collection import TrajectoryCollection
-from .trajectory_aggregator import TrajectoryCollectionAggregator
-from .trajectory_splitter import TrajectorySplitter, TemporalSplitter, ObservationGapSplitter, SpeedSplitter, \
-    StopSplitter
-from .trajectory_stop_detector import TrajectoryStopDetector
-from .point_clusterer import PointClusterer
+from .trajectory import Trajectory  # noqa F401
+from .trajectory_generalizer import (  # noqa F401
+    TrajectoryGeneralizer,
+    MaxDistanceGeneralizer,
+    MinDistanceGeneralizer,
+    MinTimeDeltaGeneralizer,
+    DouglasPeuckerGeneralizer,
+    TopDownTimeRatioGeneralizer,
+)
+from .trajectory_collection import TrajectoryCollection  # noqa F401
+from .trajectory_aggregator import TrajectoryCollectionAggregator  # noqa F401
+from .trajectory_splitter import (  # noqa F401
+    TrajectorySplitter,
+    TemporalSplitter,
+    ObservationGapSplitter,
+    SpeedSplitter,
+    StopSplitter,
+)
+from .trajectory_stop_detector import TrajectoryStopDetector  # noqa F401
+from .point_clusterer import PointClusterer  # noqa F401
 try:
-    from .trajectory_smoother import KalmanSmootherCV
+    from .trajectory_smoother import KalmanSmootherCV  # noqa F401
 except ImportError:
     pass
 
-name = 'movingpandas'
-__version__ = '0.8.rc1'
+name = "movingpandas"
+__version__ = "0.8.rc1"
