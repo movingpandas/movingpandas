@@ -367,8 +367,8 @@ class Trajectory:
 
     def to_traj_gdf(self, wkt=False):
         """
-        Return a GeoDataFrame with one row containing the trajectory as a single
-        LineString
+        Return a GeoDataFrame with one row containing the trajectory as a
+        single LineString.
 
         Returns
         -------
@@ -455,7 +455,7 @@ class Trajectory:
 
     def get_row_at(self, t, method="nearest"):
         """
-        Return row of the trajectory's dataframe at time t.
+        Return row of the trajectory's DataFrame at time t.
 
         Parameters
         ----------
@@ -467,7 +467,7 @@ class Trajectory:
         Returns
         -------
         Pandas series
-            Row of the dataframe at time t
+            Row of the DataFrame at time t
         """
         try:
             return self.df.loc[t]
@@ -523,7 +523,8 @@ class Trajectory:
 
         Examples
         --------
-        If the trajectory contains a position at the given timestamp, it is returned:
+        If the trajectory contains a position at the given timestamp, it is
+        returned:
 
         >>> traj.get_position_at(datetime(2018, 1, 1, 12, 6))
         Point (6 0)
@@ -663,8 +664,9 @@ class Trajectory:
         """
         Return the direction of the trajectory.
 
-        The direction is calculated between the trajectory's start and end location.
-        Direction values are in degrees, starting North turning clockwise.
+        The direction is calculated between the trajectory's start and end
+        location. Direction values are in degrees, starting North turning
+        clockwise.
 
         Returns
         -------
@@ -719,7 +721,7 @@ class Trajectory:
 
     def add_traj_id(self, overwrite=False):
         """
-        Add trajectory id column and values to the trajectory's dataframe.
+        Add trajectory id column and values to the trajectory's DataFrame.
 
         Parameters
         ----------
@@ -735,7 +737,7 @@ class Trajectory:
 
     def add_direction(self, overwrite=False):
         """
-        Add direction column and values to the trajectory's dataframe.
+        Add direction column and values to the trajectory's DataFrame.
 
         The direction is calculated between consecutive locations.
         Direction values are in degrees, starting North turning clockwise.
@@ -758,7 +760,7 @@ class Trajectory:
 
     def add_distance(self, overwrite=False):
         """
-        Add distance column and values to the trajectory's dataframe.
+        Add distance column and values to the trajectory's DataFrame.
 
         Distance is calculated as CRS units, except if the CRS is geographic
         (e.g. EPSG:4326 WGS84) then distance is calculated in meters.
@@ -777,10 +779,11 @@ class Trajectory:
 
     def add_speed(self, overwrite=False, name=SPEED_COL_NAME):
         """
-        Add speed column and values to the trajectory's dataframe.
+        Add speed column and values to the trajectory's DataFrame.
 
-        Speed is calculated as CRS units per second, except if the CRS is geographic
-        (e.g. EPSG:4326 WGS84) then speed is calculated in meters per second.
+        Speed is calculated as CRS units per second, except if the CRS is
+        geographic (e.g. EPSG:4326 WGS84) then speed is calculated in meters
+        per second.
 
         Parameters
         ----------
@@ -845,9 +848,9 @@ class Trajectory:
         """
         Return trajectory segments clipped by the given polygon.
 
-        By default, the trajectory's line representation is clipped by the polygon.
-        If pointbased=True, the trajectory's point representation is used instead,
-        leading to shorter segments.
+        By default, the trajectory's line representation is clipped by the
+        polygon. If pointbased=True, the trajectory's point representation is
+        used instead, leading to shorter segments.
 
         Parameters
         ----------
@@ -870,11 +873,11 @@ class Trajectory:
         """
         Return the trajectory segments that intersects the given feature.
 
-        Feature attributes are appended to the trajectory's dataframe.
+        Feature attributes are appended to the trajectory's DataFrame.
 
-        By default, the trajectory's line representation is clipped by the polygon.
-        If pointbased=True, the trajectory's point representation is used instead,
-        leading to shorter segments.
+        By default, the trajectory's line representation is clipped by the
+        polygon. If pointbased=True, the trajectory's point representation is
+        used instead, leading to shorter segments.
 
         Parameters
         ----------
@@ -886,7 +889,7 @@ class Trajectory:
         Returns
         -------
         TrajectoryCollection
-            Ssegments intersecting with the feature
+            Segments intersecting with the feature
         """
         from .trajectory_collection import TrajectoryCollection
 
@@ -902,7 +905,7 @@ class Trajectory:
         column : str
             Name of the column to shift
         offset : int
-            Number of seconds to shift by, can be positive or negative.
+            Number of seconds to shift by, can be positive or negative
         """
         self.df[column] = self.df[column].shift(offset, freq="1s")
 
@@ -915,19 +918,19 @@ class Trajectory:
         column : str
             Name of the column to shift
         offset : int
-            Number of minutes to shift by, can be positive or negative.
+            Number of minutes to shift by, can be positive or negative
         """
         self.df[column] = self.df[column].shift(offset, freq="1min")
 
     def _to_line_df(self):
         """
-        Convert trajectory data GeoDataFrame of points to GeoDataFrame of lines that
-        connect consecutive points.
+        Convert trajectory data GeoDataFrame of points to GeoDataFrame of lines
+        that connect consecutive points.
 
         Returns
         -------
         line_df : GeoDataFrame
-            GeoDataFrame of line segements
+            GeoDataFrame of line segments
         """
         line_df = self.df.copy()
         line_df["prev_pt"] = line_df.geometry.shift()
@@ -966,4 +969,4 @@ def point_gdf_to_linestring(df, geom_col_name):
             .values[0]
         )
     else:
-        raise RuntimeError("Dataframe needs at least two points to make line!")
+        raise RuntimeError("DataFrame needs at least two points to make line!")
