@@ -56,7 +56,7 @@ jobs:
       - name: Check and Log Environment
         run: |
           python -V
-          python -c "import geopandas; geopandas.show_versions();"
+          python -c "import movingpandas; movingpandas.show_versions();"
           conda info
 
       - name: Test
