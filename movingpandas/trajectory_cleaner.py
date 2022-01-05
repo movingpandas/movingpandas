@@ -22,14 +22,14 @@ class TrajectoryCleaner:
         """
         self.traj = traj
 
-    def clean(self, features):
+    def clean(self, columns):
         """
         Clean the input Trajectory/TrajectoryCollection.
 
         Parameters
         ----------
-        features: dictionary
-            Information regarding the features that will be used to clean the trajectory
+        columns: dictionary
+            Information regarding the columns that will be used to clean the trajectory
             and the accompanying thresholds. ex. - {'speed': 30, 'heading': 360} etc.
 
         Returns
@@ -38,21 +38,21 @@ class TrajectoryCleaner:
             Cleaned Trajectory or TrajectoryCollection
         """
         if isinstance(self.traj, Trajectory):
-            return self._clean_traj(self.traj, features)
+            return self._clean_traj(self.traj, columns)
         elif isinstance(self.traj, TrajectoryCollection):
-            return self._clean_traj_collection(features)
+            return self._clean_traj_collection(columns)
         else:
             raise TypeError
 
-    def _clean_traj_collection(self, features):
+    def _clean_traj_collection(self, columns):
         cleaned = []
         for traj in self.traj:
-            cleaned.append(self._clean_traj(traj, features))
+            cleaned.append(self._clean_traj(traj, columns))
         result = copy(self.traj)
         result.trajectories = cleaned
         return result
 
-    def _clean_traj(self, traj, features):
+    def _clean_traj(self, traj, columns):
         return traj
 
 
@@ -60,8 +60,8 @@ class OutlierCleaner(TrajectoryCleaner):
     """
     Outlier (interquantile range - iqr) based cleaner.
 
-    features : dictionary
-        Key - value pairs of features and alpha (iqr multiplier).
+    columns : dictionary
+        Key - value pairs of columns and alpha (iqr multiplier).
 
         Note: Setting alpha=3 is widely used.
 
@@ -71,12 +71,12 @@ class OutlierCleaner(TrajectoryCleaner):
     >>> mpd.OutlierCleaner(traj).clean({'speed': 3})
     """
 
-    def _clean_traj(self, traj, features):
+    def _clean_traj(self, traj, columns):
         df = traj.df.copy()
         ixs = []
 
-        for feature, alpha in features.items():
-            ix = self._calc_outliers(df[feature], alpha)
+        for column, alpha in columns.items():
+            ix = self._calc_outliers(df[column], alpha)
             ixs.append(ix.tolist())
 
         indices = pd.Series(list(map(any, zip(*ixs))), index=df.index)

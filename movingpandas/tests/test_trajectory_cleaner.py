@@ -47,7 +47,7 @@ class TestTrajectoryCleaner:
                 Node(5, 5, day=6, value=1),
             ]
         )
-        result = OutlierCleaner(traj).clean(features={"value": 3})
+        result = OutlierCleaner(traj).clean(columns={"value": 3})
         assert result == make_traj(
             [
                 Node(),
@@ -61,7 +61,7 @@ class TestTrajectoryCleaner:
 
     def test_outlier_cleaner_collection(self):
         collection = OutlierCleaner(self.collection).clean(
-            features={"val": 3, "val2": 3}
+            columns={"val": 3, "val2": 3}
         )
         assert len(collection) == 2
         wkt1 = collection.trajectories[0].to_linestring().wkt
