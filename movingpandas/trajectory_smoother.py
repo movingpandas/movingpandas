@@ -118,7 +118,7 @@ class KalmanSmootherCV(TrajectorySmoother):
             Alternatively, a single float can be provided, which is assumed to be the same for both
             coordinates.
         """
-        super().smooth(process_noise_std=process_noise_std, measurement_noise_std=measurement_noise_std)
+        return super().smooth(process_noise_std=process_noise_std, measurement_noise_std=measurement_noise_std)
 
     def _smooth_traj(self, traj, process_noise_std=0.5, measurement_noise_std=1):
         # Get detector
