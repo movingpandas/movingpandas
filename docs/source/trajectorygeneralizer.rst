@@ -19,3 +19,5 @@ MovingPandas.TrajectoryGeneralizer
 .. autoclass:: MinTimeDeltaGeneralizer
    :members:
 
+.. autoclass:: TopDownTimeRatioGeneralizer
+   :members:
