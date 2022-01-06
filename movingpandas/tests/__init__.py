@@ -8,8 +8,8 @@ def _importorskip(modname):
         has = True
     except ImportError:
         has = False
-    func = pytest.mark.skipif(not has, reason=f'requires {modname}')
+    func = pytest.mark.skipif(not has, reason=f"requires {modname}")
     return has, func
 
 
-has_stonesoup, requires_stonesoup = _importorskip('stonesoup')
+has_stonesoup, requires_stonesoup = _importorskip("stonesoup")

@@ -23,6 +23,7 @@ from .trajectory_splitter import (  # noqa F401
 )
 from .trajectory_stop_detector import TrajectoryStopDetector  # noqa F401
 from .point_clusterer import PointClusterer  # noqa F401
+
 try:
     from .trajectory_smoother import KalmanSmootherCV  # noqa F401
 except ImportError:
