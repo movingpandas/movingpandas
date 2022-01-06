@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
+
 from copy import copy
 
 from .trajectory import Trajectory
@@ -76,6 +78,10 @@ class OutlierCleaner(TrajectoryCleaner):
         ixs = []
 
         for column, alpha in columns.items():
+            if not is_numeric_dtype(df[column]):
+                raise TypeError(
+                    f"'{column}' column of type '{df[column].dtype}' is not numeric"
+                )
             ix = self._calc_outliers(df[column], alpha)
             ixs.append(ix.tolist())
 
