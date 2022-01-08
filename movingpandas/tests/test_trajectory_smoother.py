@@ -21,71 +21,16 @@ class TestTrajectorySmoother:
     def setup_method(self):
         df = pd.DataFrame(
             [
-                {
-                    "id": 1,
-                    "obj": "A",
-                    "geometry": Point(0, 0),
-                    "t": datetime(2018, 1, 1, 12, 0, 0),
-                    "val": 9,
-                    "val2": "a",
-                },
-                {
-                    "id": 1,
-                    "obj": "A",
-                    "geometry": Point(6, 0),
-                    "t": datetime(2018, 1, 1, 12, 6, 0),
-                    "val": 5,
-                    "val2": "b",
-                },
-                {
-                    "id": 1,
-                    "obj": "A",
-                    "geometry": Point(6, 6),
-                    "t": datetime(2018, 1, 1, 14, 10, 0),
-                    "val": 2,
-                    "val2": "c",
-                },
-                {
-                    "id": 1,
-                    "obj": "A",
-                    "geometry": Point(9, 9),
-                    "t": datetime(2018, 1, 1, 14, 15, 0),
-                    "val": 4,
-                    "val2": "d",
-                },
-                {
-                    "id": 2,
-                    "obj": "A",
-                    "geometry": Point(10, 10),
-                    "t": datetime(2018, 1, 1, 12, 0, 0),
-                    "val": 10,
-                    "val2": "e",
-                },
-                {
-                    "id": 2,
-                    "obj": "A",
-                    "geometry": Point(16, 10),
-                    "t": datetime(2018, 1, 1, 12, 6, 0),
-                    "val": 6,
-                    "val2": "f",
-                },
-                {
-                    "id": 2,
-                    "obj": "A",
-                    "geometry": Point(16, 16),
-                    "t": datetime(2018, 1, 2, 13, 10, 0),
-                    "val": 7,
-                    "val2": "g",
-                },
-                {
-                    "id": 2,
-                    "obj": "A",
-                    "geometry": Point(190, 19),
-                    "t": datetime(2018, 1, 2, 13, 15, 0),
-                    "val": 3,
-                    "val2": "h",
-                },
-            ]
+                [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0)],
+                [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0)],
+                [1, "A", Point(6, 6), datetime(2018, 1, 1, 14, 10, 0)],
+                [1, "A", Point(9, 9), datetime(2018, 1, 1, 14, 15, 0)],
+                [2, "A", Point(10, 10), datetime(2018, 1, 1, 12, 0, 0)],
+                [2, "A", Point(16, 10), datetime(2018, 1, 1, 12, 6, 0)],
+                [2, "A", Point(16, 16), datetime(2018, 1, 2, 13, 10, 0)],
+                [2, "A", Point(190, 19), datetime(2018, 1, 2, 13, 15, 0)]
+            ],
+            columns=["id", "obj", "geometry", "t"],
         ).set_index("t")
         self.df = GeoDataFrame(df, crs=CRS_METRIC)
         self.collection = TrajectoryCollection(self.df, "id", obj_id_col="obj")
