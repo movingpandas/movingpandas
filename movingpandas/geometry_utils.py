@@ -10,8 +10,9 @@ C_EARTH = 2 * R_EARTH * pi  # circumference
 
 
 def _is_point(input):
-    if type(input) != Point:
-        raise TypeError(f"Only Points are supported as arguments, got {input}")
+    if not isinstance(input, Point):
+        raise TypeError(f"Only Points are supported as arguments, "
+                        f"got {input} {type(input)}")
 
 
 def measure_distance_spherical(point1, point2):
