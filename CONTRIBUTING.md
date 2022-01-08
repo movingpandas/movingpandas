@@ -19,6 +19,14 @@ create a development environment that is separate from your existing Python
 environment so that you can make and test changes without compromising your
 own work environment.
 
+### Style
+
+- MovingPandas follows [the PEP 8
+  standard](http://www.python.org/dev/peps/pep-0008/) and uses
+  [Black](https://black.readthedocs.io/en/stable/) and
+  [Flake8](http://flake8.pycqa.org/en/latest/) to ensure a consistent
+  code format throughout the project.
+
 ### Run the tests
 
 Before submitting your changes for review, make sure to check that your changes
