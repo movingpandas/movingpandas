@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 from math import sqrt
 from shapely.geometry import Point
 from movingpandas.geometry_utils import (
@@ -8,6 +9,8 @@ from movingpandas.geometry_utils import (
     angular_difference,
     mrr_diagonal,
     measure_distance_geodesic,
+    measure_distance_euclidean,
+    measure_distance_spherical,
 )
 
 
@@ -72,6 +75,14 @@ class TestGeometryUtils:
             [Point(0, 0), Point(0, 2), Point(2, 0), Point(2, 2)]
         ) == sqrt(8)
 
+    def test_euclidean_distance(self):
+        assert (measure_distance_euclidean(Point(0, 0), Point(0, 1))) == 1
+
+    def test_spherical_distance(self):
+        assert measure_distance_spherical(
+            Point(-74.00597, 40.71427), Point(-118.24368, 34.05223)
+        ) == pytest.approx(3935735)
+
     def test_geodesic_distance(self):
         # Distance between NYC, NY USA and Los Angeles, CA USA is
         # 3944411.0951634306 meters
@@ -81,3 +92,23 @@ class TestGeometryUtils:
             )
             == 3944411.0951634306
         )
+
+    def test_measure_distance_euclidean_throws_type_error(self):
+        with pytest.raises(TypeError):
+            measure_distance_euclidean((0, 0), (0, 1))
+
+    def test_measure_distance_spherical_throws_type_error(self):
+        with pytest.raises(TypeError):
+            measure_distance_spherical((0, 0), (0, 1))
+
+    def test_measure_distance_geodesic_throws_type_error(self):
+        with pytest.raises(TypeError):
+            measure_distance_geodesic((0, 0), (0, 1))
+
+    def test_calculate_initial_compass_bearing_throws_type_error(self):
+        with pytest.raises(TypeError):
+            calculate_initial_compass_bearing((0, 0), (0, 1))
+
+    def test_azimuth_throws_type_error(self):
+        with pytest.raises(TypeError):
+            azimuth((0, 0), (0, 1))

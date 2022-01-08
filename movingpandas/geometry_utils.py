@@ -9,16 +9,17 @@ R_EARTH = 6371000  # radius of earth in meters
 C_EARTH = 2 * R_EARTH * pi  # circumference
 
 
+def _is_point(input):
+    if type(input) != Point:
+        raise TypeError(f"Only Points are supported as arguments, got {input}")
+
+
 def measure_distance_spherical(point1, point2):
     """
     Return spherical distance between two shapely Points as a float.
     """
-    if (type(point1) != Point) or (type(point2) != Point):
-        raise TypeError(
-            "Only Points are supported as arguments, got {} and {}".format(
-                point1, point2
-            )
-        )
+    _is_point(point1)
+    _is_point(point2)
     lon1 = float(point1.x)
     lon2 = float(point2.x)
     lat1 = float(point1.y)
@@ -37,12 +38,8 @@ def measure_distance_euclidean(point1, point2):
     """
     Return euclidean distance between two shapely Points as float.
     """
-    if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
-        raise TypeError(
-            "Only Points are supported as arguments, got {} and {}".format(
-                point1, point2
-            )
-        )
+    _is_point(point1)
+    _is_point(point2)
     return point1.distance(point2)
 
 
@@ -63,12 +60,8 @@ def measure_distance_geodesic(point1, point2):
     dist : float
         geodesic distance (on a WGS84 ellipsoid) in meters
     """
-    if (type(point1) != Point) or (type(point2) != Point):
-        raise TypeError(
-            "Only Points are supported as arguments, got {} and {}".format(
-                point1, point2
-            )
-        )
+    _is_point(point1)
+    _is_point(point2)
     lon1 = float(point1.x)
     lon2 = float(point2.x)
     lat1 = float(point1.y)
@@ -105,12 +98,8 @@ def calculate_initial_compass_bearing(point1, point2):
     :Returns Type:
       float
     """
-    if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
-        raise TypeError(
-            "Only Points are supported as arguments, got {} and {}".format(
-                point1, point2
-            )
-        )
+    _is_point(point1)
+    _is_point(point2)
     lat1 = radians(point1.y)
     lat2 = radians(point2.y)
     delta_lon = radians(point2.x - point1.x)
@@ -130,13 +119,8 @@ def azimuth(point1, point2):
     """
     Calculates euclidean bearing of line between two points.
     """
-    if (not isinstance(point1, Point)) or (not isinstance(point2, Point)):
-        raise TypeError(
-            "Only Points are supported as arguments, got {} and {}".format(
-                point1, point2
-            )
-        )
-
+    _is_point(point1)
+    _is_point(point2)
     angle = atan2(point2.x - point1.x, point2.y - point1.y)
     azimuth = degrees(angle)
     if angle < 0:
