@@ -28,7 +28,7 @@ class TestTrajectorySmoother:
                 [2, "A", Point(10, 10), datetime(2018, 1, 1, 12, 0, 0)],
                 [2, "A", Point(16, 10), datetime(2018, 1, 1, 12, 6, 0)],
                 [2, "A", Point(16, 16), datetime(2018, 1, 2, 13, 10, 0)],
-                [2, "A", Point(190, 19), datetime(2018, 1, 2, 13, 15, 0)]
+                [2, "A", Point(190, 19), datetime(2018, 1, 2, 13, 15, 0)],
             ],
             columns=["id", "obj", "geometry", "t"],
         ).set_index("t")
@@ -50,6 +50,32 @@ class TestTrajectorySmoother:
         )
         result = KalmanSmootherCV(traj).smooth(
             process_noise_std=0.1, measurement_noise_std=10
+        )
+        truth = loads(
+            "LINESTRING ("
+            "1.7982884510469304 0.6585353696461531, "
+            "1.7986579478436395 0.6588189259897214, "
+            "1.7996332413712328 0.6596163790136829, "
+            "1.8009712874015955 0.6608076466642573, "
+            "1.8024490723366013 0.6622216786861853)"
+        )
+        assert np.allclose(result.to_linestring().xy, truth.xy)
+
+    @requires_stonesoup
+    def test_kalman_smoother_cv_single_tuple(self):
+        from movingpandas.trajectory_smoother import KalmanSmootherCV
+
+        traj = make_traj(
+            [
+                Node(),
+                Node(1, 0.1, second=1),
+                Node(2, 0.2, second=2),
+                Node(3, 0, second=3),
+                Node(3, 3, second=4),
+            ]
+        )
+        result = KalmanSmootherCV(traj).smooth(
+            process_noise_std=(0.1, 0.1), measurement_noise_std=(10, 10)
         )
         truth = loads(
             "LINESTRING ("
