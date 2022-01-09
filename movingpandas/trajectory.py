@@ -363,6 +363,7 @@ class Trajectory:
         line_gdf.drop(columns=[self.get_geom_column_name(), "prev_pt"], inplace=True)
         line_gdf.reset_index(drop=True, inplace=True)
         line_gdf.rename(columns={"line": "geometry"}, inplace=True)
+        line_gdf.set_geometry("geometry", inplace=True)
         return line_gdf
 
     def to_traj_gdf(self, wkt=False):

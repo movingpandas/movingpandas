@@ -222,12 +222,14 @@ class TestTrajectoryCollection:
 
     def test_to_point_gdf(self):
         point_gdf = self.collection.to_point_gdf()
+        point_gdf.to_file("temp.gpkg", layer="points", driver="GPKG")
         assert_frame_equal(point_gdf, self.geo_df)
 
     def test_to_line_gdf(self):
         temp_df = self.geo_df.drop(columns=["obj", "val", "val2"])
         tc = TrajectoryCollection(temp_df, "id")
         line_gdf = tc.to_line_gdf()
+        line_gdf.to_file("temp.gpkg", layer="lines", driver="GPKG")
         t1 = [
             datetime(2018, 1, 1, 12, 0),
             datetime(2018, 1, 1, 12, 6),
@@ -258,7 +260,7 @@ class TestTrajectoryCollection:
         temp_df = self.geo_df.drop(columns=["obj", "val", "val2"])
         tc = TrajectoryCollection(temp_df, "id")
         traj_gdf = tc.to_traj_gdf()
-
+        traj_gdf.to_file("temp.gpkg", layer="trajs", driver="GPKG")
         rows = [
             {
                 "traj_id": 1,
