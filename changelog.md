@@ -5,9 +5,11 @@
 ## 0.9 (released January 2022)
 
 [Version 0.9](https://github.com/anitagraser/movingpandas/releases/tag/v0.9) 
-adds a Kalman filter for trajectory smoothing, 
-Top-Down Time Ratio algorithm for spatiotemporal trajectory generalizationj,
-as well as outlier removal.  
+includes, amongst other improvements, the following new algorithms:
+ 
+* A Kalman filter for trajectory smoothing, 
+* Top-Down Time Ratio algorithm for spatiotemporal trajectory generalization, 
+* A cleaning algorithm that removes statistical outliers in numerical columns  
 
 For full details, see the 
 [commit history](https://github.com/anitagraser/movingpandas/compare/v0.8rc1...v0.9).
