@@ -1,16 +1,16 @@
-<img align="right" src="https://anitagraser.github.io/movingpandas/pics/movingpandas.png">
+<img align="right" src="https://anitagraser.github.io/movingpandas/assets/img/movingpandas.png">
 
 # Changelog
 
 ## 0.9 (released January 2022)
 
-[Version 0.9](https://github.com/anitagraser/movingpandas/releases/tag/v0.9rc1) 
+[Version 0.9](https://github.com/anitagraser/movingpandas/releases/tag/v0.9) 
 adds a Kalman filter for trajectory smoothing, 
 Top-Down Time Ratio algorithm for spatiotemporal trajectory generalizationj,
 as well as outlier removal.  
 
 For full details, see the 
-[commit history](https://github.com/anitagraser/movingpandas/compare/v0.8rc1...v0.9rc1).
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.8rc1...v0.9).
 
 ## 0.8 (released October 2021)
 
