@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
 
 setuptools.setup(
     name="movingpandas",
-    version="0.8.rc1",
+    version="0.9.rc1",
     author="Anita Graser",
     author_email="anitagraser@gmx.at",
     description="Implementation of Trajectory classes and functions built on top of GeoPandas",
