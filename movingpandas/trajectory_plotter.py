@@ -70,7 +70,7 @@ class _TrajectoryPlotter:
 
     def _hvplot_trajectory(self, traj):
         line_gdf = self._make_line_df(traj)
-        if not traj.is_latlon and traj.crs is not None:
+        if self.hvplot_is_geo and not traj.is_latlon and traj.crs is not None:
             line_gdf = line_gdf.to_crs(epsg=4326)
         if self.column and isinstance(self.column, str):
             self.kwargs["c"] = dim(
