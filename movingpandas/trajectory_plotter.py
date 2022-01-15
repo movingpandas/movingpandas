@@ -24,7 +24,8 @@ class _TrajectoryPlotter:
         self.column = kwargs.get("column", None)
         self.column = kwargs.get("c", self.column)
         self.ax = kwargs.pop("ax", None)
-        self.column_to_color = kwargs.pop("column_to_color", None)
+        self.colormap = kwargs.pop("colormap", None)
+        self.colormap = kwargs.pop("column_to_color", self.colormap)
 
         self.min_value = self.kwargs.get("vmin", None)
         self.max_value = self.kwargs.get("vmax", None)
@@ -51,9 +52,9 @@ class _TrajectoryPlotter:
 
     def _plot_trajectory(self, traj):
         temp_df = self._make_line_df(traj)
-        if self.column and self.column_to_color:
+        if self.column and self.colormap:
             try:
-                color = self.column_to_color[traj.df[self.column].max()]
+                color = self.colormap[traj.df[self.column].max()]
             except KeyError:
                 color = "grey"
             return temp_df.plot(ax=self.ax, color=color, *self.args, **self.kwargs)
@@ -76,15 +77,16 @@ class _TrajectoryPlotter:
             self.kwargs["c"] = dim(
                 self.column
             )  # fixes https://github.com/anitagraser/movingpandas/issues/71
-        if self.column and self.column_to_color:
+        if self.column and self.colormap:
             try:
-                color = self.column_to_color[traj.df[self.column].max()]
+                color = self.colormap[traj.df[self.column].max()]
             except KeyError:
                 color = "grey"
             return line_gdf.hvplot(
                 color=color,
                 geo=self.hvplot_is_geo,
                 tiles=self.hvplot_tiles,
+                label=traj.df[self.column].max(),
                 *self.args,
                 **self.kwargs
             )
