@@ -22,5 +22,5 @@ dependencies:
   - rasterio
   - scikit-learn
   - seaborn
-  - shapely<1.8
+  - shapely
   - stonesoup
