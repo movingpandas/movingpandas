@@ -450,6 +450,27 @@ class TestTrajectory:
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 2
 
+    def test_hvplot_with_speed_exists(self):
+        import holoviews
+
+        plot = self.default_traj_latlon.hvplot(geo=True, c="speed")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+        assert len(plot.Path.ddims) == 3
+
+    def test_reproduce_notebook_error(self):
+        df = pd.DataFrame(
+            [
+                {"geometry": Point(0, 0), "t": datetime(2018, 1, 1, 12, 0, 0)},
+                {"geometry": Point(6, 0), "t": datetime(2018, 1, 1, 12, 6, 0)},
+                {"geometry": Point(6, 6), "t": datetime(2018, 1, 1, 12, 10, 0)},
+                {"geometry": Point(9, 9), "t": datetime(2018, 1, 1, 12, 15, 0)},
+            ]
+        ).set_index("t")
+        geo_df = GeoDataFrame(df, crs=31256)
+        toy_traj = Trajectory(geo_df, 1)
+        toy_traj.add_speed(overwrite=True)
+        toy_traj.hvplot(c="speed", line_width=7)
+
     def test_hvplot_exists_without_crs(self):
         import holoviews
 
