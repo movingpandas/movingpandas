@@ -473,9 +473,9 @@ class Trajectory:
         try:
             return self.df.loc[t]
         except KeyError:
-            return self.df.iloc[
-                self.df.index.sort_values().drop_duplicates().get_loc(t, method=method)
-            ]
+            index = self.df.index.sort_values().drop_duplicates()
+            idx = index.get_indexer([t], method=method)[0]
+            return self.df.iloc[idx]
 
     def interpolate_position_at(self, t):
         """

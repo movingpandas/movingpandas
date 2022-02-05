@@ -97,11 +97,13 @@ def create_entry_and_exit_points(traj, range):
     """
     if type(range) != SpatioTemporalRange:
         raise TypeError("Input range has to be a SpatioTemporalRange!")
+
+    index = traj.df.index
     # Create row at entry point with attributes from previous row = pad
-    row0 = traj.df.iloc[traj.df.index.get_loc(range.t_0, method="pad")].copy()
+    row0 = traj.df.iloc[index.get_indexer([range.t_0], method="pad")[0]].copy()
     row0["geometry"] = range.pt_0
     # Create row at exit point
-    rown = traj.df.iloc[traj.df.index.get_loc(range.t_n, method="pad")].copy()
+    rown = traj.df.iloc[index.get_indexer([range.t_n], method="pad")[0]].copy()
     rown["geometry"] = range.pt_n
     # Insert rows
     temp_df = traj.df.copy()
