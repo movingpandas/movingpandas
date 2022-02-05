@@ -218,7 +218,7 @@ class TrajectoryCollection:
                     continue
                 x = traj.get_row_at(t)
             gdf = gdf.append(x)
-        return gdf
+        return GeoDataFrame(gdf)
 
     def get_start_locations(self):
         """

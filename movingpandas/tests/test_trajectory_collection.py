@@ -104,6 +104,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].val2 in ["a", "e"]
         assert locs.iloc[1].geometry in [Point(0, 0), Point(10, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
+        assert isinstance(locs, GeoDataFrame)
 
     def test_get_end_locations(self):
         locs = self.collection.get_end_locations()
@@ -115,6 +116,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].val2 in ["d", "h"]
         assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
+        assert isinstance(locs, GeoDataFrame)
 
     def test_get_intersecting(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
