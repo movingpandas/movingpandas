@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import sin, cos, atan2, radians, degrees, sqrt, pi
-from shapely.geometry import MultiPoint, Point
+from shapely.geometry import Point
 from geopy import distance
 
 
@@ -145,11 +145,11 @@ def mrr_diagonal(geom, spherical=False):
     Calculate the length of the diagonal of the minimum rotated rectangle of
     the input geometry.
     """
-    if len(geom) == 1:
+    if isinstance(geom, Point):
         return 0
     if len(geom) == 2:
         return _measure_distance(geom[0], geom[1], spherical)
-    mrr = MultiPoint(geom).minimum_rotated_rectangle
+    mrr = geom.minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
     except AttributeError:  # thrown if mrr is a LineString
