@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import sin, cos, atan2, radians, degrees, sqrt, pi
-from shapely.geometry import MultiPoint, Point
+from shapely.geometry import Point
 from geopy import distance
 
 
