@@ -2,7 +2,7 @@
 
 import pytest
 from math import sqrt
-from shapely.geometry import Point
+from shapely.geometry import MultiPoint, Point
 from movingpandas.geometry_utils import (
     azimuth,
     calculate_initial_compass_bearing,
@@ -72,8 +72,11 @@ class TestGeometryUtils:
 
     def test_mrr_diagonal(self):
         assert mrr_diagonal(
-            [Point(0, 0), Point(0, 2), Point(2, 0), Point(2, 2)]
+            MultiPoint([Point(0, 0), Point(0, 2), Point(2, 0), Point(2, 2)])
         ) == sqrt(8)
+
+    def test_mrr_diagonal_one_point(self):
+        assert mrr_diagonal(Point(2, 3)) == 0
 
     def test_euclidean_distance(self):
         assert (measure_distance_euclidean(Point(0, 0), Point(0, 1))) == 1

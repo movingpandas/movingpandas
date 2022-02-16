@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from geopandas import GeoDataFrame
+from shapely.geometry import MultiPoint
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .geometry_utils import mrr_diagonal
@@ -59,12 +60,13 @@ class TrajectoryStopDetector:
         detected_stops = []
         segment_geoms = []
         segment_times = []
+        geom = MultiPoint()
         is_stopped = False
         previously_stopped = False
-        geom_column_name = traj.get_geom_column_name()
 
-        for index, row in traj.df.iterrows():
-            segment_geoms.append(row[geom_column_name])
+        for index, data in traj.df[traj.get_geom_column_name()].iteritems():
+            segment_geoms.append(data)
+            geom = geom.union(data)
             segment_times.append(index)
 
             if not is_stopped:  # remove points to the specified min_duration
@@ -74,10 +76,12 @@ class TrajectoryStopDetector:
                 ):
                     segment_geoms.pop(0)
                     segment_times.pop(0)
+                # after removing extra points, re-generate geometry
+                geom = MultiPoint(segment_geoms)
 
             if (
                 len(segment_geoms) > 1
-                and mrr_diagonal(segment_geoms, traj.is_latlon) < max_diameter
+                and mrr_diagonal(geom, traj.is_latlon) < max_diameter
             ):
                 is_stopped = True
             else:
@@ -95,6 +99,7 @@ class TrajectoryStopDetector:
                         )
                         segment_geoms = []
                         segment_times = []
+                        geom = MultiPoint()
 
             previously_stopped = is_stopped
 
