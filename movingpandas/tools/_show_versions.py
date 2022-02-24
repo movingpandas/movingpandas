@@ -100,6 +100,7 @@ def _get_deps_info():
         "holoviews",
         "hvplot",
         "geoviews",
+        "stonesoup",
     ]
 
     def get_version(module):
