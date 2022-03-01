@@ -187,6 +187,12 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     tolerance : float
         Distance tolerance in trajectory CRS units
 
+    References
+    ----------
+    * Douglas, D., & Peucker, T. (1973). Algorithms for the reduction of the number
+      of points required to represent a digitized line or its caricature.
+      The Canadian Cartographer 10(2), 112–122. doi:10.3138/FM57-6770-U75U-7727.
+
     Examples
     --------
 
