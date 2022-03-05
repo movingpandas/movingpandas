@@ -11,7 +11,7 @@ conda:
 build:
   os: "ubuntu-20.04"
   tools:
-    python: "miniconda3-4.7"
+    python: "mambaforge-4.10"
   apt_packages:
     - libgeos-dev
     - libproj-dev
