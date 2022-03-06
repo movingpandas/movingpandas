@@ -12,5 +12,5 @@ python:
   - method: pip
     path: .
 conda:
-  environment: doc/environment.yml
+  environment: docs/environment.yml
 formats: []
