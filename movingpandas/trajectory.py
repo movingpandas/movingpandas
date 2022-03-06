@@ -758,6 +758,7 @@ class Trajectory:
         self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][
             DIRECTION_COL_NAME
         ]
+        self.df.drop(columns=["prev_pt"], inplace=True)
 
     def add_distance(self, overwrite=False):
         """
