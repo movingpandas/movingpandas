@@ -23,6 +23,7 @@ class TrajectoryGeneralizer:
         traj : Trajectory or TrajectoryCollection
         """
         self.traj = traj
+        self.traj_col_name = traj.get_geom_column_name()
 
     def generalize(self, tolerance):
         """
@@ -244,7 +245,8 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
-        return Trajectory(self.td_tr(traj.df.copy(), tolerance), traj.id)
+        generalized = self.td_tr(traj.df.copy(), tolerance)
+        return Trajectory(generalized, traj.id)
 
     def td_tr(self, df, tolerance):
         if len(df) <= 2:
@@ -254,13 +256,16 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
                 df.index.max().to_pydatetime() - df.index.min().to_pydatetime()
             ).total_seconds()
 
-            dx = df.geometry.iloc[-1].x - df.geometry.iloc[0].x
-            dy = df.geometry.iloc[-1].y - df.geometry.iloc[0].y
+            t0 = df.index.min().to_pydatetime()
+
+            pt0 = df[self.traj_col_name].iloc[0]
+            ptn = df[self.traj_col_name].iloc[-1]
+
+            dx = ptn.x - pt0.x
+            dy = ptn.y - pt0.y
 
             dists = df.apply(
-                lambda rec: self._dist_from_calced(
-                    rec, df.index.min().to_pydatetime(), df.geometry.iloc[0], de, dx, dy
-                ),
+                lambda rec: self._dist_from_calced(rec, t0, pt0, de, dx, dy),
                 axis=1,
             )
 
@@ -281,4 +286,4 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     def _dist_from_calced(self, rec, start_t, start_geom, de, dx, dy):
         di = (rec.name - start_t).total_seconds()
         calced = Point(start_geom.x + dx * di / de, start_geom.y + dy * di / de)
-        return rec.geometry.distance(calced)
+        return rec[self.traj_col_name].distance(calced)

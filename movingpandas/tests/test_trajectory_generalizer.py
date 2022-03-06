@@ -6,6 +6,7 @@ from shapely.geometry import Point
 from fiona.crs import from_epsg
 from datetime import datetime, timedelta
 from .test_trajectory import make_traj, Node
+from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.trajectory_generalizer import (
     MaxDistanceGeneralizer,
@@ -22,6 +23,19 @@ CRS_LATLON = from_epsg(4326)
 
 class TestTrajectoryGeneralizer:
     def setup_method(self):
+        self.nodes = [
+            Node(0, 0, day=1),
+            Node(1, 0.1, day=2),
+            Node(2, 0.2, day=3),
+            Node(3, 0, day=4),
+            Node(3, 3, day=5),
+        ]
+        self.traj = make_traj(self.nodes)
+        df = pd.DataFrame(
+            [{"xxx": n.geometry, "t": n.t} for n in self.nodes]
+        ).set_index("t")
+        geo_df = GeoDataFrame(df, geometry="xxx", crs=CRS_METRIC)
+        self.traj_other_geometry_column_names = Trajectory(geo_df, 1)
         df = pd.DataFrame(
             [
                 [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0), 9, "a"],
@@ -39,28 +53,18 @@ class TestTrajectoryGeneralizer:
         self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
 
     def test_douglas_peucker(self):
-        nodes = [
-            Node(0, 0, day=1),
-            Node(1, 0.1, day=2),
-            Node(2, 0.2, day=3),
-            Node(3, 0, day=4),
-            Node(3, 3, day=5),
-        ]
-        traj = make_traj(nodes)
-        result = DouglasPeuckerGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([nodes[0], nodes[3], nodes[4]])
+        result = DouglasPeuckerGeneralizer(self.traj).generalize(tolerance=1)
+        assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
+
+    def test_douglas_peucker_for_other_geometry_column_names(self):
+        result = DouglasPeuckerGeneralizer(
+            self.traj_other_geometry_column_names
+        ).generalize(tolerance=1)
+        assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
 
     def test_tdtr(self):
-        nodes = [
-            Node(0, 0, day=1),
-            Node(1, 0.1, day=2),
-            Node(2, 0.2, day=3),
-            Node(3, 0, day=4),
-            Node(3, 3, day=5),
-        ]
-        traj = make_traj(nodes)
-        result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([nodes[0], nodes[3], nodes[4]])
+        result = TopDownTimeRatioGeneralizer(self.traj).generalize(tolerance=1)
+        assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
 
     def test_tdtr_different_than_dp(self):
         nodes = [
@@ -75,17 +79,21 @@ class TestTrajectoryGeneralizer:
         result = TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([nodes[0], nodes[2], nodes[3], nodes[4], nodes[5]])
 
+    def test_tdtr_for_other_geometry_column_names(self):
+        result = TopDownTimeRatioGeneralizer(
+            self.traj_other_geometry_column_names
+        ).generalize(tolerance=1)
+        assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
+
     def test_max_distance(self):
-        nodes = [
-            Node(0, 0, day=1),
-            Node(1, 0.1, day=2),
-            Node(2, 0.2, day=3),
-            Node(3, 0, day=4),
-            Node(3, 3, day=5),
-        ]
-        traj = make_traj(nodes)
-        result = MaxDistanceGeneralizer(traj).generalize(tolerance=1)
-        assert result == make_traj([nodes[0], nodes[3], nodes[4]])
+        result = MaxDistanceGeneralizer(self.traj).generalize(tolerance=1)
+        assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
+
+    def test_max_distance_for_other_geometry_column_names(self):
+        result = MaxDistanceGeneralizer(
+            self.traj_other_geometry_column_names
+        ).generalize(tolerance=1)
+        assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
 
     def test_min_time_delta(self):
         nodes = [
