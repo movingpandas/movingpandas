@@ -256,6 +256,8 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
                 df.index.max().to_pydatetime() - df.index.min().to_pydatetime()
             ).total_seconds()
 
+            t0 = df.index.min().to_pydatetime()
+
             pt0 = df[self.traj_col_name].iloc[0]
             ptn = df[self.traj_col_name].iloc[-1]
 
@@ -263,9 +265,7 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
             dy = ptn.y - pt0.y
 
             dists = df.apply(
-                lambda rec: self._dist_from_calced(
-                    rec, df.index.min().to_pydatetime(), pt0, de, dx, dy,
-                ),
+                lambda rec: self._dist_from_calced(rec, t0, pt0, de, dx, dy),
                 axis=1,
             )
 
