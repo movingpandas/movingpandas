@@ -194,6 +194,16 @@ class TrajectoryCollection:
             if traj.id == traj_id:
                 return traj
 
+    def get_geom_column_name(self):
+        """
+        Return name of the geometry column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_geom_column_name()
+
     def get_locations_at(self, t):
         """
         Returns GeoDataFrame with trajectory locations at the specified timestamp
