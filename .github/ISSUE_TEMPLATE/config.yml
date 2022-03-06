@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: MovingPandas Q&A forum
+  - name: Questions & Discussions
     url: https://github.com/anitagraser/movingpandas/discussions
-    about: Please ask and answer questions here.
+    about: Please ask and answer questions in the MovingPandas Q&A forum.
