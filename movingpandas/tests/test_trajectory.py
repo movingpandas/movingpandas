@@ -265,6 +265,12 @@ class TestTrajectory:
         traj.add_direction()
         assert traj.df[DIRECTION_COL_NAME].tolist() == [90.0, 90.0, 180.0, 270]
 
+    def test_add_direction_only_adds_direction_col_and_doesnt_otherwise_alter_df(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.add_direction()
+        traj.df = traj.df.drop(columns=[DIRECTION_COL_NAME])
+        assert_frame_equal(self.default_traj_metric_5.df, traj.df)
+
     def test_add_direction_latlon(self):
         traj = make_traj([Node(0, 0), Node(10, 10, day=2)], CRS_LATLON)
         traj.add_direction()
