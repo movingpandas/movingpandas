@@ -117,11 +117,12 @@ class KalmanSmootherCV(TrajectorySmoother):
 
             Alternatively, a single float can be provided, which is assumed to be the
             same for both coordinates.
-            
+
             This governs the uncertainty associated with the adherence of the new
             (smooth) trajectories to the CV model assumption; higher values relax
-            the assumption, therefore leading to less-smooth trajectories, and vice-versa.
-            
+            the assumption, therefore leading to less-smooth trajectories,
+            and vice-versa.
+
         measurement_noise_std: float or sequence of floats of length 2, default is 1.
             The measurement noise standard deviation.
 
@@ -132,7 +133,7 @@ class KalmanSmootherCV(TrajectorySmoother):
 
             Alternatively, a single float can be provided, which is assumed to be the
             same for both coordinates.
-            
+
             This controls the assumed error in the original trajectories; higher values
             dictate that the original trajectories are expected to be noisier
             (and therefore, less reliable), thus leading to smoother trajectories,
