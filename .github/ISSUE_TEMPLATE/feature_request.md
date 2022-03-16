@@ -9,7 +9,7 @@ labels: "enhancement"
 
 #### Is your feature request related to a problem?
 
-[this should provide a description of what the problem is, e.g. "I wish I could use geopandas to do [...]"]
+[this should provide a description of what the problem is, e.g. "I wish I could use movingpandas to do [...]"]
 
 #### Describe the solution you'd like
 
