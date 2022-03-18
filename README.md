@@ -146,6 +146,8 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [1] [Graser, A. & Dragaschnig, M. (2020). Exploring movement data in notebook environments. Presented at MoVIS 2020, IEEE VIS 2020.](http://move.geog.ucsb.edu/wp-content/uploads/2020/10/MoVIS20_paper_4.pdf)
 
+[2] [Graser, A. (2021). Exploratory Movement Data Analysis. GeoPython 2021. – 🎬 video](https://vimeo.com/539472075/bfa7347707)
+
 ### Scientific Publications Referencing MovingPandas
 
 * [Pappalardo, L., Simini, F., Barlacchi, G., & Pellungrini, R. (2019). scikit-mobility: A Python library for the analysis, generation and risk assessment of mobility data. arXiv preprint arXiv:1907.07062.](https://arxiv.org/abs/1907.07062)
