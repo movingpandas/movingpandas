@@ -298,7 +298,23 @@ class Trajectory:
         -------
         string
         """
-        return DISTANCE_COL_NAME
+        if hasattr(self, "distance_col_name"):
+            return self.distance_col_name
+        else:
+            return DISTANCE_COL_NAME
+
+    def get_direction_column_name(self):
+        """
+        Return name of the direction column
+
+        Returns
+        -------
+        string
+        """
+        if hasattr(self, "direction_col_name"):
+            return self.direction_col_name
+        else:
+            return DIRECTION_COL_NAME
 
     def get_geom_column_name(self):
         """
@@ -736,7 +752,7 @@ class Trajectory:
             )
         self.df[TRAJ_ID_COL_NAME] = self.id
 
-    def add_direction(self, overwrite=False):
+    def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME):
         """
         Add direction column and values to the trajectory's DataFrame.
 
@@ -748,19 +764,20 @@ class Trajectory:
         overwrite : bool
             Whether to overwrite existing direction values (default: False)
         """
-        if DIRECTION_COL_NAME in self.df.columns and not overwrite:
+        self.direction_col_name = name
+        if self.direction_col_name in self.df.columns and not overwrite:
             raise RuntimeError(
-                "Trajectory already has direction values! "
-                "Use overwrite=True to overwrite exiting values."
+                f"Trajectory already has a column named {self.direction_col_name}! "
+                "Use overwrite=True to overwrite exiting values or update the "
+                "name arg."
             )
         self._add_prev_pt()
-        self.df[DIRECTION_COL_NAME] = self.df.apply(self._compute_heading, axis=1)
-        self.df.at[self.get_start_time(), DIRECTION_COL_NAME] = self.df.iloc[1][
-            DIRECTION_COL_NAME
-        ]
+        self.df[name] = self.df.apply(self._compute_heading, axis=1)
+        # set the direction in the first row to the direction of the second row
+        self.df.at[self.get_start_time(), name] = self.df.iloc[1][name]
         self.df.drop(columns=["prev_pt"], inplace=True)
 
-    def add_distance(self, overwrite=False):
+    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME):
         """
         Add distance column and values to the trajectory's DataFrame.
 
@@ -772,12 +789,14 @@ class Trajectory:
         overwrite : bool
             Whether to overwrite existing distance values (default: False)
         """
-        if DISTANCE_COL_NAME in self.df.columns and not overwrite:
+        self.distance_col_name = name
+        if self.distance_col_name in self.df.columns and not overwrite:
             raise RuntimeError(
-                "Trajectory already has distance values! "
-                "Use overwrite=True to overwrite exiting values."
+                f"Trajectory already has a column named {self.distance_col_name}! "
+                "Use overwrite=True to overwrite exiting values or update the "
+                "name arg."
             )
-        self.df = self._get_df_with_distance()
+        self.df = self._get_df_with_distance(name)
 
     def add_speed(self, overwrite=False, name=SPEED_COL_NAME):
         """
@@ -803,15 +822,15 @@ class Trajectory:
             )
         self.df = self._get_df_with_speed(name)
 
-    def _get_df_with_distance(self):
+    def _get_df_with_distance(self, name):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[DISTANCE_COL_NAME] = temp_df.apply(self._compute_distance, axis=1)
+            temp_df[name] = temp_df.apply(self._compute_distance, axis=1)
         except ValueError as e:
             raise e
         # set the distance in the first row to zero
-        temp_df.at[self.get_start_time(), DISTANCE_COL_NAME] = 0
+        temp_df.at[self.get_start_time(), name] = 0
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 

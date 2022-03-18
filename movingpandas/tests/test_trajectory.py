@@ -265,6 +265,20 @@ class TestTrajectory:
         traj.add_direction()
         assert traj.df[DIRECTION_COL_NAME].tolist() == [90.0, 90.0, 180.0, 270]
 
+    def test_add_direction_with_name(self):
+        traj = make_traj(
+            [Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)]
+        )
+        traj.add_direction(name="direction2")
+        assert "direction2" in traj.df.columns
+
+    def test_add_direction_doesnt_change_existing_direction(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.df[DIRECTION_COL_NAME] = [0, 90, 180, 270, 0]
+        traj.add_direction(name="direction2")
+        assert list(traj.df[DIRECTION_COL_NAME]) == [0, 90, 180, 270, 0]
+        assert_frame_not_equal(traj.df[DIRECTION_COL_NAME], traj.df["direction2"])
+
     def test_add_direction_only_adds_direction_col_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
         traj.add_direction()
@@ -375,6 +389,17 @@ class TestTrajectory:
         traj.add_distance()
         with pytest.raises(RuntimeError):
             traj.add_distance()
+
+    def test_add_distance_with_name(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance(name="distance2")
+        assert "distance2" in traj.df.columns
+
+    def test_add_distance_doesnt_change_existing_distance(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.df["distance"] = [1, 2, 3, 4, 5]
+        traj.add_distance(name="distance2")
+        assert_frame_not_equal(traj.df[DISTANCE_COL_NAME], traj.df["distance2"])
 
     def test_add_distance_only_adds_distance_column_and_doesnt_otherwise_alter_df(self):
         traj = self.default_traj_metric_5.copy()
