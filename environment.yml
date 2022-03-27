@@ -7,11 +7,12 @@ dependencies:
   - cartopy
   - codecov
   - cython
-  - hvplot
   - flake8
   - geopandas
   - geoviews
   - geopy
+  - hvplot
+  - jinja2<3.1
   - matplotlib
   - numpy
   - pandas
