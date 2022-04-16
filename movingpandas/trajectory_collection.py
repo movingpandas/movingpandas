@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pandas as pd
+from pandas import concat
 from copy import copy
 from geopandas import GeoDataFrame
 from .trajectory import Trajectory
@@ -121,7 +121,7 @@ class TrajectoryCollection:
         GeoDataFrame
         """
         gdfs = [traj.to_point_gdf() for traj in self.trajectories]
-        return pd.concat(gdfs)
+        return concat(gdfs)
 
     def to_line_gdf(self):
         """
@@ -132,7 +132,7 @@ class TrajectoryCollection:
         GeoDataFrame
         """
         gdfs = [traj.to_line_gdf() for traj in self.trajectories]
-        gdf = pd.concat(gdfs)
+        gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
 
@@ -146,7 +146,7 @@ class TrajectoryCollection:
         GeoDataFrame
         """
         gdfs = [traj.to_traj_gdf(wkt) for traj in self.trajectories]
-        gdf = pd.concat(gdfs)
+        gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
 

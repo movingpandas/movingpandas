@@ -47,11 +47,11 @@ class Trajectory:
         parent=None,
     ):
         """
-        Create Trajectory from GeoDataFrame.
+        Create Trajectory from GeoDataFrame or DataFrame.
 
         Parameters
         ----------
-        df : GeoDataFrame
+        df : GeoDataFrame or DataFrame
             GeoDataFrame with point geometry column and timestamp index
         traj_id : any
             Trajectory ID

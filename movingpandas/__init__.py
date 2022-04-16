@@ -13,6 +13,7 @@ from .trajectory_generalizer import (  # noqa F401
     TopDownTimeRatioGeneralizer,
 )
 from .trajectory_collection import TrajectoryCollection  # noqa F401
+from .io import read_mf_json  # noqa F401
 from .trajectory_aggregator import TrajectoryCollectionAggregator  # noqa F401
 from .trajectory_splitter import (  # noqa F401
     TrajectorySplitter,
