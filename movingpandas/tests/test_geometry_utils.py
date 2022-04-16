@@ -93,7 +93,7 @@ class TestGeometryUtils:
             measure_distance_geodesic(
                 Point(-74.00597, 40.71427), Point(-118.24368, 34.05223)
             )
-            == 3944411.0951634306
+            == pytest.approx(3944411)
         )
 
     def test_measure_distance_euclidean_throws_type_error(self):
