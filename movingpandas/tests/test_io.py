@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
+import os
 import pytest
 from movingpandas.io import read_mf_json, _create_objects_from_mf_json_dict
 
 
 class TestIO:
+    test_dir = os.path.dirname(os.path.realpath(__file__))
+
     def test_mf_file(self):
-        traj = read_mf_json("movingfeatures.json", "id")
+        traj = read_mf_json(os.path.join(self.test_dir, "movingfeatures.json"), "id")
         assert traj.id == "9569"
         assert traj.size() == 5
 
     def test_wrong_property_raises_error(self):
         with pytest.raises(ValueError):
-            read_mf_json("movingfeatures.json", "wrong id property")
+            read_mf_json(os.path.join(self.test_dir, "movingfeatures.json"), "foo")
 
     def test_dict(self):
         data = {
