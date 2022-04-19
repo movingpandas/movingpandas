@@ -1,5 +1,6 @@
 # MovingPandas
 
+[![pypi](https://img.shields.io/pypi/v/movingpandas.svg)](https://pypi.python.org/pypi/movingpandas/)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Tests](https://github.com/anitagraser/movingpandas/actions/workflows/tests.yaml/badge.svg)](https://github.com/anitagraser/movingpandas/actions/workflows/tests.yaml)
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=master)](https://movingpandas.readthedocs.io/en/master/)
