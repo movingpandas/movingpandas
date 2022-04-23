@@ -1,12 +1,32 @@
 {
-  "type" : "MovingFeature",
+  "type" : "Feature",
   "properties" : {
     "id" : "9569"
   },
   "temporalGeometry" : {
     "type" : "MovingPoint",
-    "datetimes" : [ "2008-02-02T15:02:18Z", "2008-02-02T18:32:28Z", "2008-02-02T18:33:28Z", "2008-02-02T18:34:29Z", "2008-02-02T18:35:15Z" ],
-    "coordinates" : [ [ 116.52299, 40.07757 ], [ 116.52302, 39.92129 ], [ 116.52276, 39.92101 ], [ 116.52289, 39.92071 ], [ 116.52236, 39.92079 ]],
-    "interpolations" : [ "Linear" ]
-  }
+    "coordinates" : [ [ 111.9, 7.6 ], [ 111.3, 7.3 ], [ 111.1, 7.0 ], [ 110.7, 6.6 ], [ 110.2, 6.3 ] ],
+    "datetimes" : [ "2018-12-31T06:00:00Z", "2018-12-31T12:00:00Z", "2018-12-31T18:00:00Z", "2019-01-01T00:00:00Z", "2019-01-01T06:00:00Z" ],
+    "interpolation" : "Linear"
+  },
+  "temporalProperties" : [ {
+    "datetimes" : [ "2018-12-31T06:00:00Z", "2018-12-31T12:00:00Z", "2018-12-31T18:00:00Z", "2019-01-01T00:00:00Z", "2019-01-01T06:00:00Z" ],
+    "pressure" : {
+      "type" : "Measure",
+      "values" : [ 1004.0, 1004.0, 1004.0, 1004.0, 1000.0 ],
+      "form" : "A97",
+      "interpolation" : "Linear"
+    },
+    "wind" : {
+      "type" : "Measure",
+      "values" : [ 0.0, 0.0, 0.0, 0.0, 35.0 ],
+      "form" : "KNT",
+      "interpolation" : "Linear"
+    },
+    "class" : {
+      "type" : "Measure",
+      "values" : [ 2.0, 2.0, 2.0, 2.0, 3.0 ],
+      "interpolation" : "Linear"
+    }
+  } ]
 }
