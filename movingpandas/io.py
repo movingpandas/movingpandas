@@ -73,8 +73,8 @@ def _get_temporal_properties(data):
     cols = []
     props = []
     for key, values in data.items():
-        if key == 'datetimes':
-            cols.append('t')
+        if key == "datetimes":
+            cols.append("t")
             props.append(values)
         else:
             cols.append(key)

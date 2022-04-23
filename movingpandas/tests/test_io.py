@@ -13,10 +13,10 @@ class TestIO:
         assert traj.id == "9569"
         assert traj.size() == 5
         actual = traj.df.columns
-        expected = ['pressure', 'wind', 'class', 'geometry']
+        expected = ["pressure", "wind", "class", "geometry"]
         assert len(actual) == len(expected)
         assert all([a == b for a, b in zip(actual, expected)])
-        actual = list(traj.df['pressure'])
+        actual = list(traj.df["pressure"])
         expected = [1004.0, 1004.0, 1004.0, 1004.0, 1000.0]
         assert actual == expected
 
