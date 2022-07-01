@@ -33,7 +33,9 @@ class TestTrajectoryCollection:
         ).set_index("t")
         self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
-        self.geo_df_latlon = GeoDataFrame(df, crs=CRS_LATLON)
+        self.geo_df_latlon = GeoDataFrame(df).set_crs(
+            crs=CRS_LATLON, allow_override=True
+        )
         self.collection_latlon = TrajectoryCollection(
             self.geo_df_latlon, "id", obj_id_col="obj"
         )
