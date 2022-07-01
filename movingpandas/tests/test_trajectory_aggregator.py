@@ -138,7 +138,7 @@ class TestTrajectoryCollectionAggregator:
                 columns=["geometry", "weight"],
             )
         )
-        self.geo_df_latlon = GeoDataFrame(df, crs=CRS_LATLON)
+        self.geo_df_latlon = GeoDataFrame(df).set_crs(CRS_LATLON, allow_override=True)
         self.geo_df_latlon.crs = CRS_LATLON  # try to fix
         # https://travis-ci.com/github/anitagraser/movingpandas/builds/177149345
         self.collection_latlon = TrajectoryCollection(

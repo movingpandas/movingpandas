@@ -142,6 +142,7 @@ def _get_segments_for_ranges(traj, ranges):
             continue
         segment.id = "{}_{}".format(traj.id, counter)
         segment.parent = traj
+        segment.crs = traj.crs
         segments.append(segment)
         counter += 1
     return segments

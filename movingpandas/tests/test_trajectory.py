@@ -63,7 +63,9 @@ class TestPoint(Point):
 def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None):
     nodes = [node.to_dict() for node in nodes]
     df = pd.DataFrame(nodes).set_index("t")
-    gdf = GeoDataFrame(df, crs=crs)
+    gdf = GeoDataFrame(df)
+    if crs:
+        gdf = gdf.set_crs(crs=crs, allow_override=True)
     return Trajectory(gdf, id, parent=parent)
 
 

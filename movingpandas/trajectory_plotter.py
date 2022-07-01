@@ -48,6 +48,8 @@ class _TrajectoryPlotter:
         line_gdf = line_gdf.rename(columns={"line": "geometry"}).set_geometry(
             "geometry"
         )
+        if traj.crs:
+            line_gdf = line_gdf.set_crs(traj.crs, allow_override=True)
         return line_gdf
 
     def _plot_trajectory(self, traj):
