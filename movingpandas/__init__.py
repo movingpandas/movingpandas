@@ -29,8 +29,8 @@ from .tools._show_versions import show_versions  # noqa F401
 
 try:
     from .trajectory_smoother import KalmanSmootherCV  # noqa F401
-except ImportError as e:
-    print(f"INFO: {e}")
+except ImportError:
+    pass
 
 name = "movingpandas"
 __version__ = "0.10.rc1"
