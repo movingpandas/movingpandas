@@ -2,7 +2,7 @@
 
 name: Bug Report
 about: Create a bug report to help us improve MovingPandas
-title: "BUG:"
+title: ""
 labels: "bug, needs triage"
 
 ---
