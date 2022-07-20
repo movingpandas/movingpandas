@@ -28,6 +28,7 @@ TRAJ_ID_COL_NAME = "traj_id"
 SPEED_COL_NAME = "speed"
 DIRECTION_COL_NAME = "direction"
 DISTANCE_COL_NAME = "distance"
+TIMEDELTA_COL_NAME = "timedelta"
 
 
 class MissingCRSWarning(UserWarning, ValueError):
@@ -315,6 +316,19 @@ class Trajectory:
             return self.direction_col_name
         else:
             return DIRECTION_COL_NAME
+
+    def get_timedelta_column_name(self):
+        """
+        Return name of the timedelta column
+
+        Returns
+        -------
+        string
+        """
+        if hasattr(self, "timedelta_col_name"):
+            return self.timedelta_col_name
+        else:
+            return TIMEDELTA_COL_NAME
 
     def get_geom_column_name(self):
         """
@@ -697,6 +711,23 @@ class Trajectory:
         else:
             return azimuth(pt0, pt1)
 
+    def get_sampling_interval(self):
+        """
+        Return the sampling interval of the trajectory.
+
+        The sampling interval is computed as the median time difference between
+        consecutive rows in the trajectory's DataFrame.
+
+        Returns
+        -------
+        datetime.timedelta
+            Sampling interval
+        """
+        if hasattr(self, "timedelta_col_name"):
+            if self.timedelta_col_name in self.df.columns:
+                return self.df[self.timedelta_col_name].median()
+        return self._get_df_with_timedelta()[TIMEDELTA_COL_NAME].median()
+
     def _compute_heading(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
@@ -822,7 +853,38 @@ class Trajectory:
             )
         self.df = self._get_df_with_speed(name)
 
-    def _get_df_with_distance(self, name):
+    def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
+        """
+        Add timedelta column and values to the trajectory's DataFrame.
+
+        Timedelta is calculated as the time difference between the current
+        and the previous row. Values are instances of datetime.timedelta.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing timedelta values (default: False)
+        name : str
+            Name of the timedelta column (default: "timedelta")
+        """
+        self.timedelta_col_name = name
+        if self.timedelta_col_name in self.df.columns and not overwrite:
+            raise RuntimeError(
+                f"Trajectory already has a column named {self.timedelta_col_name}! "
+                f"Use overwrite=True to overwrite exiting values or update the "
+                f"name arg."
+            )
+        self.df = self._get_df_with_timedelta(name)
+
+    def _get_df_with_timedelta(self, name=TIMEDELTA_COL_NAME):
+        temp_df = self.df.copy()
+        temp_df["t"] = temp_df.index
+        times = temp_df.t
+        temp_df.drop(columns=["t"], inplace=True)
+        temp_df[name] = times.diff().values
+        return temp_df
+
+    def _get_df_with_distance(self, name=DISTANCE_COL_NAME):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
@@ -834,13 +896,9 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
-    def _get_df_with_speed(self, name):
-        temp_df = self.df.copy()
+    def _get_df_with_speed(self, name=SPEED_COL_NAME):
+        temp_df = self._get_df_with_timedelta("delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
-        temp_df["t"] = temp_df.index
-        times = temp_df.t
-        temp_df = temp_df.drop(columns=["t"])
-        temp_df = temp_df.assign(delta_t=times.diff().values)
         try:
             temp_df[name] = temp_df.apply(self._compute_speed, axis=1)
         except ValueError as e:

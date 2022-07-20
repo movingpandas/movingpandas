@@ -12,6 +12,7 @@ from movingpandas.trajectory import (
     DIRECTION_COL_NAME,
     SPEED_COL_NAME,
     DISTANCE_COL_NAME,
+    TIMEDELTA_COL_NAME,
     TRAJ_ID_COL_NAME,
     MissingCRSWarning,
 )
@@ -429,6 +430,27 @@ class TestTrajectory:
         traj.add_distance()
         traj.add_distance(overwrite=True)
 
+    def test_add_timedelta(self):
+        traj = self.default_traj_metric.copy()
+        traj.add_timedelta()
+        deltas = traj.df[TIMEDELTA_COL_NAME].tolist()
+        assert pd.isnull(deltas[0])
+        assert deltas[1:3] == [timedelta(seconds=10)]*2
+
+    def test_add_timedelta_overwrite_raises_error(self):
+        traj = self.default_traj_metric.copy()
+        traj.add_timedelta()
+        with pytest.raises(RuntimeError):
+            traj.add_timedelta()
+
+    def test_add_timedelta_can_overwrite(self):
+        traj = self.default_traj_metric.copy()
+        traj.add_timedelta()
+        traj.add_timedelta(overwrite=True)
+        deltas = traj.df[TIMEDELTA_COL_NAME].tolist()
+        assert pd.isnull(deltas[0])
+        assert deltas[1:3] == [timedelta(seconds=10)]*2
+
     def test_get_bbox(self):
         result = make_traj([Node(0, 1), Node(6, 5, day=2)], CRS_LATLON).get_bbox()
         assert result == (0, 1, 6, 5)  # (minx, miny, maxx, maxy)
@@ -448,6 +470,16 @@ class TestTrajectory:
             [Node(0, 0), Node(-6, 10, day=1), Node(6, 6, day=2)]
         ).get_direction()
         assert result == pytest.approx(45, 1)
+
+    def test_get_sampling_interval(self):
+        result = self.default_traj_metric.get_sampling_interval()
+        assert result == timedelta(seconds=10)
+
+    def test_get_sampling_interval_irregular(self):
+        result = make_traj(
+            [Node(), Node(1, 0, minute=1), Node(2, 0, minute=4)]
+        ).get_sampling_interval()
+        assert result == timedelta(minutes=2)
 
     def test_offset_seconds(self):
         traj = self.default_traj_metric_5
