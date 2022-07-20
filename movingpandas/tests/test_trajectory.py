@@ -435,7 +435,7 @@ class TestTrajectory:
         traj.add_timedelta()
         deltas = traj.df[TIMEDELTA_COL_NAME].tolist()
         assert pd.isnull(deltas[0])
-        assert deltas[1:3] == [timedelta(seconds=10)]*2
+        assert deltas[1:3] == [timedelta(seconds=10)] * 2
 
     def test_add_timedelta_overwrite_raises_error(self):
         traj = self.default_traj_metric.copy()
@@ -449,7 +449,7 @@ class TestTrajectory:
         traj.add_timedelta(overwrite=True)
         deltas = traj.df[TIMEDELTA_COL_NAME].tolist()
         assert pd.isnull(deltas[0])
-        assert deltas[1:3] == [timedelta(seconds=10)]*2
+        assert deltas[1:3] == [timedelta(seconds=10)] * 2
 
     def test_get_bbox(self):
         result = make_traj([Node(0, 1), Node(6, 5, day=2)], CRS_LATLON).get_bbox()

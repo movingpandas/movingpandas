@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from geopandas import GeoDataFrame
-from shapely.geometry import MultiPoint
+from shapely.geometry import MultiPoint, Point
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .geometry_utils import mrr_diagonal
@@ -174,7 +174,8 @@ class TrajectoryStopDetector:
         for stop in stops:
             stop_pts.at[stop.id, "start_time"] = stop.get_start_time()
             stop_pts.at[stop.id, "end_time"] = stop.get_end_time()
-            stop_pts.at[stop.id, "geometry"] = stop.get_start_location()
+            pt = Point(stop.df.geometry.x.median(), stop.df.geometry.y.median())
+            stop_pts.at[stop.id, "geometry"] = pt
             stop_pts.at[stop.id, "traj_id"] = stop.parent.id
 
         if len(stops) > 0:

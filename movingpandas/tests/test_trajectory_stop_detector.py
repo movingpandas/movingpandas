@@ -55,7 +55,7 @@ class TestTrajectorySplitter:
         )
         assert len(stop_points) == 1
         assert stop_points.iloc[0].geometry.x == 0
-        assert stop_points.iloc[0].geometry.y == 20
+        assert stop_points.iloc[0].geometry.y == 21
         assert stop_points.iloc[0].start_time == datetime(1970, 1, 1, 0, 0, 2)
         assert stop_points.iloc[0].end_time == datetime(1970, 1, 1, 0, 0, 6)
         assert stop_points.iloc[0].duration_s == 4
