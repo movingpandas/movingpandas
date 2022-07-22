@@ -165,11 +165,11 @@ class TrajectoryCollection:
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:
                     continue
-            if (
-                trajectory.get_length() < self.min_length
-                or trajectory.df.geometry.count() < 2
-            ):
+            if trajectory.df.geometry.count() < 2:
                 continue
+            if self.min_length > 0:
+                if trajectory.get_length() < self.min_length:
+                    continue
             if isinstance(df, GeoDataFrame):
                 trajectory.crs = df.crs
             else:
