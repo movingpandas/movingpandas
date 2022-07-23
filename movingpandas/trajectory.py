@@ -8,6 +8,7 @@ from datetime import datetime
 from pandas import DataFrame, to_datetime
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
+from geopy.distance import geodesic
 
 try:
     from pyproj import CRS
@@ -685,11 +686,11 @@ class Trajectory:
         float
             Length of the trajectory
         """
-        temp_df = self.df.assign(prev_pt=self.df.geometry.shift())
-        temp_df = temp_df.assign(
-            dist_to_prev=temp_df.apply(self._compute_distance, axis=1)
-        )
-        return temp_df["dist_to_prev"].sum()
+        pt_tuples = [(pt.y, pt.x) for pt in self.df.geometry.tolist()]
+        if self.is_latlon:
+            return geodesic(*pt_tuples).m
+        else:  # The following distance will be in CRS units that might not be meters!
+            return LineString(pt_tuples).length
 
     def get_direction(self):
         """
