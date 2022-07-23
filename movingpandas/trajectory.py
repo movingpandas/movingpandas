@@ -450,7 +450,7 @@ class Trajectory:
         tuple
             Bounding box values (minx, miny, maxx, maxy)
         """
-        return self.to_linestring().bounds  # (minx, miny, maxx, maxy)
+        return tuple(self.df.total_bounds.tolist())  # (minx, miny, maxx, maxy)
 
     def get_start_time(self):
         """
