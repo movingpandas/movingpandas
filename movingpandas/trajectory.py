@@ -942,6 +942,12 @@ class Trajectory:
         float
             Hausdorff distance
         """
+        if self.is_latlon:
+            message = (
+                f"Hausdorff distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
         if type(other) == Trajectory:
             other = other.to_linestring()
         return self.to_linestring().hausdorff_distance(other)

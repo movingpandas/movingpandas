@@ -727,6 +727,11 @@ class TestTrajectory:
         traj2 = make_traj([Node(2, 0, day=1), Node(2, 4, day=2), Node(3, 4, day=3)])
         assert traj.hausdorff_distance(traj2) == sqrt(4 + 1)
 
+    def test_hausdorff_distance_warning(self):
+        with pytest.warns(UserWarning):
+            point = Point(0, 0)
+            self.default_traj_latlon.hausdorff_distance(point)
+
     """
     This test should work but fails in my PyCharm probably due to
     https://github.com/pyproj4/pyproj/issues/134
