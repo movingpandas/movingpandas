@@ -924,6 +924,31 @@ class Trajectory:
         """
         return intersects(self, polygon)
 
+    def distance(self, other):
+        """
+        Return the minimum distance to the other geometric object (based on shapely
+        https://shapely.readthedocs.io/en/stable/manual.html#object.distance).
+
+        Parameters
+        ----------
+        other : shapely.geometry or Trajectory
+            Other geometric object or trajectory
+
+        Returns
+        -------
+        float
+            Distance
+        """
+        if self.is_latlon:
+            message = (
+                f"Distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        if type(other) == Trajectory:
+            other = other.to_linestring()
+        return self.to_linestring().distance(other)
+
     def hausdorff_distance(self, other):
         """
         Return the Hausdorff distance to the other geometric object (based on shapely
