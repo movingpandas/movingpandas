@@ -915,7 +915,7 @@ class Trajectory:
 
         Parameters
         ----------
-        polygon : shapely Polygon
+        polygon : shapely.geometry.Polygon
             Polygon to test for intersections
 
         Returns
@@ -923,6 +923,28 @@ class Trajectory:
         bool
         """
         return intersects(self, polygon)
+
+    def hausdorff_distance(self, other):
+        """
+        Return the Hausdorff distance to the other geometric object (based on shapely
+        https://shapely.readthedocs.io/en/stable/manual.html#object.hausdorff_distance).
+        The Hausdorff distance between two geometries is the furthest distance
+        that a point on either geometry can be from the nearest point to it on
+        the other geometry.
+
+        Parameters
+        ----------
+        other : shapely.geometry or Trajectory
+            Other geometric object or trajectory
+
+        Returns
+        -------
+        float
+            Hausdorff distance
+        """
+        if type(other) == Trajectory:
+            other = other.to_linestring()
+        return self.to_linestring().hausdorff_distance(other)
 
     def clip(self, polygon, point_based=False):
         """

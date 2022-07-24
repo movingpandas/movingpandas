@@ -716,6 +716,17 @@ class TestTrajectory:
         mcp = traj.get_mcp()
         assert mcp.wkt == "LINESTRING (0 0, 6 0)"
 
+    def test_hausdorff_distance(self):
+        from math import sqrt
+
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
+        point = Point(0, 0)
+        assert traj.hausdorff_distance(point) == sqrt(4 + 4)
+        line = LineString([(2, 0), (2, 4), (3, 4)])
+        assert traj.hausdorff_distance(line) == sqrt(4 + 1)
+        traj2 = make_traj([Node(2, 0, day=1), Node(2, 4, day=2), Node(3, 4, day=3)])
+        assert traj.hausdorff_distance(traj2) == sqrt(4 + 1)
+
     """
     This test should work but fails in my PyCharm probably due to
     https://github.com/pyproj4/pyproj/issues/134
