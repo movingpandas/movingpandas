@@ -24,27 +24,41 @@ You can run **[MovingPandas examples](https://github.com/anitagraser/movingpanda
 
 To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/anitagraser/movingpandas/master?filepath=tutorials/1-getting-started.ipynb).
 
+
 ## Documentation
 
 The official documentation is hosted on **[ReadTheDocs](https://movingpandas.readthedocs.io)**
 
+
 ## Examples
 
-### Trajectory plots
+### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/View-Jupyter%20Notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/1-getting-started.ipynb)
+
+Create interactive trajectory plots, including multiple linked plots with ease
 
 ![movingpandas_animated](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
-### Stop detection
+
+### Stop detection  [![View Jupyter Notebook](https://img.shields.io/badge/View-Jupyter%20Notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/8-detecting-stops.ipynb)
+
+Detect stops in trajectories, extract them as points or segments, and use them to split trajectories
 
 ![movingpandas_stop_detection](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
 
-### Trajectory generalization
+
+### Trajectory generalization  [![View Jupyter Notebook](https://img.shields.io/badge/View-Jupyter%20Notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/7-generalizing-trajectories.ipynb)
+
+Generalize trajectories using spatial, temporal, and spatiotemporal methods
 
 ![movingpandas_generalize](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
 
-### Trajectory aggregation
+
+### Trajectory aggregation [![View Jupyter Notebook](https://img.shields.io/badge/View-Jupyter%20Notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/9-aggregating-trajectories.ipynb)
+
+Aggregate trajectories to explore larger patterns
 
 ![movingpandas_ais](https://user-images.githubusercontent.com/590385/137953890-d43c7fe5-5aea-4e29-8ce1-f0d529c3220f.png)
+
 
 ## Installation
 
@@ -62,9 +76,11 @@ If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot b
 (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/getting_started/install.html)).
 On Ubuntu, pip install fails on cartopy with "Proj 4.9.0 must be installed".
 
-## Development Installation 
+
+## Development installation 
 
 Use the following steps to run the notebooks using the current development version:
+
 
 ### Using conda
 
@@ -85,6 +101,7 @@ conda env create -f environment.yml
 
 *On Windows, because conda-forge relies on some package built with defaults blas (like scipy) one must use the defaults channel on top of conda-forge and activate conda's new strict channel feature.* Source: https://github.com/conda-forge/gdal-feedstock/issues/269#issuecomment-473661530
 
+
 ### Using Anaconda
 
 1. Install Anaconda
@@ -101,6 +118,7 @@ Known issues:
 
 * On Windows, importing rasterio can lead to DLL errors. If this happens, downgrade the rasterio version to 1.0.13.
 
+
 ### Develop mode
 
 To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use: 
@@ -109,13 +127,15 @@ To install MovingPandas in ["develop" or "editable" mode](https://python-packagi
 python setup.py develop
 ```
 
+
 ## Contributing to MovingPandas [![GitHub contributors](https://img.shields.io/github/contributors/anitagraser/movingpandas.svg)](https://github.com/anitagraser/movingpandas/graphs/contributors)
 
 All contributions, bug reports, bug fixes, documentation improvements, enhancements and ideas are welcome.
 
 A detailed overview on how to contribute can be found in the [contributing guide](https://github.com/anitagraser/movingpandas/blob/master/CONTRIBUTING.md) on GitHub.
 
-## Related Python Packages
+
+## Related Python packages
 
 **For a more comprehensive list, including non-Python solutions, check https://github.com/anitagraser/movement-analysis-tools**
 
@@ -139,6 +159,7 @@ It implements PandasMoveDataFrames and DaskMoveDataFrame on top of Pandas and Da
 
 Please cite [[0]](#publications) when using MovingPandas in your research and reference the appropriate release version. All releases of MovingPandas are listed on [Zenodo](https://doi.org/10.5281/zenodo.3710950) where you will find citation information, including DOIs.  
 
+
 ## Publications
 
 ### About MovingPandas
@@ -149,7 +170,10 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [2] [Graser, A. (2021). Exploratory Movement Data Analysis. GeoPython 2021. – 🎬 video](https://vimeo.com/539472075/bfa7347707)
 
-### Scientific Publications Referencing MovingPandas
+
+### Scientific publications referencing MovingPandas
+
+The following publications use MovingPandas:
 
 * [Pappalardo, L., Simini, F., Barlacchi, G., & Pellungrini, R. (2019). scikit-mobility: A Python library for the analysis, generation and risk assessment of mobility data. arXiv preprint arXiv:1907.07062.](https://arxiv.org/abs/1907.07062)
 * [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y)
@@ -160,11 +184,13 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
-### Teaching Material Referencing MovingPandas
+
+### Teaching materials referencing MovingPandas
 
 * [Aalto University. Spatial data science for sustainable development course](https://sustainability-gis.readthedocs.io/en/latest/lessons/L3/mobility-analytics.html)
 
-### Workshop Videos
+
+### Workshop videos
 
 * [Graser, A. (2019). Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school, Münster, Germany.](http://www.youtube.com/watch?v=qeLQfnpJV1g)
 
