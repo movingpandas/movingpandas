@@ -171,16 +171,17 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 [2] [Graser, A. (2021). Exploratory Movement Data Analysis. GeoPython 2021. – 🎬 video](https://vimeo.com/539472075/bfa7347707)
 
 
-### Scientific publications referencing MovingPandas
+### Scientific publications using MovingPandas
 
-The following publications use MovingPandas:
+* [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y) - *"For example, Fig. 4 shows how MovingPandas can be used to split a trajectory into subtrajectories and plot the results."*
+* [Kirkland, L. A., de Waal, A., & de Villiers, J. P. (2020). Evaluation of a Pure-Strategy Stackelberg Game for Wildlife Security in a Geospatial Framework. In Southern African Conference for Artificial Intelligence Research (pp. 101-118). Springer, Cham.](https://www.researchgate.net/publication/347786937_Evaluation_of_a_Pure-Strategy_Stackelberg_Game_for_Wildlife_Security_in_a_Geospatial_Framework) - *"The movingpandas Python library [12] is utilised to store trajectories which can be easily analysed
+and plotted after the simulation."*
+* [Depellegrin, D., Bastianini, M., Fadini, A., & Menegon, S. (2020). The effects of COVID-19 induced lockdown measures on maritime settings of a coastal region. Science of the Total Environment, 740, 140123.](https://doi.org/10.1016/j.scitotenv.2020.140123) - *"We combined the Python libraries scikit-Mobility (Pappalardo et al., 2019) and MovingPandas (Graser, 2019) to pre-process position data received from the AAOT and to reconstruct and represent the vessel trajectory in the lockdown assessment period."*
+* [Graser, A. (2021). An exploratory data analysis protocol for identifying problems in continuous movement data. Journal of Location Based Services. doi:10.1080/17489725.2021.1900612.](https://doi.org/10.1080/17489725.2021.1900612) - MovingPandas is used to plot individual trajectories colored by movement speeed. 
+* [Mehri, S., Alesheikh, A. A., & Basiri, A. (2021). A Contextual Hybrid Model for Vessel Movement Prediction. IEEE Access, 9, 45600-45613.](https://ieeexplore.ieee.org/abstract/document/9380635/) - *"AIS messages are converted into trajectories by a Python library named, MovingPandas"*
+* [Soularidis, A., & Kotis, K. (2022). Semantic Modeling and Reconstruction of Drones’ Trajectories. In European Semantic Web Conference (pp. 158-162). Springer, Cham.](https://2022.eswc-conferences.org/wp-content/uploads/2022/05/pd_Soularidis_et_al_paper_192.pdf) - *"The goal of this paper is to present our position related to the semantic trajectories of swarms of drones, towards proposing methods for extending MovingPandas, a widely used open-source trajectory analytics and visualization tool."*
+* [Elayam, M. M., Ray, C., & Claramunt, C. (2022). A hierarchical graph-based model for mobility data representation and analysis. Data & Knowledge Engineering, 102054.](https://www.sciencedirect.com/science/article/abs/pii/S0169023X22000532) - *"The implementation combines several open source tools such as Python, MovingPandas library, Uber H3 index, Neo4j graph database management system ..."*
 
-* [Pappalardo, L., Simini, F., Barlacchi, G., & Pellungrini, R. (2019). scikit-mobility: A Python library for the analysis, generation and risk assessment of mobility data. arXiv preprint arXiv:1907.07062.](https://arxiv.org/abs/1907.07062)
-* [Graser, A. & Dragaschnig, M. (2020). Open Geospatial Tools for Movement Data Exploration. KN ‒ Journal of Cartography and Geographic Information, 70(1), 3-10. doi:10.1007/s42489-020-00039-y.](https://link.springer.com/article/10.1007/s42489-020-00039-y)
-* [Kirkland, L. A., de Waal, A., & de Villiers, J. P. (2020). Evaluation of a Pure-Strategy Stackelberg Game for Wildlife Security in a Geospatial Framework. In Southern African Conference for Artificial Intelligence Research (pp. 101-118). Springer, Cham.](https://link.springer.com/chapter/10.1007/978-3-030-66151-9_7)
-* [Depellegrin, D., Bastianini, M., Fadini, A., & Menegon, S. (2020). The effects of COVID-19 induced lockdown measures on maritime settings of a coastal region. Science of the Total Environment, 740, 140123.](https://doi.org/10.1016/j.scitotenv.2020.140123)
-* [Graser, A. (2021). An exploratory data analysis protocol for identifying problems in continuous movement data. Journal of Location Based Services. doi:10.1080/17489725.2021.1900612.](https://doi.org/10.1080/17489725.2021.1900612)
-* [Mehri, S., Alesheikh, A. A., & Basiri, A. (2021). A Contextual Hybrid Model for Vessel Movement Prediction. IEEE Access, 9, 45600-45613.](https://ieeexplore.ieee.org/abstract/document/9380635/)
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
