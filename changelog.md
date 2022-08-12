@@ -2,6 +2,28 @@
 
 ## Changelog
 
+### 0.11 (released August 2022)
+
+[Version 0.11](https://github.com/anitagraser/movingpandas/releases/tag/v0.11) 
+includes, amongst other improvements, the following new algorithms:
+ 
+* New minimum and Hausdorff distance measures
+* New functions to add a timedelta column and get the trajectory sampling interval
+
+For full details, see the 
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.10...v0.11).
+
+### 0.10 (released June 2022)
+
+[Version 0.10](https://github.com/anitagraser/movingpandas/releases/tag/v0.10) 
+includes, amongst other improvements, the following new algorithms:
+ 
+* First initial MovingFeatures JSON (MF-JSON) support
+* New tutorial on local non-geographic coordinates
+
+For full details, see the 
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.9...v0.10).
+
 ### 0.9 (released January 2022)
 
 [Version 0.9](https://github.com/anitagraser/movingpandas/releases/tag/v0.9) 
