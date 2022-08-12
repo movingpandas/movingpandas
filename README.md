@@ -53,6 +53,13 @@ Generalize trajectories using spatial, temporal, and spatiotemporal methods
 ![movingpandas_generalize](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
 
 
+### Trajectory cleaning & smoothing  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/10-smoothing-trajectories.ipynb)
+
+Clean and sooth trajectories by removing outliers and applying Kalman filters
+
+![movingpandas smooth](https://user-images.githubusercontent.com/590385/184359439-52eca394-5df6-40b2-a5b3-54543c3ccf34.png)
+
+
 ### Trajectory aggregation [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/9-aggregating-trajectories.ipynb)
 
 Aggregate trajectories to explore larger patterns
