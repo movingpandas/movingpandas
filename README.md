@@ -9,16 +9,19 @@ MovingPandas provides trajectory data structures and functions for movement data
 
 ## Features
 
-* Easily create trajectories from diverse sources, including CSV files, GIS file formats, and (Geo)DataFrames 
-* Compute movement speed / direction and extract stops 
+* Easily create trajectories from diverse sources, including CSV files, GIS file formats, (Geo)DataFrames, and OGC Moving Features JSONs (MF-JSON) 
+* Find locations for given time stamps and time spans
+* Compute movement speed, direction, and sampling intervals
+* Detect and extract stops 
 * Split trajectories into individual trips
-* Generalize and aggregate trajectories 
+* Clean, simplify, generalize, and aggregate trajectories 
 * Create static and interactive visualizations 
 
- ![Interactive trajectory visualization using hvplot](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
+![Interactive trajectory visualization using hvplot](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
-![Trajectory generalization and linked plots](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
+![Trajectory cleaning & smoothing](https://user-images.githubusercontent.com/590385/184359439-52eca394-5df6-40b2-a5b3-54543c3ccf34.png)
 
+![Stop detection and splitting](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
 
 ## Documentation
 
