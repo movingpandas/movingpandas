@@ -13,18 +13,18 @@
    id="Layer_1"
    x="0px"
    y="0px"
-   viewBox="0 0 2261.4675 273.20001"
+   viewBox="0 0 1656.6943 273.20001"
    xml:space="preserve"
    inkscape:version="0.91 r13725"
    sodipodi:docname="logo-wide.svg"
-   width="2261.4675"
+   width="1656.6943"
    height="273.20001"
    inkscape:export-filename="E:\Dropbox\MovingPandasLogo\logo-wide.png"
    inkscape:export-xdpi="184.06"
    inkscape:export-ydpi="184.06"><metadata
      id="metadata39"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
      id="defs37" /><sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -42,11 +42,11 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="0.40223513"
-     inkscape:cx="662.08729"
-     inkscape:cy="435.36432"
-     inkscape:window-x="631"
-     inkscape:window-y="441"
+     inkscape:zoom="0.56884638"
+     inkscape:cx="946.9111"
+     inkscape:cy="13.096279"
+     inkscape:window-x="300"
+     inkscape:window-y="475"
      inkscape:window-maximized="0"
      inkscape:current-layer="Layer_1" /><style
      type="text/css"
@@ -55,7 +55,7 @@
 	.st1{fill:#E31883;}
 </style><g
      id="g7"
-     transform="translate(-77.1,2.4800004e-6)"><g
+     transform="translate(-77.1,0)"><g
        id="g9"><g
          id="g11"><path
            style="fill:#25224f"
@@ -71,7 +71,7 @@
            d="m 77.1,256.1 c 0,9.4 7.6,17.1 17.1,17.1 l 34.2,0 c 9.4,0 17.1,-7.6 17.1,-17.1 l 0,-153.7 -68.4,97.6 0,56.1 z M 470,0 435.8,0 c -9.4,0 -17.1,7.6 -17.1,17.1 l 0,153.6 68.3,-97.5 0,-56.1 C 487.1,7.6 479.5,0 470,0 Z"
            class="st1" /></g></g></g><g
      id="g21"
-     transform="matrix(3.1010207,0,0,3.1010216,511.56167,-894.95483)"><g
+     transform="matrix(2.0633695,0,0,2.0633701,492.33495,-549.78006)"><g
        id="g23"><g
          id="g25"><path
            style="fill:#e31883"
