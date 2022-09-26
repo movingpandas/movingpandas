@@ -32,7 +32,7 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 
 ## Examples
 
-### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/1-getting-started.ipynb)
+### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-orange.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/2-analysis-examples/bird-migration.ipynb)
 
 Create interactive trajectory plots, including multiple linked plots with ease
 
