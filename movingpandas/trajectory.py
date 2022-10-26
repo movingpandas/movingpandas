@@ -5,7 +5,7 @@ import warnings
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from datetime import datetime
-from pandas import DataFrame, to_datetime
+from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
@@ -879,9 +879,7 @@ class Trajectory:
 
     def _get_df_with_timedelta(self, name=TIMEDELTA_COL_NAME):
         temp_df = self.df.copy()
-        temp_df["t"] = temp_df.index
-        times = temp_df.t
-        temp_df.drop(columns=["t"], inplace=True)
+        times = Series(index=temp_df.index, data=temp_df.index)
         temp_df[name] = times.diff().values
         return temp_df
 
@@ -898,7 +896,7 @@ class Trajectory:
         return temp_df
 
     def _get_df_with_speed(self, name=SPEED_COL_NAME):
-        temp_df = self._get_df_with_timedelta("delta_t")
+        temp_df = self._get_df_with_timedelta(name="delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
             temp_df[name] = temp_df.apply(self._compute_speed, axis=1)
