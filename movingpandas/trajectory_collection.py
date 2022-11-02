@@ -370,6 +370,22 @@ class TrajectoryCollection:
         for traj in self:
             traj.add_direction(overwrite)
 
+    def add_acceleration(self, overwrite=False):
+        """
+        Add acceleration column and values to the trajectories.
+
+        Acceleration is calculated as CRS units per second squared,
+        except if the CRS is geographic (e.g. EPSG:4326 WGS84) then speed is
+        calculated in meters per second squared.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing speed values (default: False)
+        """
+        for traj in self:
+            traj.add_acceleration(overwrite)
+
     def add_traj_id(self, overwrite=False):
         """
         Add trajectory id column and values to the trajectories.
