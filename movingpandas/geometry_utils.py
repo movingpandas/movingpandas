@@ -153,5 +153,5 @@ def mrr_diagonal(geom, spherical=False):
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
     except AttributeError:  # thrown if mrr is a LineString
-        return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1], spherical))
+        return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
     return _measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
