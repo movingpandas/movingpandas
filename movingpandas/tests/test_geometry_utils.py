@@ -117,6 +117,12 @@ class TestGeometryUtils:
         # Distance between NYC, NY USA and Los Angeles, CA USA is
         # 3944411.0951634306 meters
         assert mrr_diagonal(
-            MultiPoint([Point(-74.00597, 40.71427), Point(-74.00597, 40.71427), Point(-118.24368, 34.05223)]),
-            spherical=True
+            MultiPoint(
+                [
+                    Point(-74.00597, 40.71427),
+                    Point(-74.00597, 40.71427),
+                    Point(-118.24368, 34.05223),
+                ]
+            ),
+            spherical=True,
         ) == pytest.approx(3944411)
