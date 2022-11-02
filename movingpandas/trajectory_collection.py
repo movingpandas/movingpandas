@@ -375,7 +375,7 @@ class TrajectoryCollection:
         Add acceleration column and values to the trajectories.
 
         Acceleration is calculated as CRS units per second squared,
-        except if the CRS is geographic (e.g. EPSG:4326 WGS84) then speed is
+        except if the CRS is geographic (e.g. EPSG:4326 WGS84) then acceleration is
         calculated in meters per second squared.
 
         Parameters
