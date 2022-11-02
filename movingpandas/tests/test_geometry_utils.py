@@ -112,3 +112,11 @@ class TestGeometryUtils:
     def test_azimuth_throws_type_error(self):
         with pytest.raises(TypeError):
             azimuth((0, 0), (0, 1))
+
+    def test_mrr_diagonal_linestring(self):
+        # Distance between NYC, NY USA and Los Angeles, CA USA is
+        # 3944411.0951634306 meters
+        assert mrr_diagonal(
+            MultiPoint([Point(-74.00597, 40.71427), Point(-74.00597, 40.71427), Point(-118.24368, 34.05223)]),
+            spherical=True
+        ) == pytest.approx(3944411)
