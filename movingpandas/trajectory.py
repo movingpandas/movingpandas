@@ -27,6 +27,7 @@ from .trajectory_plotter import _TrajectoryPlotter
 
 TRAJ_ID_COL_NAME = "traj_id"
 SPEED_COL_NAME = "speed"
+ACCELERATION_COL_NAME = "acceleration"
 DIRECTION_COL_NAME = "direction"
 DISTANCE_COL_NAME = "distance"
 TIMEDELTA_COL_NAME = "timedelta"
@@ -854,6 +855,23 @@ class Trajectory:
             )
         self.df = self._get_df_with_speed(name)
 
+    def add_acceleration(self, overwrite=False, name=ACCELERATION_COL_NAME):
+        """
+        Add acceleration column and values to the trajectory's DataFrame.
+
+        Acceleration is calculated as CRS units per second squared,
+        except if the CRS is geographic (e.g. EPSG:4326 WGS84) then speed is
+        calculated in meters per second squared.
+        """
+        self.acceleration_col_name = name
+        if self.acceleration_col_name in self.df.columns and not overwrite:
+            raise RuntimeError(
+                f"Trajectory already has a column named {self.acceleration_col_name}! "
+                f"Use overwrite=True to overwrite exiting values or update the "
+                f"name arg."
+            )
+        self.df = self._get_df_with_acceleration(name)
+
     def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
         """
         Add timedelta column and values to the trajectory's DataFrame.
@@ -906,6 +924,25 @@ class Trajectory:
         temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
+
+    def _get_df_with_acceleration(self, name=ACCELERATION_COL_NAME):
+        # Avoid computed speed again if already computed
+        if hasattr(self, "speed_col_name"):
+            temp_df = self.df.copy()
+        else:
+            temp_df = self._get_df_with_speed(name=SPEED_COL_NAME)
+        speed_column_name = self.get_speed_column_name()
+        temp_df[name] = (
+            temp_df[speed_column_name].diff()
+            / temp_df.index.to_series().diff().dt.total_seconds()
+        )
+        # set the acceleration in the first row to the acceleration of the
+        # second row
+        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
+        if hasattr(self, "speed_col_name"):
+            return temp_df
+        else:
+            return temp_df.drop(columns=[speed_column_name])
 
     def intersects(self, polygon):
         """

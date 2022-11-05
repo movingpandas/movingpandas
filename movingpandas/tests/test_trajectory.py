@@ -11,6 +11,7 @@ from movingpandas.trajectory import (
     Trajectory,
     DIRECTION_COL_NAME,
     SPEED_COL_NAME,
+    ACCELERATION_COL_NAME,
     DISTANCE_COL_NAME,
     TIMEDELTA_COL_NAME,
     TRAJ_ID_COL_NAME,
@@ -370,6 +371,57 @@ class TestTrajectory:
         traj = traj.clip(area_of_interest).get_trajectory("1_0")
         traj.add_speed()
         traj.add_speed(overwrite=True)
+
+    def test_add_acceleration(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration()
+        assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 6.0]
+
+    def test_add_acceleration_without_crs(self):
+        traj = make_traj(
+            [Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)], crs=None
+        )
+        traj.add_acceleration()
+        assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 6.0]
+
+    def test_add_acceleration_can_overwrite(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration()
+        traj.add_acceleration(overwrite=True)
+        assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 6.0]
+
+    def test_add_acceleration_overwrite_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration()
+        with pytest.raises(RuntimeError):
+            traj.add_acceleration()
+
+    def test_add_acceleration_with_name(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration(name="acceleration2")
+        assert "acceleration2" in traj.df.columns
+
+    def test_add_acceleration_doesnt_change_existing_acceleration(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.df[ACCELERATION_COL_NAME] = [1, 2, 3, 4, 5]
+        traj.add_acceleration(name="acceleration2")
+        assert list(traj.df[ACCELERATION_COL_NAME]) == [1, 2, 3, 4, 5]
+        assert_frame_not_equal(traj.df[ACCELERATION_COL_NAME], traj.df["acceleration2"])
+
+    def test_add_accel_only_adds_accel_column_and_doesnt_otherwise_alter_df(
+        self,
+    ):
+        traj = self.default_traj_metric_5.copy()
+        traj.add_acceleration()
+        traj.df = traj.df.drop(columns=["acceleration"])
+        assert_frame_equal(self.default_traj_metric_5.df, traj.df)
+
+    def test_add_acceleration_keeps_existing_speed(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_speed()
+        traj.add_acceleration()
+        assert SPEED_COL_NAME in traj.df.columns
+        assert ACCELERATION_COL_NAME in traj.df.columns
 
     def test_add_distance(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
