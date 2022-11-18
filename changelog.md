@@ -2,6 +2,16 @@
 
 ## Changelog
 
+### 0.12 (released November 2022)
+
+[Version 0.12](https://github.com/anitagraser/movingpandas/releases/tag/v0.12) 
+includes, amongst other improvements, the following new algorithms:
+ 
+* New add_acceleration method
+
+For full details, see the 
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.11...v0.12).
+
 ### 0.11 (released August 2022)
 
 [Version 0.11](https://github.com/anitagraser/movingpandas/releases/tag/v0.11) 
