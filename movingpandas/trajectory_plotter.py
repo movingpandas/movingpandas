@@ -181,6 +181,7 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
 
     def hvplot(self):  # noqa F811
         try:
+            import hvplot.pandas  # noqa F401, seems necessary for the following import to work
             from holoviews import opts
         except ImportError as error:
             raise ImportError(
@@ -195,13 +196,7 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
                 width=self.width, height=self.height, active_tools=["wheel_zoom"]
             )
         )
-        return self._hvplot_trajectory(self.data)
 
-        opts.defaults(
-            opts.Overlay(
-                width=self.width, height=self.height, active_tools=["wheel_zoom"]
-            )
-        )
         for traj in self.data:
             overlay = self._hvplot_trajectory(traj)
             if self.overlay:
