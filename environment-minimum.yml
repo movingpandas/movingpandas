@@ -1,0 +1,13 @@
+name: mpd-mini
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - geopandas
+  - geopy
+  - matplotlib
+  - numpy
+  - pandas
+  - shapely
+  - pytest
+  - pytest-cov
