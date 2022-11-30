@@ -5,7 +5,7 @@ dependencies:
   - python=3.10
   - geopandas
   - geopy
-  - matplotlib
+  - matplotlib-base
   - numpy
   - pandas
   - shapely
