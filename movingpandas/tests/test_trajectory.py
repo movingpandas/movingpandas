@@ -18,6 +18,8 @@ from movingpandas.trajectory import (
     MissingCRSWarning,
 )
 
+from . import requires_holoviews, has_holoviews
+
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -560,6 +562,7 @@ class TestTrajectory:
         plot = self.default_traj_metric.plot()
         assert isinstance(plot, Axes)
 
+    @requires_holoviews
     def test_hvplot_exists(self):
         import holoviews
 
@@ -567,6 +570,7 @@ class TestTrajectory:
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 2
 
+    @requires_holoviews
     def test_hvplot_with_speed_exists(self):
         import holoviews
 
@@ -574,6 +578,7 @@ class TestTrajectory:
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 3
 
+    @requires_holoviews
     def test_hvplot_exists_without_crs(self):
         import holoviews
 
@@ -614,6 +619,7 @@ class TestTrajectory:
         traj.get_position_at(datetime(1970, 1, 1, 0, 0, 2), method="nearest")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
 
+    @requires_holoviews
     def test_support_for_subclasses_of_point(self):
         df = pd.DataFrame(
             [
@@ -646,7 +652,8 @@ class TestTrajectory:
             datetime(2018, 1, 1, 12, 0, 0), datetime(2018, 1, 1, 12, 6, 0)
         )
         traj.get_start_location()
-        traj.hvplot()
+        if has_holoviews:
+            traj.hvplot()
         traj.size()
         traj.to_line_gdf()
         traj.to_linestringm_wkt()
@@ -666,7 +673,8 @@ class TestTrajectory:
         traj = Trajectory(geo_df, 1)
         traj.add_speed()
         traj.add_direction()
-        traj.hvplot()
+        if has_holoviews:
+            traj.hvplot()
         traj.plot()
         traj.get_length()
         traj.to_linestring()

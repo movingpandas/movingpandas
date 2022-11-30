@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-import hvplot.pandas  # noqa F401, seems necessary for the following import to work
-from holoviews import opts, dim
 
 
 class _TrajectoryPlotter:
@@ -72,6 +70,8 @@ class _TrajectoryPlotter:
             )
 
     def _hvplot_trajectory(self, traj):
+        from holoviews import dim
+
         line_gdf = self._make_line_df(traj)
         if self.hvplot_is_geo and not traj.is_latlon and traj.crs is not None:
             line_gdf = line_gdf.to_crs(epsg=4326)
@@ -113,6 +113,17 @@ class _TrajectoryPlotter:
         return ax
 
     def hvplot(self):  # noqa F811
+        try:
+            import hvplot.pandas  # noqa F401, seems necessary for the following import to work
+            from holoviews import opts
+        except ImportError as error:
+            raise ImportError(
+                "Missing optional dependencies. To use interactive plotting, "
+                "install hvplot and GeoViews (see "
+                "https://hvplot.holoviz.org/getting_started/installation.html and "
+                "https://geoviews.org)."
+            ) from error
+
         opts.defaults(
             opts.Overlay(
                 width=self.width, height=self.height, active_tools=["wheel_zoom"]
@@ -169,11 +180,23 @@ class _TrajectoryCollectionPlotter(_TrajectoryPlotter):
         return self.ax
 
     def hvplot(self):  # noqa F811
+        try:
+            import hvplot.pandas  # noqa F401, seems necessary for the following import to work
+            from holoviews import opts
+        except ImportError as error:
+            raise ImportError(
+                "Missing optional dependencies. To use interactive plotting, "
+                "install hvplot and GeoViews (see "
+                "https://hvplot.holoviz.org/getting_started/installation.html and "
+                "https://geoviews.org)."
+            ) from error
+
         opts.defaults(
             opts.Overlay(
                 width=self.width, height=self.height, active_tools=["wheel_zoom"]
             )
         )
+
         for traj in self.data:
             overlay = self._hvplot_trajectory(traj)
             if self.overlay:

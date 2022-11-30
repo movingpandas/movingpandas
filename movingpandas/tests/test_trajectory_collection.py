@@ -12,6 +12,9 @@ from math import sqrt
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.trajectory import TRAJ_ID_COL_NAME
 
+from . import requires_holoviews
+
+
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
 
@@ -148,6 +151,7 @@ class TestTrajectoryCollection:
         result = self.collection.plot()
         assert isinstance(result, Axes)
 
+    @requires_holoviews
     def test_hvplot_exists(self):
         import holoviews
 

@@ -5,7 +5,8 @@ with open("README.md", "r") as fh:
 
 # Packages that MovingPandas uses explicitly:
 INSTALL_REQUIRES = [
-    'numpy', 'matplotlib', 'shapely', 'pandas', 'geopandas', 'hvplot', 'bokeh', 'cartopy', 'geoviews', 'pyproj', 'geopy']
+    'numpy', 'matplotlib-base', 'shapely', 'pandas', 'geopandas-base', 'fiona', 'rtree',
+    'pyproj', 'geopy']
 
 setuptools.setup(
     name="movingpandas",
@@ -31,7 +32,8 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'smoothing': ['stonesoup']
+        'smoothing': ['stonesoup'],
+        'viz': ['hvplot', 'bokeh', 'cartopy', 'geoviews']
     }
 
 )
