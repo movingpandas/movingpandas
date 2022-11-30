@@ -3,8 +3,10 @@ channels:
   - conda-forge
 dependencies:
   - python=3.9
-  - geopandas
+  - geopandas-base
+  - fiona
   - geopy
+  - rtree
   - matplotlib
   - numpy
   - pandas
