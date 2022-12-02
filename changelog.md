@@ -2,6 +2,16 @@
 
 ## Changelog
 
+### 0.13 (released December 2022)
+
+[Version 0.13](https://github.com/anitagraser/movingpandas/releases/tag/v0.13) 
+focuses on behind-the-scenes improvements. We've made interactive plotting
+dependencies optional to simplify installation in environments that don't need
+visualizations.
+
+For full details, see the 
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.12...v0.13).
+
 ### 0.12 (released November 2022)
 
 [Version 0.12](https://github.com/anitagraser/movingpandas/releases/tag/v0.12) 
