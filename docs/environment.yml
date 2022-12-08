@@ -14,3 +14,4 @@ dependencies:
   - gdal
   - hdf5
   - pip
+  - sphinx
