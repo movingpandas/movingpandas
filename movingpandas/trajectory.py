@@ -855,16 +855,22 @@ class Trajectory:
                 f"name arg."
             )
         # Avoid computing direction again if already computed
-        if hasattr(self, "direction_col_name"):
+        direction_column_name = self.get_direction_column_name()
+        if direction_column_name in self.df.columns:
+            direction_exists = True
             temp_df = self.df.copy()
         else:
-            temp_df = self.add_direction(name=DIRECTION_COL_NAME)
-        direction_column_name = self.get_direction_column_name()
+            direction_exists = False
+            self.add_direction(name=DIRECTION_COL_NAME)
+            temp_df = self.df.copy()
+
         temp_df["prev_" + direction_column_name] = temp_df[
             direction_column_name
         ].shift()
         self.df[name] = temp_df.apply(self._compute_angular_difference, axis=1)
-        if not hasattr(self, "direction_col_name"):
+        # set the first row to be 0
+        self.df.at[self.get_start_time(), name] = 0.0
+        if not direction_exists:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
 
     def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME):
