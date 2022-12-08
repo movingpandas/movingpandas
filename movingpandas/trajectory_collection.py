@@ -370,6 +370,22 @@ class TrajectoryCollection:
         for traj in self:
             traj.add_direction(overwrite)
 
+    def add_angular_difference(self, overwrite=False):
+        """
+        Add angular difference to the trajectories.
+
+        Angular difference is calculated as the absolute smaller angle
+        between direction for points along the trajectory.
+        Values are [0, 180.0]
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing speed values (default: False)
+        """
+        for traj in self:
+            traj.add_angular_difference(overwrite)
+
     def add_acceleration(self, overwrite=False):
         """
         Add acceleration column and values to the trajectories.
