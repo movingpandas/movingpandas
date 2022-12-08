@@ -5,8 +5,12 @@ with open("README.md", "r") as fh:
 
 # Packages that MovingPandas uses explicitly:
 INSTALL_REQUIRES = [
-    'numpy', 'matplotlib-base', 'shapely', 'pandas', 'geopandas-base', 'fiona', 'rtree',
-    'pyproj', 'geopy']
+    "matplotlib",
+    "geopandas",
+    "fiona",
+    "rtree",
+    "geopy",
+]
 
 setuptools.setup(
     name="movingpandas",
@@ -14,8 +18,8 @@ setuptools.setup(
     author="Anita Graser",
     author_email="anitagraser@gmx.at",
     description="MovingPandas implements Trajectory classes and corresponding methods "
-                "for the analysis of movement data based on GeoPandas. "
-                "Visit movingpandas.org for details.",
+    "for the analysis of movement data based on GeoPandas. "
+    "Visit movingpandas.org for details.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/anitagraser/movingpandas",
@@ -29,11 +33,10 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
+    python_requires=">=3.8",
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'smoothing': ['stonesoup'],
-        'viz': ['hvplot', 'bokeh', 'cartopy', 'geoviews']
-    }
-
+        "smoothing": ["stonesoup"],
+        "viz": ["hvplot", "bokeh", "cartopy", "geoviews"],
+    },
 )
