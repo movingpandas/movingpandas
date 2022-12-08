@@ -10,6 +10,7 @@ from fiona.crs import from_epsg
 from movingpandas.trajectory import (
     Trajectory,
     DIRECTION_COL_NAME,
+    ANGULAR_DIFFERENCE_COL_NAME,
     SPEED_COL_NAME,
     ACCELERATION_COL_NAME,
     DISTANCE_COL_NAME,
@@ -313,6 +314,13 @@ class TestTrajectory:
         traj.add_direction()
         with pytest.raises(RuntimeError):
             traj.add_direction()
+
+    def test_add_angular_difference(self):
+        traj = make_traj(
+            [Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)]
+        )
+        traj.add_angular_difference()
+        assert traj.df[ANGULAR_DIFFERENCE_COL_NAME].tolist() == [0.0, 0.0, 90.0, 90.0]
 
     def test_add_speed(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
