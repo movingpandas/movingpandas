@@ -10,6 +10,7 @@ dependencies:
   - libgdal
   - geotiff
   - libspatialite
+  - matplotlib
   - gdal
   - hdf5
   - pip
