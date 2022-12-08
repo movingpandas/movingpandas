@@ -810,6 +810,9 @@ class Trajectory:
         self.df.at[self.get_start_time(), name] = self.df.iloc[1][name]
         self.df.drop(columns=["prev_pt"], inplace=True)
 
+    def add_angular_difference(self, overwrite=False, name=ANGULAR_DIFFERENCE_COL_NAME):
+        pass
+        
     def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME):
         """
         Add distance column and values to the trajectory's DataFrame.
