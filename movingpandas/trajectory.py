@@ -18,6 +18,7 @@ except ImportError:
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
 from .time_range_utils import SpatioTemporalRange
 from .geometry_utils import (
+    angular_difference,
     azimuth,
     calculate_initial_compass_bearing,
     measure_distance_geodesic,
@@ -25,12 +26,13 @@ from .geometry_utils import (
 )
 from .trajectory_plotter import _TrajectoryPlotter
 
-TRAJ_ID_COL_NAME = "traj_id"
-SPEED_COL_NAME = "speed"
 ACCELERATION_COL_NAME = "acceleration"
+ANGULAR_DIFFERENCE_COL_NAME = "angular_difference"
 DIRECTION_COL_NAME = "direction"
 DISTANCE_COL_NAME = "distance"
+SPEED_COL_NAME = "speed"
 TIMEDELTA_COL_NAME = "timedelta"
+TRAJ_ID_COL_NAME = "traj_id"
 
 
 class MissingCRSWarning(UserWarning, ValueError):
@@ -318,6 +320,19 @@ class Trajectory:
             return self.direction_col_name
         else:
             return DIRECTION_COL_NAME
+
+    def get_angular_difference_column_name(self):
+        """
+        Retrun name of the angular difference column
+
+        Returns
+        -------
+        string
+        """
+        if hasattr(self, "angular_difference_col_name"):
+            return self.angular_difference_col_name
+        else:
+            return ANGULAR_DIFFERENCE_COL_NAME
 
     def get_timedelta_column_name(self):
         """
@@ -742,6 +757,14 @@ class Trajectory:
         else:
             return azimuth(pt0, pt1)
 
+    def _compute_angular_difference(self, row):
+        degrees1 = row["prev_direction"]
+        degrees2 = row["direction"]
+        if degrees1 == degrees2:
+            return 0.0
+        else:
+            return angular_difference(degrees1, degrees2)
+
     def _compute_speed(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
@@ -791,6 +814,7 @@ class Trajectory:
 
         The direction is calculated between consecutive locations.
         Direction values are in degrees, starting North turning clockwise.
+        Values are [0, 360).
 
         Parameters
         ----------
@@ -810,9 +834,39 @@ class Trajectory:
         self.df.at[self.get_start_time(), name] = self.df.iloc[1][name]
         self.df.drop(columns=["prev_pt"], inplace=True)
 
-    def add_angular_difference(self, overwrite=False, name=ANGULAR_DIFFERENCE_COL_NAME):
-        pass
-        
+    def add_angular_difference(
+        self,
+        overwrite=False,
+        name=ANGULAR_DIFFERENCE_COL_NAME,
+    ):
+        """
+        Add angular difference to the trajectory's DataFrame.
+
+        Angular difference is calculated as the absolute smaller angle
+        between direction for points along the trajectory.
+        Values are [0, 180.0]
+        """
+        self.angular_difference_col_name = name
+        if self.angular_difference_col_name in self.df.columns and not overwrite:
+            raise RuntimeError(
+                f"Trajectory already has a column named "
+                f"{self.angular_difference_col_name}!"
+                f"Use overwrite=True to overwrite exiting values or update the "
+                f"name arg."
+            )
+        # Avoid computing direction again if already computed
+        if hasattr(self, "direction_col_name"):
+            temp_df = self.df.copy()
+        else:
+            temp_df = self.add_direction(name=DIRECTION_COL_NAME)
+        direction_column_name = self.get_direction_column_name()
+        temp_df["prev_" + direction_column_name] = temp_df[
+            direction_column_name
+        ].shift()
+        self.df[name] = temp_df.apply(self._compute_angular_difference, axis=1)
+        if not hasattr(self, "direction_col_name"):
+            self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
+
     def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME):
         """
         Add distance column and values to the trajectory's DataFrame.
@@ -857,6 +911,25 @@ class Trajectory:
                 f"name arg."
             )
         self.df = self._get_df_with_speed(name)
+
+    def _get_df_with_acceleration(self, name=ACCELERATION_COL_NAME):
+        # Avoid computing speed again if already computed
+        if hasattr(self, "speed_col_name"):
+            temp_df = self.df.copy()
+        else:
+            temp_df = self._get_df_with_speed(name=SPEED_COL_NAME)
+        speed_column_name = self.get_speed_column_name()
+        temp_df[name] = (
+            temp_df[speed_column_name].diff()
+            / temp_df.index.to_series().diff().dt.total_seconds()
+        )
+        # set the acceleration in the first row to the acceleration of the
+        # second row
+        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
+        if hasattr(self, "speed_col_name"):
+            return temp_df
+        else:
+            return temp_df.drop(columns=[speed_column_name])
 
     def add_acceleration(self, overwrite=False, name=ACCELERATION_COL_NAME):
         """
@@ -927,25 +1000,6 @@ class Trajectory:
         temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
-
-    def _get_df_with_acceleration(self, name=ACCELERATION_COL_NAME):
-        # Avoid computed speed again if already computed
-        if hasattr(self, "speed_col_name"):
-            temp_df = self.df.copy()
-        else:
-            temp_df = self._get_df_with_speed(name=SPEED_COL_NAME)
-        speed_column_name = self.get_speed_column_name()
-        temp_df[name] = (
-            temp_df[speed_column_name].diff()
-            / temp_df.index.to_series().diff().dt.total_seconds()
-        )
-        # set the acceleration in the first row to the acceleration of the
-        # second row
-        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
-        if hasattr(self, "speed_col_name"):
-            return temp_df
-        else:
-            return temp_df.drop(columns=[speed_column_name])
 
     def intersects(self, polygon):
         """
