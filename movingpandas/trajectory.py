@@ -791,6 +791,7 @@ class Trajectory:
 
         The direction is calculated between consecutive locations.
         Direction values are in degrees, starting North turning clockwise.
+        Values are [0, 360).
 
         Parameters
         ----------
