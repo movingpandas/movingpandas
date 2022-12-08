@@ -322,6 +322,53 @@ class TestTrajectory:
         traj.add_angular_difference()
         assert traj.df[ANGULAR_DIFFERENCE_COL_NAME].tolist() == [0.0, 0.0, 90.0, 90.0]
 
+    def test_add_angular_difference_with_name(self):
+        traj = make_traj(
+            [Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)]
+        )
+        traj.add_angular_difference(name="angular_difference2")
+        assert "angular_difference2" in traj.df.columns
+
+    def test_add_angular_difference_can_overwrite(self):
+        traj = make_traj(
+            [Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)]
+        )
+        traj.add_angular_difference()
+        traj.add_angular_difference(overwrite=True)
+        assert traj.df[ANGULAR_DIFFERENCE_COL_NAME].tolist() == [0.0, 0.0, 90.0, 90.0]
+
+    def test_add_angular_difference_overwrite_raises_error(self):
+        traj = make_traj(
+            [Node(0, 0), Node(6, 0, day=2), Node(6, -6, day=3), Node(-6, -6, day=4)]
+        )
+        traj.add_angular_difference()
+        with pytest.raises(RuntimeError):
+            traj.add_angular_difference()
+
+    def test_add_ag_doesnt_change_existing_ag(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.df[ANGULAR_DIFFERENCE_COL_NAME] = [1, 2, 3, 4, 5]
+        traj.add_angular_difference(name="angular_difference2")
+        assert list(traj.df[ANGULAR_DIFFERENCE_COL_NAME]) == [1, 2, 3, 4, 5]
+        assert_frame_not_equal(
+            traj.df[ANGULAR_DIFFERENCE_COL_NAME], traj.df["angular_difference2"]
+        )
+
+    def test_add_ag_only_adds_ag_column_and_doesnt_otherwise_alter_df(
+        self,
+    ):
+        traj = self.default_traj_metric_5.copy()
+        traj.add_angular_difference()
+        traj.df = traj.df.drop(columns=[ANGULAR_DIFFERENCE_COL_NAME])
+        assert_frame_equal(self.default_traj_metric_5.df, traj.df)
+
+    def test_add_ag_keeps_existing_direction(self):
+        traj = self.default_traj_metric_5.copy()
+        traj.add_direction()
+        traj.add_angular_difference()
+        assert DIRECTION_COL_NAME in traj.df.columns
+        assert ANGULAR_DIFFERENCE_COL_NAME in traj.df.columns
+
     def test_add_speed(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
         traj.add_speed()
