@@ -5,14 +5,10 @@ with open("README.md", "r") as fh:
 
 # Packages that MovingPandas uses explicitly:
 INSTALL_REQUIRES = [
-    "numpy",
     "matplotlib-base",
-    "shapely",
-    "pandas",
     "geopandas-base",
     "fiona",
     "rtree",
-    "pyproj",
     "geopy",
 ]
 
