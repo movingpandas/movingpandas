@@ -69,7 +69,14 @@ Aggregate trajectories to explore larger patterns
 
 ## Installation
 
-MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using `conda install -c conda-forge movingpandas`.
+MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
+
+`conda install -c conda-forge movingpandas`
+ 
+ or faster using 
+ 
+ `mamba install -c conda-forge movingpandas`
+
 
 **Conda status**
 
