@@ -147,8 +147,8 @@ def mrr_diagonal(geom, spherical=False):
     """
     if isinstance(geom, Point):
         return 0
-    if len(geom) == 2:
-        return _measure_distance(geom[0], geom[1], spherical)
+    if len(geom.geoms) == 2:
+        return _measure_distance(geom.geoms[0], geom.geoms[1], spherical)
     mrr = geom.minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
