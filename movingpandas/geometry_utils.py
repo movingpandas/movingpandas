@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from packaging.version import Version
-from math import sin, cos, atan2, radians, degrees, sqrt, pi
-from shapely.geometry import Point
-from geopy import distance
+from math import atan2, cos, degrees, pi, radians, sin, sqrt
 
 import shapely
+from geopy import distance
+from packaging.version import Version
+from shapely.geometry import Point
 
 SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
 
