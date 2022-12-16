@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from math import sin, cos, atan2, radians, degrees, sqrt, pi
-from shapely.geometry import Point
-from geopy import distance
+from math import atan2, cos, degrees, pi, radians, sin, sqrt
 
+import shapely
+from geopy import distance
+from packaging.version import Version
+from shapely.geometry import Point
+
+SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
 
 R_EARTH = 6371000  # radius of earth in meters
 C_EARTH = 2 * R_EARTH * pi  # circumference
@@ -147,8 +151,9 @@ def mrr_diagonal(geom, spherical=False):
     """
     if isinstance(geom, Point):
         return 0
-    if len(geom) == 2:
-        return _measure_distance(geom[0], geom[1], spherical)
+    _geom = geom.geoms if SHAPELY_GE_2 else geom
+    if len(_geom) == 2:
+        return _measure_distance(_geom[0], _geom[1], spherical)
     mrr = geom.minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
