@@ -33,4 +33,4 @@ except ImportError:
     pass
 
 name = "movingpandas"
-__version__ = "0.13.rc1"
+__version__ = "0.14.rc1"
