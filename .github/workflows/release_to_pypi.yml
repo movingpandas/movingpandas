@@ -1,4 +1,4 @@
-name: Publish geopandas to PyPI / GitHub
+name: Publish movingpandas to PyPI / GitHub
 
 on:
   push:
