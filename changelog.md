@@ -2,15 +2,15 @@
 
 ## Changelog
 
-### 0.14rc1 (released December 2022)
+### 0.14 (released December 2022)
 
-[Version 0.14rc1](https://github.com/anitagraser/movingpandas/releases/tag/v0.14rc1) 
+[Version 0.14](https://github.com/anitagraser/movingpandas/releases/tag/v0.14.rc1)
 includes, amongst other improvements, the following new algorithms:
  
 * New add_angular_difference method
 
 For full details, see the 
-[commit history](https://github.com/anitagraser/movingpandas/compare/v0.13...0.14rc1).
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.13...v0.14.rc1).
 
 ### 0.13 (released December 2022)
 
