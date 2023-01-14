@@ -7,7 +7,7 @@ from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
-from pandas import Series 
+from pandas import Series
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
 
@@ -419,6 +419,15 @@ class Trajectory:
         Return a GeoDataFrame with one row containing the trajectory as a
         single LineString.
 
+        Parameters
+        ----------
+        wkt : bool
+            If True, adds WKT column representing the trajectory geometry
+        agg : dict
+            Adds columns with aggregate values computed from trajectory dataframe
+            columns according to specified aggregation mode, using
+            pandas.DataFrame.agg()
+
         Returns
         -------
         GeoDataFrame
@@ -431,17 +440,19 @@ class Trajectory:
             "length": self.get_length(),
             "direction": self.get_direction(),
         }
+
         if wkt:
             properties["wkt"] = self.to_linestringm_wkt()
         if agg:
             for key, value in agg.items():
-                if type(value) != list: 
+                if type(value) != list:
                     value = [value]
-                for v in value: 
+                for v in value:
                     if v == "mode":
-                        properties[f"{key}_{v}"] = self.df.agg({key: Series.mode})[key][0]
-                    else: 
-                        properties[f"{key}_{v}"] = self.df.agg({key: v})[key]
+                        aggregated = self.df.agg({key: Series.mode})[key][0]
+                    else:
+                        aggregated = self.df.agg({key: v})[key]
+                    properties[f"{key}_{v}"] = aggregated
         df = DataFrame([properties])
         traj_gdf = GeoDataFrame(df, crs=self.crs)
         return traj_gdf

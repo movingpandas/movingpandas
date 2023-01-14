@@ -295,7 +295,7 @@ class TestTrajectoryCollection:
     def test_to_traj_gdf_aggregate(self):
         temp_df = self.geo_df.drop(columns=["val2"])
         tc = TrajectoryCollection(temp_df, "id")
-        traj_gdf = tc.to_traj_gdf(agg={"obj": "mode", "val":["min", "max"]})
+        traj_gdf = tc.to_traj_gdf(agg={"obj": "mode", "val": ["min", "max"]})
         print(traj_gdf)
         rows = [
             {
@@ -307,7 +307,7 @@ class TestTrajectoryCollection:
                 "direction": 45.0,
                 "obj_mode": "A",
                 "val_min": 2,
-                "val_max": 9
+                "val_max": 9,
             },
             {
                 "traj_id": 2,
@@ -318,7 +318,7 @@ class TestTrajectoryCollection:
                 "direction": 90.0,
                 "obj_mode": "A",
                 "val_min": 3,
-                "val_max": 10
+                "val_max": 10,
             },
         ]
         df2 = pd.DataFrame(rows)
