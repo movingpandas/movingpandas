@@ -291,3 +291,37 @@ class TestTrajectoryCollection:
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
 
         assert_frame_equal(traj_gdf, expected_line_gdf)
+
+    def test_to_traj_gdf_aggregate(self):
+        temp_df = self.geo_df.drop(columns=["val2"])
+        tc = TrajectoryCollection(temp_df, "id")
+        traj_gdf = tc.to_traj_gdf(agg={"obj": "mode", "val":["min", "max"]})
+        print(traj_gdf)
+        rows = [
+            {
+                "traj_id": 1,
+                "start_t": datetime(2018, 1, 1, 12, 0, 0),
+                "end_t": datetime(2018, 1, 1, 14, 15, 0),
+                "geometry": LineString([(0, 0), (6, 0), (6, 6), (9, 9)]),
+                "length": 12 + sqrt(18),
+                "direction": 45.0,
+                "obj_mode": "A",
+                "val_min": 2,
+                "val_max": 9
+            },
+            {
+                "traj_id": 2,
+                "start_t": datetime(2018, 1, 1, 12, 0, 0),
+                "end_t": datetime(2018, 1, 2, 13, 15, 0),
+                "geometry": LineString([(10, 10), (16, 10), (16, 16), (190, 10)]),
+                "length": 12 + sqrt(174 * 174 + 36),
+                "direction": 90.0,
+                "obj_mode": "A",
+                "val_min": 3,
+                "val_max": 10
+            },
+        ]
+        df2 = pd.DataFrame(rows)
+        expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
+
+        assert_frame_equal(traj_gdf, expected_line_gdf)

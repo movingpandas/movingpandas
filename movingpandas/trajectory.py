@@ -7,6 +7,7 @@ from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
+from pandas import Series 
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
 
@@ -413,7 +414,7 @@ class Trajectory:
         line_gdf.set_geometry("geometry", inplace=True)
         return line_gdf
 
-    def to_traj_gdf(self, wkt=False):
+    def to_traj_gdf(self, wkt=False, agg=False):
         """
         Return a GeoDataFrame with one row containing the trajectory as a
         single LineString.
@@ -432,6 +433,15 @@ class Trajectory:
         }
         if wkt:
             properties["wkt"] = self.to_linestringm_wkt()
+        if agg:
+            for key, value in agg.items():
+                if type(value) != list: 
+                    value = [value]
+                for v in value: 
+                    if v == "mode":
+                        properties[f"{key}_{v}"] = self.df.agg({key: Series.mode})[key][0]
+                    else: 
+                        properties[f"{key}_{v}"] = self.df.agg({key: v})[key]
         df = DataFrame([properties])
         traj_gdf = GeoDataFrame(df, crs=self.crs)
         return traj_gdf

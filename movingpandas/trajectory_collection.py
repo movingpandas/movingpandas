@@ -136,7 +136,7 @@ class TrajectoryCollection:
         gdf.reset_index(drop=True, inplace=True)
         return gdf
 
-    def to_traj_gdf(self, wkt=False):
+    def to_traj_gdf(self, wkt=False, agg=False):
         """
         Return a GeoDataFrame with one row per Trajectory within the
         TrajectoryCollection
@@ -145,7 +145,7 @@ class TrajectoryCollection:
         -------
         GeoDataFrame
         """
-        gdfs = [traj.to_traj_gdf(wkt) for traj in self.trajectories]
+        gdfs = [traj.to_traj_gdf(wkt, agg) for traj in self.trajectories]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
