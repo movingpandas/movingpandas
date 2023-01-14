@@ -37,8 +37,8 @@ class TrajectoryCollectionAggregator:
             EPSG:4326 WGS84, then distance is calculated in meters)
         min_distance : float
             Minimum distance between significant points
-        min_stop_duration : integer
-            Minimum duration required for stop detection (in seconds)
+        min_stop_duration : datetime.timedelta
+            Minimum duration required for stop detection
         min_angle : float
             Minimum angle for significant point extraction
 
