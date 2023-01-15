@@ -7,7 +7,10 @@ from geopy import distance
 from packaging.version import Version
 from shapely.geometry import Point
 
-SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
+try:
+    SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
+except TypeError:
+    SHAPELY_GE_2 = False
 
 R_EARTH = 6371000  # radius of earth in meters
 C_EARTH = 2 * R_EARTH * pi  # circumference
