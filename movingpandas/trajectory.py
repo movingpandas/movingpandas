@@ -7,7 +7,6 @@ from shapely.geometry import Point, LineString
 from datetime import datetime
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
-from pandas import Series
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
 
@@ -426,7 +425,13 @@ class Trajectory:
         agg : dict
             Adds columns with aggregate values computed from trajectory dataframe
             columns according to specified aggregation mode, using
-            pandas.DataFrame.agg()
+            pandas.DataFrame.agg(), and shortcuts for "mode" and quantiles
+            (e.g. "q5" or "q95")
+
+        Examples
+        --------
+
+        >>> traj.to_traj_gdf(agg={"col1": "mode", "col2": ["min", "q95"]})
 
         Returns
         -------
@@ -444,15 +449,19 @@ class Trajectory:
         if wkt:
             properties["wkt"] = self.to_linestringm_wkt()
         if agg:
-            for key, value in agg.items():
-                if type(value) != list:
-                    value = [value]
-                for v in value:
-                    if v == "mode":
-                        aggregated = self.df.agg({key: Series.mode})[key][0]
+            for col, agg_modes in agg.items():
+                if type(agg_modes) != list:
+                    agg_modes = [agg_modes]
+                for agg_mode in agg_modes:
+                    if agg_mode == "mode":
+                        aggregated = self.df.agg({col: Series.mode})[col][0]
+                    elif agg_mode[0] == "q" and int(agg_mode[1:]) < 100:
+                        aggregated = self.df[col].agg(
+                            lambda x: x.quantile(int(agg_mode[1:]) / 100)
+                        )
                     else:
-                        aggregated = self.df.agg({key: v})[key]
-                    properties[f"{key}_{v}"] = aggregated
+                        aggregated = self.df.agg({col: agg_mode})[col]
+                    properties[f"{col}_{agg_mode}"] = aggregated
         df = DataFrame([properties])
         traj_gdf = GeoDataFrame(df, crs=self.crs)
         return traj_gdf
