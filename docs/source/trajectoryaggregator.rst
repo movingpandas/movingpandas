@@ -2,7 +2,6 @@ MovingPandas.TrajectoryCollectionAggregator
 ===========================================
 
 .. automodule:: movingpandas
-    :members:
     :noindex:
 
 **TrajectoryCollectionAggregator** generalizes and aggregates trajectories by extracting

@@ -2,7 +2,6 @@ MovingPandas.TrajectoryGeneralizer
 ===========================================
 
 .. automodule:: movingpandas
-    :members:
     :noindex:
 
 .. autoclass:: TrajectoryGeneralizer

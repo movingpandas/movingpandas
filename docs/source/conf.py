@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'MovingPandas'
-copyright = '2021, Anita Graser'
-author = 'Anita Graser'
+copyright = '2023, MovingPandas developers'
+author = 'MovingPandas developers'
 
 # The full version, including alpha/beta/rc tags
 release = 'master'
@@ -43,6 +43,9 @@ master_doc = 'index'
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# Hide class name from ToC 
+# as described in https://github.com/sphinx-doc/sphinx/issues/6316
+toc_object_entries_show_parents = 'hide'  
 
 
 # -- Options for HTML output -------------------------------------------------
