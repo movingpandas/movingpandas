@@ -64,7 +64,7 @@ class TrajectoryStopDetector:
         is_stopped = False
         previously_stopped = False
 
-        for index, data in traj.df[traj.get_geom_column_name()].iteritems():
+        for index, data in traj.df[traj.get_geom_column_name()].items():
             segment_geoms.append(data)
             geom = geom.union(data)
             segment_times.append(index)

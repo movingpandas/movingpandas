@@ -152,7 +152,7 @@ class TrajectoryCollection:
 
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col, t, x, y, crs):
         trajectories = []
-        for traj_id, values in df.groupby([traj_id_col]):
+        for traj_id, values in df.groupby(traj_id_col):
             if len(values) < 2:
                 continue
             if obj_id_col in values.columns:

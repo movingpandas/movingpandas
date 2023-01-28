@@ -26,8 +26,6 @@ from .geometry_utils import (
 )
 from .trajectory_plotter import _TrajectoryPlotter
 
-import warnings
-
 warnings.filterwarnings(  # see https://github.com/anitagraser/movingpandas/issues/289
     "ignore", message="CRS not set for some of the concatenation inputs."
 )
