@@ -90,7 +90,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[1].geometry in [Point(6, 0), Point(16, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
 
-    def test_get_locations_at_needing_interpolation(self):
+    def test_get_locations_at_nearest(self):
         locs = self.collection.get_locations_at(datetime(2018, 1, 1, 12, 6, 1))
         assert len(locs) == 2
         assert locs.iloc[0].val in [5, 6]
@@ -122,6 +122,13 @@ class TestTrajectoryCollection:
         assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
         assert isinstance(locs, GeoDataFrame)
+
+    def test_get_segments_between(self):
+        collection = self.collection.get_segments_between(
+            datetime(2018, 1, 1, 12, 6, 0), datetime(2018, 1, 1, 14, 10, 0)
+        )
+        assert len(collection) == 1
+        assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (6 0, 6 6)"
 
     def test_get_intersecting(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])

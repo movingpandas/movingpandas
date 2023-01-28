@@ -211,6 +211,7 @@ class TrajectoryCollection:
         Parameters
         ----------
         t : datetime.datetime
+            Timestamp to extract trajectory locations for
 
         Returns
         -------
@@ -251,6 +252,35 @@ class TrajectoryCollection:
             Trajectory end locations
         """
         return self.get_locations_at("end")
+
+    def get_segments_between(self, t1, t2):
+        """
+        Return Trajectory segments between times t1 and t2.
+
+        Parameters
+        ----------
+        t1 : datetime.datetime
+            Start time for the segments
+        t2 : datetime.datetime
+            End time for the segments
+
+        Returns
+        -------
+        TrajectoryCollection
+            Extracted trajectory segments
+        """
+        segments = []
+        for traj in self:
+            if t1 > traj.get_end_time() or t2 < traj.get_start_time():
+                continue
+            try:
+                seg = traj.get_segment_between(t1, t2)
+            except ValueError:
+                continue
+            segments.append(seg)
+        result = copy(self)
+        result.trajectories = segments
+        return result
 
     def get_intersecting(self, polygon):
         """
