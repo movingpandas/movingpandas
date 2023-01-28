@@ -193,7 +193,8 @@ class Trajectory:
         -------
         Trajectory
         """
-        with warnings.catch_warnings():  # see https://github.com/anitagraser/movingpandas/issues/291
+        with warnings.catch_warnings():
+            # see https://github.com/anitagraser/movingpandas/issues/291
             warnings.simplefilter("ignore")
             copied = Trajectory(self.df.copy(), self.id, parent=self.parent)
         return copied
@@ -1139,7 +1140,8 @@ class Trajectory:
         """
         from .trajectory_collection import TrajectoryCollection
 
-        with warnings.catch_warnings():  # see https://github.com/anitagraser/movingpandas/issues/291
+        with warnings.catch_warnings():
+            # see https://github.com/anitagraser/movingpandas/issues/291
             warnings.simplefilter("ignore")
             segments = clip(self, polygon, point_based)
         return TrajectoryCollection(segments)
