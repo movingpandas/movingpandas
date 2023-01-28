@@ -26,6 +26,12 @@ from .geometry_utils import (
 )
 from .trajectory_plotter import _TrajectoryPlotter
 
+import warnings
+
+warnings.filterwarnings(  # see https://github.com/anitagraser/movingpandas/issues/289
+    "ignore", message="CRS not set for some of the concatenation inputs."
+)
+
 ACCELERATION_COL_NAME = "acceleration"
 ANGULAR_DIFFERENCE_COL_NAME = "angular_difference"
 DIRECTION_COL_NAME = "direction"
@@ -621,12 +627,12 @@ class Trajectory:
         """
         if t < self.get_start_time() or t > self.get_end_time():
             raise ValueError(
-                f"Timestamp {t} outside the trajectory's time range"
-                f"{self.get_start_time()} to {self.get_end_time()}"
+                f"Timestamp {t} outside the trajectory's time range "
+                f"({self.get_start_time()} to {self.get_end_time()})"
             )
         if method not in ["nearest", "interpolated", "ffill", "bfill"]:
             raise ValueError(
-                f"Invalid method {method}. Must be one of [nearest, interpolated,"
+                f"Invalid method {method}. Must be one of [nearest, interpolated, "
                 "ffill, bfill]"
             )
         if method == "interpolated":
