@@ -128,6 +128,12 @@ class TestTrajectory:
             datetime(1970, 1, 1, 0, 0, 10), method="nearest"
         )
         assert pos == Point(6, 0)
+        
+    def test_get_postion_at_out_of_time_range(self):
+        with pytest.raises(ValueError):
+            pos = self.default_traj_metric.get_position_at(
+                datetime(2017, 1, 1, 12, 6, 1)
+            )
 
     def test_get_position_with_invalid_method(self):
         with pytest.raises(ValueError):

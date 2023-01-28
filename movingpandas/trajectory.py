@@ -619,10 +619,15 @@ class Trajectory:
         >>> traj.get_position_at(datetime(2018, 1, 1, 12, 9), method='nearest')
         POINT (6 6)
         """
+        if t < self.get_start_time() or t > self.get_end_time():
+            raise ValueError(
+                f"Timestamp {t} outside the trajectory's time range"
+                f"{self.get_start_time()} to {self.get_end_time()}"
+            )
         if method not in ["nearest", "interpolated", "ffill", "bfill"]:
             raise ValueError(
-                "Invalid method {}. Must be one of [nearest, interpolated, ffill,"
-                "bfill]".format(method)
+                f"Invalid method {method}. Must be one of [nearest, interpolated,"
+                "ffill, bfill]"
             )
         if method == "interpolated":
             return self.interpolate_position_at(t)
