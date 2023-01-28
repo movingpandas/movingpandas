@@ -171,7 +171,7 @@ It implements PandasMoveDataFrames and DaskMoveDataFrame on top of Pandas and Da
 
 ## Citation information
 
-Please cite [[0] and [1]](#publications) when using MovingPandas in your research and reference the appropriate release version. All releases of MovingPandas are listed on [Zenodo](https://doi.org/10.5281/zenodo.3710950) where you will find citation information, including DOIs.  
+Please cite [[0]](#publications) when using MovingPandas in your research and reference the appropriate release version. All releases of MovingPandas are listed on [Zenodo](https://doi.org/10.5281/zenodo.3710950) where you will find citation information, including DOIs.  
 
 
 ## Publications
