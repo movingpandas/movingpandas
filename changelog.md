@@ -2,6 +2,16 @@
 
 ## Changelog
 
+### 0.15 (released January 2023)
+
+[Version 0.15](https://github.com/anitagraser/movingpandas/releases/tag/v.0.15)
+includes, amongst other improvements, the following new algorithms:
+ 
+* New aggregation parameter for TrajectoryCollection.to_traj_gdf function 
+
+For full details, see the 
+[commit history](https://github.com/anitagraser/movingpandas/compare/v0.14.rc1...v.0.15).
+
 ### 0.14 (released December 2022)
 
 [Version 0.14](https://github.com/anitagraser/movingpandas/releases/tag/v0.14.rc1)
