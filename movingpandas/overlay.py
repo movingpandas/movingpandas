@@ -98,6 +98,9 @@ def create_entry_and_exit_points(traj, range):
     if type(range) != SpatioTemporalRange:
         raise TypeError("Input range has to be a SpatioTemporalRange!")
 
+    crs = traj.df.crs
+    temp_df = traj.df.copy()
+
     index = traj.df.index
     # Create row at entry point with attributes from previous row = pad
     row0 = traj.df.iloc[index.get_indexer([range.t_0], method="pad")[0]].copy()
@@ -106,8 +109,6 @@ def create_entry_and_exit_points(traj, range):
     rown = traj.df.iloc[index.get_indexer([range.t_n], method="pad")[0]].copy()
     rown["geometry"] = range.pt_n
     # Insert rows
-    temp_df = traj.df.copy()
-
     try:
         temp_df.loc[range.t_0] = row0
     except ValueError as err:
@@ -117,7 +118,6 @@ def create_entry_and_exit_points(traj, range):
             pass
         else:
             raise err
-
     try:
         temp_df.loc[range.t_n] = rown
     except ValueError as err:
@@ -125,6 +125,9 @@ def create_entry_and_exit_points(traj, range):
             pass
         else:
             raise err
+
+    # ensure CRS is set, fix for https://github.com/anitagraser/movingpandas/issues/291
+    temp_df = temp_df.set_crs(crs, allow_override=True)
 
     return temp_df.sort_index()
 
@@ -142,7 +145,6 @@ def _get_segments_for_ranges(traj, ranges):
             continue
         segment.id = "{}_{}".format(traj.id, counter)
         segment.parent = traj
-        segment.crs = traj.crs
         segments.append(segment)
         counter += 1
     return segments

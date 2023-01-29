@@ -99,6 +99,7 @@ class Trajectory:
 
         .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
         """  # noqa: E501
+
         if len(df) < 2:
             raise ValueError("The input DataFrame must have at least two rows.")
         if not isinstance(df, GeoDataFrame):
@@ -193,10 +194,7 @@ class Trajectory:
         -------
         Trajectory
         """
-        with warnings.catch_warnings():
-            # see https://github.com/anitagraser/movingpandas/issues/291
-            warnings.simplefilter("ignore")
-            copied = Trajectory(self.df.copy(), self.id, parent=self.parent)
+        copied = Trajectory(self.df.copy(), self.id, parent=self.parent)
         return copied
 
     def plot(self, *args, **kwargs):
@@ -1140,10 +1138,7 @@ class Trajectory:
         """
         from .trajectory_collection import TrajectoryCollection
 
-        with warnings.catch_warnings():
-            # see https://github.com/anitagraser/movingpandas/issues/291
-            warnings.simplefilter("ignore")
-            segments = clip(self, polygon, point_based)
+        segments = clip(self, polygon, point_based)
         return TrajectoryCollection(segments)
 
     def intersection(self, feature, point_based=False):
@@ -1214,7 +1209,8 @@ class Trajectory:
         line_df["t"] = self.df.index
         line_df["prev_t"] = line_df["t"].shift()
         line_df["line"] = line_df.apply(self._connect_prev_pt_and_geometry, axis=1)
-        return line_df.set_geometry("line")[1:]
+        line_df = line_df.set_geometry("line")[1:]
+        return line_df
 
     def get_mcp(self):
         """Return the Minimum Convex Polygon of the trajectory data
