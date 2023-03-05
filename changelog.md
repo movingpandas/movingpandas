@@ -1,5 +1,3 @@
-[back](./index)
-
 ## Changelog
 
 ### 0.15 (released January 2023)
