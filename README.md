@@ -6,7 +6,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/MovingPandasOrg)](https://twitter.com/MovingPandasOrg)
 [![Mastodon Follow](https://img.shields.io/mastodon/follow/109434720057484377?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@movingpandas)
 
-<img  width="50%" src="https://github.com/movingpandas/movingpandas/blob/gh-pages/assets/img/logo-wide.svg">
+<img  width="50%" src="https://movingpandas.github.io/movingpandas/assets/img/logo-wide.svg">
 
 
 MovingPandas is a Python library for handling movement data based on Pandas, [GeoPandas](https://geopandas.org), and [HoloViz](https://holoviz.org). 
