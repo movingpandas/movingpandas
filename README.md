@@ -9,20 +9,22 @@
 [![pyOpenSci](https://camo.githubusercontent.com/63ff31cdb80a06361e53ac2b9ac0d184118ebd0b/68747470733a2f2f74696e7975726c2e636f6d2f7932326e62387570)](https://github.com/pyOpenSci/software-review/issues/18)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
-[![Twitter Follow](https://img.shields.io/twitter/follow/MovingPandasOrg?style=social)](https://twitter.com/MovingPandasOrg)
+
+[![Twitter Follow](https://img.shields.io/twitter/follow/MovingPandasOrg)](https://twitter.com/MovingPandasOrg)
+[![Mastodon Follow](https://img.shields.io/mastodon/follow/109434720057484377?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@movingpandas)
 
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
 
-<img align="right" src="https://anitagraser.github.io/movingpandas/assets/img/movingpandas.png">
+<img align="right" src="https://movingpandas.github.io/movingpandas/assets/img/movingpandas.png">
 
 MovingPandas implements a Trajectory class and corresponding methods based on **[GeoPandas](https://geopandas.org)**.
 
 Visit **[movingpandas.org](http://movingpandas.org)** for details! 
 
-You can run **[MovingPandas examples](https://github.com/anitagraser/movingpandas-examples)** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/anitagraser/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
+You can run **[MovingPandas examples](https://github.com/movingpandas/movingpandas-examples)** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/movingpandas/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
 
-To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/anitagraser/movingpandas/master?filepath=tutorials/1-getting-started.ipynb).
+To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/movingpandas/movingpandas/master?filepath=tutorials/1-getting-started.ipynb).
 
 
 ## Documentation
