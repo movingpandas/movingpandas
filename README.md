@@ -36,7 +36,7 @@ For more information about individual releases, check out the [Changelog](./chan
 ## What's next?
 
 MovingPandas is under active development and there are some exciting features coming up. 
-If you’d like to contribute to this project, you’re welcome to head on over to the [Github repo](https://github.com/anitagraser/movingpandas)! 
+If you’d like to contribute to this project, you’re welcome to head on over to the [Github repo](https://github.com/movingpandas/movingpandas)! 
 
 
 ## Citation information
