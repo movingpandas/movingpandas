@@ -1,5 +1,3 @@
-[back](./index)
-
 ## Tutorials
 
 1. [Getting started](https://movingpandas.github.io/movingpandas-website/1-tutorials/1-getting-started.html)
