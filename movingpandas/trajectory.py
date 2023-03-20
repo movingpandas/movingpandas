@@ -13,6 +13,7 @@ from geopy.distance import geodesic
 try:
     from pyproj import CRS
 except ImportError:
+# TODO: fiona.crs is deprecated from fiona 2.0, use fiona.CRS instead
     from fiona.crs import from_epsg
 
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
@@ -37,7 +38,34 @@ DISTANCE_COL_NAME = "distance"
 SPEED_COL_NAME = "speed"
 TIMEDELTA_COL_NAME = "timedelta"
 TRAJ_ID_COL_NAME = "traj_id"
+DEFAULT_DISTANCE_UNITS = "default"
+DEFAULT_SPEED_UNITS = "default"
 
+# TODO: Add the following as a data structure
+          km 1000                 Kilometer
+           m 1                    Meter
+          dm 0.1                  Decimeter
+          cm 0.01                 Centimeter
+          mm 0.001                Millimeter
+         kmi 1852.0               International Nautical Mile
+          in 0.0254               International Inch
+          ft 0.3048               International Foot
+          yd 0.9144               International Yard
+          mi 1609.344             International Statute Mile
+        fath 1.8288               International Fathom
+          ch 20.1168              International Chain
+        link 0.201168             International Link
+       us-in 0.0254               U.S. Surveyor's Inch
+       us-ft 0.304800609601219    U.S. Surveyor's Foot
+       us-yd 0.914401828803658    U.S. Surveyor's Yard
+       us-ch 20.11684023368047    U.S. Surveyor's Chain
+       us-mi 1609.347218694437    U.S. Surveyor's Statute Mile
+      ind-yd 0.91439523           Indian Yard
+      ind-ft 0.30479841           Indian Foot
+      ind-ch 20.11669506          Indian Chain
+
+# TODO: Add time units in the same way
+# TODO: Add speed units? Or make speed require separate distance and time inputs?
 
 class MissingCRSWarning(UserWarning, ValueError):
     pass
@@ -710,6 +738,12 @@ class Trajectory:
             )
         return segment
 
+# TODO: this currently returns dist_meters, elif for different units with each having a return?
+# TODO: for CRS self.is_latlon = TRUE elifs return dist_km, dist_miles, but not for CRS units
+# TODO: How can I ensure a return in metres for CRS not latlong?
+# TODO: Use self.df.crs.axis_info[0].unit_name to check CRS units
+# TODO: Or just simply echo a warning that if CRS not in metres, other unit answers will be wrong?
+# TODO: Same applies to _compute_speed
     def _compute_distance(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
@@ -806,6 +840,7 @@ class Trajectory:
         else:
             return angular_difference(degrees1, degrees2)
 
+# TODO: also uses dist_meters
     def _compute_speed(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
@@ -914,17 +949,22 @@ class Trajectory:
         if not direction_exists:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
 
-    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME):
+#TODO: Check this works for specifying units
+    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=DEFAULT_DISTANCE_UNITS):
         """
         Add distance column and values to the trajectory's DataFrame.
 
         Distance is calculated as CRS units, except if the CRS is geographic
-        (e.g. EPSG:4326 WGS84) then distance is calculated in meters.
+        (e.g. EPSG:4326 WGS84) then distance is calculated in meters, 
+        or unless different units are specified.
 
         Parameters
         ----------
         overwrite : bool
             Whether to overwrite existing distance values (default: False)
+        
+        units : str
+            Units in which to calculate distance values (default: CRS units)
         """
         self.distance_col_name = name
         if self.distance_col_name in self.df.columns and not overwrite:
@@ -933,15 +973,17 @@ class Trajectory:
                 "Use overwrite=True to overwrite exiting values or update the "
                 "name arg."
             )
-        self.df = self._get_df_with_distance(name)
+ #TODO: do I need a self.distance_col_units = units with an if check on existence?
+ # if self.distance_col_units exists and != units and not overwrite then raise error
+        self.df = self._get_df_with_distance(name, units)
 
-    def add_speed(self, overwrite=False, name=SPEED_COL_NAME):
+    def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=DEFAULT_SPEED_UNITS):
         """
         Add speed column and values to the trajectory's DataFrame.
 
         Speed is calculated as CRS units per second, except if the CRS is
         geographic (e.g. EPSG:4326 WGS84) then speed is calculated in meters
-        per second.
+        per second, or unless different units are specified.
 
         Parameters
         ----------
@@ -949,6 +991,8 @@ class Trajectory:
             Whether to overwrite existing speed values (default: False)
         name : str
             Name of the speed column (default: "speed")
+        units : str
+            Units in which to calculate speed (default: CRS units per second)
         """
         self.speed_col_name = name
         if self.speed_col_name in self.df.columns and not overwrite:
@@ -957,7 +1001,9 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        self.df = self._get_df_with_speed(name)
+# TODO: Do I need a self.speed_col_units = units with an if to check on existence?      
+# if self.speed_col_units exists and not= units and not overwrite then raise error  
+        self.df = self._get_df_with_speed(name, units)
 
     def _get_df_with_acceleration(self, name=ACCELERATION_COL_NAME):
         # Avoid computing speed again if already computed
@@ -1024,7 +1070,8 @@ class Trajectory:
         temp_df[name] = times.diff().values
         return temp_df
 
-    def _get_df_with_distance(self, name=DISTANCE_COL_NAME):
+# TODO: Check this works
+    def _get_df_with_distance(self, name=DISTANCE_COL_NAME, units=DEFAULT_DISTANCE_UNITS):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
@@ -1036,6 +1083,7 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
+# TODO: Edit this for units
     def _get_df_with_speed(self, name=SPEED_COL_NAME):
         temp_df = self._get_df_with_timedelta(name="delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
