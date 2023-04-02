@@ -9,6 +9,7 @@ from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
+from collections import namedtuple
 
 try:
     from pyproj import CRS
@@ -38,10 +39,8 @@ DISTANCE_COL_NAME = "distance"
 SPEED_COL_NAME = "speed"
 TIMEDELTA_COL_NAME = "timedelta"
 TRAJ_ID_COL_NAME = "traj_id"
-DEFAULT_DISTANCE_UNITS = "default"
-DEFAULT_TIME_UNITS = "default"
+UNITS = namedtuple("UNITS", "distance time time2", defaults=(None, None, None))
 
-# TODO: Come back to this if it does't work ideally
 DISTANCE_UNIT_LIST = [
     {"abbr": "km", "conv": 1000, "fullname": "Kilometer"},
     {"abbr": "m", "conv": 1, "fullname": "metre"},
@@ -56,66 +55,163 @@ DISTANCE_UNIT_LIST = [
     {"abbr": "link", "conv": 0.201168, "fullname": "International Link"},
     {"abbr": "chain", "conv": 20.1168, "fullname": "International Chain"},
     {"abbr": "fathom", "conv": 1.8288, "fullname": "International Fathom"},
-    {"abbr": "british_ft", "conv": 0.304799471538676,
-        "fullname": "British foot (Sears 1922)", "epsg": 9041},
-    {"abbr": "british_yd", "conv": 0.914398414616029,
-        "fullname": "British yard (Sears 1922)", "epsg": 9040},
-    {"abbr": "british_chain_sears", "conv": 20.11677651215526,
-        "fullname": "British chain (Sears 1922)", "epsg": 9042},
-    {"abbr": "british_link_sears", "conv": 0.20116767651215526,
-        "fullname": "British link (Sears 1922)", "epsg": 9043},
-    {"abbr": "sears_yd", "conv": 0.914398414616029,
-        "fullname": "Yard (Sears)"},
-    {"abbr": "link_sears", "conv": 0.20116767651215526,
-        "fullname": "Link (Sears)"},
-    {"abbr": "chain_sears", "conv": 20.11677651215526,
-        "fullname": "Chain (Sears)"},
-    {"abbr": "british_ft_sears_truncated", "conv": 0.914398,
-        "fullname": "British foot (Sears 1922 truncated)", "epsg": 9300},
-    {"abbr": "british_chain_sears_truncated", "conv": 20.11676,
-        "fullname": "British chain (Sears 1922 truncated)", "epsg": 9301},
-    {"abbr": "british_chain_benoit", "conv": 20.116782494375872,
-        "fullname": "British chain (Benoit 1895 B)", "epsg": 9062},
-    {"abbr": "chain_benoit", "conv": 20.116782494375872,
-        "fullname": "Chain (Benoit)", "epsg": 9062},
-    {"abbr": "link_benoit", "conv": 0.20116782494375872,
-        "fullname": "Link (Benoit)", "epsg": 9063},
-    {"abbr": "clarke_yd", "conv": 0.9143917962,
-        "fullname": "Clarke's yard", "epsg": 9037},
-    {"abbr": "clarke_ft", "conv": 0.3047972654,
-        "fullname": "Clarke’s Foot", "epsg": 9005},
-    {"abbr": "clarke_link", "conv": 0.201166195164,
-        "fullname": "Clarke’s link", "epsg": 9039},
-    {"abbr": "clarke_chain", "conv": 20.1166195164,
-        "fullname": "Clarke's chain", "epsg": 9038},
-    {"abbr": "british_ft_1936", "conv": 0.3048007491,
-        "fullname": "British foot (1936)", "epsg": 9095},
-    {"abbr": "gold_coast_ft", "conv": 0.3047997101815,
-        "fullname": "Gold Coast foot", "epsg": 9094},
+    {
+        "abbr": "british_ft",
+        "conv": 0.304799471538676,
+        "fullname": "British foot (Sears 1922)",
+        "epsg": 9041,
+    },
+    {
+        "abbr": "british_yd",
+        "conv": 0.914398414616029,
+        "fullname": "British yard (Sears 1922)",
+        "epsg": 9040,
+    },
+    {
+        "abbr": "british_chain_sears",
+        "conv": 20.11677651215526,
+        "fullname": "British chain (Sears 1922)",
+        "epsg": 9042,
+    },
+    {
+        "abbr": "british_link_sears",
+        "conv": 0.20116767651215526,
+        "fullname": "British link (Sears 1922)",
+        "epsg": 9043,
+    },
+    {"abbr": "sears_yd", "conv": 0.914398414616029, "fullname": "Yard (Sears)"},
+    {"abbr": "link_sears", "conv": 0.20116767651215526, "fullname": "Link (Sears)"},
+    {"abbr": "chain_sears", "conv": 20.11677651215526, "fullname": "Chain (Sears)"},
+    {
+        "abbr": "british_ft_sears_truncated",
+        "conv": 0.914398,
+        "fullname": "British foot (Sears 1922 truncated)",
+        "epsg": 9300,
+    },
+    {
+        "abbr": "british_chain_sears_truncated",
+        "conv": 20.11676,
+        "fullname": "British chain (Sears 1922 truncated)",
+        "epsg": 9301,
+    },
+    {
+        "abbr": "british_chain_benoit",
+        "conv": 20.116782494375872,
+        "fullname": "British chain (Benoit 1895 B)",
+        "epsg": 9062,
+    },
+    {
+        "abbr": "chain_benoit",
+        "conv": 20.116782494375872,
+        "fullname": "Chain (Benoit)",
+        "epsg": 9062,
+    },
+    {
+        "abbr": "link_benoit",
+        "conv": 0.20116782494375872,
+        "fullname": "Link (Benoit)",
+        "epsg": 9063,
+    },
+    {
+        "abbr": "clarke_yd",
+        "conv": 0.9143917962,
+        "fullname": "Clarke's yard",
+        "epsg": 9037,
+    },
+    {
+        "abbr": "clarke_ft",
+        "conv": 0.3047972654,
+        "fullname": "Clarke’s Foot",
+        "epsg": 9005,
+    },
+    {
+        "abbr": "clarke_link",
+        "conv": 0.201166195164,
+        "fullname": "Clarke’s link",
+        "epsg": 9039,
+    },
+    {
+        "abbr": "clarke_chain",
+        "conv": 20.1166195164,
+        "fullname": "Clarke's chain",
+        "epsg": 9038,
+    },
+    {
+        "abbr": "british_ft_1936",
+        "conv": 0.3048007491,
+        "fullname": "British foot (1936)",
+        "epsg": 9095,
+    },
+    {
+        "abbr": "gold_coast_ft",
+        "conv": 0.3047997101815,
+        "fullname": "Gold Coast foot",
+        "epsg": 9094,
+    },
     {"abbr": "rod", "conv": 0.1988387815, "fullname": "Rod"},
     {"abbr": "furlong", "conv": 201.168, "fullname": "Furlong"},
-    {"abbr": "german_m", "conv": 1.0000135965,
-        "fullname": "German legal metre", "epsg": 9031},
+    {
+        "abbr": "german_m",
+        "conv": 1.0000135965,
+        "fullname": "German legal metre",
+        "epsg": 9031,
+    },
     {"abbr": "survey_in", "conv": 0.0254000508001016, "fullname": "US survey inch"},
-    {"abbr": "survey_ft", "conv": 0.3048006096012192,
-        "fullname": "US survey foot", "epsg": 9003},
+    {
+        "abbr": "survey_ft",
+        "conv": 0.3048006096012192,
+        "fullname": "US survey foot",
+        "epsg": 9003,
+    },
     {"abbr": "survey_yd", "conv": 0.9144018288036575, "fullname": "US survey yard"},
-    {"abbr": "survey_lk", "conv": 0.20116840233680463,
-        "fullname": "US survey link", "epsg": 9034},
-    {"abbr": "survey_ch", "conv": 20.116840233680463,
-        "fullname": "US survey chain", "epsg": 9033},
-    {"abbr": "survey_mi", "conv": 1609.3472186944373,
-        "fullname": "US survey mile", "epsg": 9035},
-    {"abbr": "indian_yd", "conv": 0.914398530744441,
-        "fullname": "Indian Yard", "epsg": 9084},
-    {"abbr": "indian_ft", "conv": 0.3047995104977167,
-        "fullname": "Indian Foot", "epsg": 9080},
-    {"abbr": "indian_ft_1937", "conv": 0.30479841,
-        "fullname": "Indian Foot", "epsg": 9081},
-    {"abbr": "indian_ft_1962", "conv": 0.3047996,
-        "fullname": "Indian Foot", "epsg": 9082},
-    {"abbr": "indian_ft_1975", "conv": 0.3047995,
-        "fullname": "Indian Foot", "epsg": 9083}
+    {
+        "abbr": "survey_lk",
+        "conv": 0.20116840233680463,
+        "fullname": "US survey link",
+        "epsg": 9034,
+    },
+    {
+        "abbr": "survey_ch",
+        "conv": 20.116840233680463,
+        "fullname": "US survey chain",
+        "epsg": 9033,
+    },
+    {
+        "abbr": "survey_mi",
+        "conv": 1609.3472186944373,
+        "fullname": "US survey mile",
+        "epsg": 9035,
+    },
+    {
+        "abbr": "indian_yd",
+        "conv": 0.914398530744441,
+        "fullname": "Indian Yard",
+        "epsg": 9084,
+    },
+    {
+        "abbr": "indian_ft",
+        "conv": 0.3047995104977167,
+        "fullname": "Indian Foot",
+        "epsg": 9080,
+    },
+    {
+        "abbr": "indian_ft_1937",
+        "conv": 0.30479841,
+        "fullname": "Indian Foot",
+        "epsg": 9081,
+    },
+    {
+        "abbr": "indian_ft_1962",
+        "conv": 0.3047996,
+        "fullname": "Indian Foot",
+        "epsg": 9082,
+    },
+    {
+        "abbr": "indian_ft_1975",
+        "conv": 0.3047995,
+        "fullname": "Indian Foot",
+        "epsg": 9083,
+    },
 ]
 
 TIME_UNIT_LIST = [
@@ -189,8 +285,7 @@ class Trajectory:
         """  # noqa: E501
 
         if len(df) < 2:
-            raise ValueError(
-                "The input DataFrame must have at least two rows.")
+            raise ValueError("The input DataFrame must have at least two rows.")
         if not isinstance(df, GeoDataFrame):
             if x is None or y is None:
                 raise ValueError(
@@ -504,8 +599,7 @@ class Trajectory:
         GeoDataFrame
         """
         line_gdf = self._to_line_df()
-        line_gdf.drop(
-            columns=[self.get_geom_column_name(), "prev_pt"], inplace=True)
+        line_gdf.drop(columns=[self.get_geom_column_name(), "prev_pt"], inplace=True)
         line_gdf.reset_index(drop=True, inplace=True)
         line_gdf.rename(columns={"line": "geometry"}, inplace=True)
         line_gdf.set_geometry("geometry", inplace=True)
@@ -678,8 +772,7 @@ class Trajectory:
         )
         if t_diff == 0 or line.length == 0:
             return prev_row[self.get_geom_column_name()]
-        interpolated_position = line.interpolate(
-            t_diff_at / t_diff * line.length)
+        interpolated_position = line.interpolate(t_diff_at / t_diff * line.length)
         return interpolated_position
 
     def get_position_at(self, t, method="interpolated"):
@@ -771,13 +864,11 @@ class Trajectory:
         else:
             try:
                 return point_gdf_to_linestring(
-                    self.get_segment_between(
-                        t1, t2).df, self.get_geom_column_name()
+                    self.get_segment_between(t1, t2).df, self.get_geom_column_name()
                 )
             except RuntimeError:
                 raise RuntimeError(
-                    "Cannot generate linestring between {0} and {1}".format(
-                        t1, t2)
+                    "Cannot generate linestring between {0} and {1}".format(t1, t2)
                 )
 
     def get_segment_between(self, t1, t2):
@@ -796,8 +887,7 @@ class Trajectory:
         Trajectory
             Extracted trajectory segment
         """
-        segment = Trajectory(
-            self.df[t1:t2], "{}_{}".format(self.id, t1), parent=self)
+        segment = Trajectory(self.df[t1:t2], "{}_{}".format(self.id, t1), parent=self)
         if not segment.is_valid():
             raise RuntimeError(
                 "Failed to extract valid trajectory segment between {} and {}".format(
@@ -812,29 +902,53 @@ class Trajectory:
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
-            raise ValueError(
-                "Invalid trajectory! Got {} instead of point!".format(pt1))
+            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
         if pt0 == pt1:
             return 0.0
         # If no units declared, return distance in m (geographic) or CRS units
-        if units == "default":
+        if units.distance is None:
             if self.is_latlon:
                 dist_computed = measure_distance_geodesic(pt0, pt1)
             else:  # The following distance will be in CRS units that might not be meters!
                 dist_computed = measure_distance_euclidean(pt0, pt1)
         # If units declared, return distance in those units if CRS units known
         # Assumes CRS in meters if CRS units unknown
-        if units in [d["abbr"] for d in DISTANCE_UNIT_LIST]:
+        if units.distance in [d["abbr"] for d in DISTANCE_UNIT_LIST]:
             if self.is_latlon:
-                dist_computed = measure_distance_geodesic(
-                    pt0, pt1)/[d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units][0]
+                dist_computed = (
+                    measure_distance_geodesic(pt0, pt1)
+                    / [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("abbr") == units.distance
+                    ][0]
+                )
             elif self.crs_units in [d["fullname"] for d in DISTANCE_UNIT_LIST]:
-                dist_computed = measure_distance_euclidean(pt0, pt1)*[d["conv"] for d in DISTANCE_UNIT_LIST if d.get(
-                    "fullname") == self.crs_units][0]/[d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units][0]
+                dist_computed = (
+                    measure_distance_euclidean(pt0, pt1)
+                    * [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("fullname") == self.crs_units
+                    ][0]
+                    / [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("abbr") == units.distance
+                    ][0]
+                )
             # The following distance will be conversion factor * CRS units that might not be meters!
-            elif self.crs_units is None or self.crs_units not in [d["fullname"] for d in DISTANCE_UNIT_LIST]:
-                dist_computed = measure_distance_euclidean(
-                    pt0, pt1)/[d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units][0]
+            elif self.crs_units is None or self.crs_units not in [
+                d["fullname"] for d in DISTANCE_UNIT_LIST
+            ]:
+                dist_computed = (
+                    measure_distance_euclidean(pt0, pt1)
+                    / [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("abbr") == units.distance
+                    ][0]
+                )
         return dist_computed
 
     def _add_prev_pt(self, force=True):
@@ -920,42 +1034,66 @@ class Trajectory:
         else:
             return angular_difference(degrees1, degrees2)
 
-    def _compute_speed(self, row, units=(DEFAULT_DISTANCE_UNITS, DEFAULT_TIME_UNITS)):
-        if units[1] == "default":
-            t_units = "s"
+    def _compute_speed(self, row, units):
+        if units.time is None:
+            t_conv = 1
         else:
-            t_units = units[1]
-        t_conv = [t["conv"] for t in TIME_UNIT_LIST if t.get(
-            "abbr") == t_units][0]
+            t_conv = [t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time][
+                0
+            ]
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
-            raise ValueError(
-                "Invalid trajectory! Got {} instead of point!".format(pt1))
+            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
         if pt0 == pt1:
             return 0.0
         # If no units declared, return speed in m/s (geographic) or CRS units/s
-        if units[0] == "default":
+        if units.distance is None:
             if self.is_latlon:
                 dist_computed = measure_distance_geodesic(pt0, pt1)
             else:  # The following distance will be in CRS units that might not be meters!
                 dist_computed = measure_distance_euclidean(pt0, pt1)
         # If units declared, return speed in those units if CRS units known
         # Assumes CRS in meters if CRS units unknown
-        if units[0] in [d["abbr"] for d in DISTANCE_UNIT_LIST]:
+        if units.distance in [d["abbr"] for d in DISTANCE_UNIT_LIST]:
             if self.is_latlon:
-                dist_computed = measure_distance_geodesic(
-                    pt0, pt1)/[d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units[0]][0]
+                dist_computed = (
+                    measure_distance_geodesic(pt0, pt1)
+                    / [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("abbr") == units.distance
+                    ][0]
+                )
             elif self.crs_units in [d["fullname"] for d in DISTANCE_UNIT_LIST]:
-                dist_computed = measure_distance_euclidean(pt0, pt1)*[d["conv"] for d in DISTANCE_UNIT_LIST if d.get(
-                    "fullname") == self.crs_units][0]/[d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units[0]][0]
+                dist_computed = (
+                    measure_distance_euclidean(pt0, pt1)
+                    * [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("fullname") == self.crs_units
+                    ][0]
+                    / [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("abbr") == units.distance
+                    ][0]
+                )
             # The following distance will be conversion factor * CRS units that might not be meters!
-            elif self.crs_units is None or self.crs_units not in [d["fullname"] for d in DISTANCE_UNIT_LIST]:
-                dist_computed = measure_distance_euclidean(
-                    pt0, pt1)/[d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units[0]][0]
-        return dist_computed / row["delta_t"].total_seconds()*t_conv
+            elif self.crs_units is None or self.crs_units not in [
+                d["fullname"] for d in DISTANCE_UNIT_LIST
+            ]:
+                dist_computed = (
+                    measure_distance_euclidean(pt0, pt1)
+                    / [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("abbr") == units.distance
+                    ][0]
+                )
+        return dist_computed / row["delta_t"].total_seconds() * t_conv
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
@@ -963,8 +1101,7 @@ class Trajectory:
         if not isinstance(pt0, Point):
             return None
         if not isinstance(pt1, Point):
-            raise ValueError(
-                "Invalid trajectory! Got {} instead of point!".format(pt1))
+            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
         if pt0 == pt1:
             # to avoid intersection issues with zero length lines
             pt1 = translate(pt1, 0.00000001, 0.00000001)
@@ -1051,7 +1188,7 @@ class Trajectory:
         if not direction_exists:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
 
-    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=DEFAULT_DISTANCE_UNITS):
+    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=None):
         """
         Add distance column and values to the trajectory's DataFrame.
 
@@ -1149,9 +1286,13 @@ class Trajectory:
                 "Use overwrite=True to overwrite exiting values or update the "
                 "name arg."
             )
-        self.df = self._get_df_with_distance(name, units)
+        if isinstance(units, tuple):
+            units = UNITS(*units)
+        else:
+            units = UNITS(units)
+        self.df = self._get_df_with_distance(units=units, name=name)
 
-    def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=(DEFAULT_DISTANCE_UNITS, DEFAULT_TIME_UNITS)):
+    def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
         """
         Add speed column and values to the trajectory's DataFrame.
 
@@ -1172,8 +1313,12 @@ class Trajectory:
         name : str
             Name of the speed column (default: "speed")
         units : tuple
-            Units (distance : str, time: str) in which to calculate speed
-            (default: CRS units, or metres if geographic, per second)
+            Units in which to calculate speed
+            distance : str
+                Abbreviation for the distance unit (default: CRS units, or metres if geographic)
+            time : str
+                Abbreviation for the time unit (default: seconds)
+
             Allowed distance units:
                 "km": Kilometer
                 "m": metre
@@ -1259,9 +1404,15 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        self.df = self._get_df_with_speed(name, units)
+        if isinstance(units, tuple):
+            units = UNITS(*units)
+        else:
+            units = UNITS(units)
+        self.df = self._get_df_with_speed(units, name)
 
-    def add_acceleration(self, overwrite=False, name=ACCELERATION_COL_NAME, units=(DEFAULT_DISTANCE_UNITS, DEFAULT_TIME_UNITS)):
+    def add_acceleration(
+        self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
+    ):
         """
         Add acceleration column and values to the trajectory's DataFrame.
 
@@ -1282,8 +1433,14 @@ class Trajectory:
         name : str
             Name of the acceleration column (default: "acceleration")
         units : tuple
-            Units (distance : str, time: str) in which to calculate acceleration
-            (default: CRS units, or metres if geographic, per second squared)
+            Units in which to calculate acceleration
+            distance : str
+                Abbreviation for the distance unit (default: CRS units, or metres if geographic)
+            time : str
+                Abbreviation for the time unit (default: seconds)
+            time2 : str
+                Abbreviation for the second time unit (default: equal to time)
+
             Allowed distance units:
                 "km": Kilometer
                 "m": metre
@@ -1368,7 +1525,11 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        self.df = self._get_df_with_acceleration(name, units)
+        if isinstance(units, tuple):
+            units = UNITS(*units)
+        else:
+            units = UNITS(units)
+        self.df = self._get_df_with_acceleration(units, name)
 
     def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
         """
@@ -1399,12 +1560,11 @@ class Trajectory:
         temp_df[name] = times.diff().values
         return temp_df
 
-    def _get_df_with_distance(self, name=DISTANCE_COL_NAME, units=DEFAULT_DISTANCE_UNITS):
+    def _get_df_with_distance(self, units, name=DISTANCE_COL_NAME):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[name] = temp_df.apply(
-                self._compute_distance, units=units, axis=1)
+            temp_df[name] = temp_df.apply(self._compute_distance, units=units, axis=1)
         except ValueError as e:
             raise e
         # set the distance in the first row to zero
@@ -1412,12 +1572,11 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
-    def _get_df_with_speed(self, name=SPEED_COL_NAME, units=(DEFAULT_DISTANCE_UNITS, DEFAULT_TIME_UNITS)):
+    def _get_df_with_speed(self, units, name=SPEED_COL_NAME):
         temp_df = self._get_df_with_timedelta(name="delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[name] = temp_df.apply(
-                self._compute_speed, units=units, axis=1)
+            temp_df[name] = temp_df.apply(self._compute_speed, units=units, axis=1)
         except ValueError as e:
             raise e
         # set the speed in the first row to the speed of the second row
@@ -1425,17 +1584,22 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
 
-    def _get_df_with_acceleration(self, name=ACCELERATION_COL_NAME, units=(DEFAULT_DISTANCE_UNITS, DEFAULT_TIME_UNITS)):
-        if units[1] == "default":
-            t_units = "s"
+    def _get_df_with_acceleration(self, units, name=ACCELERATION_COL_NAME):
+        temp_df = self._get_df_with_speed(units=units, name="speed_temp")
+        if units.time is None:
+            t_conv = 1
+        elif units.time2 is None:
+            t_conv = [t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time][
+                0
+            ]
         else:
-            t_units = units[1]
-        t_conv = [t["conv"] for t in TIME_UNIT_LIST if t.get(
-            "abbr") == t_units][0]
-        temp_df = self._get_df_with_speed(name="speed_temp", units=units)
+            t_conv = [
+                t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time2
+            ][0]
         temp_df[name] = (
             temp_df["speed_temp"].diff()
-            / temp_df.index.to_series().diff().dt.total_seconds()*t_conv
+            / temp_df.index.to_series().diff().dt.total_seconds()
+            * t_conv
         )
         # set the acceleration in the first row to the acceleration of the
         # second row
@@ -1602,8 +1766,7 @@ class Trajectory:
         line_df["prev_pt"] = line_df.geometry.shift()
         line_df["t"] = self.df.index
         line_df["prev_t"] = line_df["t"].shift()
-        line_df["line"] = line_df.apply(
-            self._connect_prev_pt_and_geometry, axis=1)
+        line_df["line"] = line_df.apply(self._connect_prev_pt_and_geometry, axis=1)
         line_df = line_df.set_geometry("line")[1:]
         return line_df
 
