@@ -218,7 +218,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory locations at timestamp t
         """
-        gdf = GeoDataFrame()
+        result = []
         for traj in self:
             if t == "start":
                 x = traj.get_row_at(traj.get_start_time())
@@ -228,8 +228,9 @@ class TrajectoryCollection:
                 if t < traj.get_start_time() or t > traj.get_end_time():
                     continue
                 x = traj.get_row_at(t)
-            gdf = gdf.append(x)
-        return GeoDataFrame(gdf)
+            result.append(x.to_frame())
+            df = pd.concat(result, ignore_index=True)
+        return GeoDataFrame(df)
 
     def get_start_locations(self):
         """
