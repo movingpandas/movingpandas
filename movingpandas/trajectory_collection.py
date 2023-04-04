@@ -220,6 +220,7 @@ class TrajectoryCollection:
         """
         result = []
         for traj in self:
+            x = None
             if t == "start":
                 x = traj.get_row_at(traj.get_start_time())
             elif t == "end":
@@ -228,7 +229,7 @@ class TrajectoryCollection:
                 if t < traj.get_start_time() or t > traj.get_end_time():
                     continue
                 x = traj.get_row_at(t)
-            result.append(x.to_frame())
+            result.append(x.to_frame().T)
         if result:
             df = concat(result, ignore_index=True)
             return GeoDataFrame(df)
