@@ -4,7 +4,7 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Tests](https://github.com/movingpandas/movingpandas/actions/workflows/tests.yaml/badge.svg)](https://github.com/movingpandas/movingpandas/actions/workflows/tests.yaml)
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=main)](https://movingpandas.readthedocs.io/en/main/)
-[![codecov](https://codecov.io/gh/movingpandas/movingpandas/branch/master/graph/badge.svg)](https://codecov.io/gh/anitagraser/movingpandas)
+[![codecov](https://codecov.io/gh/movingpandas/movingpandas/branch/main/graph/badge.svg)](https://codecov.io/gh/movingpandas/movingpandas)
 [![DOI](https://zenodo.org/badge/161995245.svg)](https://zenodo.org/badge/latestdoi/161995245)
 [![pyOpenSci](https://camo.githubusercontent.com/63ff31cdb80a06361e53ac2b9ac0d184118ebd0b/68747470733a2f2f74696e7975726c2e636f6d2f7932326e62387570)](https://github.com/pyOpenSci/software-review/issues/18)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -24,7 +24,7 @@ Visit **[movingpandas.org](http://movingpandas.org)** for details!
 
 You can run **[MovingPandas examples](https://github.com/movingpandas/movingpandas-examples)** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/movingpandas/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
 
-To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/movingpandas/movingpandas/master?filepath=tutorials/1-getting-started.ipynb).
+To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/movingpandas/movingpandas/main?filepath=tutorials/1-getting-started.ipynb).
 
 
 ## Documentation
@@ -34,35 +34,35 @@ The official documentation is hosted on **[ReadTheDocs](https://movingpandas.rea
 
 ## Examples
 
-### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/2-analysis-examples/bird-migration.ipynb)
+### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/2-analysis-examples/bird-migration.ipynb)
 
 Create interactive trajectory plots, including multiple linked plots with ease
 
 ![movingpandas_animated](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
 
-### Stop detection  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/8-detecting-stops.ipynb)
+### Stop detection  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/8-detecting-stops.ipynb)
 
 Detect stops in trajectories, extract them as points or segments, and use them to split trajectories
 
 ![movingpandas_stop_detection](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
 
 
-### Trajectory generalization  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/7-generalizing-trajectories.ipynb)
+### Trajectory generalization  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/7-generalizing-trajectories.ipynb)
 
 Generalize trajectories using spatial, temporal, and spatiotemporal methods
 
 ![movingpandas_generalize](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
 
 
-### Trajectory cleaning & smoothing  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/10-smoothing-trajectories.ipynb)
+### Trajectory cleaning & smoothing  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/10-smoothing-trajectories.ipynb)
 
 Clean and sooth trajectories by removing outliers and applying Kalman filters
 
 ![movingpandas smooth](https://user-images.githubusercontent.com/590385/184359439-52eca394-5df6-40b2-a5b3-54543c3ccf34.png)
 
 
-### Trajectory aggregation [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/anitagraser/movingpandas-examples/blob/main/1-tutorials/9-aggregating-trajectories.ipynb)
+### Trajectory aggregation [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/9-aggregating-trajectories.ipynb)
 
 Aggregate trajectories to explore larger patterns
 
@@ -144,21 +144,21 @@ python setup.py develop
 ```
 
 
-## Contributing to MovingPandas [![GitHub contributors](https://img.shields.io/github/contributors/anitagraser/movingpandas.svg)](https://github.com/anitagraser/movingpandas/graphs/contributors)
+## Contributing to MovingPandas [![GitHub contributors](https://img.shields.io/github/contributors/movingpandas/movingpandas.svg)](https://github.com/movingpandas/movingpandas/graphs/contributors)
 
 All contributions, bug reports, bug fixes, documentation improvements, enhancements and ideas are welcome.
 
-A detailed overview on how to contribute can be found in the [contributing guide](https://github.com/anitagraser/movingpandas/blob/master/CONTRIBUTING.md) on GitHub.
+A detailed overview on how to contribute can be found in the [contributing guide](https://github.com/movingpandas/movingpandas/blob/main/CONTRIBUTING.md) on GitHub.
 
 
 ## Related Python packages
 
-**For a more comprehensive list, including non-Python solutions, check https://github.com/anitagraser/movement-analysis-tools**
+**For a more comprehensive list, including non-Python solutions, check https://github.com/movingpandas/movement-analysis-tools**
 
 [scikit-mobility](https://github.com/scikit-mobility/scikit-mobility) is a similar package which also deals with movement data. 
 It implements TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas. 
 There is little overlap in the covered use cases and implemented functionality (comparing 
-[MovingPandas tutorials](https://github.com/anitagraser/movingpandas/tree/master/tutorials) and 
+[MovingPandas tutorials](https://github.com/movingpandas/movingpandas/tree/main/tutorials) and 
 [scikit-mobility tutorials](https://github.com/scikit-mobility/tutorials)). 
 MovingPandas focuses on spatio-temporal data exploration with corresponding functions for data manipulation and analysis. 
 scikit-mobility on the other hand focuses on computing human mobility metrics, generating synthetic trajectories 
