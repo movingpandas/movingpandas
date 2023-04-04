@@ -229,7 +229,7 @@ class TrajectoryCollection:
                     continue
                 x = traj.get_row_at(t)
             result.append(x.to_frame())
-            df = concat(result, ignore_index=True)
+        df = concat(result, ignore_index=True)
         return GeoDataFrame(df)
 
     def get_start_locations(self):
