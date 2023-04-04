@@ -39,7 +39,9 @@ DISTANCE_COL_NAME = "distance"
 SPEED_COL_NAME = "speed"
 TIMEDELTA_COL_NAME = "timedelta"
 TRAJ_ID_COL_NAME = "traj_id"
-UNITS = namedtuple("UNITS", "distance time time2", defaults=(None, None, None))
+UNITS = namedtuple(
+    "UNITS", "distance time time2 crs", defaults=(None, None, None, None)
+)
 
 DISTANCE_UNIT_LIST = [
     {"abbr": "km", "conv": 1000, "fullname": "Kilometer"},
@@ -121,13 +123,13 @@ DISTANCE_UNIT_LIST = [
     {
         "abbr": "clarke_ft",
         "conv": 0.3047972654,
-        "fullname": "Clarke’s Foot",
+        "fullname": "Clarke's Foot",
         "epsg": 9005,
     },
     {
         "abbr": "clarke_link",
         "conv": 0.201166195164,
-        "fullname": "Clarke’s link",
+        "fullname": "Clarke's link",
         "epsg": 9039,
     },
     {
@@ -212,6 +214,12 @@ DISTANCE_UNIT_LIST = [
         "fullname": "Indian Foot",
         "epsg": 9083,
     },
+    {
+        "abbr": "deg",
+        "conv": 1,
+        "fullname": "degree",
+        "epsg": 4326,
+    },  # To allow geodesic conversions
 ]
 
 TIME_UNIT_LIST = [
@@ -896,7 +904,58 @@ class Trajectory:
             )
         return segment
 
-    def _compute_distance(self, row, units):
+    def _get_conversion(self, units):
+        # Looks up unit conversions in the unit dictionaries
+        # If distance specified, lookup distance and crs conversions and check time
+        # If time specified, lookup time conversion and check if time2 specified
+        # If time2 specified, lookup time2 conversion, otherwise t2_conv=t_conv
+        # Unit conversions default to 1 if not specified or lookup fails
+        d_conv, t_conv, t2_conv, crs_conv = 1, 1, 1, 1
+        if units.distance is not None:
+            try:
+                d_conv = [
+                    d["conv"]
+                    for d in DISTANCE_UNIT_LIST
+                    if d.get("abbr") == units.distance
+                ][0]
+            except IndexError:
+                raise ValueError("Invalid distance units!")
+            else:
+                try:
+                    crs_conv = [
+                        d["conv"]
+                        for d in DISTANCE_UNIT_LIST
+                        if d.get("fullname") == self.crs_units
+                    ][0]
+                except IndexError:
+                    warnings.warn(
+                        "No valid CRS distance units. Computations will "
+                        "assume CRS distance units are meters",
+                        category=MissingCRSWarning,
+                    )
+                finally:
+                    if units.time is not None:
+                        try:
+                            t_conv = [
+                                t["conv"]
+                                for t in TIME_UNIT_LIST
+                                if t.get("abbr") == units.time
+                            ][0]
+                        except IndexError:
+                            pass
+                        else:
+                            if units.time2 is not None:
+                                try:
+                                    t2_conv = [
+                                        t["conv"]
+                                        for t in TIME_UNIT_LIST
+                                        if t.get("abbr") == units.time2
+                                    ][0]
+                                except IndexError:
+                                    t2_conv = t_conv
+        return UNITS(d_conv, t_conv, t2_conv, crs_conv)
+
+    def _compute_distance(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
@@ -905,50 +964,18 @@ class Trajectory:
             raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
         if pt0 == pt1:
             return 0.0
-        # If no units declared, return distance in m (geographic) or CRS units
-        if units.distance is None:
-            if self.is_latlon:
-                dist_computed = measure_distance_geodesic(pt0, pt1)
-            else:  # The following distance will be in CRS units that might not be meters!
-                dist_computed = measure_distance_euclidean(pt0, pt1)
-        # If units declared, return distance in those units if CRS units known
-        # Assumes CRS in meters if CRS units unknown
-        if units.distance in [d["abbr"] for d in DISTANCE_UNIT_LIST]:
-            if self.is_latlon:
-                dist_computed = (
-                    measure_distance_geodesic(pt0, pt1)
-                    / [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("abbr") == units.distance
-                    ][0]
-                )
-            elif self.crs_units in [d["fullname"] for d in DISTANCE_UNIT_LIST]:
-                dist_computed = (
-                    measure_distance_euclidean(pt0, pt1)
-                    * [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("fullname") == self.crs_units
-                    ][0]
-                    / [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("abbr") == units.distance
-                    ][0]
-                )
-            # The following distance will be conversion factor * CRS units that might not be meters!
-            elif self.crs_units is None or self.crs_units not in [
-                d["fullname"] for d in DISTANCE_UNIT_LIST
-            ]:
-                dist_computed = (
-                    measure_distance_euclidean(pt0, pt1)
-                    / [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("abbr") == units.distance
-                    ][0]
-                )
+        if self.is_latlon:
+            dist_computed = (
+                measure_distance_geodesic(pt0, pt1)
+                * conversion.crs
+                / conversion.distance
+            )
+        else:  # The following distance will be in CRS units that might not be meters!
+            dist_computed = (
+                measure_distance_euclidean(pt0, pt1)
+                * conversion.crs
+                / conversion.distance
+            )
         return dist_computed
 
     def _add_prev_pt(self, force=True):
@@ -1034,13 +1061,7 @@ class Trajectory:
         else:
             return angular_difference(degrees1, degrees2)
 
-    def _compute_speed(self, row, units):
-        if units.time is None:
-            t_conv = 1
-        else:
-            t_conv = [t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time][
-                0
-            ]
+    def _compute_speed(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
@@ -1049,51 +1070,19 @@ class Trajectory:
             raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
         if pt0 == pt1:
             return 0.0
-        # If no units declared, return speed in m/s (geographic) or CRS units/s
-        if units.distance is None:
-            if self.is_latlon:
-                dist_computed = measure_distance_geodesic(pt0, pt1)
-            else:  # The following distance will be in CRS units that might not be meters!
-                dist_computed = measure_distance_euclidean(pt0, pt1)
-        # If units declared, return speed in those units if CRS units known
-        # Assumes CRS in meters if CRS units unknown
-        if units.distance in [d["abbr"] for d in DISTANCE_UNIT_LIST]:
-            if self.is_latlon:
-                dist_computed = (
-                    measure_distance_geodesic(pt0, pt1)
-                    / [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("abbr") == units.distance
-                    ][0]
-                )
-            elif self.crs_units in [d["fullname"] for d in DISTANCE_UNIT_LIST]:
-                dist_computed = (
-                    measure_distance_euclidean(pt0, pt1)
-                    * [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("fullname") == self.crs_units
-                    ][0]
-                    / [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("abbr") == units.distance
-                    ][0]
-                )
-            # The following distance will be conversion factor * CRS units that might not be meters!
-            elif self.crs_units is None or self.crs_units not in [
-                d["fullname"] for d in DISTANCE_UNIT_LIST
-            ]:
-                dist_computed = (
-                    measure_distance_euclidean(pt0, pt1)
-                    / [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("abbr") == units.distance
-                    ][0]
-                )
-        return dist_computed / row["delta_t"].total_seconds() * t_conv
+        if self.is_latlon:
+            dist_computed = (
+                measure_distance_geodesic(pt0, pt1)
+                * conversion.crs
+                / conversion.distance
+            )
+        else:  # The following distance will be in CRS units that might not be meters!
+            dist_computed = (
+                measure_distance_euclidean(pt0, pt1)
+                * conversion.crs
+                / conversion.distance
+            )
+        return dist_computed / row["delta_t"].total_seconds() * conversion.time
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
@@ -1290,7 +1279,8 @@ class Trajectory:
             units = UNITS(*units)
         else:
             units = UNITS(units)
-        self.df = self._get_df_with_distance(units=units, name=name)
+        conversion = self._get_conversion(units)
+        self.df = self._get_df_with_distance(conversion, name)
 
     def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
         """
@@ -1408,7 +1398,8 @@ class Trajectory:
             units = UNITS(*units)
         else:
             units = UNITS(units)
-        self.df = self._get_df_with_speed(units, name)
+        conversion = self._get_conversion(units)
+        self.df = self._get_df_with_speed(conversion, name)
 
     def add_acceleration(
         self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
@@ -1517,6 +1508,7 @@ class Trajectory:
         It is suggested to declare a name for the new column specifying units
 
         >>>traj.add_acceleration(name="US Survey Feet/s2", units=("survey_ft", "s"))
+        >>>traj.add_acceleration(name="mph/s", units=("mi", "h", "s"))
         """
         self.acceleration_col_name = name
         if self.acceleration_col_name in self.df.columns and not overwrite:
@@ -1529,7 +1521,8 @@ class Trajectory:
             units = UNITS(*units)
         else:
             units = UNITS(units)
-        self.df = self._get_df_with_acceleration(units, name)
+        conversion = self._get_conversion(units)
+        self.df = self._get_df_with_acceleration(conversion, name)
 
     def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
         """
@@ -1560,11 +1553,13 @@ class Trajectory:
         temp_df[name] = times.diff().values
         return temp_df
 
-    def _get_df_with_distance(self, units, name=DISTANCE_COL_NAME):
+    def _get_df_with_distance(self, conversion, name=DISTANCE_COL_NAME):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[name] = temp_df.apply(self._compute_distance, units=units, axis=1)
+            temp_df[name] = temp_df.apply(
+                self._compute_distance, conversion=conversion, axis=1
+            )
         except ValueError as e:
             raise e
         # set the distance in the first row to zero
@@ -1572,11 +1567,13 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
-    def _get_df_with_speed(self, units, name=SPEED_COL_NAME):
+    def _get_df_with_speed(self, conversion, name=SPEED_COL_NAME):
         temp_df = self._get_df_with_timedelta(name="delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[name] = temp_df.apply(self._compute_speed, units=units, axis=1)
+            temp_df[name] = temp_df.apply(
+                self._compute_speed, conversion=conversion, axis=1
+            )
         except ValueError as e:
             raise e
         # set the speed in the first row to the speed of the second row
@@ -1584,22 +1581,12 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
 
-    def _get_df_with_acceleration(self, units, name=ACCELERATION_COL_NAME):
-        temp_df = self._get_df_with_speed(units=units, name="speed_temp")
-        if units.time is None:
-            t_conv = 1
-        elif units.time2 is None:
-            t_conv = [t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time][
-                0
-            ]
-        else:
-            t_conv = [
-                t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time2
-            ][0]
+    def _get_df_with_acceleration(self, conversion, name=ACCELERATION_COL_NAME):
+        temp_df = self._get_df_with_speed(conversion, name="speed_temp")
         temp_df[name] = (
             temp_df["speed_temp"].diff()
             / temp_df.index.to_series().diff().dt.total_seconds()
-            * t_conv
+            * conversion.time2
         )
         # set the acceleration in the first row to the acceleration of the
         # second row
