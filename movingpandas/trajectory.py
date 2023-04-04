@@ -27,7 +27,7 @@ from .geometry_utils import (
 )
 from .trajectory_plotter import _TrajectoryPlotter
 
-warnings.filterwarnings(  # see https://github.com/anitagraser/movingpandas/issues/289
+warnings.filterwarnings(  # see https://github.com/movingpandas/movingpandas/issues/289
     "ignore", message="CRS not set for some of the concatenation inputs."
 )
 
@@ -185,7 +185,7 @@ class Trajectory:
 
         For more examples, see the tutorial notebooks_.
 
-        .. _notebooks: https://mybinder.org/v2/gh/anitagraser/movingpandas/binder-tag?filepath=tutorials/0_getting_started.ipynb
+        .. _notebooks: https://mybinder.org/v2/gh/movingpandas/movingpandas/main?filepath=tutorials/1-getting-started.ipynb
         """  # noqa: E501
 
         if len(df) < 2:

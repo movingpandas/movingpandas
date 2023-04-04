@@ -246,7 +246,7 @@ class _SequenceGenerator:
         this_sequence = []
         prev_cell_id = None
         geom_name = trajectory.get_geom_column_name()
-        for t, geom in trajectory.df[geom_name].iteritems():
+        for t, geom in trajectory.df[geom_name].items():
             nearest_id = self.get_nearest(geom)
             nearest_cell = self.id_to_centroid[nearest_id][0]
             nearest_cell_id = nearest_cell.name

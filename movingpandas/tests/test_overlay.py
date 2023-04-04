@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pytest import approx
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from shapely.geometry import Polygon
 from datetime import datetime, timedelta
 from movingpandas.tests.test_trajectory import Node, make_traj, CRS_METRIC, CRS_LATLON
