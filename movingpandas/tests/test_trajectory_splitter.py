@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from fiona.crs import from_epsg
 from datetime import timedelta, datetime
 from geopandas import GeoDataFrame
