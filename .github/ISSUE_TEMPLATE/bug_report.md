@@ -11,9 +11,7 @@ If you have a question, rather than a bug report, please post in the [discussion
 Otherwise, please check: 
 
 - [ ] I have checked that this issue has not already been reported.
-
 - [ ] I have confirmed this bug exists on the latest version of MovingPandas.
-
 - [ ] (optional) I have confirmed this bug exists on the main branch of MovingPandas.
 
 ---
