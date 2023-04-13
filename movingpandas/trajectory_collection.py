@@ -400,7 +400,7 @@ class TrajectoryCollection:
         Parameters
         ----------
         overwrite : bool
-            Whether to overwrite existing speed values (default: False)
+            Whether to overwrite existing direction values (default: False)
         """
         for traj in self:
             traj.add_direction(overwrite)
@@ -416,7 +416,7 @@ class TrajectoryCollection:
         Parameters
         ----------
         overwrite : bool
-            Whether to overwrite existing speed values (default: False)
+            Whether to overwrite existing angular difference values (default: False)
         """
         for traj in self:
             traj.add_angular_difference(overwrite)
@@ -444,7 +444,7 @@ class TrajectoryCollection:
         Parameters
         ----------
         overwrite : bool
-            Whether to overwrite existing speed values (default: False)
+            Whether to overwrite existing trajectory id values (default: False)
         """
         for traj in self:
             traj.add_traj_id(overwrite)
