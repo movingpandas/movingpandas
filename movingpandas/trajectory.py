@@ -324,7 +324,7 @@ class Trajectory:
         if self.crs is None:
             warnings.warn(
                 "Trajectory generated without CRS. Computations will use Euclidean"
-                "distances.",
+                " distances.",
                 category=MissingCRSWarning,
             )
             self.is_latlon = False
@@ -908,8 +908,8 @@ class Trajectory:
         # Looks up unit conversions in the unit dictionaries
         # If distance specified, lookup distance and crs conversions and check time
         # If time specified, lookup time conversion and check if time2 specified
-        # If time2 specified, lookup time2 conversion, otherwise t2_conv=t_conv
-        # Unit conversions default to 1 if not specified or lookup fails
+        # If time2 specified, lookup time2 conversion
+        # Unit conversions default to 1 if not specified
         d_conv, t_conv, t2_conv, crs_conv = 1, 1, 1, 1
         if units.distance is not None:
             try:
@@ -927,7 +927,8 @@ class Trajectory:
                         for d in DISTANCE_UNIT_LIST
                         if d.get("fullname") == self.crs_units
                     ][0]
-                except IndexError:
+                except (IndexError, AttributeError):
+                    crs_conv = 1
                     warnings.warn(
                         "No valid CRS distance units. Computations will "
                         "assume CRS distance units are meters",
@@ -942,7 +943,7 @@ class Trajectory:
                                 if t.get("abbr") == units.time
                             ][0]
                         except IndexError:
-                            pass
+                            raise ValueError("Invalid time units!")
                         else:
                             if units.time2 is not None:
                                 try:
@@ -952,7 +953,7 @@ class Trajectory:
                                         if t.get("abbr") == units.time2
                                     ][0]
                                 except IndexError:
-                                    t2_conv = t_conv
+                                    raise ValueError("Invalid second time units!")
         return UNITS(d_conv, t_conv, t2_conv, crs_conv)
 
     def _compute_distance(self, row, conversion):
