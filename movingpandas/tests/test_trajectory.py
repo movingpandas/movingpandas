@@ -17,6 +17,7 @@ from movingpandas.trajectory import (
     TIMEDELTA_COL_NAME,
     TRAJ_ID_COL_NAME,
     MissingCRSWarning,
+    UNITS
 )
 
 from . import requires_holoviews, has_holoviews
@@ -378,10 +379,20 @@ class TestTrajectory:
         traj.add_speed()
         assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
 
+    def test_add_speed_with_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed(units=("km", "h"))
+        assert traj.df[SPEED_COL_NAME].tolist() == [21.6, 21.6]
+
     def test_add_speed_without_crs(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
         traj.add_speed()
         assert traj.df[SPEED_COL_NAME].tolist() == [6.0, 6.0]
+
+    def test_add_speed_with_units_without_crs(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
+        traj.add_speed(units=("nm", "min"))
+        assert traj.df[SPEED_COL_NAME].tolist()[0]*100 == pytest.approx(19, abs=1)
 
     def test_add_speed_can_overwrite(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
@@ -400,6 +411,16 @@ class TestTrajectory:
         traj.add_speed(name="speed2")
         assert "speed2" in traj.df.columns
 
+    def test_add_speed_with_only_distance_units_and_name(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed(name="links/s", units="link")
+        assert traj.df["links/s"].tolist()[0] == pytest.approx(29.8, abs=1)
+
+    def test_add_speed_with_extra_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_speed(name="survey mph", units=("survey_mi", "h", "s"))
+        assert traj.df["survey mph"].tolist()[0] == pytest.approx(13.4, abs=1)
+
     def test_add_speed_doesnt_change_existing_speed(self):
         traj = self.default_traj_metric_5.copy()
         traj.df[SPEED_COL_NAME] = [1, 2, 3, 4, 5]
@@ -416,7 +437,12 @@ class TestTrajectory:
     def test_add_speed_latlon(self):
         traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
         traj.add_speed()
-        assert traj.df[SPEED_COL_NAME].tolist()[0] / 1000 == pytest.approx(676.3, 1)
+        assert traj.df[SPEED_COL_NAME].tolist()[0] / 1000 == pytest.approx(676.3, abs=1)
+
+    def test_add_speed_with_units_latlon(self):
+        traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
+        traj.add_speed(units=("mi", "h"))
+        assert traj.df[SPEED_COL_NAME].tolist()[0] / 1000 == pytest.approx(1514, abs=1)
 
     def test_add_speed_latlon_numerical_issues(self):
         from shapely.geometry import Polygon
@@ -438,12 +464,62 @@ class TestTrajectory:
         traj.add_acceleration()
         assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 6.0]
 
+    def test_add_acceleration_with_distance_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration(units="km")
+        assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 0.006]
+
+    def test_add_acceleration_with_distance_and_time_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration(units=("km", "h"))
+        assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 21.6]
+
+    def test_add_acceleration_with_distance_and_both_time_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        traj.add_acceleration(units=("km", "h", "min"))
+        assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 1296.0]
+
     def test_add_acceleration_without_crs(self):
         traj = make_traj(
             [Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)], crs=None
         )
         traj.add_acceleration()
         assert traj.df[ACCELERATION_COL_NAME].tolist() == [0.0, 0.0, 6.0]
+
+    def test_add_acceleration_with_distance_units_with_name_no_crs(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)], crs=None)
+        traj.add_acceleration(name="km/s2", units="km")
+        assert traj.df["km/s2"].tolist() == [0.0, 0.0, 0.006]
+
+    def test_add_acceleration_with_distance_and_time_units_with_name_no_crs(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)], crs=None)
+        traj.add_acceleration(name="kph/s", units=("km", "h"))
+        assert traj.df["kph/s"].tolist() == [0.0, 0.0, 21.6]
+
+    def test_add_acceleration_with_distance_and_both_time_units_with_name_no_crs(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)], crs=None)
+        traj.add_acceleration(name="km/h/min", units=("km", "h", "min"))
+        assert traj.df["km/h/min"].tolist() == [0.0, 0.0, 1296.0]
+
+    def test_add_acceleration_with_distance_and_both_time_units_latlon(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)], CRS_LATLON)
+        traj.add_acceleration(units=("km", "h", "min"))
+        assert traj.df[ACCELERATION_COL_NAME].tolist()[2] == pytest.approx(144270060, 1)
+
+    def test_add_acceleration_with_wrong_distance_units_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        with pytest.raises(ValueError):
+            traj.add_acceleration(units=("ie", "h", "s"))
+
+    def test_add_acceleration_with_wrong_time_units_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        with pytest.raises(ValueError):
+            traj.add_acceleration(units=("km", "month", "s"))
+
+    def test_add_acceleration_with_wrong_time2_units_raises_error(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
+        with pytest.raises(ValueError):
+            traj.add_acceleration(units=("km", "h", "century"))
 
     def test_add_acceleration_can_overwrite(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
@@ -489,10 +565,25 @@ class TestTrajectory:
         traj.add_distance()
         assert traj.df[DISTANCE_COL_NAME].tolist() == [0, 6.0]
 
+    def test_add_distance_with_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance(units="chain")
+        assert traj.df[DISTANCE_COL_NAME].tolist()[1] == pytest.approx(0.29, abs=0.01)
+
+    def test_add_distance_with_extra_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance(units=("survey_ft", "a", "min"))
+        assert traj.df[DISTANCE_COL_NAME].tolist()[1] == pytest.approx(19.6, abs=0.1)
+
     def test_add_distance_without_crs(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
         traj.add_distance()
         assert traj.df[DISTANCE_COL_NAME].tolist() == [0, 6.0]
+
+    def test_add_distance_without_crs_with_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)], crs=None)
+        traj.add_distance(units="mi")
+        assert traj.df[DISTANCE_COL_NAME].tolist()[1] == pytest.approx(0.0037, abs=0.0001)
 
     def test_add_distance_can_overwrite(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
@@ -511,6 +602,12 @@ class TestTrajectory:
         traj.add_distance(name="distance2")
         assert "distance2" in traj.df.columns
 
+    def test_add_second_distance_with_name_and_units(self):
+        traj = make_traj([Node(0, 0), Node(6, 0, second=1)])
+        traj.add_distance()
+        traj.add_distance(name="distance (US Yards)", units="survey_yd")
+        assert traj.df["distance (US Yards)"].tolist()[1] == pytest.approx(6.5, abs=0.1)
+
     def test_add_distance_doesnt_change_existing_distance(self):
         traj = self.default_traj_metric_5.copy()
         traj.df["distance"] = [1, 2, 3, 4, 5]
@@ -526,7 +623,22 @@ class TestTrajectory:
     def test_add_distance_latlon(self):
         traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
         traj.add_distance()
-        assert traj.df[DISTANCE_COL_NAME].tolist()[1] / 1000 == pytest.approx(676.3, 1)
+        assert traj.df[DISTANCE_COL_NAME].tolist()[1] / 1000 == pytest.approx(676.3, abs=1)
+
+    def test_add_distance_latlon_with_units(self):
+        traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
+        traj.add_distance(units="nm")
+        assert traj.df[DISTANCE_COL_NAME].tolist()[1] == pytest.approx(365, abs=1)
+
+    def test_add_distance_latlon_with_wrong_units_raises_error(self):
+        traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
+        with pytest.raises(ValueError):
+            traj.add_distance(units="fish")
+
+    def test_add_distance_latlon_with_wrong_time_units_raises_error(self):
+        traj = make_traj([Node(0, 1), Node(6, 0, second=1)], CRS_LATLON)
+        with pytest.raises(ValueError):
+            traj.add_distance(units=("chain", "fish"))
 
     def test_add_distance_latlon_numerical_issues(self):
         from shapely.geometry import Polygon
