@@ -1306,7 +1306,8 @@ class Trajectory:
         units : tuple
             Units in which to calculate speed
             distance : str
-                Abbreviation for the distance unit (default: CRS units, or metres if geographic)
+                Abbreviation for the distance unit
+                (default: CRS units, or metres if geographic)
             time : str
                 Abbreviation for the time unit (default: seconds)
 
@@ -1417,6 +1418,10 @@ class Trajectory:
                  For known CRS units, using declared units
                  For unknown CRS units, using declared units as if CRS distance
                  units are meters
+                 If only distance units are declared, returns
+                     distance per second squared
+                 If distance and one time unit declared, returns
+                     distance/time per second
 
         Parameters
         ----------
@@ -1427,11 +1432,12 @@ class Trajectory:
         units : tuple
             Units in which to calculate acceleration
             distance : str
-                Abbreviation for the distance unit (default: CRS units, or metres if geographic)
+                Abbreviation for the distance unit
+                (default: CRS units, or metres if geographic)
             time : str
                 Abbreviation for the time unit (default: seconds)
             time2 : str
-                Abbreviation for the second time unit (default: equal to time)
+                Abbreviation for the second time unit (default: seconds)
 
             Allowed distance units:
                 "km": Kilometer
@@ -1504,7 +1510,7 @@ class Trajectory:
         except if the CRS distance units are unknown, in which case the
         CRS distance units are assumed to be meters
 
-        >>>traj.add_acceleration(units=("km", "h"))
+        >>>traj.add_acceleration(units=("km", "h", "s"))
 
         It is suggested to declare a name for the new column specifying units
 
