@@ -112,7 +112,7 @@ class _TrajectoryPlotter:
             **self.kwargs
         )
 
-    def _hvplot_trajectory(self, traj):        
+    def _hvplot_trajectory(self, traj):
         line_gdf = self._make_line_df(traj)
 
         if self.hvplot_is_geo and not traj.is_latlon and traj.crs is not None:
