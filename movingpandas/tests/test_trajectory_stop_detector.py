@@ -14,7 +14,7 @@ CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
 
 
-class TestTrajectorySplitter:
+class TestTrajectoryStopDetector:
     def setup_method(self):
         self.traj = make_traj(
             [

@@ -182,6 +182,23 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [0] [Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54.](https://www.austriaca.at/rootcollection?arp=0x003aba2b)
 
+```
+@article{graser_movingpandas_2019,
+	title = {{MovingPandas}: {Efficient} {Structures} for {Movement} {Data} in {Python}},
+	volume = {1},
+	issn = {2308-1708, 2308-1708},
+	shorttitle = {{MovingPandas}},
+	url = {https://hw.oeaw.ac.at?arp=0x003aba2b},
+	doi = {10.1553/giscience2019_01_s54},
+	language = {en},
+	urldate = {2023-04-19},
+	journal = {GI\_Forum},
+	author = {Graser, Anita},
+	year = {2019},
+	pages = {54--68},
+}
+```
+
 [1] [Graser, A. & Dragaschnig, M. (2020). Exploring movement data in notebook environments. Presented at MoVIS 2020, IEEE VIS 2020.](http://move.geog.ucsb.edu/wp-content/uploads/2020/10/MoVIS20_paper_4.pdf)
 
 [2] [Graser, A. (2021). Exploratory Movement Data Analysis. GeoPython 2021. – 🎬 video](https://vimeo.com/539472075/bfa7347707)
