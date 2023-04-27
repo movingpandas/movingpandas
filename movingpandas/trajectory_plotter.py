@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-from holoviews import dim
 
 
 class _TrajectoryPlotter:
@@ -88,6 +87,8 @@ class _TrajectoryPlotter:
         return line_plot
 
     def _hvplot_end_triangle(self, traj):
+        from holoviews import dim
+
         self.kwargs.pop("tiles", None)
         hover_cols = self.kwargs.pop("hover_cols", None)
         self.kwargs["hover_cols"] = ["triangle_angle"]
