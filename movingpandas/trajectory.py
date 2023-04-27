@@ -9,12 +9,10 @@ from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
-from collections import namedtuple
 
 try:
     from pyproj import CRS
 except ImportError:
-    # TODO: fiona.crs is deprecated from fiona 2.0, use fiona.CRS instead
     from fiona.crs import from_epsg
 
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
@@ -39,196 +37,6 @@ DISTANCE_COL_NAME = "distance"
 SPEED_COL_NAME = "speed"
 TIMEDELTA_COL_NAME = "timedelta"
 TRAJ_ID_COL_NAME = "traj_id"
-UNITS = namedtuple(
-    "UNITS", "distance time time2 crs", defaults=(None, None, None, None)
-)
-
-DISTANCE_UNIT_LIST = [
-    {"abbr": "km", "conv": 1000, "fullname": "Kilometer"},
-    {"abbr": "m", "conv": 1, "fullname": "metre"},
-    {"abbr": "dm", "conv": 0.1, "fullname": "Decimeter"},
-    {"abbr": "cm", "conv": 0.01, "fullname": "Centimeter"},
-    {"abbr": "mm", "conv": 0.001, "fullname": "Millimeter"},
-    {"abbr": "nm", "conv": 1852.0, "fullname": "International Nautical Mile"},
-    {"abbr": "inch", "conv": 0.0254, "fullname": "International Inch"},
-    {"abbr": "ft", "conv": 0.3048, "fullname": "International Foot"},
-    {"abbr": "yd", "conv": 0.9144, "fullname": "International Yard"},
-    {"abbr": "mi", "conv": 1609.344, "fullname": "International Statute Mile"},
-    {"abbr": "link", "conv": 0.201168, "fullname": "International Link"},
-    {"abbr": "chain", "conv": 20.1168, "fullname": "International Chain"},
-    {"abbr": "fathom", "conv": 1.8288, "fullname": "International Fathom"},
-    {
-        "abbr": "british_ft",
-        "conv": 0.304799471538676,
-        "fullname": "British foot (Sears 1922)",
-        "epsg": 9041,
-    },
-    {
-        "abbr": "british_yd",
-        "conv": 0.914398414616029,
-        "fullname": "British yard (Sears 1922)",
-        "epsg": 9040,
-    },
-    {
-        "abbr": "british_chain_sears",
-        "conv": 20.11677651215526,
-        "fullname": "British chain (Sears 1922)",
-        "epsg": 9042,
-    },
-    {
-        "abbr": "british_link_sears",
-        "conv": 0.20116767651215526,
-        "fullname": "British link (Sears 1922)",
-        "epsg": 9043,
-    },
-    {"abbr": "sears_yd", "conv": 0.914398414616029, "fullname": "Yard (Sears)"},
-    {"abbr": "link_sears", "conv": 0.20116767651215526, "fullname": "Link (Sears)"},
-    {"abbr": "chain_sears", "conv": 20.11677651215526, "fullname": "Chain (Sears)"},
-    {
-        "abbr": "british_ft_sears_truncated",
-        "conv": 0.914398,
-        "fullname": "British foot (Sears 1922 truncated)",
-        "epsg": 9300,
-    },
-    {
-        "abbr": "british_chain_sears_truncated",
-        "conv": 20.11676,
-        "fullname": "British chain (Sears 1922 truncated)",
-        "epsg": 9301,
-    },
-    {
-        "abbr": "british_chain_benoit",
-        "conv": 20.116782494375872,
-        "fullname": "British chain (Benoit 1895 B)",
-        "epsg": 9062,
-    },
-    {
-        "abbr": "chain_benoit",
-        "conv": 20.116782494375872,
-        "fullname": "Chain (Benoit)",
-        "epsg": 9062,
-    },
-    {
-        "abbr": "link_benoit",
-        "conv": 0.20116782494375872,
-        "fullname": "Link (Benoit)",
-        "epsg": 9063,
-    },
-    {
-        "abbr": "clarke_yd",
-        "conv": 0.9143917962,
-        "fullname": "Clarke's yard",
-        "epsg": 9037,
-    },
-    {
-        "abbr": "clarke_ft",
-        "conv": 0.3047972654,
-        "fullname": "Clarke's Foot",
-        "epsg": 9005,
-    },
-    {
-        "abbr": "clarke_link",
-        "conv": 0.201166195164,
-        "fullname": "Clarke's link",
-        "epsg": 9039,
-    },
-    {
-        "abbr": "clarke_chain",
-        "conv": 20.1166195164,
-        "fullname": "Clarke's chain",
-        "epsg": 9038,
-    },
-    {
-        "abbr": "british_ft_1936",
-        "conv": 0.3048007491,
-        "fullname": "British foot (1936)",
-        "epsg": 9095,
-    },
-    {
-        "abbr": "gold_coast_ft",
-        "conv": 0.3047997101815,
-        "fullname": "Gold Coast foot",
-        "epsg": 9094,
-    },
-    {"abbr": "rod", "conv": 0.1988387815, "fullname": "Rod"},
-    {"abbr": "furlong", "conv": 201.168, "fullname": "Furlong"},
-    {
-        "abbr": "german_m",
-        "conv": 1.0000135965,
-        "fullname": "German legal metre",
-        "epsg": 9031,
-    },
-    {"abbr": "survey_in", "conv": 0.0254000508001016, "fullname": "US survey inch"},
-    {
-        "abbr": "survey_ft",
-        "conv": 0.3048006096012192,
-        "fullname": "US survey foot",
-        "epsg": 9003,
-    },
-    {"abbr": "survey_yd", "conv": 0.9144018288036575, "fullname": "US survey yard"},
-    {
-        "abbr": "survey_lk",
-        "conv": 0.20116840233680463,
-        "fullname": "US survey link",
-        "epsg": 9034,
-    },
-    {
-        "abbr": "survey_ch",
-        "conv": 20.116840233680463,
-        "fullname": "US survey chain",
-        "epsg": 9033,
-    },
-    {
-        "abbr": "survey_mi",
-        "conv": 1609.3472186944373,
-        "fullname": "US survey mile",
-        "epsg": 9035,
-    },
-    {
-        "abbr": "indian_yd",
-        "conv": 0.914398530744441,
-        "fullname": "Indian Yard",
-        "epsg": 9084,
-    },
-    {
-        "abbr": "indian_ft",
-        "conv": 0.3047995104977167,
-        "fullname": "Indian Foot",
-        "epsg": 9080,
-    },
-    {
-        "abbr": "indian_ft_1937",
-        "conv": 0.30479841,
-        "fullname": "Indian Foot",
-        "epsg": 9081,
-    },
-    {
-        "abbr": "indian_ft_1962",
-        "conv": 0.3047996,
-        "fullname": "Indian Foot",
-        "epsg": 9082,
-    },
-    {
-        "abbr": "indian_ft_1975",
-        "conv": 0.3047995,
-        "fullname": "Indian Foot",
-        "epsg": 9083,
-    },
-    {
-        "abbr": "deg",
-        "conv": 1,
-        "fullname": "degree",
-        "epsg": 4326,
-    },  # To allow geodesic conversions
-]
-
-TIME_UNIT_LIST = [
-    {"abbr": "s", "conv": 1, "fullname": "seconds"},
-    {"abbr": "min", "conv": 60, "fullname": "minutes"},
-    {"abbr": "h", "conv": 3600, "fullname": "hours"},
-    {"abbr": "d", "conv": 86400, "fullname": "days"},
-    {"abbr": "a", "conv": 31557600, "fullname": "years"},
-]
 
 
 class MissingCRSWarning(UserWarning, ValueError):
@@ -314,6 +122,8 @@ class Trajectory:
                 )
             df[t] = to_datetime(df[t])
             df = df.set_index(t).tz_localize(None)
+        else:
+            df = df.tz_localize(None)
 
         self.id = traj_id
         self.obj_id = obj_id
@@ -324,7 +134,7 @@ class Trajectory:
         if self.crs is None:
             warnings.warn(
                 "Trajectory generated without CRS. Computations will use Euclidean"
-                " distances.",
+                "distances.",
                 category=MissingCRSWarning,
             )
             self.is_latlon = False
@@ -334,8 +144,6 @@ class Trajectory:
             self.is_latlon = crs.is_geographic
         except NameError:
             self.is_latlon = self.crs["init"] == from_epsg(4326)["init"]
-        if self.crs is not None:
-            self.crs_units = self.crs.axis_info[0].unit_name
 
     def __str__(self):
         try:
@@ -418,7 +226,9 @@ class Trajectory:
         """
         Generate an interactive plot using HoloViews.
 
-        The following parameters are set by default: geo=True, tiles='OSM'.
+        The following parameters are set by default:
+
+        geo=True, tiles='OSM', marker_size=200, line_width=2.0
 
         Parameters
         ----------
@@ -904,80 +714,18 @@ class Trajectory:
             )
         return segment
 
-    def _get_conversion(self, units):
-        # Looks up unit conversions in the unit dictionaries
-        # If distance specified, lookup distance and crs conversions and check time
-        # If time specified, lookup time conversion and check if time2 specified
-        # If time2 specified, lookup time2 conversion
-        # Unit conversions default to 1 if not specified
-        d_conv, t_conv, t2_conv, crs_conv = 1, 1, 1, 1
-        if units.distance is not None:
-            try:
-                d_conv = [
-                    d["conv"]
-                    for d in DISTANCE_UNIT_LIST
-                    if d.get("abbr") == units.distance
-                ][0]
-            except IndexError:
-                raise ValueError("Invalid distance units!")
-            else:
-                try:
-                    crs_conv = [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("fullname") == self.crs_units
-                    ][0]
-                except (IndexError, AttributeError):
-                    crs_conv = 1
-                    warnings.warn(
-                        "No valid CRS distance units. Computations will "
-                        "assume CRS distance units are meters",
-                        category=MissingCRSWarning,
-                    )
-                finally:
-                    if units.time is not None:
-                        try:
-                            t_conv = [
-                                t["conv"]
-                                for t in TIME_UNIT_LIST
-                                if t.get("abbr") == units.time
-                            ][0]
-                        except IndexError:
-                            raise ValueError("Invalid time units!")
-                        else:
-                            if units.time2 is not None:
-                                try:
-                                    t2_conv = [
-                                        t["conv"]
-                                        for t in TIME_UNIT_LIST
-                                        if t.get("abbr") == units.time2
-                                    ][0]
-                                except IndexError:
-                                    raise ValueError("Invalid second time units!")
-        return UNITS(d_conv, t_conv, t2_conv, crs_conv)
-
-    def _compute_distance(self, row, conversion):
+    def _compute_distance(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
             return 0.0
-        if not isinstance(pt1, Point):
-            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
         if pt0 == pt1:
             return 0.0
         if self.is_latlon:
-            dist_computed = (
-                measure_distance_geodesic(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
+            dist_meters = measure_distance_geodesic(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
-            dist_computed = (
-                measure_distance_euclidean(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
-        return dist_computed
+            dist_meters = measure_distance_euclidean(pt0, pt1)
+        return dist_meters
 
     def _add_prev_pt(self, force=True):
         """
@@ -1062,7 +810,7 @@ class Trajectory:
         else:
             return angular_difference(degrees1, degrees2)
 
-    def _compute_speed(self, row, conversion):
+    def _compute_speed(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
         if not isinstance(pt0, Point):
@@ -1072,18 +820,10 @@ class Trajectory:
         if pt0 == pt1:
             return 0.0
         if self.is_latlon:
-            dist_computed = (
-                measure_distance_geodesic(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
+            dist_meters = measure_distance_geodesic(pt0, pt1)
         else:  # The following distance will be in CRS units that might not be meters!
-            dist_computed = (
-                measure_distance_euclidean(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
-        return dist_computed / row["delta_t"].total_seconds() * conversion.time
+            dist_meters = measure_distance_euclidean(pt0, pt1)
+        return dist_meters / row["delta_t"].total_seconds()
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
@@ -1178,96 +918,17 @@ class Trajectory:
         if not direction_exists:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
 
-    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=None):
+    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME):
         """
         Add distance column and values to the trajectory's DataFrame.
 
-        Adds a column with the distance to each point from the previous:
-            If no units have been declared:
-                For geographic projections (e.g. EPSG:4326 WGS84), in meters
-                For other projections, in CRS units
-            If units have been declared:
-                For geographic projections, in declared units
-                For known CRS units, in declared units
-                For unknown CRS units, in declared units as if CRS is in meters
+        Distance is calculated as CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then distance is calculated in meters.
 
         Parameters
         ----------
         overwrite : bool
             Whether to overwrite existing distance values (default: False)
-
-        units : str
-            Units in which to calculate distance values (default: CRS units)
-            Allowed:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke’s Foot
-                "clarke_link": Clarke’s link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
-
-        Examples
-        ----------
-        If no units are declared, the distance will be calculated
-        in meters for geographic projections (e.g. EPSG:4326 WGS84)
-        and in CRS units for all other projections
-
-        >>>traj.add_distance()
-
-        The default column name is "distance". If a column of this name
-        already exists, a new column name can be specified
-
-        >>>traj.add_distance(name="distance (CRS units)")
-
-        If units are declared, the distance will be calculated in those units
-        except if the CRS units are unknown, in which case the CRS units are
-        assumed to be in meters
-
-        >>>traj.add_distance(units="km")
-
-        It is suggested to declare a name for the new column specifying units
-
-        >>>traj.add_distance(name="distance (miles)", units="mi")
-        >>>traj.add_distance(name="distance (US Survey Feet)", units="survey_ft")
         """
         self.distance_col_name = name
         if self.distance_col_name in self.df.columns and not overwrite:
@@ -1276,26 +937,15 @@ class Trajectory:
                 "Use overwrite=True to overwrite exiting values or update the "
                 "name arg."
             )
-        if isinstance(units, tuple):
-            units = UNITS(*units)
-        else:
-            units = UNITS(units)
-        conversion = self._get_conversion(units)
-        self.df = self._get_df_with_distance(conversion, name)
+        self.df = self._get_df_with_distance(name)
 
-    def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
+    def add_speed(self, overwrite=False, name=SPEED_COL_NAME):
         """
         Add speed column and values to the trajectory's DataFrame.
 
-        Adds a column with the speed to each point from the previous:
-             If no units have been declared:
-                 For geographic projections, in meters per second
-                 For other projections, in CRS units per second
-             If units have been declared:
-                 For geographic projections, in declared units
-                 For known CRS units, in declared units
-                 For unknown CRS units, in declared units as if CRS distance
-                 units are meters
+        Speed is calculated as CRS units per second, except if the CRS is
+        geographic (e.g. EPSG:4326 WGS84) then speed is calculated in meters
+        per second.
 
         Parameters
         ----------
@@ -1303,91 +953,6 @@ class Trajectory:
             Whether to overwrite existing speed values (default: False)
         name : str
             Name of the speed column (default: "speed")
-        units : tuple
-            Units in which to calculate speed
-            distance : str
-                Abbreviation for the distance unit
-                (default: CRS units, or metres if geographic)
-            time : str
-                Abbreviation for the time unit (default: seconds)
-
-            Allowed distance units:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke’s Foot
-                "clarke_link": Clarke’s link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
-
-            Allowed time units:
-                "s": seconds
-                "min": minutes
-                "h": hours
-                "d": days
-                "a": years
-
-        Examples
-        ----------
-        If no units are declared, the speed will be calculated
-        in meters per second for geographic projections (e.g. EPSG:4326 WGS84)
-        and in CRS distance units per second for all other projections
-
-        >>>traj.add_speed()
-
-        The default column name is "speed". If a column of this name
-        already exists, a new column name can be specified
-
-        >>>traj.add_speed(name="speed (CRS units)")
-
-        If units are declared, the speed will be calculated in those units
-        except if the CRS distance units are unknown, in which case the
-        CRS distance units are assumed to be meters
-
-        >>>traj.add_speed(units=("km", "h"))
-
-        It is suggested to declare a name for the new column specifying units
-
-        >>>traj.add_speed(name="speed (mph)", units=("mi", "h"))
-        >>>traj.add_speed(name="US Survey Feet/s", units=("survey_ft", "s"))
         """
         self.speed_col_name = name
         if self.speed_col_name in self.df.columns and not overwrite:
@@ -1396,126 +961,34 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        if isinstance(units, tuple):
-            units = UNITS(*units)
-        else:
-            units = UNITS(units)
-        conversion = self._get_conversion(units)
-        self.df = self._get_df_with_speed(conversion, name)
+        self.df = self._get_df_with_speed(name)
 
-    def add_acceleration(
-        self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
-    ):
+    def _get_df_with_acceleration(self, name=ACCELERATION_COL_NAME):
+        # Avoid computing speed again if already computed
+        if hasattr(self, "speed_col_name"):
+            temp_df = self.df.copy()
+        else:
+            temp_df = self._get_df_with_speed(name=SPEED_COL_NAME)
+        speed_column_name = self.get_speed_column_name()
+        temp_df[name] = (
+            temp_df[speed_column_name].diff()
+            / temp_df.index.to_series().diff().dt.total_seconds()
+        )
+        # set the acceleration in the first row to the acceleration of the
+        # second row
+        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
+        if hasattr(self, "speed_col_name"):
+            return temp_df
+        else:
+            return temp_df.drop(columns=[speed_column_name])
+
+    def add_acceleration(self, overwrite=False, name=ACCELERATION_COL_NAME):
         """
         Add acceleration column and values to the trajectory's DataFrame.
 
-        Adds a column with the acceleration to each point from the previous:
-             If no units have been declared:
-                 For geographic projections, in meters per second squared
-                 For other projections, in CRS units per second squared
-             If units have been declared:
-                 For geographic projections, using declared units
-                 For known CRS units, using declared units
-                 For unknown CRS units, using declared units as if CRS distance
-                 units are meters
-                 If only distance units are declared, returns
-                     distance per second squared
-                 If distance and one time unit declared, returns
-                     distance/time per second
-
-        Parameters
-        ----------
-        overwrite : bool
-            Whether to overwrite existing speed values (default: False)
-        name : str
-            Name of the acceleration column (default: "acceleration")
-        units : tuple
-            Units in which to calculate acceleration
-            distance : str
-                Abbreviation for the distance unit
-                (default: CRS units, or metres if geographic)
-            time : str
-                Abbreviation for the time unit (default: seconds)
-            time2 : str
-                Abbreviation for the second time unit (default: seconds)
-
-            Allowed distance units:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke’s Foot
-                "clarke_link": Clarke’s link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
-
-            Allowed time units:
-                "s": seconds
-                "min": minutes
-                "h": hours
-                "d": days
-                "a": years
-
-        Examples
-        ----------
-        If no units are declared, the acceleration will be calculated
-        in meters per second squared for geographic projections and
-        in CRS distance units per second squared for all other projections
-
-        >>>traj.add_acceleration()
-
-        The default column name is "acceleration". If a column of this name
-        already exists, a new column name can be specified
-
-        >>>traj.add_acceleration(name="acceleration (CRS units/s2)")
-
-        If units are declared, acceleration will be calculated in those units
-        except if the CRS distance units are unknown, in which case the
-        CRS distance units are assumed to be meters
-
-        >>>traj.add_acceleration(units=("km", "h", "s"))
-
-        It is suggested to declare a name for the new column specifying units
-
-        >>>traj.add_acceleration(name="US Survey Feet/s2", units=("survey_ft", "s"))
-        >>>traj.add_acceleration(name="mph/s", units=("mi", "h", "s"))
+        Acceleration is calculated as CRS units per second squared,
+        except if the CRS is geographic (e.g. EPSG:4326 WGS84) then speed is
+        calculated in meters per second squared.
         """
         self.acceleration_col_name = name
         if self.acceleration_col_name in self.df.columns and not overwrite:
@@ -1524,12 +997,7 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        if isinstance(units, tuple):
-            units = UNITS(*units)
-        else:
-            units = UNITS(units)
-        conversion = self._get_conversion(units)
-        self.df = self._get_df_with_acceleration(conversion, name)
+        self.df = self._get_df_with_acceleration(name)
 
     def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
         """
@@ -1560,13 +1028,11 @@ class Trajectory:
         temp_df[name] = times.diff().values
         return temp_df
 
-    def _get_df_with_distance(self, conversion, name=DISTANCE_COL_NAME):
+    def _get_df_with_distance(self, name=DISTANCE_COL_NAME):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[name] = temp_df.apply(
-                self._compute_distance, conversion=conversion, axis=1
-            )
+            temp_df[name] = temp_df.apply(self._compute_distance, axis=1)
         except ValueError as e:
             raise e
         # set the distance in the first row to zero
@@ -1574,31 +1040,17 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
-    def _get_df_with_speed(self, conversion, name=SPEED_COL_NAME):
+    def _get_df_with_speed(self, name=SPEED_COL_NAME):
         temp_df = self._get_df_with_timedelta(name="delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
         try:
-            temp_df[name] = temp_df.apply(
-                self._compute_speed, conversion=conversion, axis=1
-            )
+            temp_df[name] = temp_df.apply(self._compute_speed, axis=1)
         except ValueError as e:
             raise e
         # set the speed in the first row to the speed of the second row
         temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
-
-    def _get_df_with_acceleration(self, conversion, name=ACCELERATION_COL_NAME):
-        temp_df = self._get_df_with_speed(conversion, name="speed_temp")
-        temp_df[name] = (
-            temp_df["speed_temp"].diff()
-            / temp_df.index.to_series().diff().dt.total_seconds()
-            * conversion.time2
-        )
-        # set the acceleration in the first row to the acceleration of the
-        # second row
-        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
-        return temp_df.drop(columns=["speed_temp"])
 
     def intersects(self, polygon):
         """
