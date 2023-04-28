@@ -94,8 +94,9 @@ class TestTrajectory:
                 {"geometry": Point(6, 0), "t": datetime(2018, 1, 1, 12, 6, 0)},
                 {"geometry": Point(6, 6), "t": datetime(2018, 1, 1, 12, 10, 0)},
                 {"geometry": Point(9, 9), "t": datetime(2018, 1, 1, 12, 15, 0)},
-            ])
-        test_gdf = test_gdf.set_index('t').tz_localize(tz='CET')
+            ]
+        )
+        test_gdf = test_gdf.set_index("t").tz_localize(tz="CET")
         with pytest.warns():
             tztesttraj = Trajectory(test_gdf, "tztest", crs="epsg:31256")
         assert tztesttraj.df.index.tzinfo is None

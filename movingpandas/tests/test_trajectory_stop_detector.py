@@ -176,18 +176,18 @@ class TestTrajectoryStopDetector:
 
     def test_stop_detector_tzaware_data(self):
         nodes = [
-                Node(0, 0),
-                Node(0, 1, second=1),
-                Node(0, 2, second=2),
-                Node(0, 1, second=3),
-                Node(0, 22, second=4),
-                Node(0, 30, second=8),
-                Node(0, 31, second=10),
-                Node(1, 32, second=15),
+            Node(0, 0),
+            Node(0, 1, second=1),
+            Node(0, 2, second=2),
+            Node(0, 1, second=3),
+            Node(0, 22, second=4),
+            Node(0, 30, second=8),
+            Node(0, 31, second=10),
+            Node(1, 32, second=15),
         ]
-        
+
         for node in nodes:
-            node.t = timezone('Europe/Vienna').localize(node.t)
+            node.t = timezone("Europe/Vienna").localize(node.t)
 
         with pytest.warns():
             traj = make_traj(nodes)

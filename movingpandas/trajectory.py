@@ -42,8 +42,10 @@ TRAJ_ID_COL_NAME = "traj_id"
 class MissingCRSWarning(UserWarning, ValueError):
     pass
 
+
 class TimeZoneWarning(UserWarning, ValueError):
     pass
+
 
 class Trajectory:
     def __init__(
@@ -122,11 +124,8 @@ class Trajectory:
                     "needs to be specified. Use Pandas' set_index() method to create an"
                     "index or specify the timestamp column name."
                 )
-            df = df.set_index(to_datetime(df[t]))
-#            df[t] = to_datetime(df[t])
-#            df = df.set_index(t).tz_localize(None)
-#        else:
-#            df = df.tz_localize(None)
+            df[t] = to_datetime(df[t])
+            df = df.set_index(t)
 
         #  Drop any time zone information, to avoid errors (see issue 303)
         if df.index.tzinfo is not None:
@@ -136,8 +135,8 @@ class Trajectory:
                 "All dates and times will use local time. "
                 "To use UTC or a different time zone, convert and drop "
                 "time zone information prior to trajectory creation.",
-                category=TimeZoneWarning
-                )
+                category=TimeZoneWarning,
+            )
 
         self.id = traj_id
         self.obj_id = obj_id
