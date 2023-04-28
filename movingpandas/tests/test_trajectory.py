@@ -87,6 +87,19 @@ class TestTrajectory:
         self.default_traj_latlon = make_traj(nodes[:3], CRS_LATLON)
         self.default_traj_metric_5 = make_traj(nodes, CRS_METRIC)
 
+    def test_timezone_info_drop(self):
+        test_gdf = GeoDataFrame(
+            [
+                {"geometry": Point(0, 0), "t": datetime(2018, 1, 1, 12, 0, 0)},
+                {"geometry": Point(6, 0), "t": datetime(2018, 1, 1, 12, 6, 0)},
+                {"geometry": Point(6, 6), "t": datetime(2018, 1, 1, 12, 10, 0)},
+                {"geometry": Point(9, 9), "t": datetime(2018, 1, 1, 12, 15, 0)},
+            ])
+        test_gdf = test_gdf.set_index('t').tz_localize(tz='CET')
+        with pytest.warns():
+            tztesttraj = Trajectory(test_gdf, "tztest", crs="epsg:31256")
+        assert tztesttraj.df.index.tzinfo is None
+
     def test_latlon(self):
         traj = make_traj([Node(0, 0), Node(10, 10, day=2)], CRS_LATLON)
         assert traj.to_linestring().wkt == "LINESTRING (0 0, 10 10)"
