@@ -418,7 +418,9 @@ class Trajectory:
         """
         Generate an interactive plot using HoloViews.
 
-        The following parameters are set by default: geo=True, tiles='OSM'.
+        The following parameters are set by default:
+
+        geo=True, tiles='OSM', marker_size=200, line_width=2.0
 
         Parameters
         ----------
