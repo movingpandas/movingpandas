@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 from datetime import datetime, timedelta
+from pytz import timezone
 
 from fiona.crs import from_epsg
 from numpy import issubdtype
@@ -14,7 +16,7 @@ CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
 
 
-class TestTrajectorySplitter:
+class TestTrajectoryStopDetector:
     def setup_method(self):
         self.traj = make_traj(
             [
@@ -171,6 +173,34 @@ class TestTrajectorySplitter:
         assert len(stop_times) == 0
         assert len(stop_segments) == 0
         assert len(stop_points) == 0
+
+    def test_stop_detector_tzaware_data(self):
+        nodes = [
+            Node(0, 0),
+            Node(0, 1, second=1),
+            Node(0, 2, second=2),
+            Node(0, 1, second=3),
+            Node(0, 22, second=4),
+            Node(0, 30, second=8),
+            Node(0, 31, second=10),
+            Node(1, 32, second=15),
+        ]
+
+        for node in nodes:
+            node.t = timezone("Europe/Vienna").localize(node.t)
+
+        with pytest.warns():
+            traj = make_traj(nodes)
+        detector = TrajectoryStopDetector(traj)
+        stop_times = detector.get_stop_time_ranges(
+            max_diameter=3, min_duration=timedelta(seconds=2)
+        )
+        assert len(stop_times) == 2
+        assert stop_times[0].t_0 == datetime(1970, 1, 1, 0, 0, 0)
+        assert stop_times[0].t_n == datetime(1970, 1, 1, 0, 0, 3)
+        assert stop_times[1].t_0 == datetime(1970, 1, 1, 0, 0, 8)
+        assert stop_times[1].t_n == datetime(1970, 1, 1, 0, 0, 15)
+        assert traj.df.index.tzinfo is None
 
     def test_stop_detector_collection(self):
         traj1 = make_traj(
