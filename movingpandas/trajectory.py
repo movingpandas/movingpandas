@@ -1632,7 +1632,6 @@ class Trajectory:
         """
         return intersects(self, polygon)
 
-# TODO: Add conversion here
     def distance(self, other):
         """
         Return the minimum distance to the other geometric object (based on shapely
