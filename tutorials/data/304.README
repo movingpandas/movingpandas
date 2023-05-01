@@ -1,0 +1,9 @@
+304 to UL 2019-02-18 0745.gpx
+Description: Timestamped GNSS data for a bus journey on the 304 in Limerick, Ireland.
+Source: Data collected by B.A. MacGabhann (https://github.com/bamacgabhann/).
+Usage restrictions: None.
+
+stops_304_to_ul.gpkg
+Description: Locations of bus stops on the 304 bus route (accurate in 2019).
+Source: Modified from open data published by the NTA (Ireland) via GTFS-R (https://developer.nationaltransport.ie/).
+Usage restrictions: None
