@@ -235,6 +235,10 @@ class MissingCRSWarning(UserWarning, ValueError):
     pass
 
 
+class TimeZoneWarning(UserWarning, ValueError):
+    pass
+
+
 class Trajectory:
     def __init__(
         self,
@@ -313,7 +317,18 @@ class Trajectory:
                     "index or specify the timestamp column name."
                 )
             df[t] = to_datetime(df[t])
-            df = df.set_index(t).tz_localize(None)
+            df = df.set_index(t)
+
+        #  Drop any time zone information, to avoid errors (see issue 303)
+        if df.index.tzinfo is not None:
+            df = df.tz_localize(None)
+            warnings.warn(
+                "Time zone information dropped from trajectory. "
+                "All dates and times will use local time. "
+                "To use UTC or a different time zone, convert and drop "
+                "time zone information prior to trajectory creation.",
+                category=TimeZoneWarning,
+            )
 
         self.id = traj_id
         self.obj_id = obj_id
@@ -418,7 +433,9 @@ class Trajectory:
         """
         Generate an interactive plot using HoloViews.
 
-        The following parameters are set by default: geo=True, tiles='OSM'.
+        The following parameters are set by default:
+
+        geo=True, tiles='OSM', marker_size=200, line_width=2.0
 
         Parameters
         ----------
@@ -1615,6 +1632,7 @@ class Trajectory:
         """
         return intersects(self, polygon)
 
+# TODO: Add conversion here
     def distance(self, other):
         """
         Return the minimum distance to the other geometric object (based on shapely

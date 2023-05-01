@@ -32,6 +32,10 @@ class _TrajectoryPlotter:
         self.hvplot_is_geo = kwargs.pop("geo", True)
         self.hvplot_tiles = kwargs.pop("tiles", "OSM")
 
+        self.marker_size = kwargs.pop("marker_size", 200)
+        self.marker_color = self.kwargs.pop("marker_color", None)
+        self.line_width = self.kwargs.pop("line_width", 3.0)
+
     def _make_line_df(self, traj):
         temp = traj.copy()
 
@@ -48,42 +52,83 @@ class _TrajectoryPlotter:
             line_gdf = line_gdf.set_crs(traj.crs, allow_override=True)
         return line_gdf
 
+    def _get_trajectory_end_with_direction(self, traj):
+        direction_column_name = traj.get_direction_column_name()
+        if direction_column_name in traj.df.columns:
+            direction_exists = True
+        else:
+            direction_exists = False
+            traj.add_direction(name=direction_column_name)
+        tmp = traj.df.tail(1).copy()
+        tmp["triangle_angle"] = ((tmp[direction_column_name] * -1.0)).astype(float)
+        if not direction_exists:
+            traj.df.drop(columns=[direction_column_name], inplace=True)
+        return tmp
+
     def _plot_trajectory(self, traj):
-        temp_df = self._make_line_df(traj)
+        line_df = self._make_line_df(traj)
+
         if self.column and self.colormap:
             try:
                 color = self.colormap[traj.df[self.column].max()]
             except KeyError:
                 color = "grey"
-            return temp_df.plot(ax=self.ax, color=color, *self.args, **self.kwargs)
+            line_plot = line_df.plot(ax=self.ax, color=color, *self.args, **self.kwargs)
         else:
             self.kwargs.pop("vmin", None)
             self.kwargs.pop("vmax", None)
-            return temp_df.plot(
+            line_plot = line_df.plot(
                 ax=self.ax,
                 vmin=self.min_value,
                 vmax=self.max_value,
                 *self.args,
                 **self.kwargs
             )
+        return line_plot
 
-    def _hvplot_trajectory(self, traj):
+    def _hvplot_end_triangle(self, traj):
         from holoviews import dim
 
+        self.kwargs.pop("tiles", None)
+        hover_cols = self.kwargs.pop("hover_cols", None)
+        self.kwargs["hover_cols"] = ["triangle_angle"]
+        if hover_cols:
+            self.kwargs["hover_cols"] = self.kwargs["hover_cols"] + hover_cols
+        if self.marker_color:
+            self.kwargs["color"] = self.marker_color
+        if self.column:
+            self.kwargs["hover_cols"] = self.kwargs["hover_cols"] + [self.column]
+        end_pt_df = self._get_trajectory_end_with_direction(traj)
+        if self.hvplot_is_geo and not traj.is_latlon and traj.crs is not None:
+            end_pt_df = end_pt_df.to_crs(epsg=4326)
+        return end_pt_df.hvplot(
+            geo=self.hvplot_is_geo,
+            tiles=None,
+            marker="triangle",
+            angle=dim("triangle_angle"),
+            # color=marker_color,
+            size=self.marker_size,
+            *self.args,
+            **self.kwargs
+        )
+
+    def _hvplot_trajectory(self, traj):
         line_gdf = self._make_line_df(traj)
+
         if self.hvplot_is_geo and not traj.is_latlon and traj.crs is not None:
             line_gdf = line_gdf.to_crs(epsg=4326)
-        if self.column and isinstance(self.column, str):
-            self.kwargs["c"] = dim(
-                self.column
-            )  # fixes https://github.com/anitagraser/movingpandas/issues/71
+        # if self.column and isinstance(self.column, str):
+        #    self.kwargs["c"] = dim(
+        #        self.column
+        #    )  # fixes https://github.com/anitagraser/movingpandas/issues/71
         if self.column and self.colormap:
             try:
                 color = self.colormap[traj.df[self.column].max()]
             except KeyError:
                 color = "grey"
-            return line_gdf.hvplot(
+            line_plot = line_gdf.hvplot(
                 color=color,
+                line_width=self.line_width,
                 geo=self.hvplot_is_geo,
                 tiles=self.hvplot_tiles,
                 label=traj.df[self.column].max(),
@@ -91,12 +136,17 @@ class _TrajectoryPlotter:
                 **self.kwargs
             )
         else:
-            return line_gdf.hvplot(
+            if "colorbar" not in self.kwargs:
+                self.kwargs["colorbar"] = True
+            line_plot = line_gdf.hvplot(
+                line_width=self.line_width,
                 geo=self.hvplot_is_geo,
                 tiles=self.hvplot_tiles,
                 *self.args,
                 **self.kwargs
             )
+        end_pt_plot = self._hvplot_end_triangle(traj)
+        return line_plot * end_pt_plot
 
     def plot(self):
         if not self.ax:
