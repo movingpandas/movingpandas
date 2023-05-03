@@ -97,9 +97,8 @@ class TrajectoryStopDetector:
                         detected_stops.append(
                             TemporalRangeWithTrajId(segment_begin, segment_end, traj.id)
                         )
-                        segment_geoms = []
-                        segment_times = []
-                        geom = MultiPoint()
+                        segment_geoms = [segment_geoms[-1]]
+                        segment_times = [segment_times[-1]]
 
             previously_stopped = is_stopped
 
