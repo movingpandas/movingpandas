@@ -983,6 +983,13 @@ class TestTrajectory:
         traj2 = make_traj([Node(2, 0, day=1), Node(2, 4, day=2), Node(3, 4, day=3)])
         assert traj.distance(traj2) == 0
 
+    def test_distance_units(self):
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(3, 3, day=3)])
+        point = Point(0, 0)
+        assert traj.distance(point, units=("km")) == 0
+        line = LineString([(2, 4), (3, 4)])
+        assert traj.distance(line, units=("km")) == 0.001
+
     def test_distance_warning(self):
         with pytest.warns(UserWarning):
             point = Point(0, 0)
