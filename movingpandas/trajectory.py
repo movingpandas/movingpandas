@@ -1400,7 +1400,7 @@ class Trajectory:
         If units have been declared:
             For geographic projections, in declared units
             For known CRS units, in declared units
-            For unknown CRS units, in declared units as if CRS is in meters        
+            For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
@@ -1454,7 +1454,7 @@ class Trajectory:
                 "indian_ft": Indian Foot
                 "indian_ft_1937": Indian Foot 1937
                 "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975            
+                "indian_ft_1975": Indian Foot 1975
 
         Returns
         -------
@@ -1471,7 +1471,7 @@ class Trajectory:
             other = other.to_linestring()
 
         dist = self.to_linestring().distance(other)
-            
+
         if isinstance(units, tuple):
             units = UNITS(*units)
         else:
