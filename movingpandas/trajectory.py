@@ -4,12 +4,10 @@ import warnings
 
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
-from datetime import datetime
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
 from geopy.distance import geodesic
-from collections import namedtuple
 
 try:
     from pyproj import CRS
@@ -25,6 +23,13 @@ from .geometry_utils import (
     calculate_initial_compass_bearing,
     measure_distance_geodesic,
     measure_distance_euclidean,
+    point_gdf_to_linestring,
+)
+from .unit_utils import (
+    UNITS,
+    MissingCRSWarning,
+    to_unixtime,
+    get_conversion,
 )
 from .trajectory_plotter import _TrajectoryPlotter
 
@@ -39,200 +44,6 @@ DISTANCE_COL_NAME = "distance"
 SPEED_COL_NAME = "speed"
 TIMEDELTA_COL_NAME = "timedelta"
 TRAJ_ID_COL_NAME = "traj_id"
-UNITS = namedtuple(
-    "UNITS", "distance time time2 crs", defaults=(None, None, None, None)
-)
-
-DISTANCE_UNIT_LIST = [
-    {"abbr": "km", "conv": 1000, "fullname": "Kilometer"},
-    {"abbr": "m", "conv": 1, "fullname": "metre"},
-    {"abbr": "dm", "conv": 0.1, "fullname": "Decimeter"},
-    {"abbr": "cm", "conv": 0.01, "fullname": "Centimeter"},
-    {"abbr": "mm", "conv": 0.001, "fullname": "Millimeter"},
-    {"abbr": "nm", "conv": 1852.0, "fullname": "International Nautical Mile"},
-    {"abbr": "inch", "conv": 0.0254, "fullname": "International Inch"},
-    {"abbr": "ft", "conv": 0.3048, "fullname": "International Foot"},
-    {"abbr": "yd", "conv": 0.9144, "fullname": "International Yard"},
-    {"abbr": "mi", "conv": 1609.344, "fullname": "International Statute Mile"},
-    {"abbr": "link", "conv": 0.201168, "fullname": "International Link"},
-    {"abbr": "chain", "conv": 20.1168, "fullname": "International Chain"},
-    {"abbr": "fathom", "conv": 1.8288, "fullname": "International Fathom"},
-    {
-        "abbr": "british_ft",
-        "conv": 0.304799471538676,
-        "fullname": "British foot (Sears 1922)",
-        "epsg": 9041,
-    },
-    {
-        "abbr": "british_yd",
-        "conv": 0.914398414616029,
-        "fullname": "British yard (Sears 1922)",
-        "epsg": 9040,
-    },
-    {
-        "abbr": "british_chain_sears",
-        "conv": 20.11677651215526,
-        "fullname": "British chain (Sears 1922)",
-        "epsg": 9042,
-    },
-    {
-        "abbr": "british_link_sears",
-        "conv": 0.20116767651215526,
-        "fullname": "British link (Sears 1922)",
-        "epsg": 9043,
-    },
-    {"abbr": "sears_yd", "conv": 0.914398414616029, "fullname": "Yard (Sears)"},
-    {"abbr": "link_sears", "conv": 0.20116767651215526, "fullname": "Link (Sears)"},
-    {"abbr": "chain_sears", "conv": 20.11677651215526, "fullname": "Chain (Sears)"},
-    {
-        "abbr": "british_ft_sears_truncated",
-        "conv": 0.914398,
-        "fullname": "British foot (Sears 1922 truncated)",
-        "epsg": 9300,
-    },
-    {
-        "abbr": "british_chain_sears_truncated",
-        "conv": 20.11676,
-        "fullname": "British chain (Sears 1922 truncated)",
-        "epsg": 9301,
-    },
-    {
-        "abbr": "british_chain_benoit",
-        "conv": 20.116782494375872,
-        "fullname": "British chain (Benoit 1895 B)",
-        "epsg": 9062,
-    },
-    {
-        "abbr": "chain_benoit",
-        "conv": 20.116782494375872,
-        "fullname": "Chain (Benoit)",
-        "epsg": 9062,
-    },
-    {
-        "abbr": "link_benoit",
-        "conv": 0.20116782494375872,
-        "fullname": "Link (Benoit)",
-        "epsg": 9063,
-    },
-    {
-        "abbr": "clarke_yd",
-        "conv": 0.9143917962,
-        "fullname": "Clarke's yard",
-        "epsg": 9037,
-    },
-    {
-        "abbr": "clarke_ft",
-        "conv": 0.3047972654,
-        "fullname": "Clarke's Foot",
-        "epsg": 9005,
-    },
-    {
-        "abbr": "clarke_link",
-        "conv": 0.201166195164,
-        "fullname": "Clarke's link",
-        "epsg": 9039,
-    },
-    {
-        "abbr": "clarke_chain",
-        "conv": 20.1166195164,
-        "fullname": "Clarke's chain",
-        "epsg": 9038,
-    },
-    {
-        "abbr": "british_ft_1936",
-        "conv": 0.3048007491,
-        "fullname": "British foot (1936)",
-        "epsg": 9095,
-    },
-    {
-        "abbr": "gold_coast_ft",
-        "conv": 0.3047997101815,
-        "fullname": "Gold Coast foot",
-        "epsg": 9094,
-    },
-    {"abbr": "rod", "conv": 0.1988387815, "fullname": "Rod"},
-    {"abbr": "furlong", "conv": 201.168, "fullname": "Furlong"},
-    {
-        "abbr": "german_m",
-        "conv": 1.0000135965,
-        "fullname": "German legal metre",
-        "epsg": 9031,
-    },
-    {"abbr": "survey_in", "conv": 0.0254000508001016, "fullname": "US survey inch"},
-    {
-        "abbr": "survey_ft",
-        "conv": 0.3048006096012192,
-        "fullname": "US survey foot",
-        "epsg": 9003,
-    },
-    {"abbr": "survey_yd", "conv": 0.9144018288036575, "fullname": "US survey yard"},
-    {
-        "abbr": "survey_lk",
-        "conv": 0.20116840233680463,
-        "fullname": "US survey link",
-        "epsg": 9034,
-    },
-    {
-        "abbr": "survey_ch",
-        "conv": 20.116840233680463,
-        "fullname": "US survey chain",
-        "epsg": 9033,
-    },
-    {
-        "abbr": "survey_mi",
-        "conv": 1609.3472186944373,
-        "fullname": "US survey mile",
-        "epsg": 9035,
-    },
-    {
-        "abbr": "indian_yd",
-        "conv": 0.914398530744441,
-        "fullname": "Indian Yard",
-        "epsg": 9084,
-    },
-    {
-        "abbr": "indian_ft",
-        "conv": 0.3047995104977167,
-        "fullname": "Indian Foot",
-        "epsg": 9080,
-    },
-    {
-        "abbr": "indian_ft_1937",
-        "conv": 0.30479841,
-        "fullname": "Indian Foot",
-        "epsg": 9081,
-    },
-    {
-        "abbr": "indian_ft_1962",
-        "conv": 0.3047996,
-        "fullname": "Indian Foot",
-        "epsg": 9082,
-    },
-    {
-        "abbr": "indian_ft_1975",
-        "conv": 0.3047995,
-        "fullname": "Indian Foot",
-        "epsg": 9083,
-    },
-    {
-        "abbr": "deg",
-        "conv": 1,
-        "fullname": "degree",
-        "epsg": 4326,
-    },  # To allow geodesic conversions
-]
-
-TIME_UNIT_LIST = [
-    {"abbr": "s", "conv": 1, "fullname": "seconds"},
-    {"abbr": "min", "conv": 60, "fullname": "minutes"},
-    {"abbr": "h", "conv": 3600, "fullname": "hours"},
-    {"abbr": "d", "conv": 86400, "fullname": "days"},
-    {"abbr": "a", "conv": 31557600, "fullname": "years"},
-]
-
-
-class MissingCRSWarning(UserWarning, ValueError):
-    pass
 
 
 class TimeZoneWarning(UserWarning, ValueError):
@@ -336,7 +147,10 @@ class Trajectory:
         self.df = df[~df.index.duplicated(keep="first")]
         self.crs = df.crs
         self.parent = parent
-        if self.crs is None:
+        if self.crs is not None:
+            self.crs_units = self.crs.axis_info[0].unit_name
+        else:
+            self.crs_units = None
             warnings.warn(
                 "Trajectory generated without CRS. Computations will use Euclidean"
                 " distances.",
@@ -349,8 +163,6 @@ class Trajectory:
             self.is_latlon = crs.is_geographic
         except NameError:
             self.is_latlon = self.crs["init"] == from_epsg(4326)["init"]
-        if self.crs is not None:
-            self.crs_units = self.crs.axis_info[0].unit_name
 
     def __str__(self):
         try:
@@ -921,58 +733,6 @@ class Trajectory:
             )
         return segment
 
-    def _get_conversion(self, units):
-        # Looks up unit conversions in the unit dictionaries
-        # If distance specified, lookup distance and crs conversions and check time
-        # If time specified, lookup time conversion and check if time2 specified
-        # If time2 specified, lookup time2 conversion
-        # Unit conversions default to 1 if not specified
-        d_conv, t_conv, t2_conv, crs_conv = 1, 1, 1, 1
-        if units.distance is not None:
-            try:
-                d_conv = [
-                    d["conv"]
-                    for d in DISTANCE_UNIT_LIST
-                    if d.get("abbr") == units.distance
-                ][0]
-            except IndexError:
-                raise ValueError("Invalid distance units!")
-            else:
-                try:
-                    crs_conv = [
-                        d["conv"]
-                        for d in DISTANCE_UNIT_LIST
-                        if d.get("fullname") == self.crs_units
-                    ][0]
-                except (IndexError, AttributeError):
-                    crs_conv = 1
-                    warnings.warn(
-                        "No valid CRS distance units. Computations will "
-                        "assume CRS distance units are meters",
-                        category=MissingCRSWarning,
-                    )
-                finally:
-                    if units.time is not None:
-                        try:
-                            t_conv = [
-                                t["conv"]
-                                for t in TIME_UNIT_LIST
-                                if t.get("abbr") == units.time
-                            ][0]
-                        except IndexError:
-                            raise ValueError("Invalid time units!")
-                        else:
-                            if units.time2 is not None:
-                                try:
-                                    t2_conv = [
-                                        t["conv"]
-                                        for t in TIME_UNIT_LIST
-                                        if t.get("abbr") == units.time2
-                                    ][0]
-                                except IndexError:
-                                    raise ValueError("Invalid second time units!")
-        return UNITS(d_conv, t_conv, t2_conv, crs_conv)
-
     def _compute_distance(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_column_name()]
@@ -1004,12 +764,68 @@ class Trajectory:
             # TODO: decide on default enforcement behavior
             self.df = self.df.assign(prev_pt=self.df.geometry.shift())
 
-    def get_length(self):
+    def get_length(self, units=UNITS()):
         """
         Return the length of the trajectory.
 
         Length is calculated using CRS units, except if the CRS is geographic
         (e.g. EPSG:4326 WGS84) then length is calculated in metres.
+
+        If units have been declared:
+            For geographic projections, in declared units
+            For known CRS units, in declared units
+            For unknown CRS units, in declared units as if CRS is in meters
+
+        Parameters
+        ----------
+        units : str
+            Units in which to calculate length values (default: CRS units)
+            Allowed:
+                "km": Kilometer
+                "m": metre
+                "dm": Decimeter
+                "cm": Centimeter
+                "mm": Millimeter
+                "nm": International Nautical Mile
+                "inch": International Inch
+                "ft": International Foot
+                "yd": International Yard
+                "mi": International Statute Mile
+                "link": International Link
+                "chain": International Chain
+                "fathom": International Fathom
+                "british_ft": British foot (Sears 1922)
+                "british_yd": British yard (Sears 1922)
+                "british_chain_sears": British chain (Sears 1922)
+                "british_link_sears": British link (Sears 1922)
+                "sears_yd": Yard (Sears)
+                "link_sears": Link (Sears)
+                "chain_sears": Chain (Sears)
+                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
+                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
+                "british_chain_benoit": British chain (Benoit 1895 B)
+                "chain_benoit": Chain (Benoit)
+                "link_benoit": Link (Benoit)
+                "clarke_yd": Clarke's yard
+                "clarke_ft": Clarke's Foot
+                "clarke_link": Clarke's link
+                "clarke_chain": Clarke's chain
+                "british_ft_1936": British foot (1936)
+                "gold_coast_ft": Gold Coast foot
+                "rod": Rod
+                "furlong": Furlong
+                "german_m": German legal metre
+                "survey_in": US survey inch
+                "survey_ft": US survey foot
+                "survey_yd": US survey yard
+                "survey_lk": US survey link
+                "survey_ch": US survey chain
+                "survey_mi": US survey mile
+                "indian_yd": Indian Yard
+                "indian_ft": Indian Foot
+                "indian_ft_1937": Indian Foot 1937
+                "indian_ft_1962": Indian Foot 1962
+                "indian_ft_1975": Indian Foot 1975
 
         Returns
         -------
@@ -1018,9 +834,13 @@ class Trajectory:
         """
         pt_tuples = [(pt.y, pt.x) for pt in self.df.geometry.tolist()]
         if self.is_latlon:
-            return geodesic(*pt_tuples).m
+            length = geodesic(*pt_tuples).m
         else:  # The following distance will be in CRS units that might not be meters!
-            return LineString(pt_tuples).length
+            length = LineString(pt_tuples).length
+
+        conversion = get_conversion(units, self.crs_units)
+
+        return length / conversion.distance
 
     def get_direction(self):
         """
@@ -1242,8 +1062,8 @@ class Trajectory:
                 "chain_benoit": Chain (Benoit)
                 "link_benoit": Link (Benoit)
                 "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke’s Foot
-                "clarke_link": Clarke’s link
+                "clarke_ft": Clarke's Foot
+                "clarke_link": Clarke's link
                 "clarke_chain": Clarke's chain
                 "british_ft_1936": British foot (1936)
                 "gold_coast_ft": Gold Coast foot
@@ -1293,11 +1113,7 @@ class Trajectory:
                 "Use overwrite=True to overwrite exiting values or update the "
                 "name arg."
             )
-        if isinstance(units, tuple):
-            units = UNITS(*units)
-        else:
-            units = UNITS(units)
-        conversion = self._get_conversion(units)
+        conversion = get_conversion(units, self.crs_units)
         self.df = self._get_df_with_distance(conversion, name)
 
     def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
@@ -1355,8 +1171,8 @@ class Trajectory:
                 "chain_benoit": Chain (Benoit)
                 "link_benoit": Link (Benoit)
                 "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke’s Foot
-                "clarke_link": Clarke’s link
+                "clarke_ft": Clarke's Foot
+                "clarke_link": Clarke's link
                 "clarke_chain": Clarke's chain
                 "british_ft_1936": British foot (1936)
                 "gold_coast_ft": Gold Coast foot
@@ -1413,11 +1229,7 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        if isinstance(units, tuple):
-            units = UNITS(*units)
-        else:
-            units = UNITS(units)
-        conversion = self._get_conversion(units)
+        conversion = get_conversion(units, self.crs_units)
         self.df = self._get_df_with_speed(conversion, name)
 
     def add_acceleration(
@@ -1483,8 +1295,8 @@ class Trajectory:
                 "chain_benoit": Chain (Benoit)
                 "link_benoit": Link (Benoit)
                 "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke’s Foot
-                "clarke_link": Clarke’s link
+                "clarke_ft": Clarke's Foot
+                "clarke_link": Clarke's link
                 "clarke_chain": Clarke's chain
                 "british_ft_1936": British foot (1936)
                 "gold_coast_ft": Gold Coast foot
@@ -1541,11 +1353,7 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values or update the "
                 f"name arg."
             )
-        if isinstance(units, tuple):
-            units = UNITS(*units)
-        else:
-            units = UNITS(units)
-        conversion = self._get_conversion(units)
+        conversion = get_conversion(units, self.crs_units)
         self.df = self._get_df_with_acceleration(conversion, name)
 
     def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
@@ -1632,15 +1440,69 @@ class Trajectory:
         """
         return intersects(self, polygon)
 
-    def distance(self, other):
+    def distance(self, other, units=UNITS()):
         """
         Return the minimum distance to the other geometric object (based on shapely
         https://shapely.readthedocs.io/en/stable/manual.html#object.distance).
+
+        If units have been declared:
+            For geographic projections, in declared units
+            For known CRS units, in declared units
+            For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
         other : shapely.geometry or Trajectory
             Other geometric object or trajectory
+
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            Allowed:
+                "km": Kilometer
+                "m": metre
+                "dm": Decimeter
+                "cm": Centimeter
+                "mm": Millimeter
+                "nm": International Nautical Mile
+                "inch": International Inch
+                "ft": International Foot
+                "yd": International Yard
+                "mi": International Statute Mile
+                "link": International Link
+                "chain": International Chain
+                "fathom": International Fathom
+                "british_ft": British foot (Sears 1922)
+                "british_yd": British yard (Sears 1922)
+                "british_chain_sears": British chain (Sears 1922)
+                "british_link_sears": British link (Sears 1922)
+                "sears_yd": Yard (Sears)
+                "link_sears": Link (Sears)
+                "chain_sears": Chain (Sears)
+                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
+                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
+                "british_chain_benoit": British chain (Benoit 1895 B)
+                "chain_benoit": Chain (Benoit)
+                "link_benoit": Link (Benoit)
+                "clarke_yd": Clarke's yard
+                "clarke_ft": Clarke's Foot
+                "clarke_link": Clarke's link
+                "clarke_chain": Clarke's chain
+                "british_ft_1936": British foot (1936)
+                "gold_coast_ft": Gold Coast foot
+                "rod": Rod
+                "furlong": Furlong
+                "german_m": German legal metre
+                "survey_in": US survey inch
+                "survey_ft": US survey foot
+                "survey_yd": US survey yard
+                "survey_lk": US survey link
+                "survey_ch": US survey chain
+                "survey_mi": US survey mile
+                "indian_yd": Indian Yard
+                "indian_ft": Indian Foot
+                "indian_ft_1937": Indian Foot 1937
+                "indian_ft_1962": Indian Foot 1962
+                "indian_ft_1975": Indian Foot 1975
 
         Returns
         -------
@@ -1655,9 +1517,12 @@ class Trajectory:
             warnings.warn(message, UserWarning)
         if type(other) == Trajectory:
             other = other.to_linestring()
-        return self.to_linestring().distance(other)
 
-    def hausdorff_distance(self, other):
+        dist = self.to_linestring().distance(other)
+        conversion = get_conversion(units, self.crs_units)
+        return dist / conversion.distance
+
+    def hausdorff_distance(self, other, units=UNITS()):
         """
         Return the Hausdorff distance to the other geometric object (based on shapely
         https://shapely.readthedocs.io/en/stable/manual.html#object.hausdorff_distance).
@@ -1665,10 +1530,64 @@ class Trajectory:
         that a point on either geometry can be from the nearest point to it on
         the other geometry.
 
+        If units have been declared:
+            For geographic projections, in declared units
+            For known CRS units, in declared units
+            For unknown CRS units, in declared units as if CRS is in meters
+
         Parameters
         ----------
         other : shapely.geometry or Trajectory
             Other geometric object or trajectory
+
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            Allowed:
+                "km": Kilometer
+                "m": metre
+                "dm": Decimeter
+                "cm": Centimeter
+                "mm": Millimeter
+                "nm": International Nautical Mile
+                "inch": International Inch
+                "ft": International Foot
+                "yd": International Yard
+                "mi": International Statute Mile
+                "link": International Link
+                "chain": International Chain
+                "fathom": International Fathom
+                "british_ft": British foot (Sears 1922)
+                "british_yd": British yard (Sears 1922)
+                "british_chain_sears": British chain (Sears 1922)
+                "british_link_sears": British link (Sears 1922)
+                "sears_yd": Yard (Sears)
+                "link_sears": Link (Sears)
+                "chain_sears": Chain (Sears)
+                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
+                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
+                "british_chain_benoit": British chain (Benoit 1895 B)
+                "chain_benoit": Chain (Benoit)
+                "link_benoit": Link (Benoit)
+                "clarke_yd": Clarke's yard
+                "clarke_ft": Clarke's Foot
+                "clarke_link": Clarke's link
+                "clarke_chain": Clarke's chain
+                "british_ft_1936": British foot (1936)
+                "gold_coast_ft": Gold Coast foot
+                "rod": Rod
+                "furlong": Furlong
+                "german_m": German legal metre
+                "survey_in": US survey inch
+                "survey_ft": US survey foot
+                "survey_yd": US survey yard
+                "survey_lk": US survey link
+                "survey_ch": US survey chain
+                "survey_mi": US survey mile
+                "indian_yd": Indian Yard
+                "indian_ft": Indian Foot
+                "indian_ft_1937": Indian Foot 1937
+                "indian_ft_1962": Indian Foot 1962
+                "indian_ft_1975": Indian Foot 1975
 
         Returns
         -------
@@ -1683,7 +1602,9 @@ class Trajectory:
             warnings.warn(message, UserWarning)
         if type(other) == Trajectory:
             other = other.to_linestring()
-        return self.to_linestring().hausdorff_distance(other)
+        dist = self.to_linestring().hausdorff_distance(other)
+        conversion = get_conversion(units, self.crs_units)
+        return dist / conversion.distance
 
     def clip(self, polygon, point_based=False):
         """
@@ -1791,20 +1712,3 @@ class Trajectory:
             of the Minimum Convex Polygon
         """
         return self.df.geometry.unary_union.convex_hull
-
-
-def to_unixtime(t):
-    """
-    Return float of total seconds since Unix time.
-    """
-    return (t - datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
-
-
-def point_gdf_to_linestring(df, geom_col_name):
-    """
-    Convert GeoDataFrame of Points to shapely LineString
-    """
-    if len(df) > 1:
-        return LineString(df[geom_col_name].tolist())
-    else:
-        raise RuntimeError("DataFrame needs at least two points to make line!")

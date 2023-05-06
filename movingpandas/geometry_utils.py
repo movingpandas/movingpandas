@@ -5,7 +5,7 @@ from math import atan2, cos, degrees, pi, radians, sin, sqrt
 import shapely
 from geopy import distance
 from packaging.version import Version
-from shapely.geometry import Point
+from shapely.geometry import LineString, Point
 
 try:
     SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
@@ -163,3 +163,13 @@ def mrr_diagonal(geom, spherical=False):
     except AttributeError:  # thrown if mrr is a LineString
         return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
     return _measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
+
+
+def point_gdf_to_linestring(df, geom_col_name):
+    """
+    Convert GeoDataFrame of Points to shapely LineString
+    """
+    if len(df) > 1:
+        return LineString(df[geom_col_name].tolist())
+    else:
+        raise RuntimeError("DataFrame needs at least two points to make line!")
