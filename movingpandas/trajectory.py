@@ -27,8 +27,6 @@ from .geometry_utils import (
 )
 from .unit_utils import (
     UNITS,
-    DISTANCE_UNIT_LIST,
-    TIME_UNIT_LIST,
     MissingCRSWarning,
     to_unixtime,
     get_conversion,
