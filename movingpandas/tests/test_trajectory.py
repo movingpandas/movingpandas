@@ -711,9 +711,19 @@ class TestTrajectory:
         )
         assert result == pytest.approx(676.3, 1)
 
+    def test_get_length_spherical_units(self):
+        result = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON).get_length(
+            units="km"
+        )
+        assert result == pytest.approx(676.3, 1)
+
     def test_get_length_euclidiean(self):
         result = make_traj([Node(0, 2), Node(6, 0, day=2)]).get_length()
         assert result == pytest.approx(6.3, 1)
+
+    def test_get_length_euclidiean_units(self):
+        result = make_traj([Node(0, 2), Node(6, 0, day=2)]).get_length(units="km")
+        assert result == pytest.approx(0.0063, 4)
 
     def test_get_direction(self):
         result = make_traj(
@@ -986,9 +996,9 @@ class TestTrajectory:
     def test_distance_units(self):
         traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(3, 3, day=3)])
         point = Point(0, 0)
-        assert traj.distance(point, units=("km")) == 0
+        assert traj.distance(point, units="km") == 0
         line = LineString([(2, 4), (3, 4)])
-        assert traj.distance(line, units=("km")) == 0.001
+        assert traj.distance(line, units="km") == 0.001
 
     def test_distance_warning(self):
         with pytest.warns(UserWarning):
@@ -1005,6 +1015,15 @@ class TestTrajectory:
         assert traj.hausdorff_distance(line) == sqrt(4 + 1)
         traj2 = make_traj([Node(2, 0, day=1), Node(2, 4, day=2), Node(3, 4, day=3)])
         assert traj.hausdorff_distance(traj2) == sqrt(4 + 1)
+
+    def test_hausdorff_distance_units(self):
+        from math import sqrt
+
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
+        point = Point(0, 0)
+        assert traj.hausdorff_distance(point, units="km") == sqrt(4 + 4) / 1000.0
+        line = LineString([(2, 0), (2, 4), (3, 4)])
+        assert traj.hausdorff_distance(line, units="km") == sqrt(4 + 1) / 1000.0
 
     def test_hausdorff_distance_warning(self):
         with pytest.warns(UserWarning):

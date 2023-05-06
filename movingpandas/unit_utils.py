@@ -214,6 +214,12 @@ def get_conversion(units, crs_units):
     Unit conversions default to 1 if not specified
     """
     d_conv, t_conv, t2_conv, crs_conv = 1, 1, 1, 1
+
+    if isinstance(units, tuple):
+        units = UNITS(*units)
+    else:
+        units = UNITS(units)
+
     if units.distance is not None:
         try:
             d_conv = [
