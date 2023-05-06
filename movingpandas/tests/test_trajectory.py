@@ -16,8 +16,8 @@ from movingpandas.trajectory import (
     DISTANCE_COL_NAME,
     TIMEDELTA_COL_NAME,
     TRAJ_ID_COL_NAME,
-    MissingCRSWarning,
 )
+from movingpandas.unit_utils import MissingCRSWarning
 
 from . import requires_holoviews, has_holoviews
 
