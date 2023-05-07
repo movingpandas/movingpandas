@@ -121,3 +121,6 @@ goth.tif
 tutorials/demodata_geolife.gpkg
 tutorials/temp.gpkg
 tutorials/Blogpost.ipynb
+.vscode/settings.json
+tutorials/soccer.csv
+temp.gpkg

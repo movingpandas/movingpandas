@@ -1,5 +1,16 @@
 ## Changelog
 
+### 0.16 (released May 2023)
+
+[Version 0.16](https://github.com/movingpandas/movingpandas/releases/tag/v0.16)
+includes, amongst other improvements, the following new algorithms:
+ 
+* New arrow markers to indicate trajectory direction in plots
+* New custom distance, speed, and acceleration unit support 
+
+For full details, see the 
+[commit history](https://github.com/movingpandas/movingpandas/compare/v.0.15...v0.16).
+
 ### 0.15 (released January 2023)
 
 [Version 0.15](https://github.com/anitagraser/movingpandas/releases/tag/v.0.15)
