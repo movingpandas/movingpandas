@@ -45,7 +45,7 @@ Create interactive trajectory plots, including multiple linked plots with ease
 
 Detect stops in trajectories, extract them as points or segments, and use them to split trajectories
 
-![movingpandas_stop_detection](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
+![movingpandas_stop_detection](https://user-images.githubusercontent.com/590385/236671475-a37aa046-76d6-48b9-ae6d-d1358a591953.png)
 
 
 ### Trajectory generalization  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/7-generalizing-trajectories.ipynb)
