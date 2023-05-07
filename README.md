@@ -35,8 +35,7 @@ For more information about individual releases, check out the [Changelog](./chan
 
 ![Trajectory cleaning & smoothing](https://user-images.githubusercontent.com/590385/184359439-52eca394-5df6-40b2-a5b3-54543c3ccf34.png)
 
-![Stop detection and splitting](https://user-images.githubusercontent.com/590385/137953859-3df81568-eda8-4443-96b8-e82e15c03653.png)
-
+![Stop detection and splitting](https://user-images.githubusercontent.com/590385/236671475-a37aa046-76d6-48b9-ae6d-d1358a591953.png)
 
 
 ## What's next?
