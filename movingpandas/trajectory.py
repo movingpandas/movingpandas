@@ -136,6 +136,7 @@ class Trajectory:
             warnings.warn(
                 "Time zone information dropped from trajectory. "
                 "All dates and times will use local time. "
+                "This has been applied using df.tz_localize(None). "
                 "To use UTC or a different time zone, convert and drop "
                 "time zone information prior to trajectory creation.",
                 category=TimeZoneWarning,
