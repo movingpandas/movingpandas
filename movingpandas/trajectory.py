@@ -132,14 +132,16 @@ class Trajectory:
 
         #  Drop any time zone information, to avoid errors (see issue 303)
         if df.index.tzinfo is not None:
-            df = df.tz_localize(None)
+            self.df_orig_tz = df.index.tzinfo
             warnings.warn(
                 "Time zone information dropped from trajectory. "
                 "All dates and times will use local time. "
+                "This is applied by doing df.tz_localize(None). "
                 "To use UTC or a different time zone, convert and drop "
                 "time zone information prior to trajectory creation.",
                 category=TimeZoneWarning,
             )
+            df = df.tz_localize(None)
 
         self.id = traj_id
         self.obj_id = obj_id
@@ -417,14 +419,21 @@ class Trajectory:
         wkt = "LINESTRING M ({})".format(coords[:-2])
         return wkt
 
-    def to_point_gdf(self):
+    def to_point_gdf(self, return_orig_tz=False):
         """
         Return the trajectory's points as GeoDataFrame.
+
+        Parameters
+        ----------
+        return_orig_tz : bool
+            If True, adds timezone info back to df
 
         Returns
         -------
         GeoDataFrame
         """
+        if return_orig_tz:
+            return self.df.tz_localize(self.df_orig_tz)
         return self.df
 
     def to_line_gdf(self):
