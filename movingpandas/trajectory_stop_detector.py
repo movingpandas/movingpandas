@@ -96,7 +96,7 @@ class TrajectoryStopDetector:
                     d = distance.distance((minx, miny), (maxx, maxy)).meters
                 else:
                     d = sqrt(pow(maxx - minx, 2) + pow(maxy - miny, 2))
-                if d < max_diameter*1.5:
+                if d < max_diameter * 1.5:
                     geom = MultiPoint(pts)
                     if mrr_diagonal(geom, traj.is_latlon) < max_diameter:
                         is_stopped = True
