@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from geopy import distance
+from math import sqrt, pow
 from geopandas import GeoDataFrame
 from shapely.geometry import MultiPoint, Point
 from .trajectory import Trajectory
@@ -50,62 +52,73 @@ class TrajectoryStopDetector:
             raise TypeError
 
     def _process_traj_collection(self, max_diameter, min_duration):
-        result = []
+        results = []
         for traj in self.traj:
             for time_range in self._process_traj(traj, max_diameter, min_duration):
-                result.append(time_range)
-        return result
+                results.append(time_range)
+        return results
 
     def _process_traj(self, traj, max_diameter, min_duration):
         detected_stops = []
-        segment_geoms = []
-        segment_times = []
+        pts, xs, ys, ts = [], [], [], []
+        minx, miny = float("inf"), float("inf")
+        maxx, maxy = float("-inf"), float("-inf")
         geom = MultiPoint()
         is_stopped = False
         previously_stopped = False
 
-        for index, data in traj.df[traj.get_geom_column_name()].items():
-            segment_geoms.append(data)
-            geom = geom.union(data)
-            segment_times.append(index)
+        for t, pt in traj.df[traj.get_geom_column_name()].items():
+            pts.append(pt)
+            xs.append(pt.x)
+            ys.append(pt.y)
+            ts.append(t)
+            first_to_keep = 0
 
             if not is_stopped:  # remove points to the specified min_duration
                 while (
-                    len(segment_geoms) > 2
-                    and segment_times[-1] - segment_times[0] >= min_duration
+                    len(pts[first_to_keep:]) > 2
+                    and ts[-1] - ts[first_to_keep] >= min_duration
                 ):
-                    segment_geoms.pop(0)
-                    segment_times.pop(0)
-                # after removing extra points, re-generate geometry
-                geom = MultiPoint(segment_geoms)
+                    first_to_keep += 1
+                pts = pts[first_to_keep:]
+                xs = xs[first_to_keep:]
+                ys = ys[first_to_keep:]
+                ts = ts[first_to_keep:]
 
-            if (
-                len(segment_geoms) > 1
-                and mrr_diagonal(geom, traj.is_latlon) < max_diameter
-            ):
-                is_stopped = True
-            else:
-                is_stopped = False
+            minx = min(xs)
+            miny = min(ys)
+            maxx = max(xs)
+            maxy = max(ys)
 
-            if len(segment_geoms) > 1:
-                segment_end = segment_times[-2]
-                segment_begin = segment_times[0]
-                if not is_stopped and previously_stopped:
-                    if (
-                        segment_end - segment_begin >= min_duration
-                    ):  # detected end of a stop
-                        detected_stops.append(
-                            TemporalRangeWithTrajId(segment_begin, segment_end, traj.id)
-                        )
-                        segment_geoms = [segment_geoms[-1]]
-                        segment_times = [segment_times[-1]]
+            is_stopped = False
+            if len(pts) > 1:
+                if traj.is_latlon:
+                    d = distance.distance((minx, miny), (maxx, maxy)).meters
+                else:
+                    d = sqrt(pow(maxx - minx, 2) + pow(maxy - miny, 2))
+                if d < max_diameter*1.5:
+                    geom = MultiPoint(pts)
+                    if mrr_diagonal(geom, traj.is_latlon) < max_diameter:
+                        is_stopped = True
+
+            if not is_stopped and previously_stopped and len(pts) > 1:
+                segment_end = ts[-2]
+                segment_begin = ts[0]
+                if (
+                    segment_end - segment_begin >= min_duration
+                ):  # detected end of a stop
+                    detected_stops.append(
+                        TemporalRangeWithTrajId(segment_begin, segment_end, traj.id)
+                    )
+                    pts = [pts[-1]]
+                    xs = [xs[-1]]
+                    ys = [ys[-1]]
+                    ts = [ts[-1]]
 
             previously_stopped = is_stopped
 
-        if is_stopped and segment_times[-1] - segment_times[0] >= min_duration:
-            detected_stops.append(
-                TemporalRangeWithTrajId(segment_times[0], segment_times[-1], traj.id)
-            )
+        if is_stopped and ts[-1] - ts[0] >= min_duration:
+            detected_stops.append(TemporalRangeWithTrajId(ts[0], ts[-1], traj.id))
 
         return detected_stops
 
