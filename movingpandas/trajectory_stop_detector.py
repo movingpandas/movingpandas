@@ -2,6 +2,8 @@
 
 from geopy import distance
 from math import sqrt, pow
+from multiprocessing import Pool
+from itertools import repeat
 from geopandas import GeoDataFrame
 from shapely.geometry import MultiPoint, Point
 from .trajectory import Trajectory
@@ -18,7 +20,7 @@ class TrajectoryStopDetector:
     at least the specified duration.
     """
 
-    def __init__(self, traj):
+    def __init__(self, traj, n_threads=4):
         """
         Create StopDetector
 
@@ -27,6 +29,7 @@ class TrajectoryStopDetector:
         traj : Trajectory or TrajectoryCollection
         """
         self.traj = traj
+        self.n_threads = n_threads
 
     def get_stop_time_ranges(self, max_diameter, min_duration):
         """
@@ -47,15 +50,40 @@ class TrajectoryStopDetector:
         if isinstance(self.traj, Trajectory):
             return self._process_traj(self.traj, max_diameter, min_duration)
         elif isinstance(self.traj, TrajectoryCollection):
-            return self._process_traj_collection(max_diameter, min_duration)
+            trajs = self.traj.trajectories
+            if self.n_threads > 1:
+                return self._process_traj_collection_multithreaded(
+                    trajs, max_diameter, min_duration
+                )
+            else:
+                return self._process_traj_collection(trajs, max_diameter, min_duration)
         else:
             raise TypeError
 
-    def _process_traj_collection(self, max_diameter, min_duration):
+    def _process_traj_collection(self, trajs, max_diameter, min_duration):
         results = []
-        for traj in self.traj:
+        for traj in trajs:
             for time_range in self._process_traj(traj, max_diameter, min_duration):
                 results.append(time_range)
+        return results
+
+    def _process_traj_collection_multithreaded(self, trajs, max_diameter, min_duration):
+        p = Pool(self.n_threads)
+
+        def split_list(a, n):  # source: https://stackoverflow.com/a/2135920/449624
+            k, m = divmod(len(a), n)
+            return (
+                a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n)
+            )
+
+        data = split_list(trajs, self.n_threads)
+
+        results = []
+        for stops in p.starmap(
+            self._process_traj_collection,
+            zip(data, repeat(max_diameter), repeat(min_duration)),
+        ):
+            results.extend(stops)
         return results
 
     def _process_traj(self, traj, max_diameter, min_duration):
