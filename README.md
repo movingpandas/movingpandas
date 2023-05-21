@@ -1,6 +1,10 @@
 # MovingPandas
 
 [![pypi](https://img.shields.io/pypi/v/movingpandas.svg)](https://pypi.python.org/pypi/movingpandas/)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Recipe](https://img.shields.io/badge/recipe-movingpandas-green.svg)](https://anaconda.org/conda-forge/movingpandas) 
+[![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Tests](https://github.com/movingpandas/movingpandas/actions/workflows/tests.yaml/badge.svg)](https://github.com/movingpandas/movingpandas/actions/workflows/tests.yaml)
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=main)](https://movingpandas.readthedocs.io/en/main/)
@@ -79,13 +83,6 @@ MovingPandas for Python >= 3.7 and all it's dependencies are available from [con
  
  `mamba install -c conda-forge movingpandas`
 
-
-**Conda status**
-
-[![Conda Recipe](https://img.shields.io/badge/recipe-movingpandas-green.svg)](https://anaconda.org/conda-forge/movingpandas) 
-[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas) 
-[![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/movingpandas.svg)](https://anaconda.org/conda-forge/movingpandas)
 
 Note that it is **NOT recommended** to install MovingPandas from [PyPI](https://pypi.org/project/movingpandas/)!
 If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed 
