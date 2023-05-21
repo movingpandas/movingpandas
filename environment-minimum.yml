@@ -3,10 +3,9 @@ channels:
   - conda-forge
 dependencies:
   - python=3.10
-  - fiona
   - geopandas-base
+  - matplotlib-base
+  - fiona
   - geopy
   - rtree
-  - matplotlib-base
   - pytest
-  - pytest-cov
