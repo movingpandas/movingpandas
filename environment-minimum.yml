@@ -4,12 +4,8 @@ channels:
 dependencies:
   - python=3.10
   - geopandas-base
-  - fiona
   - geopy
   - rtree
   - matplotlib-base
-  - numpy
-  - pandas
-  - shapely
   - pytest
   - pytest-cov
