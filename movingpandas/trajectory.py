@@ -583,7 +583,7 @@ class Trajectory:
             idx = index.get_indexer([t], method=method)[0]
             return self.df.iloc[idx]
 
-    def interpolate_position_at(self, t):
+    def interpolate_position_at(self, t, units=UNITS()):
         """
         Compute and return interpolated position at time t.
 
@@ -609,7 +609,19 @@ class Trajectory:
         )
         if t_diff == 0 or line.length == 0:
             return prev_row[self.get_geom_column_name()]
-        interpolated_position = line.interpolate(t_diff_at / t_diff * line.length)
+
+        speed_col_name = self.get_speed_column_name()
+        conversion = get_conversion(units, self.crs_units)
+        if (speed_col_name in self.df.columns) and \
+                (self.crs_units == 'metre'):  # assume constant acceleration
+            u_diff = next_row[speed_col_name] - prev_row[speed_col_name]
+            acc = u_diff / t_diff.total_seconds() * conversion.time
+            dist = prev_row[speed_col_name] * \
+                   t_diff_at.total_seconds() * conversion.time + \
+                   .5 * acc * (t_diff_at.total_seconds() * conversion.time)**2
+        else: # assume constant velocity
+            dist = t_diff_at / t_diff * line.length
+        interpolated_position = line.interpolate(dist)
         return interpolated_position
 
     def get_position_at(self, t, method="interpolated"):
