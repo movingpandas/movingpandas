@@ -22,6 +22,7 @@ MovingPandas classes
    trajectorysplitter
    trajectorystopdetector
    trajectorysmoother
+   trajectorycleaner
 
 
 All Functions
