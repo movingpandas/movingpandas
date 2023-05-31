@@ -237,6 +237,21 @@ class TestTrajectory:
         ).wkt
         assert result == "LINESTRING (6 0, 8 0)"
 
+    def test_get_position_at_with_speed_included(self):
+        # based upon: .5*9.8*(t**2) a freely falling object
+        df = pd.DataFrame(
+            {
+                "t": pd.date_range("2020-01-01", periods=6, freq="S"),
+                "geometry": [Point(0, 0), Point(0, 4.9), Point(0, 19.6),
+                             Point(0, 44.1), Point(0, 78.4), Point(0, 122.5)],
+                "speed": [0., 9.8, 19.6, 29.4, 39.2, 49.0]
+            }
+        ).set_index('t')
+        df = df.drop(df.index[2])
+        toy_traj = Trajectory(GeoDataFrame(df, crs=31256), 1)
+        result = toy_traj.get_position_at(datetime(2020, 1, 1, 0, 0, 2))
+        assert result == 19.6
+
     def test_get_linestring_between_interpolate_ValueError(self):
         # test for https://github.com/anitagraser/movingpandas/issues/118
         # (not sure what causes this problem)
