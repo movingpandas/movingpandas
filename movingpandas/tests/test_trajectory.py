@@ -6,6 +6,7 @@ from pandas.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
+from math import cos, sin, pi
 from fiona.crs import from_epsg
 from movingpandas.trajectory import (
     Trajectory,
@@ -263,6 +264,19 @@ class TestTrajectory:
             method="within",
         ).wkt
         assert result == "LINESTRING (6 0, 10 0)"
+
+    def test_get_detour(self, N=60, err=.1):
+        # create half a circle
+        df = pd.DataFrame(
+            {
+                "t": pd.date_range("2020-01-01", periods=N+1, freq="S"),
+                "geometry": [Point(sin(pi/N*x), cos(pi/N*x)) for x in range(N+1)]
+            }
+        ).set_index('t')
+        toy_traj = Trajectory(GeoDataFrame(df, crs=31256), 1)
+        # diameter (2*r) over half-circle (pi*r)
+        result = toy_traj.get_detour()
+        assert (2*result >= pi-err) and (2*result<= pi+err)
 
     def test_add_traj_id(self):
         traj = self.default_traj_metric

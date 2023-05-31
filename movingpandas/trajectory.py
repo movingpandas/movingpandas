@@ -830,7 +830,7 @@ class Trajectory:
         Returns
         -------
         float
-            Length of the trajectory
+            Length of the trajectory, also known as, traversed distance
         """
         pt_tuples = [(pt.y, pt.x) for pt in self.df.geometry.tolist()]
         if self.is_latlon:
@@ -878,6 +878,37 @@ class Trajectory:
             if self.timedelta_col_name in self.df.columns:
                 return self.df[self.timedelta_col_name].median()
         return self._get_df_with_timedelta()[TIMEDELTA_COL_NAME].median()
+
+    def _get_global_velocity_length(self, units=UNITS()):
+        pt_tuples = [(pt.y, pt.x) for pt in [self.get_start_location(),
+                                             self.get_end_location()]]
+        if self.is_latlon:
+            length = geodesic(*pt_tuples).m
+        else:  # The following distance will be in CRS units that might not be meters!
+            length = LineString(pt_tuples).length
+
+        conversion = get_conversion(units, self.crs_units)
+        return length / conversion.distance
+
+    def get_detour(self):
+        """
+        Return the detour of the trajectory, see also [Bu11]__.
+
+        Detour describes the amount of winding and banding of a trajector, and
+        is a global parameter.
+
+        Returns
+        -------
+        float, range = 1...∞
+            amount of detour, also known as sunousity
+
+        References
+        ----------
+        .. [Bu11] Buchin et al. "Segmenting trajectories: A framework and
+                  algorithms using spatiotemporal criteria" Journal of spatial
+                  information science, no.3, pp.33-63, 2011.
+        """
+        return self.get_length() / self._get_global_velocity_length()
 
     def _compute_heading(self, row):
         pt0 = row["prev_pt"]
@@ -1669,6 +1700,9 @@ class Trajectory:
         offset : int
             Number of seconds to shift by, can be positive or negative
         """
+        assert column in self.df.keys(), \
+            'column does not seem to be present in dataframe'
+        assert isinstance(offset, int), 'please provide whole seconds'
         self.df[column] = self.df[column].shift(offset, freq="1s")
 
     def apply_offset_minutes(self, column, offset):
@@ -1679,10 +1713,20 @@ class Trajectory:
         ----------
         column : str
             Name of the column to shift
-        offset : int
+        offset : {int, float}
             Number of minutes to shift by, can be positive or negative
         """
+        assert column in self.df.keys(), \
+            'column does not seem to be present in dataframe'
+        if isinstance(offset, float):
+            # reducing precision to seconds
+            remainder = int(60*(offset - offset // 1))
+            min_to_sec = int(offset // 1)*60 + remainder
+            return self.apply_offset_seconds(column, min_to_sec)
+
+        assert isinstance(offset, int), 'please provide whole minutes'
         self.df[column] = self.df[column].shift(offset, freq="1min")
+        return self
 
     def _to_line_df(self):
         """
