@@ -150,7 +150,7 @@ A detailed overview on how to contribute can be found in the [contributing guide
 
 ## Related Python packages
 
-**For a more comprehensive list, including non-Python solutions, check https://github.com/movingpandas/movement-analysis-tools**
+**For a more comprehensive list, including non-Python solutions, check https://github.com/anitagraser/movement-analysis-tools**
 
 [scikit-mobility](https://github.com/scikit-mobility/scikit-mobility) is a similar package which also deals with movement data. 
 It implements TrajectoryDataFrames and FlowDataFrames on top of Pandas instead of GeoPandas. 
