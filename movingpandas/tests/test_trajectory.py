@@ -65,9 +65,11 @@ class TestPoint(Point):
         super().__init__(data, *args, **kwargs)
 
 
-def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None):
+def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None, tz=False):
     nodes = [node.to_dict() for node in nodes]
     df = pd.DataFrame(nodes).set_index("t")
+    if tz:
+        df = df.tz_localize("CET")
     gdf = GeoDataFrame(df)
     if crs:
         gdf = gdf.set_crs(crs=crs, allow_override=True)
@@ -84,6 +86,7 @@ class TestTrajectory:
             Node(0, 10, 1970, 1, 1, 0, 0, 40, 0, 5),
         ]
         self.default_traj_metric = make_traj(nodes[:3], CRS_METRIC)
+        self.default_traj_metric_with_tz = make_traj(nodes[:3], CRS_METRIC, tz=True)
         self.default_traj_latlon = make_traj(nodes[:3], CRS_LATLON)
         self.default_traj_metric_5 = make_traj(nodes, CRS_METRIC)
 
@@ -888,6 +891,19 @@ class TestTrajectory:
 
     def test_to_point_gdf(self):
         traj = self.default_traj_metric
+        geo_df = traj.df.copy()
+        point_gdf = traj.to_point_gdf()
+        assert_frame_equal(point_gdf, geo_df)
+
+    def test_to_point_gdf_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        # tz is stripped out of traj.df but kept in traj.df_orig_tz
+        geo_df = traj.df.copy().tz_localize(traj.df_orig_tz)
+        point_gdf = traj.to_point_gdf(return_orig_tz=True)
+        assert_frame_equal(point_gdf, geo_df)
+
+    def test_to_point_gdf_dont_return_tz(self):
+        traj = self.default_traj_metric_with_tz
         geo_df = traj.df.copy()
         point_gdf = traj.to_point_gdf()
         assert_frame_equal(point_gdf, geo_df)
