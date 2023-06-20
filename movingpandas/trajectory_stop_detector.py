@@ -20,7 +20,7 @@ class TrajectoryStopDetector:
     at least the specified duration.
     """
 
-    def __init__(self, traj, n_threads=4):
+    def __init__(self, traj, n_threads=1):
         """
         Create StopDetector
 
