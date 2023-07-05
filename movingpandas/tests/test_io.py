@@ -2,6 +2,7 @@
 import json
 import os
 
+import pandas as pd
 import pytest
 
 from movingpandas.io import (
@@ -114,3 +115,25 @@ class TestIO:
 
         # Compare the expected and actual Moving-Features JSON dictionaries.
         assert entity_mf_json == expected_mf_json
+
+    def test_not_geodataframe_raises_error(self):
+        with pytest.raises(TypeError):
+            gdf_to_mf_json(
+                pd.DataFrame(),
+                traj_id_property="id",
+                datetime_column="t",
+            )
+
+    def test_missing_datetime_column_raises_error(self):
+        with pytest.raises(ValueError):
+            gdf_to_mf_json(
+                pd.DataFrame(),
+                traj_id_property="id",
+            )
+
+    def test_missing_traj_id_property_raises_error(self):
+        with pytest.raises(ValueError):
+            gdf_to_mf_json(
+                pd.DataFrame(),
+                datetime_column="t",
+            )

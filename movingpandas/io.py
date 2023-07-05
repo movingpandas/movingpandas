@@ -38,12 +38,7 @@ def gdf_to_mf_json(
         dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
     """
 
-    if not isinstance(gdf, GeoDataFrame):
-        raise ValueError(
-            "Not a GeoDataFrame, but a {} was supplied. This function only works with GeoDataFrames.".format(
-                type(gdf)
-            )
-        )
+    _raise_error_if_invalid_arguments(gdf, datetime_column, traj_id_property)
 
     if not temporal_properties:
         temporal_properties = []
@@ -100,6 +95,26 @@ def gdf_to_mf_json(
         rows.append(trajectory_data)
 
     return {"type": "FeatureCollection", "features": rows}
+
+
+def _raise_error_if_invalid_arguments(
+    gdf: GeoDataFrame, datetime_column: str, traj_id_property: str
+):
+    if not isinstance(gdf, GeoDataFrame):
+        raise TypeError(
+            "Not a GeoDataFrame, but a {} was supplied. This function only works with GeoDataFrames.".format(
+                type(gdf)
+            )
+        )
+    # Check if both datetime_column and trip_id_property are in the GeoDataFrame
+    if datetime_column not in gdf.columns:
+        raise ValueError(
+            f"The datetime_column {datetime_column} is not in the GeoDataFrame."
+        )
+    if traj_id_property not in gdf.columns:
+        raise ValueError(
+            f"The traj_id_property {traj_id_property} is not in the GeoDataFrame."
+        )
 
 
 def _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row):
