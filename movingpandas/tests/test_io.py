@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+
 import pytest
-from movingpandas.io import gdf_to_mf_json, read_mf_json, _create_objects_from_mf_json_dict
+
+from movingpandas.io import (
+    _create_objects_from_mf_json_dict,
+    gdf_to_mf_json,
+    read_mf_json,
+)
 
 
 class TestIO:
@@ -73,22 +79,34 @@ class TestIO:
         ).df
 
         loaded_gdf["t"] = loaded_gdf.index
-        loaded_gdf["id"] = '9569'
+        loaded_gdf["id"] = "9569"
 
         # Convert the GeoDataFrame to a Moving-Features JSON dictionary.
-        entity_mf_json = json.loads(json.dumps(gdf_to_mf_json(
-            loaded_gdf,
-            traj_id_property="id",
-            datetime_column="t",
-            datetime_encoder=lambda x: x.isoformat() + "Z",
-            temporal_properties=["wind", "pressure", "class"],
-            interpolation="Linear",
-            temporal_properties_static_fields={
-                "wind": {"form": "KNT", "interpolation": "Linear", "type": "Measure"},
-                "pressure": {"form": "A97", "interpolation": "Linear", "type": "Measure"},
-                "class": {"interpolation": "Linear", "type": "Measure"},
-            },
-        )["features"][0]))
+        entity_mf_json = json.loads(
+            json.dumps(
+                gdf_to_mf_json(
+                    loaded_gdf,
+                    traj_id_property="id",
+                    datetime_column="t",
+                    datetime_encoder=lambda x: x.isoformat() + "Z",
+                    temporal_properties=["wind", "pressure", "class"],
+                    interpolation="Linear",
+                    temporal_properties_static_fields={
+                        "wind": {
+                            "form": "KNT",
+                            "interpolation": "Linear",
+                            "type": "Measure",
+                        },
+                        "pressure": {
+                            "form": "A97",
+                            "interpolation": "Linear",
+                            "type": "Measure",
+                        },
+                        "class": {"interpolation": "Linear", "type": "Measure"},
+                    },
+                )["features"][0]
+            )
+        )
 
         # Load the expected result from the original Moving-Features JSON file.
         with open(os.path.join(self.test_dir, "movingfeatures.json"), "r") as f:

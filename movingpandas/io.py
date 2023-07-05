@@ -1,9 +1,10 @@
 import json
 from typing import Callable, Dict
 
-from movingpandas import Trajectory
 from geopandas import GeoDataFrame
 from pandas import DataFrame
+
+from movingpandas import Trajectory
 
 
 def gdf_to_mf_json(
@@ -24,17 +25,17 @@ def gdf_to_mf_json(
         gdf (GeoDataFrame): The input GeoDataFrame to convert.
         traj_id_property (str): The name of the column in the GeoDataFrame that represents the trajectory identifier.
         datetime_column (str): The name of the column in the GeoDataFrame that represents the datetime information.
-        temporal_properties (list, optional): A list of column names in the GeoDataFrame that represent additional temporal properties.
-                                               Defaults to None.
-        temporal_properties_static_fields (Dict[str, Dict], optional): A dictionary mapping column names to static fields associated with the
-                                                                      corresponding temporal property. One such static field is the unit of measurement (uom). Defaults to None.
+        temporal_properties (list, optional): A list of column names in the GeoDataFrame that represent additional
+            temporal properties. Defaults to None.
+        temporal_properties_static_fields (Dict[str, Dict], optional): A dictionary mapping column names to static
+            fields associated with the corresponding temporal property. Defaults to None.
         interpolation (str, optional): The interpolation method used for the temporal geometry. Defaults to None.
         crs (optional): Coordinate reference system for the MF-JSON. Defaults to None.
         trs (optional): Temporal reference system for the MF-JSON. Defaults to None.
-        datetime_encoder (Callable[[any], str|int], optional): A function that encodes the datetime values in the GeoDataFrame to a string ( IETF RFC 3339 ) or integer ( Timestamp, milliseconds ). Defaults to None.
-
+        datetime_encoder (Callable[[any], str|int], optional): A function that encodes the datetime values in the
+            GeoDataFrame to a string ( IETF RFC 3339 ) or integer ( Timestamp, milliseconds ). Defaults to None.
     Returns:
-        dict: The MF-JSON representation of the GeoDataFrame.
+        dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
     """
 
     if not isinstance(gdf, GeoDataFrame):
@@ -108,7 +109,9 @@ def _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row):
     return datetimes
 
 
-def _encode_temporal_properties(datetimes, row, temporal_properties, temporal_properties_static_fields):
+def _encode_temporal_properties(
+    datetimes, row, temporal_properties, temporal_properties_static_fields
+):
     temporal_properties_data = {
         "datetimes": datetimes,
     }
