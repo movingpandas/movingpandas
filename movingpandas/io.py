@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Callable, Dict
 
 from movingpandas import Trajectory
 from geopandas import GeoDataFrame
@@ -15,6 +15,7 @@ def gdf_to_mf_json(
     interpolation: str = None,
     crs=None,
     trs=None,
+    datetime_encoder: Callable[[any], str | int] = None,
 ) -> dict:
     """
     Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON (MF-JSON) specification.
@@ -30,6 +31,7 @@ def gdf_to_mf_json(
         interpolation (str, optional): The interpolation method used for the temporal geometry. Defaults to None.
         crs (optional): Coordinate reference system for the MF-JSON. Defaults to None.
         trs (optional): Temporal reference system for the MF-JSON. Defaults to None.
+        datetime_encoder (Callable[[any], str|int], optional): A function that encodes the datetime values in the GeoDataFrame to a string ( IETF RFC 3339 ) or integer ( Timestamp, milliseconds ). Defaults to None.
 
     Returns:
         dict: The MF-JSON representation of the GeoDataFrame.
@@ -48,19 +50,27 @@ def gdf_to_mf_json(
     rows = []
 
     for identifier, row in gdf.groupby(traj_id_property):
-        datetimes = row[datetime_column].tolist()
+        datetimes = _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row)
+
+        properties = row.drop(
+            columns=[
+                "geometry",
+                datetime_column,
+                traj_id_property,
+                *temporal_properties,
+            ]
+        )
+
+        if properties.empty:
+            encoded_properties = {}
+        else:
+            encoded_properties = properties.to_dict(orient="records")[0]
+
         trajectory_data = {
             "type": "Feature",
             "properties": {
                 traj_id_property: identifier,
-                **row.drop(
-                    columns=[
-                        "geometry",
-                        datetime_column,
-                        traj_id_property,
-                        *temporal_properties,
-                    ]
-                ).to_dict(orient="records")[0],
+                **encoded_properties,
             },
             "temporalGeometry": {
                 "type": "MovingPoint",
@@ -89,6 +99,13 @@ def gdf_to_mf_json(
         rows.append(trajectory_data)
 
     return {"type": "FeatureCollection", "features": rows}
+
+
+def _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row):
+    datetimes = row[datetime_column].tolist()
+    if datetime_encoder:
+        datetimes = [datetime_encoder(dt) for dt in datetimes]
+    return datetimes
 
 
 def _encode_temporal_properties(datetimes, row, temporal_properties, temporal_properties_static_fields):
