@@ -88,3 +88,5 @@ If you’d like to contribute to this project, you’re welcome to head on over 
 Please cite [0] when using MovingPandas in your research and reference the appropriate release version. All releases of MovingPandas are listed on [Zenodo](https://doi.org/10.5281/zenodo.3710950) where you will find citation information, including DOIs.  
 
 [0] [Graser, A. (2019). MovingPandas: Efficient Structures for Movement Data in Python. GI_Forum ‒ Journal of Geographic Information Science 2019, 1-2019, 54-68. doi:10.1553/giscience2019_01_s54.](https://www.austriaca.at/rootcollection?arp=0x003aba2b)
+
+If you are curious about who else is using MovingPandas, check out the [list of publications citing MovingPandas](https://github.com/movingpandas/movingpandas#scientific-publications-using-movingpandas).
