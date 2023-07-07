@@ -33,16 +33,30 @@ To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.o
 
 ## Documentation
 
-The official documentation is hosted on **[ReadTheDocs](https://movingpandas.readthedocs.io)**
+We recommend starting your MovingPandas journey with the **[tutorial notebooks on the official homepage](https://movingpandas.org/examples)**
+
+The official API documentation is hosted on **[ReadTheDocs](https://movingpandas.readthedocs.io)**
 
 
 ## Examples
+
+
 
 ### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/2-analysis-examples/bird-migration.ipynb)
 
 Create interactive trajectory plots, including multiple linked plots with ease
 
 ![movingpandas_animated](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
+
+
+#### For all types of tracking data, e.g. [video-based trajectories](https://anitagraser.com/2023/05/21/analyzing-video-based-bicycle-trajectories/)
+
+![Bicycle tracks from object tracking in videos](https://github.com/movingpandas/movingpandas/assets/590385/c4a0f682-bb94-4b15-ac03-a4d854008937)
+
+
+#### Including plots in custom projections [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/2-analysis-examples/iceberg.ipynb)
+
+![MovingPandas Iceberg trajectory in custom SouthPolarStereo projection](https://github.com/movingpandas/movingpandas/assets/590385/334304eb-da78-4779-b46b-5492fd54d8ed)
 
 
 ### Stop detection  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/8-detecting-stops.ipynb)
@@ -97,40 +111,9 @@ Use the following steps to run the notebooks using the current development versi
 
 ### Using conda
 
-**Linux/Mac**:  
-
 ```
 conda env create -f environment.yml
 ```
-
-**Windows**: 
-
-```
-conda config --add channels conda-forge
-conda config --add channels defaults
-conda config --set channel_priority strict
-conda env create -f environment.yml
-```
-
-*On Windows, because conda-forge relies on some package built with defaults blas (like scipy) one must use the defaults channel on top of conda-forge and activate conda's new strict channel feature.* Source: https://github.com/conda-forge/gdal-feedstock/issues/269#issuecomment-473661530
-
-
-### Using Anaconda
-
-1. Install Anaconda
-2. Clone the movingpandas repository
-3. In Anaconda Navigator | Environments | Import select the movingpandas environment.yml from the cloned directory:
-
-![image](https://user-images.githubusercontent.com/590385/62143367-2db14c00-b2f0-11e9-8cb9-fb7993b7f62e.png)
-
-4. Wait until the environment is ready, then change to the Home tab and install Jupyter notebooks into the movingpandas environment
-5. Launch Jupyter notebooks and navigate to the `movingpandas/tutorials` directory to execute them
-6. Now you can run the notebooks, experiment with the code and adjust it to your own data
-
-Known issues:
-
-* On Windows, importing rasterio can lead to DLL errors. If this happens, downgrade the rasterio version to 1.0.13.
-
 
 ### Develop mode
 
@@ -213,7 +196,7 @@ and plotted after the simulation."*
 * [Elayam, M. M., Ray, C., & Claramunt, C. (2022). A hierarchical graph-based model for mobility data representation and analysis. Data & Knowledge Engineering, 102054.](https://www.sciencedirect.com/science/article/abs/pii/S0169023X22000532) - *"The implementation combines several open source tools such as Python, MovingPandas library, Uber H3 index, Neo4j graph database management system ..."*
 * [Kotis, K., & Soularidis, A. (2023). ReconTraj4Drones: A Framework for the Reconstruction and Semantic Modeling of UAVs’ Trajectories on MovingPandas. Applied Sciences, 13(1), 670.](https://www.mdpi.com/2076-3417/13/1/670) - *"This framework extends MovingPandas, a widely used and open-source trajectory analytics and visualization tool."*
 * [Šakan, D., Žuškin, S., Rudan, I., & Brčić, D. (2023). Container Ship Fleet Route Evaluation and Similarity Measurement between Two Shipping Line Ports. Journal of Marine Science and Engineering, 11(2), 400.](https://www.mdpi.com/2130602) - *"To create routes, we used the MovingPandas library ..."* (Horizon Europe project no. 101077026 SafeNav).
-
+* [Sheehan, C., & Green, T. (2023) ChargeUp! Data Swap!. Using data from battery swapping e-motorcycles in Nairobi to assess impacts and plan infrastructure. Imperial College London. White paper.](https://p4gpartnerships.org/sites/default/files/2023-06/341%20IMP%20Energy%20futures%20ChargeUp_Data%20Swap_White%20paper_AC2.pdf) - *"the raw GPS co-ordinates and their timestamps were processed to detect individual trajectories (trips) for each battery using MovingPandas"*
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
