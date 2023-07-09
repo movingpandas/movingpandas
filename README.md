@@ -1,7 +1,4 @@
-
 <img  width="50%" src="https://movingpandas.github.io/movingpandas/assets/img/logo-wide.svg">
-
-
 
 MovingPandas is a Python library for handling movement data based on Pandas, [GeoPandas](https://geopandas.org), and [HoloViz](https://holoviz.org). 
 
@@ -9,8 +6,7 @@ MovingPandas provides trajectory data structures and functions for movement data
 
 The official MovingPandas API documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
-For more information about individual releases, check out the [Changelog](./changelog).
-
+For more information about individual releases, check out the [Changelog](https://github.com/movingpandas/movingpandas/releases).
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/MovingPandasOrg)](https://twitter.com/MovingPandasOrg)
 [![Mastodon Follow](https://img.shields.io/mastodon/follow/109434720057484377?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@movingpandas)
