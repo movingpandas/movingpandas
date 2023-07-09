@@ -204,7 +204,7 @@ and plotted after the simulation."*
 ### Teaching materials referencing MovingPandas
 
 * [Aalto University. Spatial data science for sustainable development course](https://sustainability-gis.readthedocs.io/en/latest/lessons/L3/mobility-analytics.html)
-
+* [University of Trento. Geospatial Analysis and Representation for Data Science course for the master in Data Science](https://napo.github.io/geospatial_course_unitn/lessons/06-mobilty-analytics)
 
 ### Workshop videos
 
