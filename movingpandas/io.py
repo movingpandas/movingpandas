@@ -19,21 +19,27 @@ def gdf_to_mf_json(
     datetime_encoder: Callable[[any], str | int] = None,
 ) -> dict:
     """
-    Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON (MF-JSON) specification.
+    Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON
+    (MF-JSON) specification.
 
     Args:
         gdf (GeoDataFrame): The input GeoDataFrame to convert.
-        traj_id_column (str): The name of the column in the GeoDataFrame that represents the trajectory identifier.
-        datetime_column (str): The name of the column in the GeoDataFrame that represents the datetime information.
-        temporal_columns (list, optional): A list of column names in the GeoDataFrame that represent additional
-            temporal properties. Defaults to None.
-        temporal_columns_static_fields (Dict[str, Dict], optional): A dictionary mapping column names to static
-            fields associated with the corresponding temporal property. Defaults to None.
-        interpolation (str, optional): The interpolation method used for the temporal geometry. Defaults to None.
+        traj_id_column (str): The name of the column in the GeoDataFrame that
+            represents the trajectory identifier.
+        datetime_column (str): The name of the column in the GeoDataFrame that
+            represents the datetime information.
+        temporal_columns (list, optional): A list of column names in the GeoDataFrame
+         that represent additional temporal properties. Defaults to None.
+        temporal_columns_static_fields (Dict[str, Dict], optional): A dictionary mapping
+            column names to static fields associated with the corresponding temporal
+            property. Defaults to None.
+        interpolation (str, optional): The interpolation method used for the temporal
+            geometry. Defaults to None.
         crs (optional): Coordinate reference system for the MF-JSON. Defaults to None.
         trs (optional): Temporal reference system for the MF-JSON. Defaults to None.
-        datetime_encoder (Callable[[any], str|int], optional): A function that encodes the datetime values in the
-            GeoDataFrame to a string ( IETF RFC 3339 ) or integer ( Timestamp, milliseconds ). Defaults to None.
+        datetime_encoder (Callable[[any], str|int], optional): A function that encodes
+            the datetime values in the GeoDataFrame to a string ( IETF RFC 3339 ) or
+            integer ( Timestamp, milliseconds ). Defaults to None.
     Returns:
         dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
     """
@@ -102,9 +108,8 @@ def _raise_error_if_invalid_arguments(
 ):
     if not isinstance(gdf, GeoDataFrame):
         raise TypeError(
-            "Not a GeoDataFrame, but a {} was supplied. This function only works with GeoDataFrames.".format(
-                type(gdf)
-            )
+            "Not a GeoDataFrame, but a {} was supplied. This function only works with"
+            " GeoDataFrames.".format(type(gdf))
         )
     # Check if both datetime_column and trip_id_property are in the GeoDataFrame
     if datetime_column not in gdf.columns:
