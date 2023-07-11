@@ -9,10 +9,10 @@ from movingpandas import Trajectory
 
 def gdf_to_mf_json(
     gdf: GeoDataFrame,
-    traj_id_property: str,
+    traj_id_column: str,
     datetime_column: str,
-    temporal_properties: list = None,
-    temporal_properties_static_fields: Dict[str, Dict] = None,
+    temporal_columns: list = None,
+    temporal_columns_static_fields: Dict[str, Dict] = None,
     interpolation: str = None,
     crs=None,
     trs=None,
@@ -23,11 +23,11 @@ def gdf_to_mf_json(
 
     Args:
         gdf (GeoDataFrame): The input GeoDataFrame to convert.
-        traj_id_property (str): The name of the column in the GeoDataFrame that represents the trajectory identifier.
+        traj_id_column (str): The name of the column in the GeoDataFrame that represents the trajectory identifier.
         datetime_column (str): The name of the column in the GeoDataFrame that represents the datetime information.
-        temporal_properties (list, optional): A list of column names in the GeoDataFrame that represent additional
+        temporal_columns (list, optional): A list of column names in the GeoDataFrame that represent additional
             temporal properties. Defaults to None.
-        temporal_properties_static_fields (Dict[str, Dict], optional): A dictionary mapping column names to static
+        temporal_columns_static_fields (Dict[str, Dict], optional): A dictionary mapping column names to static
             fields associated with the corresponding temporal property. Defaults to None.
         interpolation (str, optional): The interpolation method used for the temporal geometry. Defaults to None.
         crs (optional): Coordinate reference system for the MF-JSON. Defaults to None.
@@ -38,22 +38,22 @@ def gdf_to_mf_json(
         dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
     """
 
-    _raise_error_if_invalid_arguments(gdf, datetime_column, traj_id_property)
+    _raise_error_if_invalid_arguments(gdf, datetime_column, traj_id_column)
 
-    if not temporal_properties:
-        temporal_properties = []
+    if not temporal_columns:
+        temporal_columns = []
 
     rows = []
 
-    for identifier, row in gdf.groupby(traj_id_property):
+    for identifier, row in gdf.groupby(traj_id_column):
         datetimes = _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row)
 
         properties = row.drop(
             columns=[
                 "geometry",
                 datetime_column,
-                traj_id_property,
-                *temporal_properties,
+                traj_id_column,
+                *temporal_columns,
             ]
         )
 
@@ -65,7 +65,7 @@ def gdf_to_mf_json(
         trajectory_data = {
             "type": "Feature",
             "properties": {
-                traj_id_property: identifier,
+                traj_id_column: identifier,
                 **encoded_properties,
             },
             "temporalGeometry": {
@@ -84,9 +84,9 @@ def gdf_to_mf_json(
         if trs:
             trajectory_data["trs"] = trs
 
-        if temporal_properties:
+        if temporal_columns:
             temporal_properties_data = _encode_temporal_properties(
-                datetimes, row, temporal_properties, temporal_properties_static_fields
+                datetimes, row, temporal_columns, temporal_columns_static_fields
             )
 
             trajectory_data["temporalProperties"] = [temporal_properties_data]

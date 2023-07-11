@@ -87,12 +87,12 @@ class TestIO:
             json.dumps(
                 gdf_to_mf_json(
                     loaded_gdf,
-                    traj_id_property="id",
+                    traj_id_column="id",
                     datetime_column="t",
                     datetime_encoder=lambda x: x.isoformat() + "Z",
-                    temporal_properties=["wind", "pressure", "class"],
+                    temporal_columns=["wind", "pressure", "class"],
                     interpolation="Linear",
-                    temporal_properties_static_fields={
+                    temporal_columns_static_fields={
                         "wind": {
                             "form": "KNT",
                             "interpolation": "Linear",
@@ -120,19 +120,19 @@ class TestIO:
         with pytest.raises(TypeError):
             gdf_to_mf_json(
                 pd.DataFrame(),
-                traj_id_property="id",
+                traj_id_column="id",
                 datetime_column="t",
             )
 
     def test_missing_datetime_column_raises_error(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             gdf_to_mf_json(
                 pd.DataFrame(),
-                traj_id_property="id",
+                traj_id_column="id",
             )
 
     def test_missing_traj_id_property_raises_error(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             gdf_to_mf_json(
                 pd.DataFrame(),
                 datetime_column="t",
