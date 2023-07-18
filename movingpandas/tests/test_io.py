@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
-
+import json
 import os
+
+import pandas as pd
 import pytest
-from movingpandas.io import read_mf_json, _create_objects_from_mf_json_dict
+
+from movingpandas.io import (
+    _create_objects_from_mf_json_dict,
+    gdf_to_mf_json,
+    read_mf_json,
+)
 
 
 class TestIO:
@@ -65,3 +72,68 @@ class TestIO:
         data = {"type": "Feature", "temporalGeometry": {"type": "MovingPolygon"}}
         with pytest.raises(RuntimeError):
             _create_objects_from_mf_json_dict(data, "id")
+
+    def test_gdf_to_mf_json(self):
+        # Load a GeoDataFrame from a Moving-Features JSON file.
+        loaded_gdf = read_mf_json(
+            os.path.join(self.test_dir, "movingfeatures.json"), "id"
+        ).df
+
+        loaded_gdf["t"] = loaded_gdf.index
+        loaded_gdf["id"] = "9569"
+
+        # Convert the GeoDataFrame to a Moving-Features JSON dictionary.
+        entity_mf_json = json.loads(
+            json.dumps(
+                gdf_to_mf_json(
+                    loaded_gdf,
+                    traj_id_column="id",
+                    datetime_column="t",
+                    datetime_encoder=lambda x: x.isoformat() + "Z",
+                    temporal_columns=["wind", "pressure", "class"],
+                    interpolation="Linear",
+                    temporal_columns_static_fields={
+                        "wind": {
+                            "form": "KNT",
+                            "interpolation": "Linear",
+                            "type": "Measure",
+                        },
+                        "pressure": {
+                            "form": "A97",
+                            "interpolation": "Linear",
+                            "type": "Measure",
+                        },
+                        "class": {"interpolation": "Linear", "type": "Measure"},
+                    },
+                )["features"][0]
+            )
+        )
+
+        # Load the expected result from the original Moving-Features JSON file.
+        with open(os.path.join(self.test_dir, "movingfeatures.json"), "r") as f:
+            expected_mf_json = json.load(f)
+
+        # Compare the expected and actual Moving-Features JSON dictionaries.
+        assert entity_mf_json == expected_mf_json
+
+    def test_not_geodataframe_raises_error(self):
+        with pytest.raises(TypeError):
+            gdf_to_mf_json(
+                pd.DataFrame(),
+                traj_id_column="id",
+                datetime_column="t",
+            )
+
+    def test_missing_datetime_column_raises_error(self):
+        with pytest.raises(TypeError):
+            gdf_to_mf_json(
+                pd.DataFrame(),
+                traj_id_column="id",
+            )
+
+    def test_missing_traj_id_property_raises_error(self):
+        with pytest.raises(TypeError):
+            gdf_to_mf_json(
+                pd.DataFrame(),
+                datetime_column="t",
+            )
