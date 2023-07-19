@@ -143,7 +143,7 @@ def _get_segments_for_ranges(traj, ranges):
             segment = temp_traj.get_segment_between(the_range.t_0, the_range.t_n)
         except ValueError:
             continue
-        segment.id = "{}_{}".format(traj.id, counter)
+        segment.id = f"{traj.id}_{counter}"
         segment.parent = traj
         segments.append(segment)
         counter += 1

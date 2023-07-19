@@ -172,16 +172,9 @@ class Trajectory:
         except RuntimeError:
             return "Invalid trajectory!"
         return (
-            "Trajectory {id} ({t0} to {tn}) | Size: {n} | Length: {len:.1f}m\n"
-            "Bounds: {bbox}\n{wkt}".format(
-                id=self.id,
-                t0=self.get_start_time(),
-                tn=self.get_end_time(),
-                n=self.size(),
-                wkt=line.wkt[:100],
-                bbox=self.get_bbox(),
-                len=self.get_length(),
-            )
+            f"Trajectory {self.id} ({self.get_start_time()} to {self.get_end_time()}) "
+            f"| Size: {self.size()} | Length: {self.get_length():.1f}m\n"
+            f"Bounds: {self.get_bbox()}\n{line.wkt[:100]}"
         )
 
     def __repr__(self):
@@ -411,12 +404,12 @@ class Trajectory:
             WKT of trajectory as LineStringM
         """
         # Shapely only supports x, y, z. Therefore, this is a bit hacky!
-        coords = ""
+        coords = []
         for index, row in self.df.iterrows():
             pt = row[self.get_geom_column_name()]
             t = to_unixtime(index)
-            coords += "{} {} {}, ".format(pt.x, pt.y, t)
-        wkt = "LINESTRING M ({})".format(coords[:-2])
+            coords.append(f"{pt.x} {pt.y} {t}")
+        wkt = f"LINESTRING M ({', '.join(coords)})"
         return wkt
 
     def to_point_gdf(self, return_orig_tz=False):
@@ -696,9 +689,7 @@ class Trajectory:
         """
         if method not in ["interpolated", "within"]:
             raise ValueError(
-                "Invalid split method {}. Must be one of [interpolated, within]".format(
-                    method
-                )
+                f"Invalid split method {method}. Must be one of [interpolated, within]"
             )
         if method == "interpolated":
             st_range = SpatioTemporalRange(
@@ -713,9 +704,7 @@ class Trajectory:
                     self.get_segment_between(t1, t2).df, self.get_geom_column_name()
                 )
             except RuntimeError:
-                raise RuntimeError(
-                    "Cannot generate linestring between {0} and {1}".format(t1, t2)
-                )
+                raise RuntimeError(f"Cannot generate linestring between {t1} and {t2}")
 
     def get_segment_between(self, t1, t2):
         """
@@ -733,12 +722,10 @@ class Trajectory:
         Trajectory
             Extracted trajectory segment
         """
-        segment = Trajectory(self.df[t1:t2], "{}_{}".format(self.id, t1), parent=self)
+        segment = Trajectory(self.df[t1:t2], f"{self.id}_{t1}", parent=self)
         if not segment.is_valid():
             raise RuntimeError(
-                "Failed to extract valid trajectory segment between {} and {}".format(
-                    t1, t2
-                )
+                f"Failed to extract valid trajectory segment between {t1} and {t2}"
             )
         return segment
 
@@ -748,7 +735,7 @@ class Trajectory:
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
-            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
+            raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
         if self.is_latlon:
@@ -914,7 +901,7 @@ class Trajectory:
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
-            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
+            raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
         if self.is_latlon:
@@ -937,7 +924,7 @@ class Trajectory:
         if not isinstance(pt0, Point):
             return None
         if not isinstance(pt1, Point):
-            raise ValueError("Invalid trajectory! Got {} instead of point!".format(pt1))
+            raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             # to avoid intersection issues with zero length lines
             pt1 = translate(pt1, 0.00000001, 0.00000001)
