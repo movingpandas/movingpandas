@@ -738,18 +738,10 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        if self.is_latlon:
-            dist_computed = (
-                measure_distance_geodesic(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
-        else:  # The following distance will be in CRS units that might not be meters!
-            dist_computed = (
-                measure_distance_euclidean(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
+        func = (
+            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
+        )
+        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
         return dist_computed
 
     def _add_prev_pt(self, force=True):
@@ -904,18 +896,10 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        if self.is_latlon:
-            dist_computed = (
-                measure_distance_geodesic(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
-        else:  # The following distance will be in CRS units that might not be meters!
-            dist_computed = (
-                measure_distance_euclidean(pt0, pt1)
-                * conversion.crs
-                / conversion.distance
-            )
+        func = (
+            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
+        )
+        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
         return dist_computed / row["delta_t"].total_seconds() * conversion.time
 
     def _connect_prev_pt_and_geometry(self, row):
