@@ -60,8 +60,8 @@ class _Grid:
         self.cells = []
         # in the rare case that the points are horizontal or vertical,
         # fallback to a 1x1 cell matrix
-        self.n_rows = max(1, int(math.ceil(h / self.cell_size)))
-        self.n_cols = max(1, int(math.ceil(w / self.cell_size)))
+        self.n_rows = max(1, math.ceil(h / self.cell_size))
+        self.n_cols = max(1, math.ceil(w / self.cell_size))
         for i in range(0, self.n_cols):
             self.cells.append([])
             for j in range(0, self.n_rows):
@@ -107,8 +107,8 @@ class _Grid:
         return nearest_centroid
 
     def get_grid_position(self, pt):
-        i = int(math.floor((pt.x - self.x_min) / self.cell_size))
-        j = int(math.floor((pt.y - self.y_min) / self.cell_size))
+        i = math.floor((pt.x - self.x_min) / self.cell_size)
+        j = math.floor((pt.y - self.y_min) / self.cell_size)
         return i, j
 
     def redistribute_points(self, points):

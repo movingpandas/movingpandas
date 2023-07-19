@@ -261,7 +261,7 @@ class _SequenceGenerator:
                 # we have changed to a new cell --> up the counter
                 h = t.hour
                 self.id_to_centroid[nearest_id][1][0] += 1
-                self.id_to_centroid[nearest_id][1][int(h / 6 + 1)] += 1
+                self.id_to_centroid[nearest_id][1][h // 6 + 1] += 1
                 this_sequence.append(nearest_cell_id)
 
     def create_flow_lines(self):
