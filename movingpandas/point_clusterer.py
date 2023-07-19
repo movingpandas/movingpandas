@@ -1,4 +1,5 @@
 import math
+import statistics
 
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -45,9 +46,9 @@ class _PointCluster:
         self.points = []
 
     def recompute_centroid(self):
-        x = [pt.x for pt in self.points]
-        y = [pt.y for pt in self.points]
-        self.centroid = Point(sum(x) / len(x), sum(y) / len(y))
+        x = statistics.fmean(pt.x for pt in self.points)
+        y = statistics.fmean(pt.y for pt in self.points)
+        self.centroid = Point(x, y)
 
 
 class _Grid:
