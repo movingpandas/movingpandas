@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import Counter
+
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
@@ -238,7 +240,7 @@ class _SequenceGenerator:
         self.cells_union = cells.geometry.unary_union
 
         self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
-        self.sequences = {}
+        self.sequences = Counter()
         for traj in traj_collection:
             self.evaluate_trajectory(traj)
 
@@ -250,13 +252,10 @@ class _SequenceGenerator:
             nearest_id = self.get_nearest(geom)
             nearest_cell = self.id_to_centroid[nearest_id][0]
             nearest_cell_id = nearest_cell.name
-            if len(this_sequence) >= 1:
+            if this_sequence:
                 prev_cell_id = this_sequence[-1]
                 if nearest_cell_id != prev_cell_id:
-                    if (prev_cell_id, nearest_cell_id) in self.sequences:
-                        self.sequences[(prev_cell_id, nearest_cell_id)] += 1
-                    else:
-                        self.sequences[(prev_cell_id, nearest_cell_id)] = 1
+                    self.sequences[(prev_cell_id, nearest_cell_id)] += 1
             if nearest_cell_id != prev_cell_id:
                 # we have changed to a new cell --> up the counter
                 h = t.hour

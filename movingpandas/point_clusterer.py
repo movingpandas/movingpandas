@@ -62,10 +62,7 @@ class _Grid:
         # fallback to a 1x1 cell matrix
         self.n_rows = max(1, math.ceil(h / self.cell_size))
         self.n_cols = max(1, math.ceil(w / self.cell_size))
-        for i in range(0, self.n_cols):
-            self.cells.append([])
-            for j in range(0, self.n_rows):
-                self.cells[i].append(None)
+        self.cells = [[None] * self.n_rows for _ in range(self.n_cols)]
         self.resulting_clusters = []
 
     def insert_points(self, points):
