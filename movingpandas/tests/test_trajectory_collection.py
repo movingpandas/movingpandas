@@ -111,6 +111,14 @@ class TestTrajectoryCollection:
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
         assert isinstance(locs, GeoDataFrame)
 
+    def test_timestamp_column_present_in_start_locations(self):
+        locs = self.collection.get_start_locations()
+        assert "t" in locs.columns
+
+    def test_timestamp_column_present_in_end_locations(self):
+        locs = self.collection.get_end_locations()
+        assert "t" in locs.columns
+
     def test_get_end_locations(self):
         locs = self.collection.get_end_locations()
         assert len(locs) == 2
