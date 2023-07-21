@@ -27,6 +27,29 @@ class TestIO:
         expected = [1004.0, 1004.0, 1004.0, 1004.0, 1000.0]
         assert actual == expected
 
+    def test_mf_collection_file(self):
+        trajs_collection = read_mf_json(
+            os.path.join(self.test_dir, "movingfeatures_collection.json"), "id"
+        )
+        assert len(trajs_collection) == 2
+        assert trajs_collection.get_trajectory(1).id == 1
+        assert trajs_collection.get_trajectory(2).id == 2
+        actual = list(trajs_collection.get_trajectory(2).df["pressure"])[:5]
+        expected = [
+            1008.0,
+            1006.0,
+            1006.0,
+            1006.0,
+            1006.0,
+        ]
+        assert actual == expected
+
+    def test_mf_collection_needs_id(self):
+        with pytest.raises(AssertionError):
+            read_mf_json(
+                os.path.join(self.test_dir, "movingfeatures_collection.json"), None
+            )
+
     def test_wrong_property_raises_error(self):
         with pytest.raises(ValueError):
             read_mf_json(os.path.join(self.test_dir, "movingfeatures.json"), "foo")
@@ -63,9 +86,9 @@ class TestIO:
         with pytest.raises(ValueError):
             _create_objects_from_mf_json_dict(data, "id")
 
-    def test_unsupported_type(self):
+    def test_invalid_feature_collection(self):
         data = {"type": "FeatureCollection", "temporalGeometry": []}
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ValueError):
             _create_objects_from_mf_json_dict(data, "id")
 
     def test_unsupported_geometry_type(self):

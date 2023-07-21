@@ -4,7 +4,7 @@ from typing import Callable, Dict
 from geopandas import GeoDataFrame
 from pandas import DataFrame
 
-from movingpandas import Trajectory
+from movingpandas import Trajectory, TrajectoryCollection
 
 
 def gdf_to_mf_json(
@@ -108,8 +108,8 @@ def _raise_error_if_invalid_arguments(
 ):
     if not isinstance(gdf, GeoDataFrame):
         raise TypeError(
-            f"Not a GeoDataFrame, but a {type(gdf)} was supplied. "
-            "This function only works with GeoDataFrames."
+            "Not a GeoDataFrame, but a {} was supplied. This function only works with"
+            " GeoDataFrames.".format(type(gdf))
         )
     # Check if both datetime_column and trip_id_property are in the GeoDataFrame
     if datetime_column not in gdf.columns:
@@ -174,12 +174,12 @@ def read_mf_json(json_file_path, traj_id_property=None, traj_id=0):
 def _create_objects_from_mf_json_dict(data, traj_id_property=None, traj_id=0):
     if not isinstance(data, dict):
         raise ValueError("Not a supported MovingFeatures JSON")
-    if not ("type" in data and "temporalGeometry" in data):
-        raise ValueError("Not a supported MovingFeatures JSON")
-    if data["type"] == "Feature":
+    if data["type"] == "Feature" and "temporalGeometry" in data:
         return _create_traj_from_movingfeature_json(data, traj_id_property, traj_id)
-    elif data["type"] == "FeatureCollection":
-        return _create_trajcollection_from_movingfeaturecollection_json(data)
+    elif data["type"] == "FeatureCollection" and "features" in data:
+        return _create_trajcollection_from_movingfeaturecollection_json(
+            data, traj_id_property
+        )
     else:
         raise ValueError(
             f"Not a supported MovingFeatures JSON: "
@@ -236,5 +236,15 @@ def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
     return Trajectory(df, traj_id, t="t", x="x", y="y")
 
 
-def _create_trajcollection_from_movingfeaturecollection_json(data):
-    raise RuntimeError("MovingFeatureCollection support is not available yet.")
+def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_property):
+    assert (
+        traj_id_property is not None
+    ), "traj_id_property must be supplied when reading a collection of trajectories"
+
+    trajectories = []
+    for feature in data["features"]:
+        trajectories.append(
+            _create_traj_from_movingfeature_json(feature, traj_id_property, None)
+        )
+
+    return TrajectoryCollection(trajectories)
