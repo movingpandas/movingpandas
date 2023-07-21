@@ -108,8 +108,8 @@ def _raise_error_if_invalid_arguments(
 ):
     if not isinstance(gdf, GeoDataFrame):
         raise TypeError(
-            "Not a GeoDataFrame, but a {} was supplied. This function only works with"
-            " GeoDataFrames.".format(type(gdf))
+            f"Not a GeoDataFrame, but a {type(gdf)} was supplied. "
+            "This function only works with GeoDataFrames."
         )
     # Check if both datetime_column and trip_id_property are in the GeoDataFrame
     if datetime_column not in gdf.columns:

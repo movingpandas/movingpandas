@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import itertools as it
 import pandas as pd
 from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
@@ -133,7 +134,7 @@ def create_entry_and_exit_points(traj, range):
 
 
 def _get_segments_for_ranges(traj, ranges):
-    counter = 0
+    counter = it.count()
     segments = []  # list of trajectories
     for the_range in ranges:
         temp_traj = traj.copy()
@@ -143,10 +144,9 @@ def _get_segments_for_ranges(traj, ranges):
             segment = temp_traj.get_segment_between(the_range.t_0, the_range.t_n)
         except ValueError:
             continue
-        segment.id = "{}_{}".format(traj.id, counter)
+        segment.id = f"{traj.id}_{next(counter)}"
         segment.parent = traj
         segments.append(segment)
-        counter += 1
     return segments
 
 
@@ -161,7 +161,7 @@ def _determine_time_ranges_pointbased(traj, polygon):
     df.columns = df.columns.map("_".join)
 
     ranges = []
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         if row["intersects_min"]:
             ranges.append(TemporalRange(row["t_min"], row["t_max"]))
     return ranges

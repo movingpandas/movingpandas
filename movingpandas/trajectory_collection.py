@@ -76,7 +76,7 @@ class TrajectoryCollection:
         return len(self.trajectories)
 
     def __str__(self):
-        return "TrajectoryCollection with {} trajectories".format(self.__len__())
+        return f"TrajectoryCollection with {self.__len__()} trajectories"
 
     def __repr__(self):
         return self.__str__()

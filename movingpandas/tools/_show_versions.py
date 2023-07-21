@@ -133,17 +133,16 @@ def show_versions():
     proj_info = _get_C_info()
 
     maxlen = max(len(x) for x in deps_info)
-    tpl = "{{k:<{maxlen}}}: {{stat}}".format(maxlen=maxlen)
     print(f"\nMovingPandas {mpd_version}")
     print("\nSYSTEM INFO")
     print("-----------")
     for k, stat in sys_info.items():
-        print(tpl.format(k=k, stat=stat))
+        print(f"{k:<{maxlen}}: {stat}")
     print("\nGEOS, GDAL, PROJ INFO")
     print("---------------------")
     for k, stat in proj_info.items():
-        print(tpl.format(k=k, stat=stat))
+        print(f"{k:<{maxlen}}: {stat}")
     print("\nPYTHON DEPENDENCIES")
     print("-------------------")
     for k, stat in deps_info.items():
-        print(tpl.format(k=k, stat=stat))
+        print(f"{k:<{maxlen}}: {stat}")
