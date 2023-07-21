@@ -146,6 +146,145 @@ def _encode_temporal_properties(
     return temporal_properties_data
 
 
+def gdf_to_mf_json(
+    gdf: GeoDataFrame,
+    traj_id_column: str,
+    datetime_column: str,
+    temporal_columns: list = None,
+    temporal_columns_static_fields: Dict[str, Dict] = None,
+    interpolation: str = None,
+    crs=None,
+    trs=None,
+    datetime_encoder: Callable[[any], str | int] = None,
+) -> dict:
+    """
+    Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON
+    (MF-JSON) specification.
+
+    Args:
+        gdf (GeoDataFrame): The input GeoDataFrame to convert.
+        traj_id_column (str): The name of the column in the GeoDataFrame that
+            represents the trajectory identifier.
+        datetime_column (str): The name of the column in the GeoDataFrame that
+            represents the datetime information.
+        temporal_columns (list, optional): A list of column names in the GeoDataFrame
+         that represent additional temporal properties. Defaults to None.
+        temporal_columns_static_fields (Dict[str, Dict], optional): A dictionary mapping
+            column names to static fields associated with the corresponding temporal
+            property. Defaults to None.
+        interpolation (str, optional): The interpolation method used for the temporal
+            geometry. Defaults to None.
+        crs (optional): Coordinate reference system for the MF-JSON. Defaults to None.
+        trs (optional): Temporal reference system for the MF-JSON. Defaults to None.
+        datetime_encoder (Callable[[any], str|int], optional): A function that encodes
+            the datetime values in the GeoDataFrame to a string ( IETF RFC 3339 ) or
+            integer ( Timestamp, milliseconds ). Defaults to None.
+    Returns:
+        dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
+    """
+
+    _raise_error_if_invalid_arguments(gdf, datetime_column, traj_id_column)
+
+    if not temporal_columns:
+        temporal_columns = []
+
+    rows = []
+
+    for identifier, row in gdf.groupby(traj_id_column):
+        datetimes = _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row)
+
+        properties = row.drop(
+            columns=[
+                "geometry",
+                datetime_column,
+                traj_id_column,
+                *temporal_columns,
+            ]
+        )
+
+        if properties.empty:
+            encoded_properties = {}
+        else:
+            encoded_properties = properties.to_dict(orient="records")[0]
+
+        trajectory_data = {
+            "type": "Feature",
+            "properties": {
+                traj_id_column: identifier,
+                **encoded_properties,
+            },
+            "temporalGeometry": {
+                "type": "MovingPoint",
+                "coordinates": list(zip(row.geometry.x, row.geometry.y)),
+                "datetimes": datetimes,
+            },
+        }
+
+        if interpolation:
+            trajectory_data["temporalGeometry"]["interpolation"] = interpolation
+
+        if crs:
+            trajectory_data["crs"] = crs
+
+        if trs:
+            trajectory_data["trs"] = trs
+
+        if temporal_columns:
+            temporal_properties_data = _encode_temporal_properties(
+                datetimes, row, temporal_columns, temporal_columns_static_fields
+            )
+
+            trajectory_data["temporalProperties"] = [temporal_properties_data]
+
+        # Appending each trajectory data to the list of rows
+        rows.append(trajectory_data)
+
+    return {"type": "FeatureCollection", "features": rows}
+
+
+def _raise_error_if_invalid_arguments(
+    gdf: GeoDataFrame, datetime_column: str, traj_id_property: str
+):
+    if not isinstance(gdf, GeoDataFrame):
+        raise TypeError(
+            f"Not a GeoDataFrame, but a {type(gdf)} was supplied. "
+            "This function only works with GeoDataFrames."
+        )
+    # Check if both datetime_column and trip_id_property are in the GeoDataFrame
+    if datetime_column not in gdf.columns:
+        raise ValueError(
+            f"The datetime_column {datetime_column} is not in the GeoDataFrame."
+        )
+    if traj_id_property not in gdf.columns:
+        raise ValueError(
+            f"The traj_id_property {traj_id_property} is not in the GeoDataFrame."
+        )
+
+
+def _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row):
+    datetimes = row[datetime_column].tolist()
+    if datetime_encoder:
+        datetimes = [datetime_encoder(dt) for dt in datetimes]
+    return datetimes
+
+
+def _encode_temporal_properties(
+    datetimes, row, temporal_properties, temporal_properties_static_fields
+):
+    temporal_properties_data = {
+        "datetimes": datetimes,
+    }
+    for prop in temporal_properties:
+        temporal_properties_data[prop] = {
+            "values": row[prop].tolist(),
+        }
+        if prop in (temporal_properties_static_fields or {}):
+            temporal_properties_data[prop].update(
+                temporal_properties_static_fields[prop]
+            )
+    return temporal_properties_data
+
+
 def read_mf_json(json_file_path, traj_id_property=None, traj_id=0):
     """
     Reads OGC Moving Features Encoding Extension JSON files.

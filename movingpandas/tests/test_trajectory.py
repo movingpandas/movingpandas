@@ -1037,9 +1037,9 @@ class TestTrajectory:
 
         traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
         point = Point(0, 0)
-        assert traj.hausdorff_distance(point, units="km") == sqrt(4 + 4) / 1000.0
+        assert traj.hausdorff_distance(point, units="km") == sqrt(4 + 4) / 1000
         line = LineString([(2, 0), (2, 4), (3, 4)])
-        assert traj.hausdorff_distance(line, units="km") == sqrt(4 + 1) / 1000.0
+        assert traj.hausdorff_distance(line, units="km") == sqrt(4 + 1) / 1000
 
     def test_hausdorff_distance_warning(self):
         with pytest.warns(UserWarning):

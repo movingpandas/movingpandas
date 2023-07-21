@@ -1,4 +1,5 @@
 import math
+import statistics
 
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -45,9 +46,9 @@ class _PointCluster:
         self.points = []
 
     def recompute_centroid(self):
-        x = [pt.x for pt in self.points]
-        y = [pt.y for pt in self.points]
-        self.centroid = Point(sum(x) / len(x), sum(y) / len(y))
+        x = statistics.fmean(pt.x for pt in self.points)
+        y = statistics.fmean(pt.y for pt in self.points)
+        self.centroid = Point(x, y)
 
 
 class _Grid:
@@ -60,12 +61,9 @@ class _Grid:
         self.cells = []
         # in the rare case that the points are horizontal or vertical,
         # fallback to a 1x1 cell matrix
-        self.n_rows = max(1, int(math.ceil(h / self.cell_size)))
-        self.n_cols = max(1, int(math.ceil(w / self.cell_size)))
-        for i in range(0, self.n_cols):
-            self.cells.append([])
-            for j in range(0, self.n_rows):
-                self.cells[i].append(None)
+        self.n_rows = max(1, math.ceil(h / self.cell_size))
+        self.n_cols = max(1, math.ceil(w / self.cell_size))
+        self.cells = [[None] * self.n_rows for _ in range(self.n_cols)]
         self.resulting_clusters = []
 
     def insert_points(self, points):
@@ -83,7 +81,7 @@ class _Grid:
                     g.add_point(pt)
                     g.recompute_centroid()
                 else:
-                    print("Error: no group in cell {0},{1}".format(i, j))
+                    print(f"Error: no group in cell {i},{j}")
                     print(pt)
 
     def get_group(self, centroid):
@@ -107,8 +105,8 @@ class _Grid:
         return nearest_centroid
 
     def get_grid_position(self, pt):
-        i = int(math.floor((pt.x - self.x_min) / self.cell_size))
-        j = int(math.floor((pt.y - self.y_min) / self.cell_size))
+        i = math.floor((pt.x - self.x_min) / self.cell_size)
+        j = math.floor((pt.y - self.y_min) / self.cell_size)
         return i, j
 
     def redistribute_points(self, points):
@@ -120,4 +118,4 @@ class _Grid:
                 g = self.cells[i][j]
                 g.add_point(pt)
             else:
-                print("Discarding {}".format(pt))
+                print(f"Discarding {pt}")
