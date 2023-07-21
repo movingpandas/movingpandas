@@ -2,6 +2,7 @@
 
 import pandas as pd
 import pytest
+from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, Polygon, LineString
@@ -114,10 +115,18 @@ class TestTrajectoryCollection:
     def test_timestamp_column_present_in_start_locations(self):
         locs = self.collection.get_start_locations()
         assert "t" in locs.columns
+        assert locs["t"].tolist() == [
+            Timestamp("2018-01-01 12:00:00"),
+            Timestamp("2018-01-01 12:00:00"),
+        ]
 
     def test_timestamp_column_present_in_end_locations(self):
         locs = self.collection.get_end_locations()
         assert "t" in locs.columns
+        assert locs["t"].tolist() == [
+            Timestamp("2018-01-01 14:15:00"),
+            Timestamp("2018-01-02 13:15:00"),
+        ]
 
     def test_get_end_locations(self):
         locs = self.collection.get_end_locations()
