@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
+from copy import copy
+from datetime import datetime as datetime, timedelta as timedelta
+from math import sqrt
+
 import pandas as pd
 import pytest
+from fiona.crs import from_epsg
+from geopandas import GeoDataFrame
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
-from geopandas import GeoDataFrame
-from shapely.geometry import Point, Polygon, LineString
-from fiona.crs import from_epsg
-from datetime import datetime as datetime, timedelta as timedelta
-from copy import copy
-from math import sqrt
-from movingpandas.trajectory_collection import TrajectoryCollection
+from shapely.geometry import LineString, Point, Polygon
+
 from movingpandas.trajectory import TRAJ_ID_COL_NAME
-
+from movingpandas.trajectory_collection import TrajectoryCollection
 from . import requires_holoviews
-
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
