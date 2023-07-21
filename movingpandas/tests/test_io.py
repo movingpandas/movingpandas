@@ -44,6 +44,12 @@ class TestIO:
         ]
         assert actual == expected
 
+    def test_mf_collection_needs_id(self):
+        with pytest.raises(AssertionError):
+            read_mf_json(
+                os.path.join(self.test_dir, "movingfeatures_collection.json"), None
+            )
+
     def test_wrong_property_raises_error(self):
         with pytest.raises(ValueError):
             read_mf_json(os.path.join(self.test_dir, "movingfeatures.json"), "foo")
@@ -80,9 +86,9 @@ class TestIO:
         with pytest.raises(ValueError):
             _create_objects_from_mf_json_dict(data, "id")
 
-    def test_unsupported_type(self):
+    def test_invalid_feature_collection(self):
         data = {"type": "FeatureCollection", "temporalGeometry": []}
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ValueError):
             _create_objects_from_mf_json_dict(data, "id")
 
     def test_unsupported_geometry_type(self):
