@@ -57,6 +57,7 @@ class TrajectoryCollection:
         """
         self.min_length = min_length
         self.min_duration = min_duration
+        self.t = t
         if type(data) == list:
             self.trajectories = [
                 traj for traj in data if traj.get_length() >= min_length
@@ -219,8 +220,8 @@ class TrajectoryCollection:
             Trajectory locations at timestamp t
         """
         result = []
+
         for traj in self:
-            x = None
             if t == "start":
                 x = traj.get_row_at(traj.get_start_time())
             elif t == "end":
@@ -231,7 +232,12 @@ class TrajectoryCollection:
                 x = traj.get_row_at(t)
             result.append(x.to_frame().T)
         if result:
-            df = concat(result, ignore_index=True)
+            df = concat(result)
+            # Move temporal index to column t
+            t = self.t or "t"
+            df.reset_index(inplace=True)
+            df.rename(columns={"index": t}, inplace=True)
+
             return GeoDataFrame(df)
         else:
             return GeoDataFrame()

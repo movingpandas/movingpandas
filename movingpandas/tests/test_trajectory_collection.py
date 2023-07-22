@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
+from copy import copy
+from datetime import datetime as datetime, timedelta as timedelta
+from math import sqrt
+
 import pandas as pd
 import pytest
-from pandas.testing import assert_frame_equal
-from geopandas import GeoDataFrame
-from shapely.geometry import Point, Polygon, LineString
 from fiona.crs import from_epsg
-from datetime import datetime as datetime, timedelta as timedelta
-from copy import copy
-from math import sqrt
-from movingpandas.trajectory_collection import TrajectoryCollection
+from geopandas import GeoDataFrame
+from pandas import Timestamp
+from pandas.testing import assert_frame_equal
+from shapely.geometry import LineString, Point, Polygon
+
 from movingpandas.trajectory import TRAJ_ID_COL_NAME
-
+from movingpandas.trajectory_collection import TrajectoryCollection
 from . import requires_holoviews
-
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -110,6 +111,22 @@ class TestTrajectoryCollection:
         assert locs.iloc[1].geometry in [Point(0, 0), Point(10, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
         assert isinstance(locs, GeoDataFrame)
+
+    def test_timestamp_column_present_in_start_locations(self):
+        locs = self.collection.get_start_locations()
+        assert "t" in locs.columns
+        assert locs["t"].tolist() == [
+            Timestamp("2018-01-01 12:00:00"),
+            Timestamp("2018-01-01 12:00:00"),
+        ]
+
+    def test_timestamp_column_present_in_end_locations(self):
+        locs = self.collection.get_end_locations()
+        assert "t" in locs.columns
+        assert locs["t"].tolist() == [
+            Timestamp("2018-01-01 14:15:00"),
+            Timestamp("2018-01-02 13:15:00"),
+        ]
 
     def test_get_end_locations(self):
         locs = self.collection.get_end_locations()
