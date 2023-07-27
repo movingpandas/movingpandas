@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from .test_trajectory import make_traj, Node
-from movingpandas.trajectory_cleaner import OutlierCleaner
+from movingpandas.trajectory_cleaner import OutlierCleaner, SpikeCleaner
 import pandas as pd
 from fiona.crs import from_epsg
 from shapely.geometry import Point
@@ -68,3 +69,46 @@ class TestTrajectoryCleaner:
         assert wkt1 == "LINESTRING (0 0, 1 1, 3 1, 9 9)"
         wkt2 = collection.trajectories[1].to_linestring().wkt
         assert wkt2 == "LINESTRING (10 10, 16 10, 16 12, 190 19)"
+
+    def test_spike_cleaner(self):
+        df = pd.DataFrame(
+            [
+                [
+                    datetime(2013, 7, 1, 2, 4, 9),
+                    Point(-8.58290, 41.14512),
+                ],  # 	12.107213
+                [
+                    datetime(2013, 7, 1, 2, 4, 24),
+                    Point(-8.58438, 41.14648),
+                ],  # 	13.018319
+                [
+                    datetime(2013, 7, 1, 2, 4, 39),
+                    Point(-8.61085, 41.14588),
+                ],  # 	148.203716
+                [
+                    datetime(2013, 7, 1, 2, 4, 54),
+                    Point(-8.61001, 41.14648),
+                ],  # 	6.471072
+                [datetime(2013, 7, 1, 2, 5, 9), Point(-8.60906, 41.14687)],  # 	6.059366
+                [
+                    datetime(2013, 7, 1, 2, 5, 24),
+                    Point(-8.60897, 41.14706),
+                ],  # 	1.487207
+                [
+                    datetime(2013, 7, 1, 2, 5, 39),
+                    Point(-8.58603, 41.14870),
+                ],  # 	128.966108
+                [
+                    datetime(2013, 7, 1, 2, 5, 54),
+                    Point(-8.58720, 41.14922),
+                ],  # 	7.603255
+                [datetime(2013, 7, 1, 2, 6, 9), Point(-8.58821, 41.14896)],  # 	5.962920
+            ],
+            columns=["t", "geometry"],
+        )
+        gdf = GeoDataFrame(df, crs=CRS_LATLON)
+        traj = Trajectory(gdf, traj_id=1, t="t")
+
+        cleaned = SpikeCleaner(traj).clean(v_max=100, units=("km", "h"))
+        expected = "LINESTRING (-8.5829 41.14512, -8.58438 41.14648, -8.58603 41.1487, -8.5872 41.14922, -8.58821 41.14896)"
+        assert cleaned.to_linestring().wkt == expected
