@@ -177,7 +177,7 @@ class SpikeCleaner(TrajectoryCleaner):
     >>> mpd.SpikeCleaner(traj).clean(v_max=100, units=("km", "h"))
     """
 
-    def _clean_traj(self, traj, v_max, units=None):
+    def _clean_traj(self, traj, v_max, units=UNITS()):
         ixs = []
         prev = None
         conversion = get_conversion(units, traj.crs_units)
