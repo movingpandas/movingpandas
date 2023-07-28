@@ -13,6 +13,7 @@ from .geometry_utils import (
     angular_difference,
     measure_distance_geodesic,
     measure_distance_euclidean,
+    measure_distance,
 )
 
 
@@ -218,10 +219,7 @@ class _PtsExtractor:
     def distance_greater_than(self, loc1, loc2, dist):
         pt1 = self.get_pt(loc1)
         pt2 = self.get_pt(loc2)
-        if self.traj.is_latlon:
-            d = measure_distance_geodesic(pt1, pt2)
-        else:
-            d = measure_distance_euclidean(pt1, pt2)
+        d = measure_distance(pt1, pt2, self.traj.is_latlon)
         return d >= dist
 
     def get_pt(self, the_loc):

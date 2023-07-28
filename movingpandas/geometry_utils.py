@@ -81,7 +81,7 @@ def measure_distance_geodesic(point1, point2):
     return dist
 
 
-def _measure_distance(point1, point2, spherical=False):
+def measure_distance(point1, point2, spherical=False):
     """
     Convenience function that returns either euclidean or geodesic distance
     between two points
@@ -156,13 +156,13 @@ def mrr_diagonal(geom, spherical=False):
         return 0
     _geom = geom.geoms if SHAPELY_GE_2 else geom
     if len(_geom) == 2:
-        return _measure_distance(_geom[0], _geom[1], spherical)
+        return measure_distance(_geom[0], _geom[1], spherical)
     mrr = geom.minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
     except AttributeError:  # thrown if mrr is a LineString
-        return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
-    return _measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
+        return measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
+    return measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
 
 
 def point_gdf_to_linestring(df, geom_col_name):

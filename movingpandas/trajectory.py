@@ -21,8 +21,7 @@ from .geometry_utils import (
     angular_difference,
     azimuth,
     calculate_initial_compass_bearing,
-    measure_distance_geodesic,
-    measure_distance_euclidean,
+    measure_distance,
     point_gdf_to_linestring,
 )
 from .unit_utils import (
@@ -31,6 +30,7 @@ from .unit_utils import (
     to_unixtime,
     get_conversion,
 )
+from .spatiotemporal_utils import get_speed2
 from .trajectory_plotter import _TrajectoryPlotter
 
 warnings.filterwarnings(  # see https://github.com/movingpandas/movingpandas/issues/289
@@ -738,11 +738,8 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        func = (
-            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
-        )
-        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
-        return dist_computed
+        d = measure_distance(pt0, pt1, self.is_latlon)
+        return d * conversion.crs / conversion.distance
 
     def _add_prev_pt(self, force=True):
         """
@@ -896,11 +893,7 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        func = (
-            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
-        )
-        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
-        return dist_computed / row["delta_t"].total_seconds() * conversion.time
+        return get_speed2(pt0, pt1, row["delta_t"], self.is_latlon, conversion)
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
