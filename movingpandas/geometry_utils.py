@@ -97,12 +97,18 @@ def measure_distance(point1, point2, spherical=False, conversion=None):
     return d
 
 
-def measure_distance2(linestring, other, conversion):
-        d = linestring.distance(other)
-        return d / conversion.distance
+def measure_distance_line(linestring, other, conversion):
+    """
+    Returns the euclidean distance between a linestring and other geometry
+    """
+    d = linestring.distance(other)
+    return d / conversion.distance
 
 
 def measure_length(geoseries, spherical=False, conversion=None):
+    """
+    Returns the total distance between the points of the geoseries
+    """
     pt_tuples = [(pt.y, pt.x) for pt in geoseries.tolist()]
     if spherical:
         length = geodesic(*pt_tuples).m

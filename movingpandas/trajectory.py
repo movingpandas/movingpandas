@@ -21,7 +21,7 @@ from .geometry_utils import (
     azimuth,
     calculate_initial_compass_bearing,
     measure_distance,
-    measure_distance2,
+    measure_distance_line,
     measure_length,
     point_gdf_to_linestring,
 )
@@ -1486,7 +1486,7 @@ class Trajectory:
             other = other.to_linestring()
 
         conversion = get_conversion(units, self.crs_units)
-        return measure_distance2(self.to_linestring(), other, conversion)
+        return measure_distance_line(self.to_linestring(), other, conversion)
 
 
     def hausdorff_distance(self, other, units=UNITS()):
