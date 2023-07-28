@@ -3,7 +3,7 @@
 from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from .test_trajectory import make_traj, Node
-from movingpandas.trajectory_cleaner import OutlierCleaner, SpikeCleaner
+from movingpandas.trajectory_cleaner import IqrCleaner, OutlierCleaner
 import pandas as pd
 from fiona.crs import from_epsg
 from shapely.geometry import Point
@@ -48,7 +48,7 @@ class TestTrajectoryCleaner:
                 Node(5, 5, day=7, value=1),
             ]
         )
-        result = OutlierCleaner(traj).clean(columns={"value": 3})
+        result = IqrCleaner(traj).clean(columns={"value": 3})
         assert result == make_traj(
             [
                 Node(),
@@ -61,7 +61,7 @@ class TestTrajectoryCleaner:
         )
 
     def test_outlier_cleaner_collection(self):
-        collection = OutlierCleaner(self.collection).clean(
+        collection = IqrCleaner(self.collection).clean(
             columns={"val": 3, "val2": 3}
         )
         assert len(collection) == 2
@@ -109,6 +109,6 @@ class TestTrajectoryCleaner:
         gdf = GeoDataFrame(df, crs=CRS_LATLON)
         traj = Trajectory(gdf, traj_id=1, t="t")
 
-        cleaned = SpikeCleaner(traj).clean(v_max=100, units=("km", "h"))
+        cleaned = OutlierCleaner(traj).clean(v_max=100, units=("km", "h"))
         expected = "LINESTRING (-8.5829 41.14512, -8.58438 41.14648, -8.58603 41.1487, -8.5872 41.14922, -8.58821 41.14896)"  # noqa F401
         assert cleaned.to_linestring().wkt == expected

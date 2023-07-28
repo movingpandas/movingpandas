@@ -54,7 +54,7 @@ class TrajectoryCleaner:
         return traj
 
 
-class OutlierCleaner(TrajectoryCleaner):
+class IqrCleaner(TrajectoryCleaner):
     """
     Interquantile range (IQR) based outlier cleaner.
 
@@ -101,9 +101,9 @@ class OutlierCleaner(TrajectoryCleaner):
         return (series > q_high) | (series < q_low)
 
 
-class SpikeCleaner(TrajectoryCleaner):
+class OutlierCleaner(TrajectoryCleaner):
     """
-    Speed-based trajectory cleaner that cuts away spikes in the trajectory
+    Speed-based outlier cleaner that cuts away spikes in the trajectory
     when the speed exceeds the provided speed threshold value
 
     Parameters
