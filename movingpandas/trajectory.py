@@ -1488,7 +1488,6 @@ class Trajectory:
         conversion = get_conversion(units, self.crs_units)
         return measure_distance_line(self.to_linestring(), other, conversion)
 
-
     def hausdorff_distance(self, other, units=UNITS()):
         """
         Return the Hausdorff distance to the other geometric object (based on shapely

@@ -196,9 +196,7 @@ class StopSplitter(TrajectorySplitter):
         if stop_ranges:
             for i in range(0, len(stop_ranges)):
                 if i == 0:
-                    result.append(
-                        TRange(traj.get_start_time(), stop_ranges[i].t_0)
-                    )
+                    result.append(TRange(traj.get_start_time(), stop_ranges[i].t_0))
                     continue
                 result.append(TRange(stop_ranges[i - 1].t_n, stop_ranges[i].t_0))
             result.append(TRange(stop_ranges[-1].t_n, traj.get_end_time()))

@@ -7,6 +7,7 @@ class TPoint:
     """
     Temporal point
     """
+
     def __init__(self, t, pt) -> None:
         self.t = t
         self.pt = pt
@@ -16,6 +17,7 @@ class TRange:
     """
     Temporal range
     """
+
     def __init__(self, t_0, t_n):
         self.t_0 = t_0
         self.t_n = t_n
@@ -25,6 +27,7 @@ class STRange:
     """
     Spatiotemporal range
     """
+
     def __init__(self, pt_0, pt_n, t_0, t_n):
         if isinstance(type(pt_0), Point):
             raise TypeError("Input pt_0 has to be a shapely.geometry.Point!")
