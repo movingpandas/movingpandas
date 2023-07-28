@@ -180,10 +180,8 @@ class OutlierCleaner(TrajectoryCleaner):
     """
 
     def _clean_traj(self, traj, v_max=None, units=UNITS(), alpha=3):
-        ixs = []
-        prev = None
-        conversion = get_conversion(units, traj.crs_units)
         out_traj = traj.copy()
+        conversion = get_conversion(units, traj.crs_units)
 
         if v_max is None:
             out_traj.add_speed(overwrite=True, units=units)
@@ -191,6 +189,8 @@ class OutlierCleaner(TrajectoryCleaner):
             v_max = out_traj.df[speed_col].agg(lambda x: x.quantile(0.95))
             v_max = v_max * alpha
 
+        ixs = []
+        prev = None
         for index, row in out_traj.df.iterrows():
             curr = TPoint(index, row.geometry)
             if not prev:

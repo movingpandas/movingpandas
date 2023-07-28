@@ -4,8 +4,10 @@ from math import atan2, cos, degrees, pi, radians, sin, sqrt
 
 import shapely
 from geopy import distance
+from geopy.distance import geodesic
 from packaging.version import Version
 from shapely.geometry import LineString, Point
+
 
 try:
     SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
@@ -81,15 +83,33 @@ def measure_distance_geodesic(point1, point2):
     return dist
 
 
-def measure_distance(point1, point2, spherical=False):
+def measure_distance(point1, point2, spherical=False, conversion=None):
     """
     Convenience function that returns either euclidean or geodesic distance
     between two points
     """
     if spherical:
-        return measure_distance_geodesic(point1, point2)
+        d = measure_distance_geodesic(point1, point2)
     else:
-        return measure_distance_euclidean(point1, point2)
+        d = measure_distance_euclidean(point1, point2)
+    if conversion:
+        d = d * conversion.crs / conversion.distance
+    return d
+
+
+def measure_distance2(linestring, other, conversion):
+        d = linestring.distance(other)
+        return d / conversion.distance
+
+
+def measure_length(geoseries, spherical=False, conversion=None):
+    pt_tuples = [(pt.y, pt.x) for pt in geoseries.tolist()]
+    if spherical:
+        length = geodesic(*pt_tuples).m
+    else:  # The following distance will be in CRS units that might not be meters!
+        length = LineString(pt_tuples).length
+
+    return length / conversion.distance
 
 
 def calculate_initial_compass_bearing(point1, point2):

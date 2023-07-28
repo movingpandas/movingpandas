@@ -7,7 +7,6 @@ from shapely.geometry import Point, LineString
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
-from geopy.distance import geodesic
 
 try:
     from pyproj import CRS
@@ -22,6 +21,8 @@ from .geometry_utils import (
     azimuth,
     calculate_initial_compass_bearing,
     measure_distance,
+    measure_distance2,
+    measure_length,
     point_gdf_to_linestring,
 )
 from .unit_utils import (
@@ -738,8 +739,7 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        d = measure_distance(pt0, pt1, self.is_latlon)
-        return d * conversion.crs / conversion.distance
+        return measure_distance(pt0, pt1, self.is_latlon, conversion)
 
     def _add_prev_pt(self, force=True):
         """
@@ -817,15 +817,9 @@ class Trajectory:
         float
             Length of the trajectory
         """
-        pt_tuples = [(pt.y, pt.x) for pt in self.df.geometry.tolist()]
-        if self.is_latlon:
-            length = geodesic(*pt_tuples).m
-        else:  # The following distance will be in CRS units that might not be meters!
-            length = LineString(pt_tuples).length
 
         conversion = get_conversion(units, self.crs_units)
-
-        return length / conversion.distance
+        return measure_length(self.df.geometry, self.is_latlon, conversion)
 
     def get_direction(self):
         """
@@ -1491,9 +1485,9 @@ class Trajectory:
         if type(other) == Trajectory:
             other = other.to_linestring()
 
-        dist = self.to_linestring().distance(other)
         conversion = get_conversion(units, self.crs_units)
-        return dist / conversion.distance
+        return measure_distance2(self.to_linestring(), other, conversion)
+
 
     def hausdorff_distance(self, other, units=UNITS()):
         """
