@@ -5,9 +5,9 @@ MovingPandas implements trajectory classes and functions built on top of GeoPand
 
 The project home is: http://movingpandas.org
 
-The code repository is: https://github.com/anitagraser/movingpandas
+The code repository is: https://github.com/movingpandas/movingpandas
 
-Extensive analysis examples are available from: https://github.com/anitagraser/movingpandas-examples
+Extensive analysis examples are available from: https://github.com/movingpandas/movingpandas-examples
 
 MovingPandas classes
 --------------------

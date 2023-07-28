@@ -11,3 +11,6 @@ MovingPandas.TrajectoryCleaner
 
 .. autoclass:: OutlierCleaner
    :members:
+
+.. autoclass:: IqrCleaner
+   :members:
