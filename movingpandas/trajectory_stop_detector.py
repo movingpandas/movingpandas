@@ -121,7 +121,7 @@ class TrajectoryStopDetector:
             is_stopped = False
             if len(pts) > 1:
                 if traj.is_latlon:
-                    d = distance.distance((minx, miny), (maxx, maxy)).meters
+                    d = distance.distance((miny, minx), (maxy, maxx)).meters
                 else:
                     d = sqrt(pow(maxx - minx, 2) + pow(maxy - miny, 2))
                 if d < max_diameter * 1.5:
