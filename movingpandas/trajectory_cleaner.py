@@ -177,11 +177,20 @@ class OutlierCleaner(TrajectoryCleaner):
     >>> mpd.SpikeCleaner(traj).clean(v_max=100, units=("km", "h"))
     """
 
-    def _clean_traj(self, traj, v_max, units=UNITS()):
+    def _clean_traj(self, traj, v_max=None, units=UNITS(), alpha=3):
         ixs = []
         prev = None
         conversion = get_conversion(units, traj.crs_units)
         out_traj = traj.copy()
+
+        if v_max is None:
+            out_traj.add_speed(overwrite=True, units=units)
+            v_max = (
+                out_traj.df[out_traj.get_speed_column_name()].agg(
+                    lambda x: x.quantile(0.95)
+                )
+                * alpha
+            )
 
         for index, row in out_traj.df.iterrows():
             if not prev:

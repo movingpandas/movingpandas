@@ -61,9 +61,7 @@ class TestTrajectoryCleaner:
         )
 
     def test_outlier_cleaner_collection(self):
-        collection = IqrCleaner(self.collection).clean(
-            columns={"val": 3, "val2": 3}
-        )
+        collection = IqrCleaner(self.collection).clean(columns={"val": 3, "val2": 3})
         assert len(collection) == 2
         wkt1 = collection.trajectories[0].to_linestring().wkt
         assert wkt1 == "LINESTRING (0 0, 1 1, 3 1, 9 9)"
@@ -73,36 +71,15 @@ class TestTrajectoryCleaner:
     def test_spike_cleaner(self):
         df = pd.DataFrame(
             [
-                [
-                    datetime(2013, 7, 1, 2, 4, 9),
-                    Point(-8.58290, 41.14512),
-                ],
-                [
-                    datetime(2013, 7, 1, 2, 4, 24),
-                    Point(-8.58438, 41.14648),
-                ],
-                [
-                    datetime(2013, 7, 1, 2, 4, 39),
-                    Point(-8.61085, 41.14588),
-                ],
-                [
-                    datetime(2013, 7, 1, 2, 4, 54),
-                    Point(-8.61001, 41.14648),
-                ],
-                [datetime(2013, 7, 1, 2, 5, 9), Point(-8.60906, 41.14687)],
-                [
-                    datetime(2013, 7, 1, 2, 5, 24),
-                    Point(-8.60897, 41.14706),
-                ],
-                [
-                    datetime(2013, 7, 1, 2, 5, 39),
-                    Point(-8.58603, 41.14870),
-                ],
-                [
-                    datetime(2013, 7, 1, 2, 5, 54),
-                    Point(-8.58720, 41.14922),
-                ],
-                [datetime(2013, 7, 1, 2, 6, 9), Point(-8.58821, 41.14896)],
+                [datetime(2013, 7, 1, 2, 4, 9), Point(-8.5829, 41.1451)],
+                [datetime(2013, 7, 1, 2, 4, 24), Point(-8.5843, 41.1464)],
+                [datetime(2013, 7, 1, 2, 4, 39), Point(-8.6108, 41.1458)],
+                [datetime(2013, 7, 1, 2, 4, 54), Point(-8.6100, 41.1464)],
+                [datetime(2013, 7, 1, 2, 5, 9), Point(-8.6090, 41.1468)],
+                [datetime(2013, 7, 1, 2, 5, 24), Point(-8.6089, 41.1470)],
+                [datetime(2013, 7, 1, 2, 5, 39), Point(-8.5860, 41.1487)],
+                [datetime(2013, 7, 1, 2, 5, 54), Point(-8.5872, 41.1492)],
+                [datetime(2013, 7, 1, 2, 6, 9), Point(-8.5882, 41.1489)],
             ],
             columns=["t", "geometry"],
         )
@@ -110,5 +87,5 @@ class TestTrajectoryCleaner:
         traj = Trajectory(gdf, traj_id=1, t="t")
 
         cleaned = OutlierCleaner(traj).clean(v_max=100, units=("km", "h"))
-        expected = "LINESTRING (-8.5829 41.14512, -8.58438 41.14648, -8.58603 41.1487, -8.5872 41.14922, -8.58821 41.14896)"  # noqa F401
+        expected = "LINESTRING (-8.5829 41.1451, -8.5843 41.1464, -8.586 41.1487, -8.5872 41.1492, -8.5882 41.1489)"  # noqa F401
         assert cleaned.to_linestring().wkt == expected
