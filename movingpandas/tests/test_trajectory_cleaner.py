@@ -92,4 +92,3 @@ class TestTrajectoryCleaner:
         cleaned = OutlierCleaner(traj).clean(v_max=100, units=("km", "h"))
         expected = "LINESTRING (-8.5829 41.1451, -8.5843 41.1464, -8.586 41.1487, -8.5872 41.1492, -8.5882 41.1489)"  # noqa F401
         assert cleaned.to_linestring().wkt == expected
-
