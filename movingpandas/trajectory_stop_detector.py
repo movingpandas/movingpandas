@@ -10,7 +10,7 @@ from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .geometry_utils import mrr_diagonal
 from .trajectory_utils import convert_time_ranges_to_segments
-from .time_range_utils import TemporalRangeWithTrajId
+from .spatiotemporal_utils import TRangeWithTrajId
 
 
 class TrajectoryStopDetector:
@@ -136,7 +136,7 @@ class TrajectoryStopDetector:
                     segment_end - segment_begin >= min_duration
                 ):  # detected end of a stop
                     detected_stops.append(
-                        TemporalRangeWithTrajId(segment_begin, segment_end, traj.id)
+                        TRangeWithTrajId(segment_begin, segment_end, traj.id)
                     )
                     pts = [pts[-1]]
                     xs = [xs[-1]]
@@ -146,7 +146,7 @@ class TrajectoryStopDetector:
             previously_stopped = is_stopped
 
         if is_stopped and ts[-1] - ts[0] >= min_duration:
-            detected_stops.append(TemporalRangeWithTrajId(ts[0], ts[-1], traj.id))
+            detected_stops.append(TRangeWithTrajId(ts[0], ts[-1], traj.id))
 
         return detected_stops
 

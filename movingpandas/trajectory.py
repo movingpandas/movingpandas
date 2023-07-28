@@ -15,7 +15,7 @@ except ImportError:
     from fiona.crs import from_epsg
 
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
-from .time_range_utils import SpatioTemporalRange
+from .spatiotemporal_utils import STRange
 from .geometry_utils import (
     angular_difference,
     azimuth,
@@ -693,7 +693,7 @@ class Trajectory:
                 f"Invalid split method {method}. Must be one of [interpolated, within]"
             )
         if method == "interpolated":
-            st_range = SpatioTemporalRange(
+            st_range = STRange(
                 self.get_position_at(t1), self.get_position_at(t2), t1, t2
             )
             temp_df = create_entry_and_exit_points(self, st_range)
