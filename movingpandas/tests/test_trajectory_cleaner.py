@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from .test_trajectory import make_traj, Node
-from movingpandas.trajectory_cleaner import OutlierCleaner
+from movingpandas.trajectory_cleaner import IqrCleaner, OutlierCleaner
 import pandas as pd
 from fiona.crs import from_epsg
 from shapely.geometry import Point
@@ -47,7 +48,7 @@ class TestTrajectoryCleaner:
                 Node(5, 5, day=7, value=1),
             ]
         )
-        result = OutlierCleaner(traj).clean(columns={"value": 3})
+        result = IqrCleaner(traj).clean(columns={"value": 3})
         assert result == make_traj(
             [
                 Node(),
@@ -60,11 +61,34 @@ class TestTrajectoryCleaner:
         )
 
     def test_outlier_cleaner_collection(self):
-        collection = OutlierCleaner(self.collection).clean(
-            columns={"val": 3, "val2": 3}
-        )
+        collection = IqrCleaner(self.collection).clean(columns={"val": 3, "val2": 3})
         assert len(collection) == 2
         wkt1 = collection.trajectories[0].to_linestring().wkt
         assert wkt1 == "LINESTRING (0 0, 1 1, 3 1, 9 9)"
         wkt2 = collection.trajectories[1].to_linestring().wkt
         assert wkt2 == "LINESTRING (10 10, 16 10, 16 12, 190 19)"
+
+    def test_outlier_cleaner(self):
+        df = pd.DataFrame(
+            [
+                [datetime(2013, 7, 1, 2, 4, 9), Point(-8.5829, 41.1451)],
+                [datetime(2013, 7, 1, 2, 4, 24), Point(-8.5843, 41.1464)],
+                [datetime(2013, 7, 1, 2, 4, 39), Point(-8.6108, 41.1458)],
+                [datetime(2013, 7, 1, 2, 4, 54), Point(-8.6100, 41.1464)],
+                [datetime(2013, 7, 1, 2, 5, 9), Point(-8.6090, 41.1468)],
+                [datetime(2013, 7, 1, 2, 5, 24), Point(-8.6089, 41.1470)],
+                [datetime(2013, 7, 1, 2, 5, 39), Point(-8.5860, 41.1487)],
+                [datetime(2013, 7, 1, 2, 5, 54), Point(-8.5872, 41.1492)],
+                [datetime(2013, 7, 1, 2, 6, 9), Point(-8.5882, 41.1489)],
+            ],
+            columns=["t", "geometry"],
+        )
+        gdf = GeoDataFrame(df, crs=CRS_LATLON)
+        traj = Trajectory(gdf, traj_id=1, t="t")
+
+        cleaned = OutlierCleaner(traj).clean()
+        cleaned = OutlierCleaner(traj).clean(alpha=2)
+
+        cleaned = OutlierCleaner(traj).clean(v_max=100, units=("km", "h"))
+        expected = "LINESTRING (-8.5829 41.1451, -8.5843 41.1464, -8.586 41.1487, -8.5872 41.1492, -8.5882 41.1489)"  # noqa F401
+        assert cleaned.to_linestring().wkt == expected
