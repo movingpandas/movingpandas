@@ -11,8 +11,6 @@ from movingpandas.point_clusterer import PointClusterer
 from .geometry_utils import (
     azimuth,
     angular_difference,
-    measure_distance_geodesic,
-    measure_distance_euclidean,
     measure_distance,
 )
 
