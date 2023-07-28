@@ -7,6 +7,8 @@ from geopy import distance
 from packaging.version import Version
 from shapely.geometry import LineString, Point
 
+from .unit_utils import UNITS, get_conversion
+
 try:
     SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
 except TypeError:
@@ -81,15 +83,26 @@ def measure_distance_geodesic(point1, point2):
     return dist
 
 
-def _measure_distance(point1, point2, spherical=False):
+def measure_distance(pt0, pt1, spherical=False, conversion=None, units=UNITS(), crs_units=None):
     """
     Convenience function that returns either euclidean or geodesic distance
     between two points
     """
+    if not conversion:
+        conversion = get_conversion(units, crs_units)
     if spherical:
-        return measure_distance_geodesic(point1, point2)
+        d = measure_distance_geodesic(pt0, pt1) 
     else:
-        return measure_distance_euclidean(point1, point2)
+        d = measure_distance_euclidean(pt0, pt1) 
+    return d * conversion.crs / conversion.distance
+
+
+def measure_speed(pt0, pt1, delta_t, is_latlon=False, conversion=None, units=UNITS(), crs_units=None):
+    if not conversion:
+        conversion = get_conversion(units, crs_units)
+    d = measure_distance(pt0, pt1, spherical=is_latlon, conversion=conversion, units=units, crs_units=crs_units)
+    v = d / delta_t.total_seconds() * conversion.time
+    return v
 
 
 def calculate_initial_compass_bearing(point1, point2):
@@ -156,13 +169,13 @@ def mrr_diagonal(geom, spherical=False):
         return 0
     _geom = geom.geoms if SHAPELY_GE_2 else geom
     if len(_geom) == 2:
-        return _measure_distance(_geom[0], _geom[1], spherical)
+        return measure_distance(_geom[0], _geom[1], spherical)
     mrr = geom.minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
     except AttributeError:  # thrown if mrr is a LineString
-        return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
-    return _measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
+        return measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
+    return measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
 
 
 def point_gdf_to_linestring(df, geom_col_name):
@@ -173,3 +186,4 @@ def point_gdf_to_linestring(df, geom_col_name):
         return LineString(df[geom_col_name].tolist())
     else:
         raise RuntimeError("DataFrame needs at least two points to make line!")
+

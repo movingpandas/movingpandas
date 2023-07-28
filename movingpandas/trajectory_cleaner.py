@@ -7,7 +7,7 @@ from copy import copy
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-from .geometry_utils import measure_distance_geodesic, measure_distance_euclidean
+from .geometry_utils import measure_speed
 from .unit_utils import UNITS, get_conversion
 
 
@@ -82,13 +82,13 @@ class IqrCleaner(TrajectoryCleaner):
                 raise TypeError(
                     f"'{column}' column of type '{df[column].dtype}' is not numeric"
                 )
-            ix = self._calc_outliers(df[column], alpha)
+            ix = self._compute_outliers(df[column], alpha)
             ixs.append(ix.tolist())
 
         indices = pd.Series(list(map(any, zip(*ixs))), index=df.index)
         return Trajectory(df[~indices], traj.id)
 
-    def _calc_outliers(self, series, alpha=3):
+    def _compute_outliers(self, series, alpha=3):
         """
         Returns a series of indexes of row that are to be considered outliers
         using the quantiles of the data.
@@ -180,31 +180,19 @@ class OutlierCleaner(TrajectoryCleaner):
     """
 
     def _clean_traj(self, traj, v_max=None, units=UNITS(), alpha=3):
+        out_traj = traj.copy()
+        if v_max is None:
+            v_max = self._compute_speed_threshold(units, alpha, out_traj)
+
         ixs = []
         prev = None
-        conversion = get_conversion(units, traj.crs_units)
-        out_traj = traj.copy()
-
-        if v_max is None:
-            out_traj.add_speed(overwrite=True, units=units)
-            v_max = (
-                out_traj.df[out_traj.get_speed_column_name()].agg(
-                    lambda x: x.quantile(0.95)
-                )
-                * alpha
-            )
-
         for index, row in out_traj.df.iterrows():
             if not prev:
                 prev = (index, row.geometry)
                 continue
-            func = (
-                measure_distance_geodesic
-                if traj.is_latlon
-                else measure_distance_euclidean
-            )
-            d = func(prev[1], row.geometry) * conversion.crs / conversion.distance
-            v = d / (index - prev[0]).total_seconds() * conversion.time
+            v = measure_speed(
+                pt0=prev[1], pt1=row.geometry, delta_t=index-prev[0], 
+                is_latlon=traj.is_latlon, units=units, crs_units=traj.crs_units)
             if v > v_max:
                 ixs.append(index)
                 continue  # do NOT update the previous point
@@ -212,3 +200,10 @@ class OutlierCleaner(TrajectoryCleaner):
 
         out_traj.df.drop(ixs, inplace=True)
         return out_traj
+
+    def _compute_speed_threshold(self, units, alpha, out_traj):
+        out_traj.add_speed(overwrite=True, units=units)
+        q95 = out_traj.df[out_traj.get_speed_column_name()].agg(
+                    lambda x: x.quantile(0.95)
+                ) 
+        return q95 * alpha

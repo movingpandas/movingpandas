@@ -21,8 +21,8 @@ from .geometry_utils import (
     angular_difference,
     azimuth,
     calculate_initial_compass_bearing,
-    measure_distance_geodesic,
-    measure_distance_euclidean,
+    measure_distance,
+    measure_speed,
     point_gdf_to_linestring,
 )
 from .unit_utils import (
@@ -738,10 +738,8 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        func = (
-            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
-        )
-        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
+        dist_computed = measure_distance(
+            pt0=pt0, pt1=pt1, spherical=self.is_latlon, conversion=conversion)
         return dist_computed
 
     def _add_prev_pt(self, force=True):
@@ -896,11 +894,10 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        func = (
-            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
-        )
-        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
-        return dist_computed / row["delta_t"].total_seconds() * conversion.time
+        v = measure_speed(
+            pt0=pt0, pt1=pt1, delta_t=row["delta_t"], 
+            is_latlon=self.is_latlon, conversion=conversion)
+        return v
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
