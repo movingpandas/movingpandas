@@ -7,7 +7,7 @@ labels: "bug, needs triage"
 
 ---
 
-If you have a question, rather than a bug report, please post in the [discussions](https://github.com/anitagraser/movingpandas/discussions).
+If you have a question, rather than a bug report, please post in the [discussions](https://github.com/movingpandas/movingpandas/discussions).
 Otherwise, please check: 
 
 - [ ] I have checked that this issue has not already been reported.
