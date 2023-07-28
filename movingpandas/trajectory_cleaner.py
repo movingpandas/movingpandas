@@ -70,7 +70,7 @@ class IqrCleaner(TrajectoryCleaner):
     Examples
     --------
 
-    >>> mpd.OutlierCleaner(traj).clean(columns={'speed': 3})
+    >>> mpd.IqrCleaner(traj).clean(columns={'speed': 3})
     """
 
     def _clean_traj(self, traj, columns):
@@ -174,7 +174,9 @@ class OutlierCleaner(TrajectoryCleaner):
     Examples
     --------
 
-    >>> mpd.SpikeCleaner(traj).clean(v_max=100, units=("km", "h"))
+    >>> mpd.OutlierCleaner(traj).clean(alpha=2)
+
+    >>> mpd.OutlierCleaner(traj).clean(v_max=100, units=("km", "h"))
     """
 
     def _clean_traj(self, traj, v_max=None, units=UNITS(), alpha=3):
