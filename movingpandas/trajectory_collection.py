@@ -138,6 +138,7 @@ class TrajectoryCollection:
         -------
         GeoDataFrame
         """
+        self.add_traj_id(overwrite=True)
         gdfs = [traj.to_line_gdf() for traj in self.trajectories]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
@@ -223,6 +224,16 @@ class TrajectoryCollection:
         """
         return self.trajectories[0].df.columns
 
+    def get_traj_id_column_name(self):
+        """
+        Return name of the trajectory ID column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_traj_id_column_name()
+
     def get_geom_column_name(self):
         """
         Return name of the geometry column
@@ -270,6 +281,7 @@ class TrajectoryCollection:
         result = []
 
         if with_direction:
+            self.add_traj_id(overwrite=True)
             direction_column_name = self.get_direction_column_name()
             direction_exists = direction_column_name in self.trajectories[0].df.columns
             if not direction_exists:
@@ -584,13 +596,16 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
 
+            To customize the plots, check the list of supported colormaps_.
+            .. _colormaps: https://holoviews.org/user_guide/Colormaps.html#available-colormaps
+
         Examples
         --------
         Plot speed along trajectories (with legend and specified figure size):
 
         >>> collection.hvplot(c='speed', line_width=7.0, width=700, height=400,
                               colorbar=True)
-        """
+        """  # noqa: E501
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
 

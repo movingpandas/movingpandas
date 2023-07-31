@@ -120,10 +120,13 @@ class _TrajectoryPlotter:
             )
         )
 
+        tc = self.preprocess_data()
+
         if self.colormap:
             self.kwargs["colormap"] = self.colormap
-
-        tc = self.preprocess_data()
+        if not self.column:
+            self.kwargs["c"] = tc.get_traj_id_column_name()
+            self.kwargs["cmap"] = "Category10"
 
         line_plot = self.hvplot_lines(tc)
         pt_plot = self.hvplot_end_points(tc)
@@ -141,7 +144,7 @@ class _TrajectoryPlotter:
             end_pts = tc.get_end_locations(with_direction=True)
         except AttributeError:
             tc.add_direction(name=direction_column_name, overwrite=True)
-            end_pts = tc.df.tail(1)
+            end_pts = tc.df.tail(1).copy()
 
         end_pts["triangle_angle"] = ((end_pts[direction_column_name] * -1.0)).astype(
             float
@@ -179,6 +182,7 @@ class _TrajectoryPlotter:
             line_width=self.line_width,
             geo=self.hvplot_is_geo,
             tiles=self.hvplot_tiles,
+            clim=self.clim,
             *self.args,
             **self.kwargs
         )

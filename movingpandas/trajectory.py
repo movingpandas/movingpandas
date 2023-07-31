@@ -360,6 +360,16 @@ class Trajectory:
         """
         return self.df.columns
 
+    def get_traj_id_column_name(self):
+        """
+        Return name of the trajectory ID column
+
+        Returns
+        -------
+        string
+        """
+        return TRAJ_ID_COL_NAME
+
     def get_speed_column_name(self):
         """
         Return name of the speed column
