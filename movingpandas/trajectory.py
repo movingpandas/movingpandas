@@ -167,6 +167,9 @@ class Trajectory:
         except NameError:
             self.is_latlon = self.crs["init"] == from_epsg(4326)["init"]
 
+    def is_latlon(self):
+        return self.is_latlon
+
     def __str__(self):
         try:
             line = self.to_linestring()
@@ -278,9 +281,15 @@ class Trajectory:
             return False
         return True
 
+    def get_crs(self):
+        """
+        Return the CRS of the trajectory
+        """
+        return self.crs
+
     def to_crs(self, crs):
         """
-        Returns the trajectory reprojected to the target CRS.
+        Return the trajectory reprojected to the target CRS
 
         Parameters
         ----------
@@ -299,13 +308,54 @@ class Trajectory:
         >>> reprojected = trajectory.to_crs(CRS(4088))
         """
         temp = self.copy()
+        if type(crs) != CRS:
+            crs = CRS(crs)
         temp.crs = crs
         temp.df = temp.df.to_crs(crs)
-        if type(crs) == CRS:
-            temp.is_latlon = crs.is_geographic
-        else:
-            temp.is_latlon = crs["init"] == from_epsg(4326)["init"]
+        temp.is_latlon = crs.is_geographic
         return temp
+
+    def get_min(self, column):
+        """
+        Return minimum value in the provided DataFrame column
+
+        Parameters
+        ----------
+        column : string
+            Name of the DataFrame column
+
+        Returns
+        -------
+        Sortable
+            Minimum value
+        """
+        return self.df[column].min()
+
+    def get_max(self, column):
+        """
+        Return maximum value in the provided DataFrame column
+
+        Parameters
+        ----------
+        column : string
+            Name of the DataFrame column
+
+        Returns
+        -------
+        Sortable
+            Maximum value
+        """
+        return self.df[column].max()
+
+    def get_column_names(self):
+        """
+        Return the list of column names
+
+        Returns
+        -------
+        list
+        """
+        return self.df.columns
 
     def get_speed_column_name(self):
         """
@@ -443,6 +493,8 @@ class Trajectory:
         line_gdf.reset_index(drop=True, inplace=True)
         line_gdf.rename(columns={"line": "geometry"}, inplace=True)
         line_gdf.set_geometry("geometry", inplace=True)
+        if self.crs:
+            line_gdf.set_crs(self.crs, inplace=True)
         return line_gdf
 
     def to_traj_gdf(self, wkt=False, agg=False):
@@ -766,8 +818,7 @@ class Trajectory:
         units : str
             Units in which to calculate length values (default: CRS units)
             For more info, check the list of supported units_.
-
-        .. _units: https://movingpandas.org/units
+            .. _units: https://movingpandas.org/units
 
         Returns
         -------
@@ -960,8 +1011,7 @@ class Trajectory:
         units : str
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units_.
-
-        .. _units: https://movingpandas.org/units
+            .. _units: https://movingpandas.org/units
 
         Examples
         ----------
@@ -1019,7 +1069,6 @@ class Trajectory:
             Name of the speed column (default: "speed")
         units : tuple
             Units in which to calculate speed
-            For more info, check the list of supported units_.
 
             distance : str
                 Abbreviation for the distance unit
@@ -1027,7 +1076,8 @@ class Trajectory:
             time : str
                 Abbreviation for the time unit (default: seconds)
 
-        .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units_.
+            .. _units: https://movingpandas.org/units
 
         Examples
         ----------
@@ -1091,7 +1141,6 @@ class Trajectory:
             Name of the acceleration column (default: "acceleration")
         units : tuple
             Units in which to calculate acceleration
-            For more info, check the list of supported units_.
 
             distance : str
                 Abbreviation for the distance unit
@@ -1101,6 +1150,7 @@ class Trajectory:
             time2 : str
                 Abbreviation for the second time unit (default: seconds)
 
+            For more info, check the list of supported units_.
             .. _units: https://movingpandas.org/units
 
         Examples
@@ -1239,8 +1289,7 @@ class Trajectory:
         units : str
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units_.
-
-        .. _units: https://movingpandas.org/units
+            .. _units: https://movingpandas.org/units
 
         Returns
         -------
@@ -1280,8 +1329,7 @@ class Trajectory:
         units : str
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units_.
-
-        .. _units: https://movingpandas.org/units
+            .. _units: https://movingpandas.org/units
 
         Returns
         -------

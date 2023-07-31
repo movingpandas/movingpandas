@@ -6,7 +6,7 @@ from shapely.geometry import Point
 from fiona.crs import from_epsg
 from datetime import datetime
 from movingpandas.trajectory_collection import TrajectoryCollection
-from movingpandas.trajectory_plotter import _TrajectoryCollectionPlotter
+from movingpandas.trajectory_plotter import _TrajectoryPlotter
 
 CRS_METRIC = from_epsg(31256)
 CRS_LATLON = from_epsg(4326)
@@ -31,13 +31,13 @@ class TestTrajectoryCollection:
         self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
 
     def test_get_min_max_values(self):
-        self.plotter = _TrajectoryCollectionPlotter(self.collection, column="val")
+        self.plotter = _TrajectoryPlotter(self.collection, column="val")
         min_value, max_value = self.plotter.get_min_max_values()
         assert min_value == 2
         assert max_value == 10
 
     def test_get_min_max_speed(self):
-        self.plotter = _TrajectoryCollectionPlotter(self.collection, column="speed")
+        self.plotter = _TrajectoryPlotter(self.collection, column="speed")
         min_value, max_value = self.plotter.get_min_max_values()
         assert min_value == 1
         assert max_value == 3

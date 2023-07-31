@@ -3,9 +3,14 @@
 from pandas import concat
 from copy import copy
 from geopandas import GeoDataFrame
-from .trajectory import Trajectory, SPEED_COL_NAME
-from .trajectory_plotter import _TrajectoryCollectionPlotter
+from .trajectory import Trajectory, SPEED_COL_NAME, DIRECTION_COL_NAME
+from .trajectory_plotter import _TrajectoryPlotter
 from .unit_utils import UNITS
+
+
+@staticmethod
+def traj_to_tc(traj):
+    return TrajectoryCollection([traj])
 
 
 class TrajectoryCollection:
@@ -196,6 +201,15 @@ class TrajectoryCollection:
             if traj.id == traj_id:
                 return traj
 
+    def get_crs(self):
+        return self.trajectories[0].get_crs()
+
+    def is_latlon(self):
+        return self.trajectories[0].is_latlon()
+
+    def get_column_names(self):
+        return self.trajectories[0].df.columns
+
     def get_geom_column_name(self):
         """
         Return name of the geometry column
@@ -206,7 +220,27 @@ class TrajectoryCollection:
         """
         return self.trajectories[0].get_geom_column_name()
 
-    def get_locations_at(self, t):
+    def get_speed_column_name(self):
+        """
+        Return name of the speed column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_speed_column_name()
+
+    def get_direction_column_name(self):
+        """
+        Return name of the direction column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_direction_column_name()
+
+    def get_locations_at(self, t, with_direction=False):
         """
         Returns GeoDataFrame with trajectory locations at the specified timestamp
 
@@ -221,6 +255,12 @@ class TrajectoryCollection:
             Trajectory locations at timestamp t
         """
         result = []
+
+        if with_direction:
+            direction_column_name = self.get_direction_column_name()
+            direction_exists = direction_column_name in self.trajectories[0].df.columns
+            if not direction_exists:
+                self.add_direction(name=direction_column_name)
 
         for traj in self:
             if t == "start":
@@ -243,7 +283,7 @@ class TrajectoryCollection:
         else:
             return GeoDataFrame()
 
-    def get_start_locations(self):
+    def get_start_locations(self, with_direction=False):
         """
         Returns GeoDataFrame with trajectory start locations
 
@@ -252,9 +292,9 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory start locations
         """
-        return self.get_locations_at("start")
+        return self.get_locations_at("start", with_direction)
 
-    def get_end_locations(self):
+    def get_end_locations(self, with_direction=False):
         """
         Returns GeoDataFrame with trajectory end locations
 
@@ -263,7 +303,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory end locations
         """
-        return self.get_locations_at("end")
+        return self.get_locations_at("end", with_direction)
 
     def get_segments_between(self, t1, t2):
         """
@@ -396,7 +436,6 @@ class TrajectoryCollection:
 
         units : tuple
             Units in which to calculate speed
-            For more info, check the list of supported units_.
 
             distance : str
                 Abbreviation for the distance unit
@@ -404,13 +443,14 @@ class TrajectoryCollection:
             time : str
                 Abbreviation for the time unit (default: seconds)
 
-        .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units_.
+            .. _units: https://movingpandas.org/units
 
         """
         for traj in self:
             traj.add_speed(overwrite, name, units)
 
-    def add_direction(self, overwrite=False):
+    def add_direction(self, name=DIRECTION_COL_NAME, overwrite=False):
         """
         Add direction column and values to the trajectories.
 
@@ -518,7 +558,7 @@ class TrajectoryCollection:
 
         >>> trajectory_collection.plot(column='speed', legend=True, figsize=(9,5))
         """
-        return _TrajectoryCollectionPlotter(self, *args, **kwargs).plot()
+        return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
     def hvplot(self, *args, **kwargs):
         """
@@ -538,7 +578,7 @@ class TrajectoryCollection:
         >>> collection.hvplot(c='speed', line_width=7.0, width=700, height=400,
                               colorbar=True)
         """
-        return _TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()
+        return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
 
 def _get_location_at(traj, t, columns=None):
