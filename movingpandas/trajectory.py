@@ -167,9 +167,6 @@ class Trajectory:
         except NameError:
             self.is_latlon = self.crs["init"] == from_epsg(4326)["init"]
 
-    def is_latlon(self):
-        return self.is_latlon
-
     def __str__(self):
         try:
             line = self.to_linestring()
@@ -314,6 +311,12 @@ class Trajectory:
         temp.df = temp.df.to_crs(crs)
         temp.is_latlon = crs.is_geographic
         return temp
+
+    def is_latlon(self):
+        """
+        Return True if the trajectory CRS is geographic (e.g. EPSG:4326 WGS84)
+        """
+        return self.is_latlon
 
     def get_min(self, column):
         """

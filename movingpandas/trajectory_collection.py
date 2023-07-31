@@ -202,12 +202,25 @@ class TrajectoryCollection:
                 return traj
 
     def get_crs(self):
+        """
+        Return the CRS of the trajectories
+        """
         return self.trajectories[0].get_crs()
 
     def is_latlon(self):
+        """
+        Return True if the trajectory CRS is geographic (e.g. EPSG:4326 WGS84)
+        """
         return self.trajectories[0].is_latlon()
 
     def get_column_names(self):
+        """
+        Return the list of column names
+
+        Returns
+        -------
+        list
+        """
         return self.trajectories[0].df.columns
 
     def get_geom_column_name(self):
