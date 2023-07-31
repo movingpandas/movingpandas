@@ -1026,7 +1026,7 @@ class Trajectory:
                 (default: CRS units, or metres if geographic)
             time : str
                 Abbreviation for the time unit (default: seconds)
-                
+
         .. _units: https://movingpandas.org/units
 
         Examples
@@ -1280,7 +1280,7 @@ class Trajectory:
         units : str
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units_.
-            
+
         .. _units: https://movingpandas.org/units
 
         Returns
