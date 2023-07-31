@@ -79,7 +79,7 @@ class _TrajectoryPlotter:
     def get_traj_list(self):
         try:
             return self.data.trajectories
-        except:
+        except AttributeError:
             return [self.data]
 
     def plot_lines(self, tc):
@@ -139,7 +139,7 @@ class _TrajectoryPlotter:
         direction_column_name = tc.get_direction_column_name()
         try:
             end_pts = tc.get_end_locations(with_direction=True)
-        except:
+        except AttributeError:
             tc.add_direction(name=direction_column_name, overwrite=True)
             end_pts = tc.df.tail(1)
 
