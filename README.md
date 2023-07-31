@@ -21,7 +21,7 @@ For more information about individual releases, check out the [Changelog](https:
 
 * Easily create trajectories from diverse sources, including CSV files, GIS file formats, (Geo)DataFrames, and OGC Moving Features JSONs (MF-JSON) 
 * Find locations for given time stamps and time spans
-* Compute movement speed, direction, and sampling intervals
+* Compute sampling intervals, movement direction, speed, and acceleration in a [variety of spatiotemporal units](./units)
 * Detect and extract stops 
 * Split trajectories into individual trips
 * Clean, simplify, generalize, and aggregate trajectories 
