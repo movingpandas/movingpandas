@@ -8,7 +8,7 @@ from .trajectory_stop_detector import TrajectoryStopDetector
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .trajectory_utils import convert_time_ranges_to_segments
-from .time_range_utils import TemporalRange
+from .spatiotemporal_utils import TRange
 
 
 class TrajectorySplitter:
@@ -196,12 +196,10 @@ class StopSplitter(TrajectorySplitter):
         if stop_ranges:
             for i in range(0, len(stop_ranges)):
                 if i == 0:
-                    result.append(
-                        TemporalRange(traj.get_start_time(), stop_ranges[i].t_0)
-                    )
+                    result.append(TRange(traj.get_start_time(), stop_ranges[i].t_0))
                     continue
-                result.append(TemporalRange(stop_ranges[i - 1].t_n, stop_ranges[i].t_0))
-            result.append(TemporalRange(stop_ranges[-1].t_n, traj.get_end_time()))
+                result.append(TRange(stop_ranges[i - 1].t_n, stop_ranges[i].t_0))
+            result.append(TRange(stop_ranges[-1].t_n, traj.get_end_time()))
         else:
-            result.append(TemporalRange(traj.get_start_time(), traj.get_end_time()))
+            result.append(TRange(traj.get_start_time(), traj.get_end_time()))
         return result

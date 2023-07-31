@@ -7,7 +7,6 @@ from shapely.geometry import Point, LineString
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
 from geopandas import GeoDataFrame
-from geopy.distance import geodesic
 
 try:
     from pyproj import CRS
@@ -16,13 +15,14 @@ except ImportError:
     from fiona.crs import from_epsg
 
 from .overlay import clip, intersection, intersects, create_entry_and_exit_points
-from .time_range_utils import SpatioTemporalRange
+from .spatiotemporal_utils import STRange
 from .geometry_utils import (
     angular_difference,
     azimuth,
     calculate_initial_compass_bearing,
-    measure_distance_geodesic,
-    measure_distance_euclidean,
+    measure_distance,
+    measure_distance_line,
+    measure_length,
     point_gdf_to_linestring,
 )
 from .unit_utils import (
@@ -31,6 +31,7 @@ from .unit_utils import (
     to_unixtime,
     get_conversion,
 )
+from .spatiotemporal_utils import get_speed2
 from .trajectory_plotter import _TrajectoryPlotter
 
 warnings.filterwarnings(  # see https://github.com/movingpandas/movingpandas/issues/289
@@ -692,7 +693,7 @@ class Trajectory:
                 f"Invalid split method {method}. Must be one of [interpolated, within]"
             )
         if method == "interpolated":
-            st_range = SpatioTemporalRange(
+            st_range = STRange(
                 self.get_position_at(t1), self.get_position_at(t2), t1, t2
             )
             temp_df = create_entry_and_exit_points(self, st_range)
@@ -738,11 +739,7 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        func = (
-            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
-        )
-        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
-        return dist_computed
+        return measure_distance(pt0, pt1, self.is_latlon, conversion)
 
     def _add_prev_pt(self, force=True):
         """
@@ -768,67 +765,18 @@ class Trajectory:
         ----------
         units : str
             Units in which to calculate length values (default: CRS units)
-            Allowed:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke's Foot
-                "clarke_link": Clarke's link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
+            For more info, check the list of supported units_.
+
+        .. _units: https://movingpandas.org/units
 
         Returns
         -------
         float
             Length of the trajectory
         """
-        pt_tuples = [(pt.y, pt.x) for pt in self.df.geometry.tolist()]
-        if self.is_latlon:
-            length = geodesic(*pt_tuples).m
-        else:  # The following distance will be in CRS units that might not be meters!
-            length = LineString(pt_tuples).length
 
         conversion = get_conversion(units, self.crs_units)
-
-        return length / conversion.distance
+        return measure_length(self.df.geometry, self.is_latlon, conversion)
 
     def get_direction(self):
         """
@@ -896,11 +844,7 @@ class Trajectory:
             raise ValueError(f"Invalid trajectory! Got {pt1} instead of point!")
         if pt0 == pt1:
             return 0.0
-        func = (
-            measure_distance_geodesic if self.is_latlon else measure_distance_euclidean
-        )
-        dist_computed = func(pt0, pt1) * conversion.crs / conversion.distance
-        return dist_computed / row["delta_t"].total_seconds() * conversion.time
+        return get_speed2(pt0, pt1, row["delta_t"], self.is_latlon, conversion)
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
@@ -1015,52 +959,9 @@ class Trajectory:
 
         units : str
             Units in which to calculate distance values (default: CRS units)
-            Allowed:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke's Foot
-                "clarke_link": Clarke's link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
+            For more info, check the list of supported units_.
+
+        .. _units: https://movingpandas.org/units
 
         Examples
         ----------
@@ -1118,65 +1019,15 @@ class Trajectory:
             Name of the speed column (default: "speed")
         units : tuple
             Units in which to calculate speed
+            For more info, check the list of supported units_.
+
             distance : str
                 Abbreviation for the distance unit
                 (default: CRS units, or metres if geographic)
             time : str
                 Abbreviation for the time unit (default: seconds)
 
-            Allowed distance units:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke's Foot
-                "clarke_link": Clarke's link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
-
-            Allowed time units:
-                "s": seconds
-                "min": minutes
-                "h": hours
-                "d": days
-                "a": years
+        .. _units: https://movingpandas.org/units
 
         Examples
         ----------
@@ -1240,6 +1091,8 @@ class Trajectory:
             Name of the acceleration column (default: "acceleration")
         units : tuple
             Units in which to calculate acceleration
+            For more info, check the list of supported units_.
+
             distance : str
                 Abbreviation for the distance unit
                 (default: CRS units, or metres if geographic)
@@ -1248,59 +1101,7 @@ class Trajectory:
             time2 : str
                 Abbreviation for the second time unit (default: seconds)
 
-            Allowed distance units:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke's Foot
-                "clarke_link": Clarke's link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
-
-            Allowed time units:
-                "s": seconds
-                "min": minutes
-                "h": hours
-                "d": days
-                "a": years
+            .. _units: https://movingpandas.org/units
 
         Examples
         ----------
@@ -1437,52 +1238,9 @@ class Trajectory:
 
         units : str
             Units in which to calculate distance values (default: CRS units)
-            Allowed:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke's Foot
-                "clarke_link": Clarke's link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
+            For more info, check the list of supported units_.
+
+        .. _units: https://movingpandas.org/units
 
         Returns
         -------
@@ -1498,9 +1256,8 @@ class Trajectory:
         if type(other) == Trajectory:
             other = other.to_linestring()
 
-        dist = self.to_linestring().distance(other)
         conversion = get_conversion(units, self.crs_units)
-        return dist / conversion.distance
+        return measure_distance_line(self.to_linestring(), other, conversion)
 
     def hausdorff_distance(self, other, units=UNITS()):
         """
@@ -1522,52 +1279,9 @@ class Trajectory:
 
         units : str
             Units in which to calculate distance values (default: CRS units)
-            Allowed:
-                "km": Kilometer
-                "m": metre
-                "dm": Decimeter
-                "cm": Centimeter
-                "mm": Millimeter
-                "nm": International Nautical Mile
-                "inch": International Inch
-                "ft": International Foot
-                "yd": International Yard
-                "mi": International Statute Mile
-                "link": International Link
-                "chain": International Chain
-                "fathom": International Fathom
-                "british_ft": British foot (Sears 1922)
-                "british_yd": British yard (Sears 1922)
-                "british_chain_sears": British chain (Sears 1922)
-                "british_link_sears": British link (Sears 1922)
-                "sears_yd": Yard (Sears)
-                "link_sears": Link (Sears)
-                "chain_sears": Chain (Sears)
-                "british_ft_sears_truncated": British foot (Sears 1922 truncated)
-                "british_chain_sears_truncated": British chain (Sears 1922 truncated)
-                "british_chain_benoit": British chain (Benoit 1895 B)
-                "chain_benoit": Chain (Benoit)
-                "link_benoit": Link (Benoit)
-                "clarke_yd": Clarke's yard
-                "clarke_ft": Clarke's Foot
-                "clarke_link": Clarke's link
-                "clarke_chain": Clarke's chain
-                "british_ft_1936": British foot (1936)
-                "gold_coast_ft": Gold Coast foot
-                "rod": Rod
-                "furlong": Furlong
-                "german_m": German legal metre
-                "survey_in": US survey inch
-                "survey_ft": US survey foot
-                "survey_yd": US survey yard
-                "survey_lk": US survey link
-                "survey_ch": US survey chain
-                "survey_mi": US survey mile
-                "indian_yd": Indian Yard
-                "indian_ft": Indian Foot
-                "indian_ft_1937": Indian Foot 1937
-                "indian_ft_1962": Indian Foot 1962
-                "indian_ft_1975": Indian Foot 1975
+            For more info, check the list of supported units_.
+
+        .. _units: https://movingpandas.org/units
 
         Returns
         -------

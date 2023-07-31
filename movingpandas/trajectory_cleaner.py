@@ -7,8 +7,8 @@ from copy import copy
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-from .geometry_utils import measure_distance_geodesic, measure_distance_euclidean
 from .unit_utils import UNITS, get_conversion
+from .spatiotemporal_utils import TPoint, get_speed
 
 
 class TrajectoryCleaner:
@@ -180,35 +180,28 @@ class OutlierCleaner(TrajectoryCleaner):
     """
 
     def _clean_traj(self, traj, v_max=None, units=UNITS(), alpha=3):
-        ixs = []
-        prev = None
-        conversion = get_conversion(units, traj.crs_units)
         out_traj = traj.copy()
+        conversion = get_conversion(units, traj.crs_units)
 
         if v_max is None:
             out_traj.add_speed(overwrite=True, units=units)
-            v_max = (
-                out_traj.df[out_traj.get_speed_column_name()].agg(
-                    lambda x: x.quantile(0.95)
-                )
-                * alpha
-            )
+            speed_col = out_traj.get_speed_column_name()
+            v_max = out_traj.df[speed_col].agg(lambda x: x.quantile(0.95))
+            v_max = v_max * alpha
 
+        ixs = []
+        prev = None
         for index, row in out_traj.df.iterrows():
+            curr = TPoint(index, row.geometry)
             if not prev:
-                prev = (index, row.geometry)
+                prev = curr
                 continue
-            func = (
-                measure_distance_geodesic
-                if traj.is_latlon
-                else measure_distance_euclidean
-            )
-            d = func(prev[1], row.geometry) * conversion.crs / conversion.distance
-            v = d / (index - prev[0]).total_seconds() * conversion.time
+
+            v = get_speed(prev, curr, traj.is_latlon, conversion)
             if v > v_max:
                 ixs.append(index)
                 continue  # do NOT update the previous point
-            prev = (index, row.geometry)
+            prev = curr
 
         out_traj.df.drop(ixs, inplace=True)
         return out_traj

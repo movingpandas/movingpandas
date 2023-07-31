@@ -4,8 +4,10 @@ from math import atan2, cos, degrees, pi, radians, sin, sqrt
 
 import shapely
 from geopy import distance
+from geopy.distance import geodesic
 from packaging.version import Version
 from shapely.geometry import LineString, Point
+
 
 try:
     SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
@@ -81,15 +83,39 @@ def measure_distance_geodesic(point1, point2):
     return dist
 
 
-def _measure_distance(point1, point2, spherical=False):
+def measure_distance(point1, point2, spherical=False, conversion=None):
     """
     Convenience function that returns either euclidean or geodesic distance
     between two points
     """
     if spherical:
-        return measure_distance_geodesic(point1, point2)
+        d = measure_distance_geodesic(point1, point2)
     else:
-        return measure_distance_euclidean(point1, point2)
+        d = measure_distance_euclidean(point1, point2)
+    if conversion:
+        d = d * conversion.crs / conversion.distance
+    return d
+
+
+def measure_distance_line(linestring, other, conversion):
+    """
+    Returns the euclidean distance between a linestring and other geometry
+    """
+    d = linestring.distance(other)
+    return d / conversion.distance
+
+
+def measure_length(geoseries, spherical=False, conversion=None):
+    """
+    Returns the total distance between the points of the geoseries
+    """
+    pt_tuples = [(pt.y, pt.x) for pt in geoseries.tolist()]
+    if spherical:
+        length = geodesic(*pt_tuples).m
+    else:  # The following distance will be in CRS units that might not be meters!
+        length = LineString(pt_tuples).length
+
+    return length / conversion.distance
 
 
 def calculate_initial_compass_bearing(point1, point2):
@@ -156,13 +182,13 @@ def mrr_diagonal(geom, spherical=False):
         return 0
     _geom = geom.geoms if SHAPELY_GE_2 else geom
     if len(_geom) == 2:
-        return _measure_distance(_geom[0], _geom[1], spherical)
+        return measure_distance(_geom[0], _geom[1], spherical)
     mrr = geom.minimum_rotated_rectangle
     try:  # usually mrr is a Polygon
         x, y = mrr.exterior.coords.xy
     except AttributeError:  # thrown if mrr is a LineString
-        return _measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
-    return _measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
+        return measure_distance(Point(mrr.coords[0]), Point(mrr.coords[-1]), spherical)
+    return measure_distance(Point(x[0], y[0]), Point(x[2], y[2]), spherical)
 
 
 def point_gdf_to_linestring(df, geom_col_name):

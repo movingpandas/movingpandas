@@ -6,7 +6,7 @@ import pandas as pd
 
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
-from .geometry_utils import measure_distance_geodesic, measure_distance_euclidean
+from .geometry_utils import measure_distance
 
 
 class TrajectoryGeneralizer:
@@ -83,10 +83,7 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
         keep_rows = [0]
         for i, (_, row) in enumerate(temp_df.iterrows()):
             pt = row[traj.get_geom_column_name()]
-            if traj.is_latlon:
-                dist = measure_distance_geodesic(pt, prev_pt)
-            else:
-                dist = measure_distance_euclidean(pt, prev_pt)
+            dist = measure_distance(pt, prev_pt, traj.is_latlon)
             if dist >= tolerance:
                 keep_rows.append(i)
                 prev_pt = pt

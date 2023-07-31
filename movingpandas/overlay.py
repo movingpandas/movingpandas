@@ -6,7 +6,7 @@ from shapely.geometry import Point, LineString, shape
 from shapely.affinity import translate
 from datetime import datetime, timedelta
 
-from .time_range_utils import TemporalRange, SpatioTemporalRange
+from .spatiotemporal_utils import TRange, STRange
 
 
 def _get_spatiotemporal_ref(row):
@@ -41,7 +41,7 @@ def _get_spatiotemporal_ref(row):
             tn = row["t"]
         if is_equal(t0, row["prev_t"]):
             t0 = row["prev_t"]
-        return SpatioTemporalRange(pt0, ptn, t0, tn)
+        return STRange(pt0, ptn, t0, tn)
     else:
         return None
 
@@ -59,7 +59,7 @@ def _dissolve_ranges(ranges):
         if r is None:
             continue  # raise ValueError('Received range that is None!')
         if new_range is None:
-            new_range = SpatioTemporalRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
+            new_range = STRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
         elif new_range.t_n == r.t_0 or (
             r.t_0 > new_range.t_n and is_equal(r.t_0, new_range.t_n)
         ):
@@ -67,7 +67,7 @@ def _dissolve_ranges(ranges):
             new_range.pt_n = r.pt_n
         else:
             dissolved_ranges.append(new_range)
-            new_range = SpatioTemporalRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
+            new_range = STRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
     dissolved_ranges.append(new_range)
     return dissolved_ranges
 
@@ -96,7 +96,7 @@ def create_entry_and_exit_points(traj, range):
     Returns a dataframe with inserted entry and exit points according to the
     provided SpatioTemporalRange.
     """
-    if type(range) != SpatioTemporalRange:
+    if type(range) != STRange:
         raise TypeError("Input range has to be a SpatioTemporalRange!")
 
     crs = traj.df.crs
@@ -138,7 +138,7 @@ def _get_segments_for_ranges(traj, ranges):
     segments = []  # list of trajectories
     for the_range in ranges:
         temp_traj = traj.copy()
-        if type(the_range) == SpatioTemporalRange:
+        if type(the_range) == STRange:
             temp_traj.df = create_entry_and_exit_points(traj, the_range)
         try:
             segment = temp_traj.get_segment_between(the_range.t_0, the_range.t_n)
@@ -163,7 +163,7 @@ def _determine_time_ranges_pointbased(traj, polygon):
     ranges = []
     for _, row in df.iterrows():
         if row["intersects_min"]:
-            ranges.append(TemporalRange(row["t_min"], row["t_max"]))
+            ranges.append(TRange(row["t_min"], row["t_max"]))
     return ranges
 
 

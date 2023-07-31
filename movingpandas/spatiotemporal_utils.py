@@ -1,16 +1,33 @@
-# -*- coding: utf-8 -*-
-
 from shapely.geometry import Point
 from datetime import datetime
+from .geometry_utils import measure_distance
 
 
-class TemporalRange:
+class TPoint:
+    """
+    Temporal point
+    """
+
+    def __init__(self, t, pt) -> None:
+        self.t = t
+        self.pt = pt
+
+
+class TRange:
+    """
+    Temporal range
+    """
+
     def __init__(self, t_0, t_n):
         self.t_0 = t_0
         self.t_n = t_n
 
 
-class SpatioTemporalRange:
+class STRange:
+    """
+    Spatiotemporal range
+    """
+
     def __init__(self, pt_0, pt_n, t_0, t_n):
         if isinstance(type(pt_0), Point):
             raise TypeError("Input pt_0 has to be a shapely.geometry.Point!")
@@ -26,7 +43,7 @@ class SpatioTemporalRange:
         self.t_n = t_n
 
 
-class TemporalRangeWithTrajId:
+class TRangeWithTrajId:
     def __init__(self, t_0, t_n, traj_id):
         self.t_0 = t_0
         self.t_n = t_n
@@ -35,3 +52,17 @@ class TemporalRangeWithTrajId:
     def __str__(self):
         dt = self.t_n - self.t_0
         return f"Traj {self.traj_id}: {self.t_0} - {self.t_n} (duration: {dt})"
+
+
+def get_speed(tpt0, tpt1, is_latlon, conversion):
+    d = measure_distance(tpt0.pt, tpt1.pt, is_latlon)
+    d = d * conversion.crs / conversion.distance
+    v = d / (tpt1.t - tpt0.t).total_seconds() * conversion.time
+    return v
+
+
+def get_speed2(pt0, pt1, delta_t, is_latlon, conversion):
+    d = measure_distance(pt0, pt1, is_latlon)
+    d = d * conversion.crs / conversion.distance
+    v = d / delta_t.total_seconds() * conversion.time
+    return v
