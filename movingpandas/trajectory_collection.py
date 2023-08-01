@@ -308,7 +308,7 @@ class TrajectoryCollection:
                 if with_direction and direction_missing:
                     tmp.df = tmp.df.head(2)
                     tmp.add_direction(name=direction_col)
-                x = tmp.get_row_at(tmp.get_end_time())
+                x = tmp.get_row_at(tmp.get_start_time())
             elif t == "end":
                 tmp = traj.copy()
                 if with_direction and direction_missing:
