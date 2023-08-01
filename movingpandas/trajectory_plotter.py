@@ -35,6 +35,7 @@ class _TrajectoryPlotter:
         self.traj_id_col_name = data.get_traj_id_col()
         self.speed_col_name = data.get_speed_col()
         self.direction_col_name = data.get_direction_col()
+        self.geom_col_name = data.get_geom_col()
         self.speed_col_missing = self.speed_col_name not in self.column_names
 
         self.hv_defaults = {
@@ -114,16 +115,17 @@ class _TrajectoryPlotter:
         tc = self.preprocess_data()
         self.set_default_cmaps()
 
-        line_plot = self.hvplot_lines(tc)
-        pt_plot = self.hvplot_end_points(tc)
+        plot = self.hvplot_lines(tc)
+        if self.marker_size > 0:
+            plot = plot * self.hvplot_end_points(tc)
 
         to_drop = [x for x in tc.get_column_names() if x not in self.column_names]
         tc.drop(columns=to_drop)
 
         if self.overlay:
-            return self.overlay * line_plot * pt_plot
+            return self.overlay * plot
         else:
-            return line_plot * pt_plot
+            return plot
 
     def set_default_cmaps(self):
         from bokeh.palettes import all_palettes, Turbo256
@@ -183,7 +185,12 @@ class _TrajectoryPlotter:
         )
 
     def hvplot_lines(self, tc):
-        line_gdf = tc.to_line_gdf()
+        cols = [self.traj_id_col_name, self.geom_col_name]
+        if "hover_cols" in self.kwargs:
+            cols = cols + self.kwargs["hover_cols"]
+        if self.column:
+            cols = cols + [self.column]
+        line_gdf = tc.to_line_gdf(columns=cols)
 
         if self.hvplot_is_geo and not tc.is_latlon and tc.get_crs() is not None:
             line_gdf = line_gdf.to_crs(epsg=4326)

@@ -142,7 +142,7 @@ class TrajectoryCollection:
         gdfs = [traj.to_point_gdf() for traj in self.trajectories]
         return concat(gdfs)
 
-    def to_line_gdf(self):
+    def to_line_gdf(self, columns=None):
         """
         Return the trajectories' line segments as GeoDataFrame.
 
@@ -150,7 +150,7 @@ class TrajectoryCollection:
         -------
         GeoDataFrame
         """
-        gdfs = [traj.to_line_gdf() for traj in self.trajectories]
+        gdfs = [traj.to_line_gdf(columns) for traj in self.trajectories]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
@@ -170,7 +170,6 @@ class TrajectoryCollection:
         return gdf
 
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col, t, x, y, crs):
-        print("_df_to_trajectories")
         trajectories = []
         for traj_id, values in df.groupby(traj_id_col):
             if len(values) < 2:
@@ -304,21 +303,26 @@ class TrajectoryCollection:
             direction_missing = direction_col not in self.get_column_names()
 
         for traj in self:
-            if with_direction and direction_missing:
-                traj.add_direction(name=direction_col)
-
             if t == "start":
-                x = traj.get_row_at(traj.get_start_time())
+                tmp = traj.copy()
+                if with_direction and direction_missing:
+                    tmp.df = tmp.df.head(2)
+                    tmp.add_direction(name=direction_col)
+                x = tmp.get_row_at(tmp.get_end_time())
             elif t == "end":
-                x = traj.get_row_at(traj.get_end_time())
+                tmp = traj.copy()
+                if with_direction and direction_missing:
+                    tmp.df = tmp.df.tail(2)
+                    tmp.add_direction(name=direction_col)
+                x = tmp.get_row_at(tmp.get_end_time())
             else:
                 if t < traj.get_start_time() or t > traj.get_end_time():
                     continue
-                x = traj.get_row_at(t)
+                tmp = traj.copy()
+                if with_direction and direction_missing:
+                    tmp.add_direction(name=direction_col)
+                x = tmp.get_row_at(t)
             result.append(x.to_frame().T)
-
-            if with_direction and direction_missing:
-                traj.df.drop(columns=[direction_col], inplace=True)
 
         if result:
             df = concat(result)

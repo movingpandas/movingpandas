@@ -521,7 +521,7 @@ class Trajectory:
             return self.df.tz_localize(self.df_orig_tz)
         return self.df
 
-    def to_line_gdf(self):
+    def to_line_gdf(self, columns=None):
         """
         Return the trajectory's line segments as GeoDataFrame.
 
@@ -529,7 +529,7 @@ class Trajectory:
         -------
         GeoDataFrame
         """
-        line_gdf = self._to_line_df()
+        line_gdf = self._to_line_df(columns)
         line_gdf.drop(columns=[self.get_geom_col(), "prev_pt"], inplace=True)
         line_gdf.reset_index(drop=True, inplace=True)
         line_gdf.rename(columns={"line": "geometry"}, inplace=True)
@@ -1470,7 +1470,7 @@ class Trajectory:
         """
         self.df[column] = self.df[column].shift(offset, freq="1min")
 
-    def _to_line_df(self):
+    def _to_line_df(self, columns=None):
         """
         Convert trajectory data GeoDataFrame of points to GeoDataFrame of lines
         that connect consecutive points.
@@ -1480,7 +1480,10 @@ class Trajectory:
         line_df : GeoDataFrame
             GeoDataFrame of line segments
         """
-        line_df = self.df.copy()
+        if columns is None:
+            line_df = self.df.copy()
+        else:
+            line_df = self.df[columns].copy()
         line_df["prev_pt"] = line_df.geometry.shift()
         line_df["t"] = self.df.index
         line_df["prev_t"] = line_df["t"].shift()
