@@ -385,11 +385,7 @@ class Trajectory:
         """
         return self.df.columns
 
-    def set_traj_id_column_name(self, name):
-        print(name)
-        self.set_traj_id_col_name = name
-
-    def get_traj_id_column_name(self):
+    def get_traj_id_col(self):
         """
         Return name of the trajectory ID column
 
@@ -402,7 +398,7 @@ class Trajectory:
         else:
             return TRAJ_ID_COL_NAME
 
-    def get_speed_column_name(self):
+    def get_speed_col(self):
         """
         Return name of the speed column
 
@@ -415,7 +411,7 @@ class Trajectory:
         else:
             return SPEED_COL_NAME
 
-    def get_distance_column_name(self):
+    def get_distance_col(self):
         """
         Return name of the distance column
 
@@ -428,7 +424,7 @@ class Trajectory:
         else:
             return DISTANCE_COL_NAME
 
-    def get_direction_column_name(self):
+    def get_direction_col(self):
         """
         Return name of the direction column
 
@@ -441,7 +437,7 @@ class Trajectory:
         else:
             return DIRECTION_COL_NAME
 
-    def get_angular_difference_column_name(self):
+    def get_angular_difference_col(self):
         """
         Retrun name of the angular difference column
 
@@ -454,7 +450,7 @@ class Trajectory:
         else:
             return ANGULAR_DIFFERENCE_COL_NAME
 
-    def get_timedelta_column_name(self):
+    def get_timedelta_col(self):
         """
         Return name of the timedelta column
 
@@ -467,7 +463,7 @@ class Trajectory:
         else:
             return TIMEDELTA_COL_NAME
 
-    def get_geom_column_name(self):
+    def get_geom_col(self):
         """
         Return name of the geometry column
 
@@ -486,7 +482,7 @@ class Trajectory:
         shapely LineString
         """
         try:
-            return point_gdf_to_linestring(self.df, self.get_geom_column_name())
+            return point_gdf_to_linestring(self.df, self.get_geom_col())
         except RuntimeError:
             raise RuntimeError("Cannot generate LineString")
 
@@ -502,7 +498,7 @@ class Trajectory:
         # Shapely only supports x, y, z. Therefore, this is a bit hacky!
         coords = []
         for index, row in self.df.iterrows():
-            pt = row[self.get_geom_column_name()]
+            pt = row[self.get_geom_col()]
             t = to_unixtime(index)
             coords.append(f"{pt.x} {pt.y} {t}")
         wkt = f"LINESTRING M ({', '.join(coords)})"
@@ -534,7 +530,7 @@ class Trajectory:
         GeoDataFrame
         """
         line_gdf = self._to_line_df()
-        line_gdf.drop(columns=[self.get_geom_column_name(), "prev_pt"], inplace=True)
+        line_gdf.drop(columns=[self.get_geom_col(), "prev_pt"], inplace=True)
         line_gdf.reset_index(drop=True, inplace=True)
         line_gdf.rename(columns={"line": "geometry"}, inplace=True)
         line_gdf.set_geometry("geometry", inplace=True)
@@ -703,12 +699,12 @@ class Trajectory:
         t_diff_at = t - prev_row.name
         line = LineString(
             [
-                prev_row[self.get_geom_column_name()],
-                next_row[self.get_geom_column_name()],
+                prev_row[self.get_geom_col()],
+                next_row[self.get_geom_col()],
             ]
         )
         if t_diff == 0 or line.length == 0:
-            return prev_row[self.get_geom_column_name()]
+            return prev_row[self.get_geom_col()]
         interpolated_position = line.interpolate(t_diff_at / t_diff * line.length)
         return interpolated_position
 
@@ -763,9 +759,9 @@ class Trajectory:
         else:
             row = self.get_row_at(t, method)
             try:
-                return row[self.get_geom_column_name()][0]
+                return row[self.get_geom_col()][0]
             except TypeError:
-                return row[self.get_geom_column_name()]
+                return row[self.get_geom_col()]
 
     def get_linestring_between(self, t1, t2, method="interpolated"):
         """
@@ -795,11 +791,11 @@ class Trajectory:
             )
             temp_df = create_entry_and_exit_points(self, st_range)
             temp_df = temp_df[t1:t2]
-            return point_gdf_to_linestring(temp_df, self.get_geom_column_name())
+            return point_gdf_to_linestring(temp_df, self.get_geom_col())
         else:
             try:
                 return point_gdf_to_linestring(
-                    self.get_segment_between(t1, t2).df, self.get_geom_column_name()
+                    self.get_segment_between(t1, t2).df, self.get_geom_col()
                 )
             except RuntimeError:
                 raise RuntimeError(f"Cannot generate linestring between {t1} and {t2}")
@@ -824,7 +820,7 @@ class Trajectory:
             self.df[t1:t2],
             f"{self.id}_{t1}",
             parent=self,
-            traj_id_col=self.get_traj_id_column_name(),
+            traj_id_col=self.get_traj_id_col(),
         )
         if not segment.is_valid():
             raise RuntimeError(
@@ -834,7 +830,7 @@ class Trajectory:
 
     def _compute_distance(self, row, conversion):
         pt0 = row["prev_pt"]
-        pt1 = row[self.get_geom_column_name()]
+        pt1 = row[self.get_geom_col()]
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
@@ -918,7 +914,7 @@ class Trajectory:
 
     def _compute_heading(self, row):
         pt0 = row["prev_pt"]
-        pt1 = row[self.get_geom_column_name()]
+        pt1 = row[self.get_geom_col()]
         if not isinstance(pt0, Point):
             return 0.0
         if pt0 == pt1:
@@ -938,7 +934,7 @@ class Trajectory:
 
     def _compute_speed(self, row, conversion):
         pt0 = row["prev_pt"]
-        pt1 = row[self.get_geom_column_name()]
+        pt1 = row[self.get_geom_col()]
         if not isinstance(pt0, Point):
             return 0.0
         if not isinstance(pt1, Point):
@@ -949,7 +945,7 @@ class Trajectory:
 
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
-        pt1 = row[self.get_geom_column_name()]
+        pt1 = row[self.get_geom_col()]
         if not isinstance(pt0, Point):
             return None
         if not isinstance(pt1, Point):
@@ -1022,8 +1018,8 @@ class Trajectory:
                 f"name arg."
             )
         # Avoid computing direction again if already computed
-        direction_column_name = self.get_direction_column_name()
-        if direction_column_name in self.df.columns:
+        direction_col = self.get_direction_col()
+        if direction_col in self.df.columns:
             direction_exists = True
             temp_df = self.df.copy()
         else:
@@ -1031,9 +1027,7 @@ class Trajectory:
             self.add_direction(name=DIRECTION_COL_NAME)
             temp_df = self.df.copy()
 
-        temp_df["prev_" + direction_column_name] = temp_df[
-            direction_column_name
-        ].shift()
+        temp_df["prev_" + direction_col] = temp_df[direction_col].shift()
         self.df[name] = temp_df.apply(self._compute_angular_difference, axis=1)
         # set the first row to be 0
         self.df.at[self.get_start_time(), name] = 0.0

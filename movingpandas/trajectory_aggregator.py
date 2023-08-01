@@ -140,7 +140,7 @@ class _PtsExtractor:
         self, traj, max_distance, min_distance, min_stop_duration, min_angle=45
     ):
         self.traj = traj
-        self.traj_geom = traj.df[traj.get_geom_column_name()]
+        self.traj_geom = traj.df[traj.get_geom_col()]
         self.n = self.traj.df.geometry.count()
         self.max_distance = max_distance
         self.min_distance = min_distance
@@ -243,7 +243,7 @@ class _SequenceGenerator:
     def evaluate_trajectory(self, trajectory):
         this_sequence = []
         prev_cell_id = None
-        geom_name = trajectory.get_geom_column_name()
+        geom_name = trajectory.get_geom_col()
         for t, geom in trajectory.df[geom_name].items():
             nearest_id = self.get_nearest(geom)
             nearest_cell = self.id_to_centroid[nearest_id][0]

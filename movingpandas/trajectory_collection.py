@@ -243,7 +243,7 @@ class TrajectoryCollection:
         """
         return self.trajectories[0].df.columns
 
-    def get_traj_id_column_name(self):
+    def get_traj_id_col(self):
         """
         Return name of the trajectory ID column
 
@@ -251,9 +251,9 @@ class TrajectoryCollection:
         -------
         string
         """
-        return self.trajectories[0].get_traj_id_column_name()
+        return self.trajectories[0].get_traj_id_col()
 
-    def get_geom_column_name(self):
+    def get_geom_col(self):
         """
         Return name of the geometry column
 
@@ -261,9 +261,9 @@ class TrajectoryCollection:
         -------
         string
         """
-        return self.trajectories[0].get_geom_column_name()
+        return self.trajectories[0].get_geom_col()
 
-    def get_speed_column_name(self):
+    def get_speed_col(self):
         """
         Return name of the speed column
 
@@ -271,9 +271,9 @@ class TrajectoryCollection:
         -------
         string
         """
-        return self.trajectories[0].get_speed_column_name()
+        return self.trajectories[0].get_speed_col()
 
-    def get_direction_column_name(self):
+    def get_direction_col(self):
         """
         Return name of the direction column
 
@@ -281,7 +281,7 @@ class TrajectoryCollection:
         -------
         string
         """
-        return self.trajectories[0].get_direction_column_name()
+        return self.trajectories[0].get_direction_col()
 
     def get_locations_at(self, t, with_direction=False):
         """
@@ -300,12 +300,12 @@ class TrajectoryCollection:
         result = []
 
         if with_direction:
-            direction_column_name = self.get_direction_column_name()
-            direction_missing = direction_column_name not in self.get_column_names()
+            direction_col = self.get_direction_col()
+            direction_missing = direction_col not in self.get_column_names()
 
         for traj in self:
             if with_direction and direction_missing:
-                traj.add_direction(name=direction_column_name)
+                traj.add_direction(name=direction_col)
 
             if t == "start":
                 x = traj.get_row_at(traj.get_start_time())
@@ -318,7 +318,7 @@ class TrajectoryCollection:
             result.append(x.to_frame().T)
 
             if with_direction and direction_missing:
-                traj.df.drop(columns=[direction_column_name], inplace=True)
+                traj.df.drop(columns=[direction_col], inplace=True)
 
         if result:
             df = concat(result)

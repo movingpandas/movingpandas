@@ -32,9 +32,9 @@ class _TrajectoryPlotter:
         self.line_width = kwargs.pop("line_width", 3.0)
 
         self.column_names = data.get_column_names()
-        self.traj_id_col_name = data.get_traj_id_column_name()
-        self.speed_col_name = data.get_speed_column_name()
-        self.direction_col_name = data.get_direction_column_name()
+        self.traj_id_col_name = data.get_traj_id_col()
+        self.speed_col_name = data.get_speed_col()
+        self.direction_col_name = data.get_direction_col()
         self.speed_col_missing = self.speed_col_name not in self.column_names
 
         self.hv_defaults = {
