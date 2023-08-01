@@ -90,7 +90,9 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_column_name())
+        new_traj = Trajectory(
+            new_df, traj.id, traj_id_col=traj.get_traj_id_column_name()
+        )
         return new_traj
 
 
@@ -125,7 +127,9 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_column_name())
+        new_traj = Trajectory(
+            new_df, traj.id, traj_id_col=traj.get_traj_id_column_name()
+        )
         return new_traj
 
 
@@ -165,7 +169,9 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(i)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_column_name())
+        new_traj = Trajectory(
+            new_df, traj.id, traj_id_col=traj.get_traj_id_column_name()
+        )
         return new_traj
 
 
@@ -200,7 +206,9 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
                 keep_rows.append(i)
 
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_column_name())
+        new_traj = Trajectory(
+            new_df, traj.id, traj_id_col=traj.get_traj_id_column_name()
+        )
         return new_traj
 
 
@@ -232,7 +240,9 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
 
     def _generalize_traj(self, traj, tolerance):
         generalized = self.td_tr(traj.df.copy(), tolerance)
-        return Trajectory(generalized, traj.id, traj_id_col=traj.get_traj_id_column_name())
+        return Trajectory(
+            generalized, traj.id, traj_id_col=traj.get_traj_id_column_name()
+        )
 
     def td_tr(self, df, tolerance):
         if len(df) <= 2:

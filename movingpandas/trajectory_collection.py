@@ -169,7 +169,14 @@ class TrajectoryCollection:
             else:
                 obj_id = None
             trajectory = Trajectory(
-                values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs, traj_id_col=traj_id_col
+                values,
+                traj_id,
+                obj_id=obj_id,
+                t=t,
+                x=x,
+                y=y,
+                crs=crs,
+                traj_id_col=traj_id_col,
             )
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:

@@ -152,7 +152,7 @@ class Trajectory:
         self.crs = df.crs
         self.parent = parent
 
-        if traj_id_col is not None: 
+        if traj_id_col is not None:
             self.traj_id_col_name = traj_id_col
         else:
             self.traj_id_col_name = TRAJ_ID_COL_NAME
@@ -219,7 +219,12 @@ class Trajectory:
         -------
         Trajectory
         """
-        copied = Trajectory(self.df.copy(), self.id, parent=self.parent, traj_id_col=self.traj_id_col_name)
+        copied = Trajectory(
+            self.df.copy(),
+            self.id,
+            parent=self.parent,
+            traj_id_col=self.traj_id_col_name,
+        )
         return copied
 
     def plot(self, *args, **kwargs):
@@ -370,7 +375,7 @@ class Trajectory:
 
     def set_traj_id_column_name(self, name):
         print(name)
-        self.set_traj_id_col_name = name 
+        self.set_traj_id_col_name = name
 
     def get_traj_id_column_name(self):
         """
@@ -803,7 +808,12 @@ class Trajectory:
         Trajectory
             Extracted trajectory segment
         """
-        segment = Trajectory(self.df[t1:t2], f"{self.id}_{t1}", parent=self, traj_id_col=self.get_traj_id_column_name())
+        segment = Trajectory(
+            self.df[t1:t2],
+            f"{self.id}_{t1}",
+            parent=self,
+            traj_id_col=self.get_traj_id_column_name(),
+        )
         if not segment.is_valid():
             raise RuntimeError(
                 f"Failed to extract valid trajectory segment between {t1} and {t2}"
