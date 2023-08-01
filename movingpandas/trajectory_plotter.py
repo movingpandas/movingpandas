@@ -190,6 +190,7 @@ class _TrajectoryPlotter:
             cols = cols + self.kwargs["hover_cols"]
         if self.column:
             cols = cols + [self.column]
+        cols = list(set(cols))
         line_gdf = tc.to_line_gdf(columns=cols)
 
         if self.hvplot_is_geo and not tc.is_latlon and tc.get_crs() is not None:
