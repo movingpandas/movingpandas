@@ -119,6 +119,18 @@ class TrajectoryCollection:
         # already preprocessed on __init__().
         return TrajectoryCollection(trajectories, min_length=self.min_length)
 
+    def drop(self, **kwargs):
+        """
+        Drop columns or rows from the trajectories' DataFrames
+
+        Examples
+        --------
+
+        >>> tc.drop(columns=['abc','def'])
+        """
+        for traj in self.trajectories:
+            traj.drop(**kwargs)
+
     def to_point_gdf(self):
         """
         Return the trajectories' points as GeoDataFrame.
@@ -138,7 +150,6 @@ class TrajectoryCollection:
         -------
         GeoDataFrame
         """
-        self.add_traj_id(overwrite=True)
         gdfs = [traj.to_line_gdf() for traj in self.trajectories]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
@@ -171,12 +182,12 @@ class TrajectoryCollection:
             trajectory = Trajectory(
                 values,
                 traj_id,
+                traj_id_col=traj_id_col,
                 obj_id=obj_id,
                 t=t,
                 x=x,
                 y=y,
                 crs=crs,
-                traj_id_col=traj_id_col,
             )
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:
@@ -289,13 +300,13 @@ class TrajectoryCollection:
         result = []
 
         if with_direction:
-            self.add_traj_id(overwrite=True)
             direction_column_name = self.get_direction_column_name()
-            direction_exists = direction_column_name in self.trajectories[0].df.columns
-            if not direction_exists:
-                self.add_direction(name=direction_column_name)
+            direction_missing = direction_column_name not in self.get_column_names()
 
         for traj in self:
+            if with_direction and direction_missing:
+                traj.add_direction(name=direction_column_name)
+
             if t == "start":
                 x = traj.get_row_at(traj.get_start_time())
             elif t == "end":
@@ -305,6 +316,10 @@ class TrajectoryCollection:
                     continue
                 x = traj.get_row_at(t)
             result.append(x.to_frame().T)
+
+            if with_direction and direction_missing:
+                traj.df.drop(columns=[direction_column_name], inplace=True)
+
         if result:
             df = concat(result)
             # Move temporal index to column t

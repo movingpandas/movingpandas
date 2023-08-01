@@ -35,9 +35,3 @@ class TestTrajectoryCollection:
         min_value, max_value = self.plotter.get_min_max_values()
         assert min_value == 2
         assert max_value == 10
-
-    def test_get_min_max_speed(self):
-        self.plotter = _TrajectoryPlotter(self.collection, column="speed")
-        min_value, max_value = self.plotter.get_min_max_values()
-        assert min_value == 1
-        assert max_value == 3

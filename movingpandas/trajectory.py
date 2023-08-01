@@ -157,6 +157,7 @@ class Trajectory:
         else:
             self.traj_id_col_name = TRAJ_ID_COL_NAME
         self.df[self.traj_id_col_name] = traj_id
+        self.df[self.traj_id_col_name].astype("category")
 
         if self.crs is not None:
             self.crs_units = self.crs.axis_info[0].unit_name
@@ -226,6 +227,17 @@ class Trajectory:
             traj_id_col=self.traj_id_col_name,
         )
         return copied
+
+    def drop(self, **kwargs):
+        """
+        Drop columns or rows from the trajectory DataFrame
+
+        Examples
+        --------
+
+        >>> trajectory.drop(columns=['abc','def'])
+        """
+        self.df.drop(**kwargs, inplace=True)
 
     def plot(self, *args, **kwargs):
         """

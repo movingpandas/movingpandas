@@ -276,14 +276,14 @@ class TestTrajectoryCollection:
         ]
         df2 = pd.DataFrame(
             [
-                [1, 1, t1[1], t1[0], LineString([(0, 0), (6, 0)])],
-                [1, 1, t1[2], t1[1], LineString([(6, 0), (6, 6)])],
-                [1, 1, t1[3], t1[2], LineString([(6, 6), (9, 9)])],
-                [2, 2, t2[1], t2[0], LineString([(10, 10), (16, 10)])],
-                [2, 2, t2[2], t2[1], LineString([(16, 10), (16, 16)])],
-                [2, 2, t2[3], t2[2], LineString([(16, 16), (190, 10)])],
+                [1, t1[1], t1[0], LineString([(0, 0), (6, 0)])],
+                [1, t1[2], t1[1], LineString([(6, 0), (6, 6)])],
+                [1, t1[3], t1[2], LineString([(6, 6), (9, 9)])],
+                [2, t2[1], t2[0], LineString([(10, 10), (16, 10)])],
+                [2, t2[2], t2[1], LineString([(16, 10), (16, 16)])],
+                [2, t2[3], t2[2], LineString([(16, 16), (190, 10)])],
             ],
-            columns=["id", "traj_id", "t", "prev_t", "geometry"],
+            columns=["id", "t", "prev_t", "geometry"],
         )
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
         assert_frame_equal(line_gdf, expected_line_gdf)
