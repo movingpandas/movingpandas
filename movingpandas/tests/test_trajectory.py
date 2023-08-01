@@ -269,7 +269,9 @@ class TestTrajectory:
 
     def test_add_traj_id(self):
         traj = self.default_traj_metric
-        traj.add_traj_id()
+        with pytest.raises(RuntimeError):
+            traj.add_traj_id()
+        traj.add_traj_id(overwrite=True)
         assert traj.df[TRAJ_ID_COL_NAME].tolist() == [1, 1, 1]
 
     def test_add_traj_id_overwrite_raises_error(self):
@@ -923,11 +925,13 @@ class TestTrajectory:
         df2 = pd.DataFrame(
             [
                 {
+                    "traj_id": 1,
                     "t": datetime(2018, 1, 1, 12, 6, 0),
                     "prev_t": datetime(2018, 1, 1, 12, 0, 0),
                     "geometry": LineString([(0, 0), (6, 0)]),
                 },
                 {
+                    "traj_id": 1,
                     "t": datetime(2018, 1, 1, 12, 10, 0),
                     "prev_t": datetime(2018, 1, 1, 12, 6, 0),
                     "geometry": LineString([(6, 0), (6, 6)]),

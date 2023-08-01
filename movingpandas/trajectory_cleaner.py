@@ -86,7 +86,7 @@ class IqrCleaner(TrajectoryCleaner):
             ixs.append(ix.tolist())
 
         indices = pd.Series(list(map(any, zip(*ixs))), index=df.index)
-        return Trajectory(df[~indices], traj.id)
+        return Trajectory(df[~indices], traj.id, traj_id_col=traj.get_traj_id_column_name())
 
     def _calc_outliers(self, series, alpha=3):
         """

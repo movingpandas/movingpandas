@@ -56,6 +56,7 @@ class Trajectory:
         self,
         df,
         traj_id,
+        traj_id_col=None,
         obj_id=None,
         t=None,
         x=None,
@@ -150,6 +151,13 @@ class Trajectory:
         self.df = df[~df.index.duplicated(keep="first")]
         self.crs = df.crs
         self.parent = parent
+
+        if traj_id_col is not None: 
+            self.traj_id_col_name = traj_id_col
+        else:
+            self.traj_id_col_name = TRAJ_ID_COL_NAME
+        self.df[self.traj_id_col_name] = traj_id
+
         if self.crs is not None:
             self.crs_units = self.crs.axis_info[0].unit_name
         else:
@@ -211,7 +219,7 @@ class Trajectory:
         -------
         Trajectory
         """
-        copied = Trajectory(self.df.copy(), self.id, parent=self.parent)
+        copied = Trajectory(self.df.copy(), self.id, parent=self.parent, traj_id_col=self.traj_id_col_name)
         return copied
 
     def plot(self, *args, **kwargs):
@@ -360,6 +368,10 @@ class Trajectory:
         """
         return self.df.columns
 
+    def set_traj_id_column_name(self, name):
+        print(name)
+        self.set_traj_id_col_name = name 
+
     def get_traj_id_column_name(self):
         """
         Return name of the trajectory ID column
@@ -368,7 +380,10 @@ class Trajectory:
         -------
         string
         """
-        return TRAJ_ID_COL_NAME
+        if hasattr(self, "traj_id_col_name"):
+            return self.traj_id_col_name
+        else:
+            return TRAJ_ID_COL_NAME
 
     def get_speed_column_name(self):
         """
@@ -788,7 +803,7 @@ class Trajectory:
         Trajectory
             Extracted trajectory segment
         """
-        segment = Trajectory(self.df[t1:t2], f"{self.id}_{t1}", parent=self)
+        segment = Trajectory(self.df[t1:t2], f"{self.id}_{t1}", parent=self, traj_id_col=self.get_traj_id_column_name())
         if not segment.is_valid():
             raise RuntimeError(
                 f"Failed to extract valid trajectory segment between {t1} and {t2}"

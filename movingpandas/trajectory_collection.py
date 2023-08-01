@@ -159,6 +159,7 @@ class TrajectoryCollection:
         return gdf
 
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col, t, x, y, crs):
+        print("_df_to_trajectories")
         trajectories = []
         for traj_id, values in df.groupby(traj_id_col):
             if len(values) < 2:
@@ -168,7 +169,7 @@ class TrajectoryCollection:
             else:
                 obj_id = None
             trajectory = Trajectory(
-                values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs
+                values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs, traj_id_col=traj_id_col
             )
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:

@@ -86,7 +86,7 @@ class TemporalSplitter(TrajectorySplitter):
         grouped = traj.df.groupby(Grouper(freq=mode))
         for key, values in grouped:
             if len(values) > 1:
-                result.append(Trajectory(values, f"{traj.id}_{key}"))
+                result.append(Trajectory(values, f"{traj.id}_{key}", traj_id_col=traj.get_traj_id_column_name()))
         return TrajectoryCollection(result, min_length=min_length)
 
 
@@ -119,7 +119,7 @@ class ObservationGapSplitter(TrajectorySplitter):
         for i, df in enumerate(dfs):
             df = df.drop(columns=["t", "gap"])
             if len(df) > 1:
-                result.append(Trajectory(df, f"{traj.id}_{i}"))
+                result.append(Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_column_name()))
         return TrajectoryCollection(result, min_length=min_length)
 
 

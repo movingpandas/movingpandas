@@ -124,7 +124,7 @@ class _TrajectoryPlotter:
 
         if self.colormap:
             self.kwargs["colormap"] = self.colormap
-        if not self.column:
+        if not self.column and tc.get_traj_id_column_name() is not None:
             self.kwargs["c"] = tc.get_traj_id_column_name()
             self.kwargs["cmap"] = "Category10"
 

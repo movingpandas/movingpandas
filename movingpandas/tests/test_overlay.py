@@ -226,7 +226,7 @@ class TestOverlay:
             "1_0"
         )
         assert len(intersection.df.columns) == len(
-            ["geometry", "value", "intersecting_id", "intersecting_name"]
+            ["geometry", "value", "traj_id", "intersecting_id", "intersecting_name"]
         )
         assert intersection.df.iloc[0]["intersecting_id"] == 1
         assert intersection.df.iloc[0]["intersecting_name"] == "foo"
