@@ -113,7 +113,6 @@ class _TrajectoryPlotter:
         opts.defaults(opts.Overlay(**self.hv_defaults))
 
         tc = self.preprocess_data()
-        self.set_default_cmaps()
 
         plot = self.hvplot_lines(tc)
         if self.marker_size > 0:
@@ -127,26 +126,23 @@ class _TrajectoryPlotter:
         else:
             return plot
 
-    def set_default_cmaps(self):
-        from bokeh.palettes import all_palettes, Turbo256
+    def set_default_cmaps(self, ids=None):
+        import holoviews as hv
+        import colorcet as cc
+        from bokeh.palettes import Category10_10
 
-        if self.colormap:
-            self.kwargs["colormap"] = self.colormap
-        elif not self.column and self.traj_id_col_name is not None:
+        mpd_palette = list(Category10_10) + cc.palette["glasbey"]
+        hv.Cycle.default_cycles["default_colors"] = mpd_palette  # cc.glasbey_hv
+        if self.column == self.speed_col_name and "cmap" not in self.kwargs:
+            self.kwargs["cmap"] = "Plasma"
+        elif self.column is None and self.traj_id_col_name is not None:
             self.kwargs["c"] = self.traj_id_col_name
             if "cmap" not in self.kwargs:
-                try:
-                    n = len(self.data)
-                except TypeError:  # len(Trajectory) will return a float
-                    n = 1
-                if n <= 10:
-                    self.kwargs["cmap"] = all_palettes["Category10"][max(3, n)]
-                elif n <= 20:
-                    self.kwargs["cmap"] = all_palettes["Category20"][max(3, n)]
-                else:
-                    self.kwargs["cmap"] = Turbo256[max(3, n)]
-        elif self.column == self.speed_col_name and "cmap" not in self.kwargs:
-            self.kwargs["cmap"] = "Plasma"
+                self.kwargs["colormap"] = dict(zip(ids, mpd_palette[: len(ids)]))
+        if self.colormap:
+            self.kwargs["colormap"] = self.colormap
+        if "cmap" not in self.kwargs and "colormap" not in self.kwargs:
+            self.kwargs["cmap"] = mpd_palette
 
     def hvplot_end_points(self, tc):
         from holoviews import dim
@@ -157,9 +153,8 @@ class _TrajectoryPlotter:
             tc.add_direction(name=self.direction_col_name, overwrite=True)
             end_pts = tc.df.tail(1).copy()
 
-        end_pts["triangle_angle"] = ((end_pts[self.direction_col_name] * -1.0)).astype(
-            float
-        )
+        end_pts["triangle_angle"] = end_pts[self.direction_col_name] * -1.0
+        end_pts["triangle_angle"] = end_pts["triangle_angle"].astype(float)
 
         hover_cols = self.kwargs.pop("hover_cols", None)
 
@@ -193,8 +188,14 @@ class _TrajectoryPlotter:
         cols = list(set(cols))
         line_gdf = tc.to_line_gdf(columns=cols)
 
+        ids = None
+        if self.column is None and self.traj_id_col_name is not None:
+            ids = line_gdf[self.traj_id_col_name].unique()
+        self.set_default_cmaps(ids)
+
         if self.hvplot_is_geo and not tc.is_latlon and tc.get_crs() is not None:
             line_gdf = line_gdf.to_crs(epsg=4326)
+
         return line_gdf.hvplot(
             line_width=self.line_width,
             geo=self.hvplot_is_geo,
