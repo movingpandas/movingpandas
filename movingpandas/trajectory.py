@@ -563,7 +563,7 @@ class Trajectory:
         GeoDataFrame
         """
         properties = {
-            TRAJ_ID_COL_NAME: self.id,
+            self.traj_id_col_name: self.id,
             "start_t": self.get_start_time(),
             "end_t": self.get_end_time(),
             "geometry": self.to_linestring(),

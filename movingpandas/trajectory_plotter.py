@@ -2,6 +2,13 @@
 
 import matplotlib.pyplot as plt
 
+import colorcet as cc
+import holoviews as hv
+from holoviews import Overlay
+from bokeh.palettes import Category10_10
+
+MPD_PALETTE = list(Category10_10) + cc.palette["glasbey"]
+
 
 class _TrajectoryPlotter:
     def __init__(self, data, *args, **kwargs):
@@ -112,6 +119,8 @@ class _TrajectoryPlotter:
 
         opts.defaults(opts.Overlay(**self.hv_defaults))
 
+        self.color = self.kwargs.pop("color", None)
+
         tc = self.preprocess_data()
 
         plot = self.hvplot_lines(tc)
@@ -125,24 +134,6 @@ class _TrajectoryPlotter:
             return self.overlay * plot
         else:
             return plot
-
-    def set_default_cmaps(self, ids=None):
-        import holoviews as hv
-        import colorcet as cc
-        from bokeh.palettes import Category10_10
-
-        mpd_palette = list(Category10_10) + cc.palette["glasbey"]
-        hv.Cycle.default_cycles["default_colors"] = mpd_palette  # cc.glasbey_hv
-        if self.column == self.speed_col_name and "cmap" not in self.kwargs:
-            self.kwargs["cmap"] = "Plasma"
-        elif self.column is None and self.traj_id_col_name is not None:
-            self.kwargs["c"] = self.traj_id_col_name
-            if "cmap" not in self.kwargs:
-                self.kwargs["colormap"] = dict(zip(ids, mpd_palette[: len(ids)]))
-        if self.colormap:
-            self.kwargs["colormap"] = self.colormap
-        if "cmap" not in self.kwargs and "colormap" not in self.kwargs:
-            self.kwargs["cmap"] = mpd_palette
 
     def hvplot_end_points(self, tc):
         from holoviews import dim
@@ -168,16 +159,34 @@ class _TrajectoryPlotter:
 
         if self.hvplot_is_geo and not tc.is_latlon and tc.get_crs() is not None:
             end_pts = end_pts.to_crs(epsg=4326)
-        return end_pts.hvplot(
-            geo=self.hvplot_is_geo,
-            tiles=None,
-            marker="triangle",
-            angle=dim("triangle_angle"),
-            size=self.marker_size,
-            clim=self.clim,
-            *self.args,
-            **self.kwargs
-        )
+
+        if self.column:
+            return end_pts.hvplot(
+                geo=self.hvplot_is_geo,
+                tiles=None,
+                marker="triangle",
+                angle=dim("triangle_angle"),
+                size=self.marker_size,
+                clim=self.clim,
+                *self.args,
+                **self.kwargs
+            )
+        else:
+            plots = []
+            for i in range(len(end_pts)):
+                tmp = end_pts.iloc[i : i + 1, :]
+                tmp = tmp.hvplot(
+                    geo=self.hvplot_is_geo,
+                    tiles=None,
+                    marker="triangle",
+                    angle=dim("triangle_angle"),
+                    size=self.marker_size,
+                    color=self.get_color(i),
+                    *self.args,
+                    **self.kwargs
+                )
+                plots.append(tmp)
+            return Overlay(plots)
 
     def hvplot_lines(self, tc):
         cols = [self.traj_id_col_name, self.geom_col_name]
@@ -186,6 +195,42 @@ class _TrajectoryPlotter:
         if self.column:
             cols = cols + [self.column]
         cols = list(set(cols))
+
+        if self.column is None:
+            return self.hvplot_traj_gdf(tc)
+        else:
+            return self.hvplot_line_gdf(tc, cols)
+
+    def get_color(self, i):
+        if self.color:
+            return self.color
+        else:
+            return MPD_PALETTE[i]
+
+    def hvplot_traj_gdf(self, tc):
+        hv.Cycle.default_cycles["default_colors"] = MPD_PALETTE
+
+        traj_gdf = tc.to_traj_gdf()
+        if self.hvplot_is_geo and not tc.is_latlon and tc.get_crs() is not None:
+            traj_gdf = traj_gdf.to_crs(epsg=4326)
+
+        plots = []
+        for i in range(len(traj_gdf)):
+            tmp = traj_gdf.iloc[i : i + 1, :]
+            tmp = tmp.hvplot(
+                line_width=self.line_width,
+                geo=self.hvplot_is_geo,
+                tiles=self.hvplot_tiles,
+                color=self.get_color(i),
+                colorbar=self.colorbar,
+                *self.args,
+                **self.kwargs
+            )
+            self.hvplot_tiles = None
+            plots.append(tmp)
+        return Overlay(plots)
+
+    def hvplot_line_gdf(self, tc, cols):
         line_gdf = tc.to_line_gdf(columns=cols)
 
         ids = None
@@ -205,3 +250,18 @@ class _TrajectoryPlotter:
             *self.args,
             **self.kwargs
         )
+
+    def set_default_cmaps(self, ids=None):
+        hv.Cycle.default_cycles["default_colors"] = MPD_PALETTE
+        if self.column == self.speed_col_name and "cmap" not in self.kwargs:
+            self.kwargs["cmap"] = "Plasma"
+        elif self.column is None and self.traj_id_col_name is not None:
+            self.kwargs["c"] = self.traj_id_col_name
+            if "cmap" not in self.kwargs:
+                print("building colormap ...")
+                self.kwargs["colormap"] = dict(zip(ids, MPD_PALETTE[: len(ids)]))
+                print(self.kwargs["colormap"])
+        if self.colormap:
+            self.kwargs["colormap"] = self.colormap
+        if "cmap" not in self.kwargs and "colormap" not in self.kwargs:
+            self.kwargs["cmap"] = MPD_PALETTE

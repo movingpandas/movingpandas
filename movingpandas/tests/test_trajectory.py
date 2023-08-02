@@ -779,7 +779,7 @@ class TestTrajectory:
 
         plot = self.default_traj_latlon.hvplot(geo=True)
         assert isinstance(plot, holoviews.core.overlay.Overlay)
-        assert len(plot.Path.ddims) == 3
+        assert len(plot.Path.ddims) == 2
 
     @requires_holoviews
     def test_hvplot_with_speed_exists(self):

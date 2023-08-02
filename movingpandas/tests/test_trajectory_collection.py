@@ -295,7 +295,7 @@ class TestTrajectoryCollection:
         traj_gdf.to_file("temp.gpkg", layer="trajs", driver="GPKG")
         rows = [
             {
-                "traj_id": 1,
+                "id": 1,
                 "start_t": datetime(2018, 1, 1, 12, 0, 0),
                 "end_t": datetime(2018, 1, 1, 14, 15, 0),
                 "geometry": LineString([(0, 0), (6, 0), (6, 6), (9, 9)]),
@@ -303,7 +303,7 @@ class TestTrajectoryCollection:
                 "direction": 45.0,
             },
             {
-                "traj_id": 2,
+                "id": 2,
                 "start_t": datetime(2018, 1, 1, 12, 0, 0),
                 "end_t": datetime(2018, 1, 2, 13, 15, 0),
                 "geometry": LineString([(10, 10), (16, 10), (16, 16), (190, 10)]),
@@ -325,7 +325,7 @@ class TestTrajectoryCollection:
         print(traj_gdf)
         rows = [
             {
-                "traj_id": 1,
+                "id": 1,
                 "start_t": datetime(2018, 1, 1, 12, 0, 0),
                 "end_t": datetime(2018, 1, 1, 14, 15, 0),
                 "geometry": LineString([(0, 0), (6, 0), (6, 6), (9, 9)]),
@@ -338,7 +338,7 @@ class TestTrajectoryCollection:
                 "val_max": 9,
             },
             {
-                "traj_id": 2,
+                "id": 2,
                 "start_t": datetime(2018, 1, 1, 12, 0, 0),
                 "end_t": datetime(2018, 1, 2, 13, 15, 0),
                 "geometry": LineString([(10, 10), (16, 10), (16, 16), (190, 10)]),
