@@ -6,6 +6,7 @@ dependencies:
   - black
   - cartopy
   - codecov
+  - colorcet
   - cython
   - hvplot=0.8.3
   - flake8
