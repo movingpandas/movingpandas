@@ -781,6 +781,17 @@ class TestTrajectory:
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 2
 
+        plot = self.default_traj_latlon.hvplot(geo=True, color="red")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot(geo=True, c="traj_id")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot(
+            geo=True, c="traj_id", colormap={1: "red"}
+        )
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
     @requires_holoviews
     def test_hvplot_with_speed_exists(self):
         import holoviews
@@ -788,6 +799,9 @@ class TestTrajectory:
         plot = self.default_traj_latlon.hvplot(geo=True, c="speed")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 3
+
+        plot = self.default_traj_latlon.hvplot(geo=True, c="speed", cmap="Reds")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
 
     @requires_holoviews
     def test_hvplot_exists_without_crs(self):

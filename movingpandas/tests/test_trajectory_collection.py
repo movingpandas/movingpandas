@@ -182,6 +182,19 @@ class TestTrajectoryCollection:
         result = self.collection_latlon.hvplot()
         assert isinstance(result, holoviews.core.overlay.Overlay)
 
+        plot = self.collection_latlon.hvplot()
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+        assert len(plot.Path.ddims) == 2
+
+        plot = self.collection_latlon.hvplot(color="red")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.collection_latlon.hvplot(c="id")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.collection_latlon.hvplot(c="id", colormap={1: "red", 2: "blue"})
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
     def test_plot_exist_column(self):
         from matplotlib.axes import Axes
 
