@@ -251,6 +251,7 @@ class _TrajectoryPlotter:
 
     def set_default_cmaps(self, ids=None):
         from holoviews import Cycle
+
         Cycle.default_cycles["default_colors"] = self.MPD_PALETTE
         if self.column == self.speed_col_name and "cmap" not in self.kwargs:
             self.kwargs["cmap"] = "Plasma"
