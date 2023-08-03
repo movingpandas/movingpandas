@@ -439,7 +439,7 @@ class Trajectory:
 
     def get_angular_difference_col(self):
         """
-        Retrun name of the angular difference column
+        Return name of the angular difference column
 
         Returns
         -------
