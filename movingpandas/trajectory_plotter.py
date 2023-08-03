@@ -2,13 +2,6 @@
 
 import matplotlib.pyplot as plt
 
-import colorcet as cc
-import holoviews as hv
-from holoviews import Overlay
-from bokeh.palettes import Category10_10
-
-MPD_PALETTE = list(Category10_10) + cc.palette["glasbey"]
-
 
 class _TrajectoryPlotter:
     def __init__(self, data, *args, **kwargs):
@@ -108,7 +101,9 @@ class _TrajectoryPlotter:
     def hvplot(self):  # noqa F811
         try:
             import hvplot.pandas  # noqa F401, seems necessary for the following import to work
+            import colorcet as cc
             from holoviews import opts
+            from bokeh.palettes import Category10_10
         except ImportError as error:
             raise ImportError(
                 "Missing optional dependencies. To use interactive plotting, "
@@ -118,6 +113,7 @@ class _TrajectoryPlotter:
             ) from error
 
         opts.defaults(opts.Overlay(**self.hv_defaults))
+        self.MPD_PALETTE = list(Category10_10) + cc.palette["glasbey"]
 
         self.color = self.kwargs.pop("color", None)
 
@@ -136,7 +132,7 @@ class _TrajectoryPlotter:
             return plot
 
     def hvplot_end_points(self, tc):
-        from holoviews import dim
+        from holoviews import dim, Overlay
 
         try:
             end_pts = tc.get_end_locations(with_direction=True)
@@ -205,10 +201,12 @@ class _TrajectoryPlotter:
         if self.color:
             return self.color
         else:
-            return MPD_PALETTE[i]
+            return self.MPD_PALETTE[i]
 
     def hvplot_traj_gdf(self, tc):
-        hv.Cycle.default_cycles["default_colors"] = MPD_PALETTE
+        from holoviews import Cycle, Overlay
+
+        Cycle.default_cycles["default_colors"] = self.MPD_PALETTE
 
         traj_gdf = tc.to_traj_gdf()
         if self.hvplot_is_geo and not tc.is_latlon and tc.get_crs() is not None:
@@ -252,16 +250,17 @@ class _TrajectoryPlotter:
         )
 
     def set_default_cmaps(self, ids=None):
-        hv.Cycle.default_cycles["default_colors"] = MPD_PALETTE
+        from holoviews import Cycle
+        Cycle.default_cycles["default_colors"] = self.MPD_PALETTE
         if self.column == self.speed_col_name and "cmap" not in self.kwargs:
             self.kwargs["cmap"] = "Plasma"
         elif self.column is None and self.traj_id_col_name is not None:
             self.kwargs["c"] = self.traj_id_col_name
             if "cmap" not in self.kwargs:
                 print("building colormap ...")
-                self.kwargs["colormap"] = dict(zip(ids, MPD_PALETTE[: len(ids)]))
+                self.kwargs["colormap"] = dict(zip(ids, self.MPD_PALETTE[: len(ids)]))
                 print(self.kwargs["colormap"])
         if self.colormap:
             self.kwargs["colormap"] = self.colormap
         if "cmap" not in self.kwargs and "colormap" not in self.kwargs:
-            self.kwargs["cmap"] = MPD_PALETTE
+            self.kwargs["cmap"] = self.MPD_PALETTE
