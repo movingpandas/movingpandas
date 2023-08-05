@@ -81,8 +81,7 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
         temp_df = traj.df.copy()
         prev_pt = temp_df.iloc[0][traj.get_geom_col()]
         keep_rows = [0]
-        for i, (_, row) in enumerate(temp_df.iterrows()):
-            pt = row[traj.get_geom_col()]
+        for i, pt in enumerate(temp_df[traj.get_geom_col()]):
             dist = measure_distance(pt, prev_pt, traj.is_latlon)
             if dist >= tolerance:
                 keep_rows.append(i)
@@ -194,8 +193,7 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
             traj.to_linestring().simplify(tolerance, preserve_topology=False).coords
         )
 
-        for i, (_, row) in enumerate(traj.df.iterrows()):
-            current_pt = row[traj.get_geom_col()]
+        for i, current_pt in enumerate(traj.df[traj.get_geom_col()]):
             if current_pt.coords[0] in simplified:
                 keep_rows.append(i)
 

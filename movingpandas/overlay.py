@@ -161,9 +161,8 @@ def _determine_time_ranges_pointbased(traj, polygon):
     df.columns = df.columns.map("_".join)
 
     ranges = []
-    for _, row in df.iterrows():
-        if row["intersects_min"]:
-            ranges.append(TRange(row["t_min"], row["t_max"]))
+    for _, row in df[df["intersects_min"]].iterrows():
+        ranges.append(TRange(row["t_min"], row["t_max"]))
     return ranges
 
 
