@@ -86,7 +86,13 @@ class TemporalSplitter(TrajectorySplitter):
         grouped = traj.df.groupby(Grouper(freq=mode))
         for key, values in grouped:
             if len(values) > 1:
-                result.append(Trajectory(values, f"{traj.id}_{key}"))
+                result.append(
+                    Trajectory(
+                        values,
+                        f"{traj.id}_{key}",
+                        traj_id_col=traj.get_traj_id_col(),
+                    )
+                )
         return TrajectoryCollection(result, min_length=min_length)
 
 
@@ -119,7 +125,9 @@ class ObservationGapSplitter(TrajectorySplitter):
         for i, df in enumerate(dfs):
             df = df.drop(columns=["t", "gap"])
             if len(df) > 1:
-                result.append(Trajectory(df, f"{traj.id}_{i}"))
+                result.append(
+                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                )
         return TrajectoryCollection(result, min_length=min_length)
 
 
@@ -151,7 +159,7 @@ class SpeedSplitter(TrajectorySplitter):
 
     def _split_traj(self, traj, speed, duration, min_length=0, max_speed=np.inf):
         traj = traj.copy()
-        speed_col_name = traj.get_speed_column_name()
+        speed_col_name = traj.get_speed_col()
         if speed_col_name not in traj.df.columns:
             traj.add_speed(overwrite=True)
         traj.df = traj.df[traj.df[speed_col_name].between(speed, max_speed)]

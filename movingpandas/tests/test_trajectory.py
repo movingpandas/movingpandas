@@ -269,7 +269,9 @@ class TestTrajectory:
 
     def test_add_traj_id(self):
         traj = self.default_traj_metric
-        traj.add_traj_id()
+        with pytest.raises(RuntimeError):
+            traj.add_traj_id()
+        traj.add_traj_id(overwrite=True)
         assert traj.df[TRAJ_ID_COL_NAME].tolist() == [1, 1, 1]
 
     def test_add_traj_id_overwrite_raises_error(self):
@@ -779,6 +781,17 @@ class TestTrajectory:
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 2
 
+        plot = self.default_traj_latlon.hvplot(geo=True, color="red")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot(geo=True, c="traj_id")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot(
+            geo=True, c="traj_id", colormap={1: "red"}
+        )
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
     @requires_holoviews
     def test_hvplot_with_speed_exists(self):
         import holoviews
@@ -786,6 +799,9 @@ class TestTrajectory:
         plot = self.default_traj_latlon.hvplot(geo=True, c="speed")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 3
+
+        plot = self.default_traj_latlon.hvplot(geo=True, c="speed", cmap="Reds")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
 
     @requires_holoviews
     def test_hvplot_exists_without_crs(self):
@@ -923,11 +939,13 @@ class TestTrajectory:
         df2 = pd.DataFrame(
             [
                 {
+                    "traj_id": 1,
                     "t": datetime(2018, 1, 1, 12, 6, 0),
                     "prev_t": datetime(2018, 1, 1, 12, 0, 0),
                     "geometry": LineString([(0, 0), (6, 0)]),
                 },
                 {
+                    "traj_id": 1,
                     "t": datetime(2018, 1, 1, 12, 10, 0),
                     "prev_t": datetime(2018, 1, 1, 12, 6, 0),
                     "geometry": LineString([(6, 0), (6, 6)]),

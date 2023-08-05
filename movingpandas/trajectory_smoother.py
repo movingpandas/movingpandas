@@ -204,7 +204,7 @@ class KalmanSmootherCV(TrajectorySmoother):
                 Point(state.state_vector[0], state.state_vector[2])
                 for state in smooth_track
             ]
-        new_traj = Trajectory(df, traj.id)
+        new_traj = Trajectory(df, traj.id, traj_id_col=traj.get_traj_id_col())
         return new_traj
 
     @staticmethod

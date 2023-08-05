@@ -3,9 +3,14 @@
 from pandas import concat
 from copy import copy
 from geopandas import GeoDataFrame
-from .trajectory import Trajectory, SPEED_COL_NAME
-from .trajectory_plotter import _TrajectoryCollectionPlotter
+from .trajectory import Trajectory, SPEED_COL_NAME, DIRECTION_COL_NAME
+from .trajectory_plotter import _TrajectoryPlotter
 from .unit_utils import UNITS
+
+
+@staticmethod
+def traj_to_tc(traj):
+    return TrajectoryCollection([traj])
 
 
 class TrajectoryCollection:
@@ -114,6 +119,18 @@ class TrajectoryCollection:
         # already preprocessed on __init__().
         return TrajectoryCollection(trajectories, min_length=self.min_length)
 
+    def drop(self, **kwargs):
+        """
+        Drop columns or rows from the trajectories' DataFrames
+
+        Examples
+        --------
+
+        >>> tc.drop(columns=['abc','def'])
+        """
+        for traj in self.trajectories:
+            traj.drop(**kwargs)
+
     def to_point_gdf(self):
         """
         Return the trajectories' points as GeoDataFrame.
@@ -125,7 +142,7 @@ class TrajectoryCollection:
         gdfs = [traj.to_point_gdf() for traj in self.trajectories]
         return concat(gdfs)
 
-    def to_line_gdf(self):
+    def to_line_gdf(self, columns=None):
         """
         Return the trajectories' line segments as GeoDataFrame.
 
@@ -133,7 +150,7 @@ class TrajectoryCollection:
         -------
         GeoDataFrame
         """
-        gdfs = [traj.to_line_gdf() for traj in self.trajectories]
+        gdfs = [traj.to_line_gdf(columns) for traj in self.trajectories]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
@@ -162,7 +179,14 @@ class TrajectoryCollection:
             else:
                 obj_id = None
             trajectory = Trajectory(
-                values, traj_id, obj_id=obj_id, t=t, x=x, y=y, crs=crs
+                values,
+                traj_id,
+                traj_id_col=traj_id_col,
+                obj_id=obj_id,
+                t=t,
+                x=x,
+                y=y,
+                crs=crs,
             )
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:
@@ -196,7 +220,39 @@ class TrajectoryCollection:
             if traj.id == traj_id:
                 return traj
 
-    def get_geom_column_name(self):
+    def get_crs(self):
+        """
+        Return the CRS of the trajectories
+        """
+        return self.trajectories[0].get_crs()
+
+    def is_latlon(self):
+        """
+        Return True if the trajectory CRS is geographic (e.g. EPSG:4326 WGS84)
+        """
+        return self.trajectories[0].is_latlon()
+
+    def get_column_names(self):
+        """
+        Return the list of column names
+
+        Returns
+        -------
+        list
+        """
+        return self.trajectories[0].df.columns
+
+    def get_traj_id_col(self):
+        """
+        Return name of the trajectory ID column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_traj_id_col()
+
+    def get_geom_col(self):
         """
         Return name of the geometry column
 
@@ -204,9 +260,29 @@ class TrajectoryCollection:
         -------
         string
         """
-        return self.trajectories[0].get_geom_column_name()
+        return self.trajectories[0].get_geom_col()
 
-    def get_locations_at(self, t):
+    def get_speed_col(self):
+        """
+        Return name of the speed column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_speed_col()
+
+    def get_direction_col(self):
+        """
+        Return name of the direction column
+
+        Returns
+        -------
+        string
+        """
+        return self.trajectories[0].get_direction_col()
+
+    def get_locations_at(self, t, with_direction=False):
         """
         Returns GeoDataFrame with trajectory locations at the specified timestamp
 
@@ -222,16 +298,32 @@ class TrajectoryCollection:
         """
         result = []
 
+        if with_direction:
+            direction_col = self.get_direction_col()
+            direction_missing = direction_col not in self.get_column_names()
+
         for traj in self:
             if t == "start":
-                x = traj.get_row_at(traj.get_start_time())
+                tmp = traj.copy()
+                if with_direction and direction_missing:
+                    tmp.df = tmp.df.head(2)
+                    tmp.add_direction(name=direction_col)
+                x = tmp.get_row_at(tmp.get_start_time())
             elif t == "end":
-                x = traj.get_row_at(traj.get_end_time())
+                tmp = traj.copy()
+                if with_direction and direction_missing:
+                    tmp.df = tmp.df.tail(2)
+                    tmp.add_direction(name=direction_col)
+                x = tmp.get_row_at(tmp.get_end_time())
             else:
                 if t < traj.get_start_time() or t > traj.get_end_time():
                     continue
-                x = traj.get_row_at(t)
+                tmp = traj.copy()
+                if with_direction and direction_missing:
+                    tmp.add_direction(name=direction_col)
+                x = tmp.get_row_at(t)
             result.append(x.to_frame().T)
+
         if result:
             df = concat(result)
             # Move temporal index to column t
@@ -243,7 +335,7 @@ class TrajectoryCollection:
         else:
             return GeoDataFrame()
 
-    def get_start_locations(self):
+    def get_start_locations(self, with_direction=False):
         """
         Returns GeoDataFrame with trajectory start locations
 
@@ -252,9 +344,9 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory start locations
         """
-        return self.get_locations_at("start")
+        return self.get_locations_at("start", with_direction)
 
-    def get_end_locations(self):
+    def get_end_locations(self, with_direction=False):
         """
         Returns GeoDataFrame with trajectory end locations
 
@@ -263,7 +355,7 @@ class TrajectoryCollection:
         GeoDataFrame
             Trajectory end locations
         """
-        return self.get_locations_at("end")
+        return self.get_locations_at("end", with_direction)
 
     def get_segments_between(self, t1, t2):
         """
@@ -396,7 +488,6 @@ class TrajectoryCollection:
 
         units : tuple
             Units in which to calculate speed
-            For more info, check the list of supported units_.
 
             distance : str
                 Abbreviation for the distance unit
@@ -404,13 +495,14 @@ class TrajectoryCollection:
             time : str
                 Abbreviation for the time unit (default: seconds)
 
-        .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units_.
+            .. _units: https://movingpandas.org/units
 
         """
         for traj in self:
             traj.add_speed(overwrite, name, units)
 
-    def add_direction(self, overwrite=False):
+    def add_direction(self, name=DIRECTION_COL_NAME, overwrite=False):
         """
         Add direction column and values to the trajectories.
 
@@ -518,7 +610,7 @@ class TrajectoryCollection:
 
         >>> trajectory_collection.plot(column='speed', legend=True, figsize=(9,5))
         """
-        return _TrajectoryCollectionPlotter(self, *args, **kwargs).plot()
+        return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
     def hvplot(self, *args, **kwargs):
         """
@@ -531,14 +623,17 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
 
+            To customize the plots, check the list of supported colormaps_.
+            .. _colormaps: https://holoviews.org/user_guide/Colormaps.html#available-colormaps
+
         Examples
         --------
         Plot speed along trajectories (with legend and specified figure size):
 
         >>> collection.hvplot(c='speed', line_width=7.0, width=700, height=400,
                               colorbar=True)
-        """
-        return _TrajectoryCollectionPlotter(self, *args, **kwargs).hvplot()
+        """  # noqa: E501
+        return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
 
 def _get_location_at(traj, t, columns=None):

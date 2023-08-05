@@ -86,7 +86,7 @@ class IqrCleaner(TrajectoryCleaner):
             ixs.append(ix.tolist())
 
         indices = pd.Series(list(map(any, zip(*ixs))), index=df.index)
-        return Trajectory(df[~indices], traj.id)
+        return Trajectory(df[~indices], traj.id, traj_id_col=traj.get_traj_id_col())
 
     def _calc_outliers(self, series, alpha=3):
         """
@@ -185,7 +185,7 @@ class OutlierCleaner(TrajectoryCleaner):
 
         if v_max is None:
             out_traj.add_speed(overwrite=True, units=units)
-            speed_col = out_traj.get_speed_column_name()
+            speed_col = out_traj.get_speed_col()
             v_max = out_traj.df[speed_col].agg(lambda x: x.quantile(0.95))
             v_max = v_max * alpha
 

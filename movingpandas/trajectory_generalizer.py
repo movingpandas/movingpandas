@@ -23,7 +23,7 @@ class TrajectoryGeneralizer:
         traj : Trajectory or TrajectoryCollection
         """
         self.traj = traj
-        self.traj_col_name = traj.get_geom_column_name()
+        self.traj_col_name = traj.get_geom_col()
 
     def generalize(self, tolerance):
         """
@@ -79,10 +79,10 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
 
     def _generalize_traj(self, traj, tolerance):
         temp_df = traj.df.copy()
-        prev_pt = temp_df.iloc[0][traj.get_geom_column_name()]
+        prev_pt = temp_df.iloc[0][traj.get_geom_col()]
         keep_rows = [0]
         for i, (_, row) in enumerate(temp_df.iterrows()):
-            pt = row[traj.get_geom_column_name()]
+            pt = row[traj.get_geom_col()]
             dist = measure_distance(pt, prev_pt, traj.is_latlon)
             if dist >= tolerance:
                 keep_rows.append(i)
@@ -90,7 +90,7 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id)
+        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_col())
         return new_traj
 
 
@@ -125,7 +125,7 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id)
+        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_col())
         return new_traj
 
 
@@ -151,7 +151,7 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
         keep_rows = [0]
         i = 0
 
-        for current_pt in traj.df[traj.get_geom_column_name()]:
+        for current_pt in traj.df[traj.get_geom_col()]:
             if prev_pt is None:
                 prev_pt = current_pt
             else:
@@ -165,7 +165,7 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(i)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id)
+        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_col())
         return new_traj
 
 
@@ -195,12 +195,12 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
         )
 
         for i, (_, row) in enumerate(traj.df.iterrows()):
-            current_pt = row[traj.get_geom_column_name()]
+            current_pt = row[traj.get_geom_col()]
             if current_pt.coords[0] in simplified:
                 keep_rows.append(i)
 
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id)
+        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_col())
         return new_traj
 
 
@@ -232,7 +232,7 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
 
     def _generalize_traj(self, traj, tolerance):
         generalized = self.td_tr(traj.df.copy(), tolerance)
-        return Trajectory(generalized, traj.id)
+        return Trajectory(generalized, traj.id, traj_id_col=traj.get_traj_id_col())
 
     def td_tr(self, df, tolerance):
         if len(df) <= 2:

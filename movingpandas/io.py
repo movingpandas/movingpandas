@@ -233,7 +233,7 @@ def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
             df.set_index("t", inplace=True)
             df = df.join(_get_temporal_properties(property_group).set_index("t"))
             df["t"] = df.index
-    return Trajectory(df, traj_id, t="t", x="x", y="y")
+    return Trajectory(df, traj_id, t="t", x="x", y="y", traj_id_col=traj_id_property)
 
 
 def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_property):
