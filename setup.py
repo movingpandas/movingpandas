@@ -22,7 +22,7 @@ setuptools.setup(
     "Visit movingpandas.org for details.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://github.com/anitagraser/movingpandas",
+    url="https://github.com/movingpandas/movingpandas",
     packages=[
         "movingpandas",
         "movingpandas.tools",
