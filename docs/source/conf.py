@@ -23,7 +23,7 @@ copyright = "2023, MovingPandas developers"
 author = "MovingPandas developers"
 
 # The full version, including alpha/beta/rc tags
-release = "master"
+release = "main"
 
 
 # -- General configuration ---------------------------------------------------
