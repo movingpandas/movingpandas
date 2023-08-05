@@ -495,8 +495,8 @@ class TrajectoryCollection:
             time : str
                 Abbreviation for the time unit (default: seconds)
 
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         """
         for traj in self:

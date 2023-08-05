@@ -109,7 +109,7 @@ On Ubuntu, pip install fails on cartopy with "Proj 4.9.0 must be installed".
 Use the following steps to run the notebooks using the current development version:
 
 
-### Using conda
+### Using conda / mamba
 
 ```
 conda env create -f environment.yml

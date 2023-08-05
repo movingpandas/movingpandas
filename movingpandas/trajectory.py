@@ -863,8 +863,8 @@ class Trajectory:
         ----------
         units : str
             Units in which to calculate length values (default: CRS units)
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         Returns
         -------
@@ -1054,8 +1054,8 @@ class Trajectory:
 
         units : str
             Units in which to calculate distance values (default: CRS units)
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         Examples
         ----------
@@ -1120,8 +1120,8 @@ class Trajectory:
             time : str
                 Abbreviation for the time unit (default: seconds)
 
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         Examples
         ----------
@@ -1194,8 +1194,8 @@ class Trajectory:
             time2 : str
                 Abbreviation for the second time unit (default: seconds)
 
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         Examples
         ----------
@@ -1332,8 +1332,8 @@ class Trajectory:
 
         units : str
             Units in which to calculate distance values (default: CRS units)
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         Returns
         -------
@@ -1372,8 +1372,8 @@ class Trajectory:
 
         units : str
             Units in which to calculate distance values (default: CRS units)
-            For more info, check the list of supported units_.
-            .. _units: https://movingpandas.org/units
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
 
         Returns
         -------
