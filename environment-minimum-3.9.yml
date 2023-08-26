@@ -1,0 +1,12 @@
+name: mpd-mini-3.9
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - geopandas-base
+  - matplotlib-base
+  - fiona
+  - geopy
+  - rtree
+  - pytest
+  - pytest-cov

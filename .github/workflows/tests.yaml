@@ -46,6 +46,8 @@ jobs:
             os: windows-latest
           - env: environment-minimum.yml
             os: ubuntu-latest
+          - env: environment-minimum-3.9.yml
+            os: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
