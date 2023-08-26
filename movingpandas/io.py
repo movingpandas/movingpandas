@@ -16,7 +16,7 @@ def gdf_to_mf_json(
     interpolation: str = None,
     crs=None,
     trs=None,
-    datetime_encoder: Callable[[any], str | int] = None,
+    datetime_encoder: Callable = None,  # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
 ) -> dict:
     """
     Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON
