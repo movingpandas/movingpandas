@@ -8,7 +8,6 @@ The official MovingPandas API documentation is hosted on [ReadTheDocs](https://m
 
 For more information about individual releases, check out the [Changelog](https://github.com/movingpandas/movingpandas/releases).
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/MovingPandasOrg)](https://twitter.com/MovingPandasOrg)
 [![Mastodon Follow](https://img.shields.io/mastodon/follow/109434720057484377?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@movingpandas)
 
 [![docs status](https://readthedocs.org/projects/movingpandas/badge/?version=main)](https://movingpandas.readthedocs.io/en/main/)
