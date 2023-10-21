@@ -852,12 +852,13 @@ class Trajectory:
         Return the length of the trajectory.
 
         Length is calculated using CRS units, except if the CRS is geographic
-        (e.g. EPSG:4326 WGS84) then length is calculated in metres.
+        (e.g. EPSG:4326 WGS84) then length is calculated in meters.
 
         If units have been declared:
-            For geographic projections, in declared units
-            For known CRS units, in declared units
-            For unknown CRS units, in declared units as if CRS is in meters
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
