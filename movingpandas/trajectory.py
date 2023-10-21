@@ -852,16 +852,17 @@ class Trajectory:
         Return the length of the trajectory.
 
         Length is calculated using CRS units, except if the CRS is geographic
-        (e.g. EPSG:4326 WGS84) then length is calculated in metres.
+        (e.g. EPSG:4326 WGS84) then length is calculated in meters.
 
         If units have been declared:
-            For geographic projections, in declared units
-            For known CRS units, in declared units
-            For unknown CRS units, in declared units as if CRS is in meters
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
-        units : str
+        units : tuple(str)
             Units in which to calculate length values (default: CRS units)
             For more info, check the list of supported units at
             https://movingpandas.org/units
@@ -983,6 +984,8 @@ class Trajectory:
         ----------
         overwrite : bool
             Whether to overwrite existing direction values (default: False)
+        name : str
+            Name of the direction column (default: "direction")
         """
         self.direction_col_name = name
         if self.direction_col_name in self.df.columns and not overwrite:
@@ -1038,20 +1041,25 @@ class Trajectory:
         """
         Add distance column and values to the trajectory's DataFrame.
 
-        Adds a column with the distance to each point from the previous:
-            If no units have been declared:
-                For geographic projections (e.g. EPSG:4326 WGS84), in meters
-                For other projections, in CRS units
-            If units have been declared:
-                For geographic projections, in declared units
-                For known CRS units, in declared units
-                For unknown CRS units, in declared units as if CRS is in meters
+        Distance values are computed between the current point and the previous:
+
+        If no units have been declared:
+
+        - For geographic projections (e.g. EPSG:4326 WGS84), in meters
+        - For other projections, in CRS units
+
+        If units have been declared:
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
         overwrite : bool
             Whether to overwrite existing distance values (default: False)
-
+        name : str
+            Name of the distance column (default: "distance")
         units : str
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units at
@@ -1095,15 +1103,19 @@ class Trajectory:
         """
         Add speed column and values to the trajectory's DataFrame.
 
-        Adds a column with the speed to each point from the previous:
-             If no units have been declared:
-                 For geographic projections, in meters per second
-                 For other projections, in CRS units per second
-             If units have been declared:
-                 For geographic projections, in declared units
-                 For known CRS units, in declared units
-                 For unknown CRS units, in declared units as if CRS distance
-                 units are meters
+        Speed values are computed between the current point and the previous:
+
+        If no units have been declared:
+
+        - For geographic projections, in meters per second
+        - For other projections, in CRS units per second
+
+        If units have been declared:
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS distance
+          units are meters
 
         Parameters
         ----------
@@ -1111,7 +1123,7 @@ class Trajectory:
             Whether to overwrite existing speed values (default: False)
         name : str
             Name of the speed column (default: "speed")
-        units : tuple
+        units : tuple(str)
             Units in which to calculate speed
 
             distance : str
@@ -1163,19 +1175,23 @@ class Trajectory:
         """
         Add acceleration column and values to the trajectory's DataFrame.
 
-        Adds a column with the acceleration to each point from the previous:
-             If no units have been declared:
-                 For geographic projections, in meters per second squared
-                 For other projections, in CRS units per second squared
-             If units have been declared:
-                 For geographic projections, using declared units
-                 For known CRS units, using declared units
-                 For unknown CRS units, using declared units as if CRS distance
-                 units are meters
-                 If only distance units are declared, returns
-                     distance per second squared
-                 If distance and one time unit declared, returns
-                     distance/time per second
+        Acceleration values are computed between the current point and the previous:
+
+        If no units have been declared:
+
+        - For geographic projections, in meters per second squared
+        - For other projections, in CRS units per second squared
+
+        If units have been declared:
+
+        - For geographic projections, using declared units
+        - For known CRS units, using declared units
+        - For unknown CRS units, using declared units as if CRS distance
+          units are meters
+        - If only distance units are declared, returns
+          distance per second squared
+        - If distance and one time unit declared, returns
+          distance/time per second
 
         Parameters
         ----------
@@ -1183,7 +1199,7 @@ class Trajectory:
             Whether to overwrite existing speed values (default: False)
         name : str
             Name of the acceleration column (default: "acceleration")
-        units : tuple
+        units : tuple(str)
             Units in which to calculate acceleration
 
             distance : str
@@ -1321,9 +1337,10 @@ class Trajectory:
         https://shapely.readthedocs.io/en/stable/manual.html#object.distance).
 
         If units have been declared:
-            For geographic projections, in declared units
-            For known CRS units, in declared units
-            For unknown CRS units, in declared units as if CRS is in meters
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
@@ -1361,9 +1378,10 @@ class Trajectory:
         the other geometry.
 
         If units have been declared:
-            For geographic projections, in declared units
-            For known CRS units, in declared units
-            For unknown CRS units, in declared units as if CRS is in meters
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------

@@ -12,7 +12,15 @@ from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 from shapely.geometry import LineString, Point, Polygon
 
-from movingpandas.trajectory import TRAJ_ID_COL_NAME
+from movingpandas.trajectory import (
+    TRAJ_ID_COL_NAME,
+    SPEED_COL_NAME,
+    DIRECTION_COL_NAME,
+    DISTANCE_COL_NAME,
+    ACCELERATION_COL_NAME,
+    ANGULAR_DIFFERENCE_COL_NAME,
+    TIMEDELTA_COL_NAME,
+)
 from movingpandas.trajectory_collection import TrajectoryCollection
 from . import requires_holoviews
 
@@ -264,6 +272,38 @@ class TestTrajectoryCollection:
         collection = TrajectoryCollection(gdf, "id", obj_id_col="obj")
         with pytest.raises(RuntimeError):
             collection.add_traj_id()
+
+    def test_add_speed(self):
+        self.collection.add_speed()
+        result1 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
+        assert len(result1) == 4
+
+    def test_add_acceleration(self):
+        self.collection.add_acceleration()
+        result1 = self.collection.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
+        assert len(result1) == 4
+
+    def test_add_direction(self):
+        self.collection.add_direction()
+        result1 = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
+        assert len(result1) == 4
+
+    def test_add_distance(self):
+        self.collection.add_distance()
+        result1 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
+        assert len(result1) == 4
+
+    def test_add_angular_difference(self):
+        self.collection.add_angular_difference()
+        result1 = (
+            self.collection.trajectories[0].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        )
+        assert len(result1) == 4
+
+    def test_add_timedelta(self):
+        self.collection.add_timedelta()
+        result1 = self.collection.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
+        assert len(result1) == 4
 
     def test_to_point_gdf(self):
         point_gdf = self.collection.to_point_gdf()
