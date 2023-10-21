@@ -862,7 +862,7 @@ class Trajectory:
 
         Parameters
         ----------
-        units : str
+        units : tuple(str)
             Units in which to calculate length values (default: CRS units)
             For more info, check the list of supported units at
             https://movingpandas.org/units
@@ -1041,19 +1041,19 @@ class Trajectory:
 
         Adds a column with the distance to each point from the previous:
             If no units have been declared:
-                For geographic projections (e.g. EPSG:4326 WGS84), in meters
-                For other projections, in CRS units
+            - For geographic projections (e.g. EPSG:4326 WGS84), in meters
+            - For other projections, in CRS units
             If units have been declared:
-                For geographic projections, in declared units
-                For known CRS units, in declared units
-                For unknown CRS units, in declared units as if CRS is in meters
+            - For geographic projections, in declared units
+            - For known CRS units, in declared units
+            - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------
         overwrite : bool
             Whether to overwrite existing distance values (default: False)
 
-        units : str
+        units : tuple(str)
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units at
             https://movingpandas.org/units
