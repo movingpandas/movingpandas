@@ -510,7 +510,7 @@ class TrajectoryCollection:
         for traj in self:
             traj.add_speed(overwrite=overwrite, name=name, units=units)
 
-    def add_direction(self, name=DIRECTION_COL_NAME, overwrite=False):
+    def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME):
         """
         Add direction column and values to the trajectories.
 

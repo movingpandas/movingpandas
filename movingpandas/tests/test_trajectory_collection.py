@@ -287,15 +287,17 @@ class TestTrajectoryCollection:
         self.collection.add_direction()
         result1 = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
         assert len(result1) == 4
-        
+
     def test_add_distance(self):
         self.collection.add_distance()
         result1 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
         assert len(result1) == 4
-        
+
     def test_add_angular_difference(self):
         self.collection.add_angular_difference()
-        result1 = self.collection.trajectories[0].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        result1 = (
+            self.collection.trajectories[0].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        )
         assert len(result1) == 4
 
     def test_add_timedelta(self):
