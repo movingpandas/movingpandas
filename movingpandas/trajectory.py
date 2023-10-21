@@ -984,6 +984,8 @@ class Trajectory:
         ----------
         overwrite : bool
             Whether to overwrite existing direction values (default: False)
+        name : str
+            Name of the direction column (default: "direction")
         """
         self.direction_col_name = name
         if self.direction_col_name in self.df.columns and not overwrite:
@@ -1040,14 +1042,14 @@ class Trajectory:
         Add distance column and values to the trajectory's DataFrame.
 
         Distance values are computed between the current point and the previous:
-            
+
         If no units have been declared:
-        
+
         - For geographic projections (e.g. EPSG:4326 WGS84), in meters
         - For other projections, in CRS units
 
         If units have been declared:
-        
+
         - For geographic projections, in declared units
         - For known CRS units, in declared units
         - For unknown CRS units, in declared units as if CRS is in meters
@@ -1056,7 +1058,8 @@ class Trajectory:
         ----------
         overwrite : bool
             Whether to overwrite existing distance values (default: False)
-
+        name : str
+            Name of the distance column (default: "distance")
         units : str
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units at
@@ -1101,9 +1104,9 @@ class Trajectory:
         Add speed column and values to the trajectory's DataFrame.
 
         Speed values are computed between the current point and the previous:
-        
+
         If no units have been declared:
-        
+
         - For geographic projections, in meters per second
         - For other projections, in CRS units per second
 
@@ -1175,12 +1178,12 @@ class Trajectory:
         Acceleration values are computed between the current point and the previous:
 
         If no units have been declared:
-        
+
         - For geographic projections, in meters per second squared
         - For other projections, in CRS units per second squared
 
         If units have been declared:
-        
+
         - For geographic projections, using declared units
         - For known CRS units, using declared units
         - For unknown CRS units, using declared units as if CRS distance
@@ -1375,9 +1378,10 @@ class Trajectory:
         the other geometry.
 
         If units have been declared:
-            For geographic projections, in declared units
-            For known CRS units, in declared units
-            For unknown CRS units, in declared units as if CRS is in meters
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
 
         Parameters
         ----------

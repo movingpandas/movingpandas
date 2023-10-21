@@ -3,7 +3,15 @@
 from pandas import concat
 from copy import copy
 from geopandas import GeoDataFrame
-from .trajectory import Trajectory, SPEED_COL_NAME, DIRECTION_COL_NAME
+from .trajectory import (
+    Trajectory,
+    SPEED_COL_NAME,
+    DIRECTION_COL_NAME,
+    DISTANCE_COL_NAME,
+    ACCELERATION_COL_NAME,
+    ANGULAR_DIFFERENCE_COL_NAME,
+    TIMEDELTA_COL_NAME,
+)
 from .trajectory_plotter import _TrajectoryPlotter
 from .unit_utils import UNITS
 
@@ -486,7 +494,7 @@ class TrajectoryCollection:
         overwrite : bool
             Whether to overwrite existing speed values (default: False)
 
-        units : tuple
+        units : tuple(str)
             Units in which to calculate speed
 
             distance : str
@@ -500,7 +508,7 @@ class TrajectoryCollection:
 
         """
         for traj in self:
-            traj.add_speed(overwrite, name, units)
+            traj.add_speed(overwrite=overwrite, name=name, units=units)
 
     def add_direction(self, name=DIRECTION_COL_NAME, overwrite=False):
         """
@@ -515,11 +523,15 @@ class TrajectoryCollection:
             Whether to overwrite existing direction values (default: False)
         """
         for traj in self:
-            traj.add_direction(overwrite)
+            traj.add_direction(overwrite=overwrite, name=name)
 
-    def add_angular_difference(self, overwrite=False):
+    def add_angular_difference(
+        self,
+        overwrite=False,
+        name=ANGULAR_DIFFERENCE_COL_NAME,
+    ):
         """
-        Add angular difference to the trajectories.
+        Add angular difference to the trajectory's DataFrame.
 
         Angular difference is calculated as the absolute smaller angle
         between direction for points along the trajectory.
@@ -531,9 +543,11 @@ class TrajectoryCollection:
             Whether to overwrite existing angular difference values (default: False)
         """
         for traj in self:
-            traj.add_angular_difference(overwrite)
+            traj.add_angular_difference(overwrite=overwrite, name=name)
 
-    def add_acceleration(self, overwrite=False):
+    def add_acceleration(
+        self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
+    ):
         """
         Add acceleration column and values to the trajectories.
 
@@ -545,9 +559,59 @@ class TrajectoryCollection:
         ----------
         overwrite : bool
             Whether to overwrite existing acceleration values (default: False)
+        name : str
+            Name of the acceleration column (default: "acceleration")
+        units : tuple(str)
+            Units in which to calculate acceleration
+
+            distance : str
+                Abbreviation for the distance unit
+                (default: CRS units, or metres if geographic)
+            time : str
+                Abbreviation for the time unit (default: seconds)
+            time2 : str
+                Abbreviation for the second time unit (default: seconds)
+
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
         """
         for traj in self:
-            traj.add_acceleration(overwrite)
+            traj.add_acceleration(overwrite=overwrite, name=name, units=units)
+
+    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=None):
+        """
+        Add distance column and values to the trajectories.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing distance values (default: False)
+        name : str
+            Name of the distance column (default: "distance")
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
+        """
+        for traj in self:
+            traj.add_distance(overwrite=overwrite, name=name, units=units)
+
+    def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
+        """
+        Add timedelta column and values to the trajectories.
+
+        Timedelta is calculated as the time difference between the current
+        and the previous row. Values are instances of datetime.timedelta.
+
+        Parameters
+        ----------
+        overwrite : bool
+            Whether to overwrite existing timedelta values (default: False)
+        name : str
+            Name of the timedelta column (default: "timedelta")
+        """
+        for traj in self:
+            traj.add_timedelta(overwrite=overwrite, name=name)
 
     def add_traj_id(self, overwrite=False):
         """
