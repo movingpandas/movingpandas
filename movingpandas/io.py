@@ -8,15 +8,16 @@ from movingpandas import Trajectory, TrajectoryCollection
 
 
 def gdf_to_mf_json(
-    gdf: GeoDataFrame,
-    traj_id_column: str,
-    datetime_column: str,
-    temporal_columns: list = None,
-    temporal_columns_static_fields: Dict[str, Dict] = None,
-    interpolation: str = None,
-    crs=None,
-    trs=None,
-    datetime_encoder: Callable = None,  # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
+        gdf: GeoDataFrame,
+        traj_id_column: str,
+        datetime_column: str,
+        temporal_columns: list = None,
+        temporal_columns_static_fields: Dict[str, Dict] = None,
+        interpolation: str = None,
+        crs=None,
+        trs=None,
+        datetime_encoder: Callable = None,
+        # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
 ) -> dict:
     """
     Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON
@@ -104,7 +105,7 @@ def gdf_to_mf_json(
 
 
 def _raise_error_if_invalid_arguments(
-    gdf: GeoDataFrame, datetime_column: str, traj_id_property: str
+        gdf: GeoDataFrame, datetime_column: str, traj_id_property: str
 ):
     if not isinstance(gdf, GeoDataFrame):
         raise TypeError(
@@ -130,7 +131,7 @@ def _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row):
 
 
 def _encode_temporal_properties(
-    datetimes, row, temporal_properties, temporal_properties_static_fields
+        datetimes, row, temporal_properties, temporal_properties_static_fields
 ):
     temporal_properties_data = {
         "datetimes": datetimes,
@@ -168,6 +169,25 @@ def read_mf_json(json_file_path, traj_id_property=None, traj_id=0):
     """
     with open(json_file_path, "r") as f:
         data = json.loads(f.read())
+    return read_mf_dict(data, traj_id, traj_id_property)
+
+
+def read_mf_dict(data: dict, traj_id=0, traj_id_property=None):
+    """
+    Reads OGC Moving Features Encoding Extension JSON files from a dictionary.
+    MovingFeatures files are turned into Trajectory objects.
+    MovingFeatureCollection files are turned into TrajectoryCollection objects.
+    More info: http://www.opengis.net/doc/BP/mf-json/1.0
+
+    data : dict
+        JSON data as a dictionary
+    traj_id_property : str
+        Name of the MovingFeature JSON property to be used as trajectory ID
+    traj_id : any
+        Trajectory ID value to be used if no traj_id_property is supplied
+
+    Returns
+    """
     return _create_objects_from_mf_json_dict(data, traj_id_property, traj_id)
 
 
@@ -238,7 +258,7 @@ def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
 
 def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_property):
     assert (
-        traj_id_property is not None
+            traj_id_property is not None
     ), "traj_id_property must be supplied when reading a collection of trajectories"
 
     trajectories = []

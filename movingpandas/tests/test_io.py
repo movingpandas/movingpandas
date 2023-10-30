@@ -8,7 +8,7 @@ import pytest
 from movingpandas.io import (
     _create_objects_from_mf_json_dict,
     gdf_to_mf_json,
-    read_mf_json,
+    read_mf_json, read_mf_dict,
 )
 
 
@@ -26,6 +26,20 @@ class TestIO:
         actual = list(traj.df["pressure"])
         expected = [1004.0, 1004.0, 1004.0, 1004.0, 1000.0]
         assert actual == expected
+
+    def test_read_mf_dict(self):
+        data = {
+            "type": "Feature",
+            "properties": {"id": 5},
+            "temporalGeometry": {
+                "type": "MovingPoint",
+                "datetimes": ["2008-02-02T15:02:18Z", "2008-02-02T18:32:28Z"],
+                "coordinates": [[116.52299, 40.07757], [116.52302, 39.92129]],
+            },
+        }
+        traj = read_mf_dict(data, "id")
+        assert traj.id == 5
+        assert traj.size() == 2
 
     def test_mf_collection_file(self):
         trajs_collection = read_mf_json(
