@@ -8,7 +8,8 @@ import pytest
 from movingpandas.io import (
     _create_objects_from_mf_json_dict,
     gdf_to_mf_json,
-    read_mf_json, read_mf_dict,
+    read_mf_json,
+    read_mf_dict,
 )
 
 
@@ -28,18 +29,28 @@ class TestIO:
         assert actual == expected
 
     def test_read_mf_dict(self):
-        data = {
-            "type": "Feature",
-            "properties": {"id": 5},
-            "temporalGeometry": {
-                "type": "MovingPoint",
-                "datetimes": ["2008-02-02T15:02:18Z", "2008-02-02T18:32:28Z"],
-                "coordinates": [[116.52299, 40.07757], [116.52302, 39.92129]],
-            },
+        collection = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"id": 5},
+                    "temporalGeometry": {
+                        "type": "MovingPoint",
+                        "datetimes": ["2008-02-02T15:02:18Z", "2008-02-02T18:32:28Z"],
+                        "coordinates": [[116.52299, 40.07757], [116.52302, 39.92129]],
+                    },
+                }
+            ],
         }
-        traj = read_mf_dict(data, "id")
+        trajs_collection = read_mf_dict(collection, traj_id_property="id")
+
+        assert len(trajs_collection) == 1
+        assert trajs_collection.get_trajectory(5).id == 5
+
+        traj = read_mf_dict(collection["features"][0], traj_id_property="id")
+
         assert traj.id == 5
-        assert traj.size() == 2
 
     def test_mf_collection_file(self):
         trajs_collection = read_mf_json(

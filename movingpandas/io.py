@@ -8,16 +8,16 @@ from movingpandas import Trajectory, TrajectoryCollection
 
 
 def gdf_to_mf_json(
-        gdf: GeoDataFrame,
-        traj_id_column: str,
-        datetime_column: str,
-        temporal_columns: list = None,
-        temporal_columns_static_fields: Dict[str, Dict] = None,
-        interpolation: str = None,
-        crs=None,
-        trs=None,
-        datetime_encoder: Callable = None,
-        # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
+    gdf: GeoDataFrame,
+    traj_id_column: str,
+    datetime_column: str,
+    temporal_columns: list = None,
+    temporal_columns_static_fields: Dict[str, Dict] = None,
+    interpolation: str = None,
+    crs=None,
+    trs=None,
+    datetime_encoder: Callable = None,
+    # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
 ) -> dict:
     """
     Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON
@@ -105,7 +105,7 @@ def gdf_to_mf_json(
 
 
 def _raise_error_if_invalid_arguments(
-        gdf: GeoDataFrame, datetime_column: str, traj_id_property: str
+    gdf: GeoDataFrame, datetime_column: str, traj_id_property: str
 ):
     if not isinstance(gdf, GeoDataFrame):
         raise TypeError(
@@ -131,7 +131,7 @@ def _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row):
 
 
 def _encode_temporal_properties(
-        datetimes, row, temporal_properties, temporal_properties_static_fields
+    datetimes, row, temporal_properties, temporal_properties_static_fields
 ):
     temporal_properties_data = {
         "datetimes": datetimes,
@@ -258,7 +258,7 @@ def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
 
 def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_property):
     assert (
-            traj_id_property is not None
+        traj_id_property is not None
     ), "traj_id_property must be supplied when reading a collection of trajectories"
 
     trajectories = []
