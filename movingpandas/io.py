@@ -16,7 +16,8 @@ def gdf_to_mf_json(
     interpolation: str = None,
     crs=None,
     trs=None,
-    datetime_encoder: Callable = None,  # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
+    datetime_encoder: Callable = None,
+    # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
 ) -> dict:
     """
     Converts a GeoDataFrame to a dictionary compatible with the Moving Features JSON
@@ -168,6 +169,25 @@ def read_mf_json(json_file_path, traj_id_property=None, traj_id=0):
     """
     with open(json_file_path, "r") as f:
         data = json.loads(f.read())
+    return read_mf_dict(data, traj_id, traj_id_property)
+
+
+def read_mf_dict(data: dict, traj_id=0, traj_id_property=None):
+    """
+    Reads OGC Moving Features Encoding Extension JSON files from a dictionary.
+    MovingFeatures files are turned into Trajectory objects.
+    MovingFeatureCollection files are turned into TrajectoryCollection objects.
+    More info: http://www.opengis.net/doc/BP/mf-json/1.0
+
+    data : dict
+        JSON data as a dictionary
+    traj_id_property : str
+        Name of the MovingFeature JSON property to be used as trajectory ID
+    traj_id : any
+        Trajectory ID value to be used if no traj_id_property is supplied
+
+    Returns
+    """
     return _create_objects_from_mf_json_dict(data, traj_id_property, traj_id)
 
 

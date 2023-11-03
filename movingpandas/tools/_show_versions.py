@@ -137,12 +137,12 @@ def show_versions():
     print("\nSYSTEM INFO")
     print("-----------")
     for k, stat in sys_info.items():
-        print(f"{k:<{maxlen}}: {stat}")
+        print(f"{k: <{maxlen}}: {stat}")
     print("\nGEOS, GDAL, PROJ INFO")
     print("---------------------")
     for k, stat in proj_info.items():
-        print(f"{k:<{maxlen}}: {stat}")
+        print(f"{k: <{maxlen}}: {stat}")
     print("\nPYTHON DEPENDENCIES")
     print("-------------------")
     for k, stat in deps_info.items():
-        print(f"{k:<{maxlen}}: {stat}")
+        print(f"{k: <{maxlen}}: {stat}")
