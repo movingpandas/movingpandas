@@ -497,8 +497,7 @@ class Trajectory:
         """
         # Shapely only supports x, y, z. Therefore, this is a bit hacky!
         coords = []
-        for index, row in self.df.iterrows():
-            pt = row[self.get_geom_col()]
+        for index, pt in self.df[self.get_geom_col()].items():
             t = to_unixtime(index)
             coords.append(f"{pt.x} {pt.y} {t}")
         wkt = f"LINESTRING M ({', '.join(coords)})"

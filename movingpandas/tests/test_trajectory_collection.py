@@ -250,8 +250,8 @@ class TestTrajectoryCollection:
         trajs = [filter_trajectory(traj) for traj in self.collection]
 
         lengths = (1, 2)
-        for i, traj in enumerate(trajs):
-            assert len(traj.df) == lengths[i]
+        for traj, length in zip(trajs, lengths):
+            assert len(traj.df) == length
 
         collection = copy(self.collection)
         collection.trajectories = trajs

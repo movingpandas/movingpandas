@@ -164,8 +164,8 @@ class TestTrajectoryCollectionAggregator:
     def test_get_flows_gdf_crs_metric(self):
         flows = self.trajectory_aggregator.get_flows_gdf()
         assert flows.crs == CRS_METRIC
-        actual = [(f.geometry, f.weight) for key, f in flows.iterrows()]
-        expected = [(f.geometry, f.weight) for key, f in self.expected_flows.iterrows()]
+        actual = list(zip(*flows[["geometry", "weight"]]))
+        expected = list(zip(*self.expected_flows[["geometry", "weight"]]))
         assert len(actual) == len(expected)
         for pt in expected:
             assert pt in actual
@@ -177,8 +177,8 @@ class TestTrajectoryCollectionAggregator:
         clusters = self.trajectory_aggregator.get_clusters_gdf()
         assert clusters.crs == CRS_METRIC
         print(clusters)
-        actual = [(c.geometry, c.n) for key, c in clusters.iterrows()]
-        expected = [(c.geometry, c.n) for key, c in self.expected_clusters.iterrows()]
+        actual = list(zip(*clusters[["geometry", "n"]]))
+        expected = list(zip(*self.expected_clusters[["geometry", "n"]]))
         for pt in expected:
             assert pt in actual
 

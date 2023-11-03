@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from geopy import distance
-from math import sqrt, pow
+from math import hypot
 from multiprocessing import Pool
 from itertools import repeat
 from geopandas import GeoDataFrame
@@ -123,7 +123,7 @@ class TrajectoryStopDetector:
                 if traj.is_latlon:
                     d = distance.distance((miny, minx), (maxy, maxx)).meters
                 else:
-                    d = sqrt(pow(maxx - minx, 2) + pow(maxy - miny, 2))
+                    d = hypot(maxx - minx, maxy - miny)
                 if d < max_diameter * 1.5:
                     geom = MultiPoint(pts)
                     if mrr_diagonal(geom, traj.is_latlon) < max_diameter:

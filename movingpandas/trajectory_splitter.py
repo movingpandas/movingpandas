@@ -200,14 +200,10 @@ class StopSplitter(TrajectorySplitter):
 
     @staticmethod
     def get_time_ranges_between_stops(traj, stop_ranges):
-        result = []
-        if stop_ranges:
-            for i in range(0, len(stop_ranges)):
-                if i == 0:
-                    result.append(TRange(traj.get_start_time(), stop_ranges[i].t_0))
-                    continue
-                result.append(TRange(stop_ranges[i - 1].t_n, stop_ranges[i].t_0))
-            result.append(TRange(stop_ranges[-1].t_n, traj.get_end_time()))
-        else:
-            result.append(TRange(traj.get_start_time(), traj.get_end_time()))
+        items = [traj.get_start_time()]
+        for stop_range in stop_ranges:
+            items.append(stop_range.t_0)
+            items.append(stop_range.t_n)
+        items.append(traj.get_end_time())
+        result = [TRange(*items[x : x + 2]) for x in range(0, len(items), 2)]
         return result

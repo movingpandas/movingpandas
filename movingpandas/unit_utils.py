@@ -221,46 +221,36 @@ def get_conversion(units, crs_units):
         units = UNITS(units)
 
     if units.distance is not None:
-        try:
-            d_conv = [
-                d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units.distance
-            ][0]
-        except IndexError:
+        d_conv = next(
+            (d["conv"] for d in DISTANCE_UNIT_LIST if d.get("abbr") == units.distance),
+            None,
+        )
+        if d_conv is None:
             raise ValueError("Invalid distance units!")
-        else:
-            try:
-                crs_conv = [
-                    d["conv"]
-                    for d in DISTANCE_UNIT_LIST
-                    if d.get("fullname") == crs_units
-                ][0]
-            except (IndexError, AttributeError):
-                crs_conv = 1
-                warnings.warn(
-                    "No valid CRS distance units. Computations will "
-                    "assume CRS distance units are meters",
-                    category=MissingCRSWarning,
-                )
-            finally:
-                if units.time is not None:
-                    try:
-                        t_conv = [
-                            t["conv"]
-                            for t in TIME_UNIT_LIST
-                            if t.get("abbr") == units.time
-                        ][0]
-                    except IndexError:
-                        raise ValueError("Invalid time units!")
-                    else:
-                        if units.time2 is not None:
-                            try:
-                                t2_conv = [
-                                    t["conv"]
-                                    for t in TIME_UNIT_LIST
-                                    if t.get("abbr") == units.time2
-                                ][0]
-                            except IndexError:
-                                raise ValueError("Invalid second time units!")
+        crs_conv = next(
+            (d["conv"] for d in DISTANCE_UNIT_LIST if d.get("fullname") == crs_units),
+            None,
+        )
+        if crs_conv is None:
+            crs_conv = 1
+            warnings.warn(
+                "No valid CRS distance units. Computations will "
+                "assume CRS distance units are meters",
+                category=MissingCRSWarning,
+            )
+        if units.time is not None:
+            t_conv = next(
+                (t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time), None
+            )
+            if t_conv is None:
+                raise ValueError("Invalid time units!")
+        if units.time2 is not None:
+            t2_conv = next(
+                (t["conv"] for t in TIME_UNIT_LIST if t.get("abbr") == units.time2),
+                None,
+            )
+            if t2_conv is None:
+                raise ValueError("Invalid second time units!")
     return UNITS(d_conv, t_conv, t2_conv, crs_conv)
 
 
