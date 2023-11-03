@@ -183,7 +183,7 @@ class Trajectory:
             return "Invalid trajectory!"
         return (
             f"Trajectory {self.id} ({self.get_start_time()} to {self.get_end_time()}) "
-            f"| Size: {self.size()} | Length:{self.get_length(): .1f}m\n"
+            f"| Size: {self.size()} | Length: {round(self.get_length(), 1)}m\n"
             f"Bounds: {self.get_bbox()}\n{line.wkt[:100]}"
         )
 
