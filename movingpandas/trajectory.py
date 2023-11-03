@@ -148,7 +148,7 @@ class Trajectory:
         self.id = traj_id
         self.obj_id = obj_id
         df.sort_index(inplace=True)
-        self.df = df[~df.index.duplicated(keep="first")]
+        self.df = df[~df.index.duplicated(keep="first")].copy()
         self.crs = df.crs
         self.parent = parent
 
