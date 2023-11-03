@@ -81,7 +81,7 @@ class _Grid:
                     g.add_point(pt)
                     g.recompute_centroid()
                 else:
-                    print(f"Error: no group in cell {i},{j}")
+                    print(f"Error: no group in cell {i}, {j}")
                     print(pt)
 
     def get_group(self, centroid):
