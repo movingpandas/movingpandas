@@ -80,7 +80,7 @@ class TrajectoryCollectionAggregator:
             Significant points
         """
         if not self.significant_points:
-            self._extract_significant_points()
+            self.significant_points = self._extract_significant_points()
         df = DataFrame(self.significant_points, columns=["geometry"])
         return GeoDataFrame(df, crs=self._crs)
 
@@ -95,7 +95,9 @@ class TrajectoryCollectionAggregator:
             points (n).
         """
         if not self.clusters:
-            self._cluster_significant_points()
+            self.clusters = PointClusterer(
+                self.significant_points, self.max_distance, self.is_latlon
+            ).get_clusters()
         df = DataFrame(
             [cluster.centroid for cluster in self.clusters],
             columns=["geometry"],
@@ -114,7 +116,7 @@ class TrajectoryCollectionAggregator:
             flow (weight).
         """
         if not self.flows:
-            self._compute_flows_between_clusters()
+            self.flows = self._compute_flows_between_clusters()
         return GeoDataFrame(self.flows, crs=self._crs)
 
     def _extract_significant_points(self):
@@ -237,6 +239,7 @@ class _SequenceGenerator:
 
         self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
         self.sequences = Counter()
+        self.sequences_obj_log = {}
         for traj in traj_collection:
             self.evaluate_trajectory(traj)
 
@@ -252,6 +255,14 @@ class _SequenceGenerator:
                 prev_cell_id = this_sequence[-1]
                 if nearest_cell_id != prev_cell_id:
                     self.sequences[(prev_cell_id, nearest_cell_id)] += 1
+                    if (prev_cell_id, nearest_cell_id) in self.sequences_obj_log.keys():
+                        self.sequences_obj_log[(prev_cell_id, nearest_cell_id)].update(
+                            [trajectory.obj_id]
+                        )
+                    else:
+                        self.sequences_obj_log[(prev_cell_id, nearest_cell_id)] = set(
+                            [trajectory.obj_id]
+                        )
             if nearest_cell_id != prev_cell_id:
                 # we have changed to a new cell --> up the counter
                 h = t.hour
@@ -264,7 +275,14 @@ class _SequenceGenerator:
         for key, value in self.sequences.items():
             p1 = self.id_to_centroid[key[0]][0].geometry
             p2 = self.id_to_centroid[key[1]][0].geometry
-            lines.append({"geometry": LineString([p1, p2]), "weight": value})
+            obj_value = len(self.sequences_obj_log[key])
+            lines.append(
+                {
+                    "geometry": LineString([p1, p2]),
+                    "weight": value,
+                    "obj_weight": obj_value,
+                }
+            )
         return lines
 
     def get_nearest(self, pt):
