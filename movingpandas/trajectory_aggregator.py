@@ -113,7 +113,8 @@ class TrajectoryCollectionAggregator:
         -------
         GeoDataFrame
             Flow lines, incl. the number of trajectories summarized in the
-            flow (weight).
+            flow (weight) and the number of unique trajectory objects summarized
+            in the flow (obj_weight).
         """
         if not self.flows:
             self.flows = self._compute_flows_between_clusters()
