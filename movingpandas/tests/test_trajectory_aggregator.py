@@ -113,9 +113,9 @@ class TestTrajectoryCollectionAggregator:
             [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0)],
             [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0)],
             [1, "A", Point(6, 6), datetime(2018, 1, 1, 14, 10, 0)],
-            [2, "A", Point(0.2, 0.2), datetime(2019, 1, 1, 12, 0, 0)],
-            [2, "A", Point(6.2, 0.2), datetime(2019, 1, 1, 12, 6, 0)],
-            [2, "A", Point(6.2, 6.2), datetime(2019, 1, 1, 14, 10, 0)],
+            [2, "B", Point(0.2, 0.2), datetime(2019, 1, 1, 12, 0, 0)],
+            [2, "B", Point(6.2, 0.2), datetime(2019, 1, 1, 12, 6, 0)],
+            [2, "B", Point(6.2, 6.2), datetime(2019, 1, 1, 14, 10, 0)],
         ]
         df = DataFrame(lst, columns=["id", "obj", "geometry", "t"]).set_index("t")
         self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
@@ -132,10 +132,10 @@ class TestTrajectoryCollectionAggregator:
         self.expected_flows = GeoDataFrame(
             DataFrame(
                 [
-                    [LineString([Point(0.1, 0.1), Point(6.1, 0.1)]), 2],
-                    [LineString([Point(6.1, 0.1), Point(6.1, 6.1)]), 2],
+                    [LineString([Point(0.1, 0.1), Point(6.1, 0.1)]), 2, 2],
+                    [LineString([Point(6.1, 0.1), Point(6.1, 6.1)]), 2, 2],
                 ],
-                columns=["geometry", "weight"],
+                columns=["geometry", "weight", "obj_weight"],
             )
         )
         self.geo_df_latlon = GeoDataFrame(df).set_crs(CRS_LATLON, allow_override=True)
@@ -164,8 +164,8 @@ class TestTrajectoryCollectionAggregator:
     def test_get_flows_gdf_crs_metric(self):
         flows = self.trajectory_aggregator.get_flows_gdf()
         assert flows.crs == CRS_METRIC
-        actual = list(zip(*flows[["geometry", "weight"]]))
-        expected = list(zip(*self.expected_flows[["geometry", "weight"]]))
+        actual = list(zip(*flows[["geometry", "weight", "obj_weight"]]))
+        expected = list(zip(*self.expected_flows[["geometry", "weight", "obj_weight"]]))
         assert len(actual) == len(expected)
         for pt in expected:
             assert pt in actual

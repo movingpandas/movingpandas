@@ -207,3 +207,60 @@ class StopSplitter(TrajectorySplitter):
         items.append(traj.get_end_time())
         result = [TRange(*items[x : x + 2]) for x in range(0, len(items), 2)]
         return result
+
+
+class AngleChangeSplitter(TrajectorySplitter):
+    """
+    Split trajectories into subtrajectories whenever there is a specified change in
+    the heading angle.
+
+    Parameters
+    ----------
+    min_angle : float
+        Minimum angle change
+    min_speed: float
+        Min speed threshold at which points are considered for angle change.
+        (Speed is calculated as CRS units per second, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then speed is calculated in meters per second.)
+    min_length : numeric
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
+
+    Examples
+    --------
+
+    >>> mpd.AngleSplitter(traj).split(min_angle=45, min_speed=15)
+    """
+
+    def _split_traj(self, traj, min_angle=45, min_speed=0, min_length=0):
+        result = []
+        traj = traj.copy()
+
+        direction_col = traj.get_direction_col()
+        if direction_col not in traj.df.columns:
+            traj.add_direction(overwrite=True)
+
+        speed_col_name = traj.get_speed_col()
+        if speed_col_name not in traj.df.columns:
+            traj.add_speed(overwrite=True)
+
+        traj.df = traj.df[traj.df[speed_col_name] > min_speed]
+
+        traj.df["angChange"] = traj.df[direction_col].apply(
+            lambda x: int(abs(x - traj.df[direction_col].iloc[0]) / min_angle)
+        )
+        traj.df["angChange"] = traj.df["angChange"].diff()
+        traj.df["angChange"] = (
+            traj.df["angChange"].apply(lambda x: 1 if x else 0).cumsum()
+        )
+
+        dfs = [group[1] for group in traj.df.groupby(traj.df["angChange"])]
+        for i, df in enumerate(dfs):
+            df = df.drop(columns=["angChange"])
+            if len(df) > 1:
+                result.append(
+                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                )
+
+        return TrajectoryCollection(result, min_length=min_length)
