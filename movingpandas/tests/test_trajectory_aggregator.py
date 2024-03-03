@@ -164,11 +164,16 @@ class TestTrajectoryCollectionAggregator:
     def test_get_flows_gdf_crs_metric(self):
         flows = self.trajectory_aggregator.get_flows_gdf()
         assert flows.crs == CRS_METRIC
-        actual = list(zip(*flows[["geometry", "weight", "obj_weight"]]))
-        expected = list(zip(*self.expected_flows[["geometry", "weight", "obj_weight"]]))
+        actual = list(zip(*flows[["geometry", "weight"]]))
+        expected = list(zip(*self.expected_flows[["geometry", "weight"]]))
         assert len(actual) == len(expected)
         for pt in expected:
             assert pt in actual
+        actual_obj = list(zip(*flows[["geometry", "weight", "obj_weight"]]))
+        expected_obj = list(zip(*self.expected_flows[["geometry", "weight", "obj_weight"]]))
+        assert len(actual_obj) == len(expected_obj)
+        for pt in expected_obj:
+            assert pt in actual_obj
 
     def test_get_flows_gdf_crs_latlon(self):
         assert self.trajectory_aggregator_latlon.get_flows_gdf().crs == CRS_LATLON
