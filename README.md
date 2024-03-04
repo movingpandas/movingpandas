@@ -203,6 +203,10 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
+### Platforms using MovingPandas
+
+* [MoveApps](https://www.moveapps.org) the free analysis platform for animal tracking data hosted by the Max Planck Institute of Animal Behavior uses MovingPandas TrajectoryCollections as their [default Python IO type](https://docs.moveapps.org/#/create_py_app?id=io-types).
+
 
 ### Teaching materials referencing MovingPandas
 
