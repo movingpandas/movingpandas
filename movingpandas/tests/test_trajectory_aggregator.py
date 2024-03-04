@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pandas import DataFrame
+from pandas.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from pyproj import CRS
@@ -14,6 +15,18 @@ from movingpandas.trajectory_aggregator import (
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
+
+
+def assert_frame_not_equal(*args, **kwargs):
+    # Taken from https://stackoverflow.com/a/38778401/6046019
+    try:
+        assert_frame_equal(*args, **kwargs)
+    except AssertionError:
+        # frames are not equal
+        pass
+    else:
+        # frames are equal
+        raise AssertionError
 
 
 class TestPtsExtractor:
@@ -117,9 +130,15 @@ class TestTrajectoryCollectionAggregator:
             [2, "B", Point(6.2, 0.2), datetime(2019, 1, 1, 12, 6, 0)],
             [2, "B", Point(6.2, 6.2), datetime(2019, 1, 1, 14, 10, 0)],
         ]
-        df = DataFrame(lst, columns=["id", "obj", "geometry", "t"]).set_index("t")
-        self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
-        self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
+        self.df = DataFrame(lst, columns=["id", "obj", "geometry", "t"]).set_index("t")
+
+    def create_metric(self, with_obj_id=False):
+        self.geo_df = GeoDataFrame(self.df, crs=CRS_METRIC)
+        if with_obj_id:
+            self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
+        else:
+            self.collection = TrajectoryCollection(self.geo_df, "id")
+
         self.trajectory_aggregator = TrajectoryCollectionAggregator(
             self.collection, 5, 0, min_stop_duration=timedelta(hours=12)
         )
@@ -132,13 +151,19 @@ class TestTrajectoryCollectionAggregator:
         self.expected_flows = GeoDataFrame(
             DataFrame(
                 [
-                    [LineString([Point(0.1, 0.1), Point(6.1, 0.1)]), 2, 2],
-                    [LineString([Point(6.1, 0.1), Point(6.1, 6.1)]), 2, 2],
+                    [LineString([Point(0.1, 0.1), Point(6.1, 0.1)]), 2, 1],
+                    [LineString([Point(6.1, 0.1), Point(6.1, 6.1)]), 2, 1],
                 ],
                 columns=["geometry", "weight", "obj_weight"],
             )
         )
-        self.geo_df_latlon = GeoDataFrame(df).set_crs(CRS_LATLON, allow_override=True)
+        if with_obj_id:
+            self.expected_flows["obj_weight"] = 2
+
+    def create_latlon(self):
+        self.geo_df_latlon = GeoDataFrame(self.df).set_crs(
+            CRS_LATLON, allow_override=True
+        )
         self.geo_df_latlon.crs = CRS_LATLON  # try to fix
         # https://travis-ci.com/github/anitagraser/movingpandas/builds/177149345
         self.collection_latlon = TrajectoryCollection(
@@ -149,6 +174,7 @@ class TestTrajectoryCollectionAggregator:
         )
 
     def test_get_significant_points_gdf_crs_metric(self):
+        self.create_metric()
         sig_points = self.trajectory_aggregator.get_significant_points_gdf()
         assert sig_points.crs == CRS_METRIC
         actual = sig_points.geometry.tolist()
@@ -158,27 +184,32 @@ class TestTrajectoryCollectionAggregator:
             assert pt in actual
 
     def test_get_significant_points_gdf_crs_latlon(self):
+        self.create_latlon()
         crs = self.trajectory_aggregator_latlon.get_significant_points_gdf().crs
         assert crs == CRS_LATLON
 
     def test_get_flows_gdf_crs_metric(self):
+        self.create_metric()
         flows = self.trajectory_aggregator.get_flows_gdf()
         assert flows.crs == CRS_METRIC
-        actual = list(zip(*flows[["geometry", "weight"]]))
-        expected = list(zip(*self.expected_flows[["geometry", "weight"]]))
-        assert len(actual) == len(expected)
-        for pt in expected:
-            assert pt in actual
-        actual_obj = list(zip(*flows[["geometry", "weight", "obj_weight"]]))
-        expected_obj = list(zip(*self.expected_flows[["geometry", "weight", "obj_weight"]]))
-        assert len(actual_obj) == len(expected_obj)
-        for pt in expected_obj:
-            assert pt in actual_obj
+        assert_frame_equal(flows, self.expected_flows)
+        self.expected_flows["obj_weight"] = 99
+        assert_frame_not_equal(flows, self.expected_flows)
+
+    def test_get_flows_gdf_crs_metric_obj(self):
+        self.create_metric(with_obj_id=True)
+        flows = self.trajectory_aggregator.get_flows_gdf()
+        assert flows.crs == CRS_METRIC
+        assert_frame_equal(flows, self.expected_flows)
+        self.expected_flows["obj_weight"] = 99
+        assert_frame_not_equal(flows, self.expected_flows)
 
     def test_get_flows_gdf_crs_latlon(self):
+        self.create_latlon()
         assert self.trajectory_aggregator_latlon.get_flows_gdf().crs == CRS_LATLON
 
     def test_get_clusters_gdf_crs_metric(self):
+        self.create_metric()
         clusters = self.trajectory_aggregator.get_clusters_gdf()
         assert clusters.crs == CRS_METRIC
         print(clusters)
@@ -188,4 +219,5 @@ class TestTrajectoryCollectionAggregator:
             assert pt in actual
 
     def test_get_clusters_gdf_crs_latlon(self):
+        self.create_latlon()
         assert self.trajectory_aggregator_latlon.get_clusters_gdf().crs == CRS_LATLON
