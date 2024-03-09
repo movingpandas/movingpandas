@@ -259,8 +259,14 @@ class AngleChangeSplitter(TrajectorySplitter):
         for i, df in enumerate(dfs):
             df = df.drop(columns=["angChange"])
             if len(df) > 1:
+                if i > 0:
+                    df.loc[prev_i] = prev_d
+                    df = df.sort_index(ascending=True)
+
                 result.append(
                     Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
                 )
+                prev_i = df.iloc[-1].name
+                prev_d = df.iloc[-1].to_dict()
 
         return TrajectoryCollection(result, min_length=min_length)
