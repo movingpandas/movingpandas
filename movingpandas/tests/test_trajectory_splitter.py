@@ -13,6 +13,7 @@ from movingpandas.trajectory_splitter import (
     ObservationGapSplitter,
     SpeedSplitter,
     StopSplitter,
+    AngleChangeSplitter,
 )
 
 
@@ -291,4 +292,69 @@ class TestTrajectorySplitter:
         assert (
             split.trajectories[0].to_linestring().wkt
             == "LINESTRING (0 1, 0 22, 0 30, 0 40, 1 50)"
+        )
+
+    def test_angle_splitter(self):
+        traj = make_traj(
+            [
+                Node(0, 0),
+                Node(2, 0, second=1),
+                Node(4, 0, second=2),
+                Node(6, 1, second=4),
+                Node(8, 2, second=6),
+                Node(8, 4, second=8),
+                Node(8, 6, second=9),
+                Node(8, 8, second=10),
+                Node(10, 10, second=11),
+                Node(12, 12, second=12),
+            ]
+        )
+        traj_copy = traj.copy()
+        split = AngleChangeSplitter(traj).split(min_angle=45, min_speed=1.0)
+
+        assert_frame_equal(traj.df, traj_copy.df)
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 3
+        assert (
+            split.trajectories[0].to_linestring().wkt
+            == "LINESTRING (0 0, 2 0, 4 0, 6 1, 8 2)"
+        )
+        assert (
+            split.trajectories[1].to_linestring().wkt
+            == "LINESTRING (8 2, 8 4, 8 6, 8 8)"
+        )
+        assert (
+            split.trajectories[2].to_linestring().wkt
+            == "LINESTRING (8 8, 10 10, 12 12)"
+        )
+
+    def test_angle_splitter_min_speed(self):
+        traj = make_traj(
+            [
+                Node(0, 0),
+                Node(2, 0, second=1),
+                Node(4, 0, second=2),
+                Node(6, 1, second=4),
+                Node(8, 2, second=6),
+                Node(8, 4, second=8),
+                Node(8, 6, second=9),
+                Node(8, 8, second=10),
+                Node(10, 10, second=11),
+                Node(12, 12, second=12),
+            ]
+        )
+        traj_copy = traj.copy()
+        split = AngleChangeSplitter(traj).split(min_angle=45, min_speed=1.5)
+
+        assert_frame_equal(traj.df, traj_copy.df)
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 3
+        assert (
+            split.trajectories[0].to_linestring().wkt
+            == "LINESTRING (0 0, 2 0, 4 0, 6 1, 8 2, 8 4)"
+        )
+        assert split.trajectories[1].to_linestring().wkt == "LINESTRING (8 4, 8 6, 8 8)"
+        assert (
+            split.trajectories[2].to_linestring().wkt
+            == "LINESTRING (8 8, 10 10, 12 12)"
         )
