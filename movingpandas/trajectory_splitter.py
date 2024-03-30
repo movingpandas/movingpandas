@@ -9,6 +9,7 @@ from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .trajectory_utils import convert_time_ranges_to_segments
 from .spatiotemporal_utils import TRange
+from .geometry_utils import angular_difference
 
 
 class TrajectorySplitter:
@@ -247,18 +248,23 @@ class AngleChangeSplitter(TrajectorySplitter):
 
         traj.df = traj.df[traj.df[speed_col_name] > min_speed]
 
-        traj.df["angChange"] = traj.df[direction_col].apply(
-            lambda x: int(abs(x - traj.df[direction_col].iloc[0]) / min_angle)
-        )
-        traj.df["angChange"] = traj.df["angChange"].diff()
-        traj.df["angChange"] = (
-            traj.df["angChange"].apply(lambda x: 1 if x else 0).cumsum()
-        )
+        comp_dir = traj.df[direction_col].iloc[0]
+        traj.df["dirChange"] = -1
+        dir_group = 0
 
-        dfs = [group[1] for group in traj.df.groupby(traj.df["angChange"])]
+        for i, direction in enumerate(traj.df[direction_col].tolist()):
+            if angular_difference(comp_dir, direction) >= min_angle:
+                comp_dir = direction
+                dir_group += 1
+
+            traj.df.iloc[i, traj.df.columns.get_loc("dirChange")] = dir_group
+
+        dfs = [group[1] for group in traj.df.groupby(traj.df["dirChange"])]
         for i, df in enumerate(dfs):
-            df = df.drop(columns=["angChange"])
+            df = df.drop(columns=["dirChange"])
             if len(df) > 1:
+                prev_i = dfs[i - 1].iloc[-1].name
+                prev_d = dfs[i - 1].iloc[-1].to_dict()
                 if i > 0:
                     df.loc[prev_i] = prev_d
                     df = df.sort_index(ascending=True)
@@ -266,7 +272,5 @@ class AngleChangeSplitter(TrajectorySplitter):
                 result.append(
                     Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
                 )
-                prev_i = df.iloc[-1].name
-                prev_d = df.iloc[-1].to_dict()
 
         return TrajectoryCollection(result, min_length=min_length)
