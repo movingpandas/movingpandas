@@ -238,24 +238,25 @@ class AngleChangeSplitter(TrajectorySplitter):
         result = []
         traj = traj.copy()
 
-        direction_col = traj.get_direction_col()
-        if direction_col not in traj.df.columns:
+        direction_col_name = traj.get_direction_col()
+        if direction_col_name not in traj.df.columns:
             traj.add_direction(overwrite=True)
 
         speed_col_name = traj.get_speed_col()
         if speed_col_name not in traj.df.columns:
             traj.add_speed(overwrite=True)
 
-        traj.df = traj.df[traj.df[speed_col_name] > min_speed]
-
-        comp_dir = traj.df[direction_col].iloc[0]
+        comp_dir = traj.df[direction_col_name].iloc[0]
         traj.df["dirChange"] = -1
         dir_group = 0
 
-        for i, direction in enumerate(traj.df[direction_col].tolist()):
-            if angular_difference(comp_dir, direction) >= min_angle:
-                comp_dir = direction
-                dir_group += 1
+        for i, (direction, speed) in enumerate(
+            zip(traj.df[direction_col_name].tolist(), traj.df[speed_col_name].tolist())
+        ):
+            if speed >= min_speed:
+                if angular_difference(comp_dir, direction) >= min_angle:
+                    comp_dir = direction
+                    dir_group += 1
 
             traj.df.iloc[i, traj.df.columns.get_loc("dirChange")] = dir_group
 
