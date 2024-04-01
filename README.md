@@ -88,7 +88,7 @@ Aggregate trajectories to explore larger patterns
 
 ## Installation
 
-MovingPandas for Python >= 3.7 and all it's dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
+MovingPandas for Python >= 3.7 and all its dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
 
 `conda install -c conda-forge movingpandas`
  
@@ -98,9 +98,9 @@ MovingPandas for Python >= 3.7 and all it's dependencies are available from [con
 
 
 Note that it is **NOT recommended** to install MovingPandas from [PyPI](https://pypi.org/project/movingpandas/)!
-If you're on Windows or Mac, many GeoPandas / MovingPandas dependencies cannot be pip installed 
+If you are using Windows or Mac, many GeoPandas / MovingPandas dependencies may not install correctly with pip
 (for details see the corresponding notes in the [GeoPandas documentation](https://geopandas.readthedocs.io/en/latest/getting_started/install.html)).
-On Ubuntu, pip install fails on cartopy with "Proj 4.9.0 must be installed".
+On Ubuntu, pip install may fail, e.g. on cartopy with "Proj 4.9.0 must be installed".
 
 
 ## Development installation 
