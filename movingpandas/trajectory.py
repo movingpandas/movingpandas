@@ -190,9 +190,6 @@ class Trajectory:
     def __repr__(self):
         return self.__str__()
 
-    def __len__(self):
-        return self.get_length()
-
     def __eq__(self, other):
         # TODO: make bullet proof
         return (

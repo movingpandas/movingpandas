@@ -710,16 +710,19 @@ class TestTrajectory:
         result = make_traj([Node(0, 1), Node(6, 5, day=2)], CRS_LATLON).get_bbox()
         assert result == (0, 1, 6, 5)  # (minx, miny, maxx, maxy)
 
+    def test_get_length(self):
+        traj = make_traj([Node(0, 1), Node(0, 6, day=2)], CRS_METRIC)
+        assert traj.get_length() == 5
+        #assert len(traj) == pytest.approx(5, 1)
+
     def test_get_length_spherical(self):
-        result = (
-            make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON).get_length() / 1000
-        )
+        traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)
+        result = traj.get_length() / 1000
         assert result == pytest.approx(676.3, 1)
 
     def test_get_length_spherical_units(self):
-        result = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON).get_length(
-            units="km"
-        )
+        traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)
+        result = traj.get_length(units="km")
         assert result == pytest.approx(676.3, 1)
 
     def test_get_length_euclidiean(self):
