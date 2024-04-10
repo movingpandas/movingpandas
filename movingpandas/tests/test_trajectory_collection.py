@@ -10,7 +10,7 @@ from fiona.crs import from_epsg
 from geopandas import GeoDataFrame
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, Point, Polygon, MultiPolygon
 
 from movingpandas.trajectory import (
     TRAJ_ID_COL_NAME,
@@ -163,9 +163,43 @@ class TestTrajectoryCollection:
 
     def test_clip(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
+        collection = self.collection.copy()
         collection = self.collection.clip(polygon)
         assert len(collection) == 1
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
+
+    def test_clip_with_multipolygon(self):
+        polygon = MultiPolygon([
+            Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
+            Polygon([(5, 1), (7, 1), (7, 3), (5, 3), (5, 1)])
+        ])
+        collection = self.collection.clip(polygon)
+        assert len(collection) == 2
+        assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
+        assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (6 1, 6 3)" 
+
+    """ Fails, related to https://github.com/movingpandas/movingpandas/discussions/235
+    def test_clip_with_multipolygon2(self):
+        polygon = MultiPolygon([
+            Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
+            Polygon([(3, -1), (3, 1), (4, 1), (4, -1), (3, -1)])
+        ])
+        collection = self.collection.clip(polygon)
+        assert len(collection) == 2
+        assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
+        assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (3 0, 4 0)"
+    """ 
+
+    def test_clip_with_min_length(self):
+        polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
+        collection = self.collection.copy()
+        collection.min_length = 1
+        collection = collection.clip(polygon)
+        assert len(collection) == 1
+        collection = self.collection.copy()
+        collection.min_length = 2
+        collection = collection.clip(polygon)
+        assert len(collection) == 0
 
     def test_filter(self):
         assert len(self.collection.filter("obj", "A")) == 2

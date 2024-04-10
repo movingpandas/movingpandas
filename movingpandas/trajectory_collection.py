@@ -55,8 +55,10 @@ class TrajectoryCollection:
         crs : string
             CRS of the x/y coordinates
         min_length : numeric
-            Desired minimum length of trajectories. (Shorter trajectories are
-            discarded.)
+            Desired minimum length of trajectories. Length is calculated using 
+            CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84) 
+            then length is calculated in meters.
+            (Shorter trajectories are discarded.)
         min_duration : timedelta
             Desired minimum duration of trajectories. (Shorter trajectories are
             discarded.)
@@ -438,7 +440,8 @@ class TrajectoryCollection:
         for traj in self:
             try:
                 for intersect in traj.clip(polygon, point_based):
-                    clipped.append(intersect)
+                    if (intersect.get_length() >= self.min_length):  # TODO also test min_duration
+                        clipped.append(intersect)
             except:  # noqa E722
                 pass
         result = copy(self)
