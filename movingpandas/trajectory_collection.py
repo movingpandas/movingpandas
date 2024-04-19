@@ -55,8 +55,8 @@ class TrajectoryCollection:
         crs : string
             CRS of the x/y coordinates
         min_length : numeric
-            Desired minimum length of trajectories. Length is calculated using 
-            CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84) 
+            Desired minimum length of trajectories. Length is calculated using
+            CRS units, except if the CRS is geographic (e.g. EPSG:4326 WGS84)
             then length is calculated in meters.
             (Shorter trajectories are discarded.)
         min_duration : timedelta
@@ -420,6 +420,42 @@ class TrajectoryCollection:
         result.trajectories = intersecting
         return result
 
+    def intersection(self, feature, point_based=False):
+        """
+        Intersect trajectories with the given polygon feature.
+
+        Feature attributes are appended to the trajectory's DataFrame.
+
+        By default, the trajectory's line representation is clipped by the
+        polygon. If pointbased=True, the trajectory's point representation is
+        used instead, leading to shorter segments.
+
+        Parameters
+        ----------
+        feature : shapely Feature
+            Feature to intersect with
+        point_based : bool
+            Clipping method
+
+        Returns
+        -------
+        TrajectoryCollection
+            Intersecting trajectory segments
+        """
+        intersections = []
+        for traj in self:
+            try:
+                for intersect in traj.intersection(feature, point_based):
+                    if (
+                        intersect.get_length() >= self.min_length
+                    ):  # TODO also test min_duration
+                        intersections.append(intersect)
+            except:  # noqa E722
+                pass
+        result = copy(self)
+        result.trajectories = intersections
+        return result
+
     def clip(self, polygon, point_based=False):
         """
         Clip trajectories by the given polygon.
@@ -440,7 +476,9 @@ class TrajectoryCollection:
         for traj in self:
             try:
                 for intersect in traj.clip(polygon, point_based):
-                    if (intersect.get_length() >= self.min_length):  # TODO also test min_duration
+                    if (
+                        intersect.get_length() >= self.min_length
+                    ):  # TODO also test min_duration
                         clipped.append(intersect)
             except:  # noqa E722
                 pass

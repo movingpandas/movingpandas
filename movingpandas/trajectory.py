@@ -1433,7 +1433,7 @@ class Trajectory:
 
     def intersection(self, feature, point_based=False):
         """
-        Return the trajectory segments that intersects the given feature.
+        Return the trajectory segments that intersects the given polygon feature.
 
         Feature attributes are appended to the trajectory's DataFrame.
 

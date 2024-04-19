@@ -161,6 +161,17 @@ class TestTrajectoryCollection:
         assert len(collection) == 1
         assert collection.trajectories[0] == self.collection.trajectories[0]
 
+    def test_intersection(self):
+        feature = {
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]],
+            },
+            "properties": {"id": 1, "name": "foo"},
+        }
+        collection = self.collection.intersection(feature)
+        assert len(collection) == 1
+
     def test_clip(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
         collection = self.collection.copy()
@@ -169,14 +180,16 @@ class TestTrajectoryCollection:
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
 
     def test_clip_with_multipolygon(self):
-        polygon = MultiPolygon([
-            Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
-            Polygon([(5, 1), (7, 1), (7, 3), (5, 3), (5, 1)])
-        ])
+        polygon = MultiPolygon(
+            [
+                Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
+                Polygon([(5, 1), (7, 1), (7, 3), (5, 3), (5, 1)]),
+            ]
+        )
         collection = self.collection.clip(polygon)
         assert len(collection) == 2
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
-        assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (6 1, 6 3)" 
+        assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (6 1, 6 3)"
 
     """ Fails, related to https://github.com/movingpandas/movingpandas/discussions/235
     def test_clip_with_multipolygon2(self):
@@ -188,7 +201,7 @@ class TestTrajectoryCollection:
         assert len(collection) == 2
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
         assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (3 0, 4 0)"
-    """ 
+    """
 
     def test_clip_with_min_length(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
