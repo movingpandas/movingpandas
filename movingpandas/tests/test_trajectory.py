@@ -713,7 +713,7 @@ class TestTrajectory:
     def test_get_length(self):
         traj = make_traj([Node(0, 1), Node(0, 6, day=2)], CRS_METRIC)
         assert traj.get_length() == 5
-        #assert len(traj) == pytest.approx(5, 1)
+        # assert len(traj) == pytest.approx(5, 1)
 
     def test_get_length_spherical(self):
         traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)

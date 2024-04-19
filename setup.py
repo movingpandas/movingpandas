@@ -1,7 +1,9 @@
 import setuptools
 
 with open("README.md", "r") as fh:
-    LONG_DESCRIPTION = "Movement trajectory classes and functions built on top of GeoPandas"
+    LONG_DESCRIPTION = (
+        "Movement trajectory classes and functions built on top of GeoPandas"
+    )
 
 # Packages that MovingPandas uses explicitly:
 INSTALL_REQUIRES = [
