@@ -70,7 +70,7 @@ class _TrajectoryPlotter:
 
         if self.column:
             if self.column == self.speed_col_name and self.speed_col_missing:
-                tc.add_speed(overwrite=True)
+                tc.add_speed()
 
             (min_val, max_val) = self.get_min_max_values()
             if self.clim is None:

@@ -250,10 +250,14 @@ class TestTrajectoryCollection:
         plot = self.collection_latlon.hvplot(c="id", colormap={1: "red", 2: "blue"})
         assert isinstance(plot, holoviews.core.overlay.Overlay)
 
-    def test_plot_exist_column(self):
+    def test_plot_existing_column(self):
         from matplotlib.axes import Axes
-
         result = self.collection.plot(column="val")
+        assert isinstance(result, Axes)
+
+    def test_plot_speed(self):
+        from matplotlib.axes import Axes
+        result = self.collection.plot(column="speed")
         assert isinstance(result, Axes)
 
     def test_plot_speed_not_altering_collection(self):
@@ -322,8 +326,23 @@ class TestTrajectoryCollection:
 
     def test_add_speed(self):
         self.collection.add_speed()
-        result1 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
-        assert len(result1) == 4
+        print(self.collection.to_point_gdf())
+        result0 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
+        assert result0[0] == pytest.approx(0.01667, 0.001)
+        result1 = self.collection.trajectories[1].df[SPEED_COL_NAME].tolist()
+        assert result1[0] == pytest.approx(0.01667, 0.001) 
+        assert len(result0) == 4
+
+    def test_add_speed_multithreaded(self):
+        expected = self.collection.copy()
+        expected.add_speed()
+        self.collection.add_speed(n_threads=2)
+        print(self.collection.to_point_gdf())
+        result0 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[SPEED_COL_NAME].tolist()
+        result1 = self.collection.trajectories[1].df[SPEED_COL_NAME].tolist()
+        assert result1 == expected.trajectories[1].df[SPEED_COL_NAME].tolist()
+        assert len(result0) == 4
 
     def test_add_acceleration(self):
         self.collection.add_acceleration()
@@ -332,13 +351,24 @@ class TestTrajectoryCollection:
 
     def test_add_direction(self):
         self.collection.add_direction()
-        result1 = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
-        assert len(result1) == 4
+        result = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
+        assert len(result) == 4
+
+    def test_add_direction_multithreaded(self):
+        expected = self.collection.copy()
+        expected.add_direction()
+        print(expected.to_point_gdf())
+        self.collection.add_direction(n_threads=2)
+        print(self.collection.to_point_gdf())
+        result0 = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[DIRECTION_COL_NAME].tolist()
+        result1 = self.collection.trajectories[1].df[DIRECTION_COL_NAME].tolist()
+        assert result1 == expected.trajectories[1].df[DIRECTION_COL_NAME].tolist()
 
     def test_add_distance(self):
         self.collection.add_distance()
-        result1 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
-        assert len(result1) == 4
+        result0 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
+        assert len(result0) == 4
 
     def test_add_angular_difference(self):
         self.collection.add_angular_difference()
