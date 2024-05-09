@@ -796,7 +796,7 @@ class TrajectoryCollection:
         Plot speed along trajectories (with legend and specified figure size):
 
         >>> trajectory_collection.plot(column='speed', legend=True, figsize=(9,5))
-        
+
         Plot speed along trajectories (scaling the colormap to specific min/max values):
 
         >>> trajectory_collection.plot(column='speed', vmin=0, vmax=20)
@@ -826,7 +826,7 @@ class TrajectoryCollection:
 
         Plot speed along trajectories (scaling the colormap to specific min/max values):
 
-        >>> trajectory_collection.plot(column='speed', clim=(0,20))                              
+        >>> trajectory_collection.plot(column='speed', clim=(0,20))
         """  # noqa: E501
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
