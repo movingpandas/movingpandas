@@ -68,7 +68,8 @@ class TrajectoryStopDetector:
         return results
 
     def _process_traj_collection_multithreaded(self, trajs, max_diameter, min_duration):
-        from movingpandas.tools._multi_threading import split_list   
+        from movingpandas.tools._multi_threading import split_list
+
         p = Pool(self.n_threads)
         data = split_list(trajs, self.n_threads)
 

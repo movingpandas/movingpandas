@@ -523,7 +523,9 @@ class TrajectoryCollection:
         result.trajectories = filtered
         return result
 
-    def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS(), n_threads=1):
+    def add_speed(
+        self, overwrite=False, name=SPEED_COL_NAME, units=UNITS(), n_threads=1
+    ):
         """
         Add speed column and values to the trajectories.
 
@@ -549,21 +551,23 @@ class TrajectoryCollection:
 
         """
         if n_threads == 1:
-            for traj in self:
-                traj.add_speed(name=name, units=units, overwrite=overwrite)
+            self._add_speed(
+                self.trajectories, name=name, units=units, overwrite=overwrite
+            )
         else:
-            self.multithread(self._add_speed, n_threads, name=name, units=units, overwrite=overwrite)
-            
+            self._multithread(
+                self._add_speed, n_threads, name=name, units=units, overwrite=overwrite
+            )
 
     def _add_speed(self, trajs, name, units, overwrite):
         for traj in trajs:
             traj.add_speed(name=name, units=units, overwrite=overwrite)
-            return trajs
+        return trajs
 
-    def multithread(self, fun, n_threads, name, units, overwrite):
-        from multiprocessing import Pool 
+    def _multithread(self, fun, n_threads, name, units, overwrite):
+        from multiprocessing import Pool
         from itertools import repeat
-        from movingpandas.tools._multi_threading import split_list   
+        from movingpandas.tools._multi_threading import split_list
 
         p = Pool(n_threads)
         data = split_list(self.trajectories, n_threads)
@@ -587,16 +591,22 @@ class TrajectoryCollection:
             Whether to overwrite existing direction values (default: False)
         """
         if n_threads == 1:
-            for traj in self:
-                traj.add_direction(name=name, overwrite=overwrite)
+            self._add_direction(
+                self.trajectories, name=name, units=UNITS(), overwrite=overwrite
+            )
         else:
-            self.multithread(self._add_direction, n_threads, name=name, units=UNITS(), overwrite=overwrite)
-            
+            self._multithread(
+                self._add_direction,
+                n_threads,
+                name=name,
+                units=UNITS(),
+                overwrite=overwrite,
+            )
 
     def _add_direction(self, trajs, name, units, overwrite):
         for traj in trajs:
             traj.add_direction(overwrite=overwrite, name=name)
-            return trajs
+        return trajs
 
     def add_angular_difference(
         self,

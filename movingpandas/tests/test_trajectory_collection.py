@@ -252,11 +252,13 @@ class TestTrajectoryCollection:
 
     def test_plot_existing_column(self):
         from matplotlib.axes import Axes
+
         result = self.collection.plot(column="val")
         assert isinstance(result, Axes)
 
     def test_plot_speed(self):
         from matplotlib.axes import Axes
+
         result = self.collection.plot(column="speed")
         assert isinstance(result, Axes)
 
@@ -330,7 +332,7 @@ class TestTrajectoryCollection:
         result0 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
         assert result0[0] == pytest.approx(0.01667, 0.001)
         result1 = self.collection.trajectories[1].df[SPEED_COL_NAME].tolist()
-        assert result1[0] == pytest.approx(0.01667, 0.001) 
+        assert result1[0] == pytest.approx(0.01667, 0.001)
         assert len(result0) == 4
 
     def test_add_speed_multithreaded(self):
