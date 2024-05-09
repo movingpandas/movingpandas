@@ -9,6 +9,7 @@ from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .trajectory_utils import convert_time_ranges_to_segments
 from .spatiotemporal_utils import TRange
+from .geometry_utils import angular_difference
 
 
 class TrajectorySplitter:
@@ -207,3 +208,70 @@ class StopSplitter(TrajectorySplitter):
         items.append(traj.get_end_time())
         result = [TRange(*items[x : x + 2]) for x in range(0, len(items), 2)]
         return result
+
+
+class AngleChangeSplitter(TrajectorySplitter):
+    """
+    Split trajectories into subtrajectories whenever there is a specified change in
+    the heading angle.
+
+    Parameters
+    ----------
+    min_angle : float
+        Minimum angle change
+    min_speed: float
+        Min speed threshold at which points are considered for angle change.
+        (Speed is calculated as CRS units per second, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then speed is calculated in meters per second.)
+    min_length : numeric
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
+
+    Examples
+    --------
+
+    >>> mpd.AngleSplitter(traj).split(min_angle=45, min_speed=15)
+    """
+
+    def _split_traj(self, traj, min_angle=45, min_speed=0, min_length=0):
+        result = []
+        traj = traj.copy()
+
+        direction_col_name = traj.get_direction_col()
+        if direction_col_name not in traj.df.columns:
+            traj.add_direction(overwrite=True)
+
+        speed_col_name = traj.get_speed_col()
+        if speed_col_name not in traj.df.columns:
+            traj.add_speed(overwrite=True)
+
+        comp_dir = traj.df[direction_col_name].iloc[0]
+        traj.df["dirChange"] = -1
+        dir_group = 0
+
+        for i, (direction, speed) in enumerate(
+            zip(traj.df[direction_col_name].tolist(), traj.df[speed_col_name].tolist())
+        ):
+            if speed >= min_speed:
+                if angular_difference(comp_dir, direction) >= min_angle:
+                    comp_dir = direction
+                    dir_group += 1
+
+            traj.df.iloc[i, traj.df.columns.get_loc("dirChange")] = dir_group
+
+        dfs = [group[1] for group in traj.df.groupby(traj.df["dirChange"])]
+        for i, df in enumerate(dfs):
+            df = df.drop(columns=["dirChange"])
+            if len(df) > 1:
+                prev_i = dfs[i - 1].iloc[-1].name
+                prev_d = dfs[i - 1].iloc[-1].to_dict()
+                if i > 0:
+                    df.loc[prev_i] = prev_d
+                    df = df.sort_index(ascending=True)
+
+                result.append(
+                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                )
+
+        return TrajectoryCollection(result, min_length=min_length)
