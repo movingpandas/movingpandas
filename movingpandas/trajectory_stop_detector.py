@@ -27,6 +27,7 @@ class TrajectoryStopDetector:
         Parameters
         ----------
         traj : Trajectory or TrajectoryCollection
+        n_threads: number of threads to use for computation (default: 1)
         """
         self.traj = traj
         self.n_threads = n_threads
