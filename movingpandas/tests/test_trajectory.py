@@ -780,30 +780,37 @@ class TestTrajectory:
     def test_hvplot_exists(self):
         import holoviews
 
-        plot = self.default_traj_latlon.hvplot(geo=True)
+        plot = self.default_traj_latlon.hvplot()
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 2
 
-        plot = self.default_traj_latlon.hvplot(geo=True, color="red")
+        plot = self.default_traj_latlon.hvplot(color="red")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
 
-        plot = self.default_traj_latlon.hvplot(geo=True, c="traj_id")
+        plot = self.default_traj_latlon.hvplot(c="traj_id")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
 
-        plot = self.default_traj_latlon.hvplot(
-            geo=True, c="traj_id", colormap={1: "red"}
-        )
+        plot = self.default_traj_latlon.hvplot(c="traj_id", colormap={1: "red"})
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot_pts()
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot_pts(color="red")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
 
     @requires_holoviews
     def test_hvplot_with_speed_exists(self):
         import holoviews
 
-        plot = self.default_traj_latlon.hvplot(geo=True, c="speed")
+        plot = self.default_traj_latlon.hvplot(c="speed")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
         assert len(plot.Path.ddims) == 3
 
-        plot = self.default_traj_latlon.hvplot(geo=True, c="speed", cmap="Reds")
+        plot = self.default_traj_latlon.hvplot(c="speed", cmap="Reds")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.default_traj_latlon.hvplot_pts(c="speed")
         assert isinstance(plot, holoviews.core.overlay.Overlay)
 
     @requires_holoviews

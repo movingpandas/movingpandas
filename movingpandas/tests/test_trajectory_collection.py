@@ -250,6 +250,18 @@ class TestTrajectoryCollection:
         plot = self.collection_latlon.hvplot(c="id", colormap={1: "red", 2: "blue"})
         assert isinstance(plot, holoviews.core.overlay.Overlay)
 
+        plot = self.collection_latlon.hvplot_pts()
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.collection_latlon.hvplot_pts(c="id")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.collection_latlon.hvplot_pts(c="speed")
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
+        plot = self.collection_latlon.hvplot_pts(c="id", colormap={1: "red", 2: "blue"})
+        assert isinstance(plot, holoviews.core.overlay.Overlay)
+
     def test_plot_existing_column(self):
         from matplotlib.axes import Axes
 

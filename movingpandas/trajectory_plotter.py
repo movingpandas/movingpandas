@@ -27,6 +27,7 @@ class _TrajectoryPlotter:
         self.hvplot_is_geo = kwargs.pop("geo", True)
         self.hvplot_tiles = kwargs.pop("tiles", "OSM")
 
+        self.plot_lines = kwargs.pop("plot_lines", True)
         self.marker_size = kwargs.pop("marker_size", 200)
         self.marker_color = kwargs.pop("marker_color", None)
         self.line_width = kwargs.pop("line_width", 3.0)
@@ -55,7 +56,7 @@ class _TrajectoryPlotter:
         if not self.ax:
             self.ax = plt.figure(figsize=self.figsize).add_subplot(1, 1, 1)
         tc = self.preprocess_data()
-        line_plot = self.plot_lines(tc)
+        line_plot = self._plot_lines(tc)
 
         to_drop = [x for x in tc.get_column_names() if x not in self.column_names]
         tc.drop(columns=to_drop)
@@ -78,7 +79,7 @@ class _TrajectoryPlotter:
 
         return tc
 
-    def plot_lines(self, tc):
+    def _plot_lines(self, tc):
         line_gdf = tc.to_line_gdf()
 
         if self.column and self.colormap:
@@ -119,9 +120,9 @@ class _TrajectoryPlotter:
 
         tc = self.preprocess_data()
 
-        plot = self.hvplot_lines(tc)
+        plot = self._hvplot_lines(tc)
         if self.marker_size > 0:
-            plot = plot * self.hvplot_end_points(tc)
+            plot = plot * self._hvplot_end_points(tc)
 
         to_drop = [x for x in tc.get_column_names() if x not in self.column_names]
         tc.drop(columns=to_drop)
@@ -131,12 +132,12 @@ class _TrajectoryPlotter:
         else:
             return plot
 
-    def hvplot_end_points(self, tc):
+    def _hvplot_end_points(self, tc):
         from holoviews import dim, Overlay
 
         try:
             end_pts = tc.get_end_locations(with_direction=True)
-        except AttributeError:
+        except AttributeError:  # if tc is actually a Trajectory
             tc.add_direction(name=self.direction_col_name, overwrite=True)
             end_pts = tc.df.tail(1).copy()
 
@@ -184,7 +185,7 @@ class _TrajectoryPlotter:
                 plots.append(tmp)
             return Overlay(plots)
 
-    def hvplot_lines(self, tc):
+    def _hvplot_lines(self, tc):
         cols = [self.traj_id_col_name, self.geom_col_name]
         if "hover_cols" in self.kwargs:
             cols = cols + self.kwargs["hover_cols"]
@@ -193,9 +194,9 @@ class _TrajectoryPlotter:
         cols = list(set(cols))
 
         if self.column is None:
-            return self.hvplot_traj_gdf(tc)
+            return self._hvplot_traj_gdf(tc)
         else:
-            return self.hvplot_line_gdf(tc, cols)
+            return self._hvplot_line_gdf(tc, cols)
 
     def get_color(self, i):
         if self.color:
@@ -203,7 +204,7 @@ class _TrajectoryPlotter:
         else:
             return self.MPD_PALETTE[i]
 
-    def hvplot_traj_gdf(self, tc):
+    def _hvplot_traj_gdf(self, tc):
         from holoviews import Cycle, Overlay
 
         Cycle.default_cycles["default_colors"] = self.MPD_PALETTE
@@ -228,7 +229,7 @@ class _TrajectoryPlotter:
             plots.append(tmp)
         return Overlay(plots)
 
-    def hvplot_line_gdf(self, tc, cols):
+    def _hvplot_line_gdf(self, tc, cols):
         line_gdf = tc.to_line_gdf(columns=cols)
 
         ids = None
@@ -248,6 +249,120 @@ class _TrajectoryPlotter:
             *self.args,
             **self.kwargs
         )
+
+    def hvplot_pts(self):
+        try:
+            import hvplot.pandas  # noqa F401, seems necessary for the following import to work
+            import colorcet as cc
+            from holoviews import opts, dim, Overlay
+            from bokeh.palettes import Category10_10
+        except ImportError as error:
+            raise ImportError(
+                "Missing optional dependencies. To use interactive plotting, "
+                "install hvplot and GeoViews (see "
+                "https://hvplot.holoviz.org/getting_started/installation.html and "
+                "https://geoviews.org)."
+            ) from error
+
+        opts.defaults(opts.Overlay(**self.hv_defaults))
+        self.MPD_PALETTE = list(Category10_10) + cc.palette["glasbey"]
+        self.color = self.kwargs.pop("color", None)
+
+        try:
+            tc = self.data.copy()
+            if self.direction_col_name not in tc.trajectories[0].df.columns:
+                tc.add_direction(name=self.direction_col_name)
+            if self.column:
+                if self.column == self.speed_col_name and self.speed_col_missing:
+                    tc.add_speed()
+            pts_gdf = tc.to_point_gdf()
+        except AttributeError:
+            traj = self.data.copy()
+            if self.direction_col_name not in traj.df.columns:
+                traj.add_direction(name=self.direction_col_name)
+            if self.column:
+                if self.column == self.speed_col_name and self.speed_col_missing:
+                    tc.add_speed()
+            pts_gdf = traj.df
+
+        ids = None
+        if self.column is None and self.traj_id_col_name is not None:
+            ids = pts_gdf[self.traj_id_col_name].unique()
+        self.set_default_cmaps(ids)
+
+        pts_gdf["triangle_angle"] = pts_gdf[self.direction_col_name] * -1.0
+        pts_gdf["triangle_angle"] = pts_gdf["triangle_angle"].astype(float)
+        pts_gdf["dash_angle"] = ((pts_gdf[self.direction_col_name] * -1.0) + 90).astype(
+            float
+        )
+
+        hover_cols = self.kwargs.pop("hover_cols", None)
+
+        self.kwargs["hover_cols"] = ["triangle_angle", "dash_angle"]
+        if hover_cols:
+            self.kwargs["hover_cols"] = self.kwargs["hover_cols"] + hover_cols
+        if self.marker_color:
+            self.kwargs["color"] = self.marker_color
+        if self.column:
+            self.kwargs["hover_cols"] = self.kwargs["hover_cols"] + [self.column]
+
+        if (
+            self.hvplot_is_geo
+            and not self.data.is_latlon
+            and self.data.get_crs() is not None
+        ):
+            pts_gdf = pts_gdf.to_crs(epsg=4326)
+
+        if self.column:
+            arrow_shaft = pts_gdf.hvplot(
+                geo=self.hvplot_is_geo,
+                tiles=None,
+                marker="dash",
+                angle=dim("dash_angle"),
+                size=self.marker_size * 1.7,
+                line_width=self.marker_size / 70.0,
+                clim=self.clim,
+                *self.args,
+                **self.kwargs
+            )
+            arrow_head = pts_gdf.hvplot(
+                geo=self.hvplot_is_geo,
+                tiles=None,
+                marker="triangle",
+                angle=dim("triangle_angle"),
+                size=self.marker_size,
+                clim=self.clim,
+                *self.args,
+                **self.kwargs
+            )
+            return arrow_shaft * arrow_head
+        else:
+            plots = []
+            for i in range(len(ids)):
+                tmp = pts_gdf[pts_gdf[self.traj_id_col_name] == ids[i]]
+                arrow_shaft = tmp.hvplot(
+                    geo=self.hvplot_is_geo,
+                    tiles=None,
+                    marker="dash",
+                    angle=dim("dash_angle"),
+                    size=self.marker_size * 1.7,
+                    line_width=self.marker_size / 70.0,
+                    color=self.get_color(i),
+                    *self.args,
+                    **self.kwargs
+                )
+                arrow_head = tmp.hvplot(
+                    geo=self.hvplot_is_geo,
+                    tiles=None,
+                    marker="triangle",
+                    angle=dim("triangle_angle"),
+                    size=self.marker_size,
+                    color=self.get_color(i),
+                    *self.args,
+                    **self.kwargs
+                )
+                plots.append(arrow_shaft * arrow_head)
+            return Overlay(plots)
 
     def set_default_cmaps(self, ids=None):
         from holoviews import Cycle

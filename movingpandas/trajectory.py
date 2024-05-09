@@ -286,6 +286,28 @@ class Trajectory:
         """  # noqa: E501
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
+    def hvplot_pts(self, *args, **kwargs):
+        """
+        Generate an interactive plot of trajectory points.
+
+        Parameters
+        ----------
+        args :
+            These parameters will be passed to the TrajectoryPlotter
+        kwargs :
+            These parameters will be passed to the TrajectoryPlotter
+
+            To customize the plots, check the list of supported colormaps_.
+            .. _colormaps: https://holoviews.org/user_guide/Colormaps.html#available-colormaps
+
+        Examples
+        --------
+        Plot points colored by speed (with legend and specified figure size):
+
+        >>> collection.hvplot_pts(c='speed', width=700, height=400, colorbar=True)
+        """  # noqa: E501
+        return _TrajectoryPlotter(self, *args, **kwargs).hvplot_pts()
+
     def is_valid(self):
         """
         Return whether the trajectory meets minimum requirements.
