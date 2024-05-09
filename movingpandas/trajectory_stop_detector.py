@@ -27,6 +27,7 @@ class TrajectoryStopDetector:
         Parameters
         ----------
         traj : Trajectory or TrajectoryCollection
+        n_threads: number of threads to use for computation (default: 1)
         """
         self.traj = traj
         self.n_threads = n_threads
@@ -68,14 +69,9 @@ class TrajectoryStopDetector:
         return results
 
     def _process_traj_collection_multithreaded(self, trajs, max_diameter, min_duration):
+        from movingpandas.tools._multi_threading import split_list
+
         p = Pool(self.n_threads)
-
-        def split_list(a, n):  # source: https://stackoverflow.com/a/2135920/449624
-            k, m = divmod(len(a), n)
-            return (
-                a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n)
-            )
-
         data = split_list(trajs, self.n_threads)
 
         results = []

@@ -523,7 +523,9 @@ class TrajectoryCollection:
         result.trajectories = filtered
         return result
 
-    def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
+    def add_speed(
+        self, overwrite=False, name=SPEED_COL_NAME, units=UNITS(), n_threads=1
+    ):
         """
         Add speed column and values to the trajectories.
 
@@ -534,7 +536,8 @@ class TrajectoryCollection:
         ----------
         overwrite : bool
             Whether to overwrite existing speed values (default: False)
-
+        name : str
+            Name of the speed column (default: speed)
         units : tuple(str)
             Units in which to calculate speed
 
@@ -546,12 +549,34 @@ class TrajectoryCollection:
 
             For more info, check the list of supported units at
             https://movingpandas.org/units
-
+        n_threads : int
+            Number of threads to use for computation (default: 1)
         """
-        for traj in self:
-            traj.add_speed(overwrite=overwrite, name=name, units=units)
+        if n_threads <= 1:
+            self._add_speed(self.trajectories, name, units, overwrite)
+        else:
+            self._multithread(self._add_speed, n_threads, name, units, overwrite)
 
-    def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME):
+    def _add_speed(self, trajs, name, units, overwrite):
+        for traj in trajs:
+            traj.add_speed(name=name, units=units, overwrite=overwrite)
+        return trajs
+
+    def _multithread(self, fun, n_threads, name, units, overwrite):
+        from multiprocessing import Pool
+        from itertools import repeat
+        from movingpandas.tools._multi_threading import split_list
+
+        p = Pool(int(n_threads))
+        data = split_list(self.trajectories, n_threads)
+        self.trajectories = []
+        args_iter = zip(data, repeat(name), repeat(units), repeat(overwrite))
+        results = []
+        for added in p.starmap(fun, args_iter):
+            results.extend(added)
+        self.trajectories = results
+
+    def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME, n_threads=1):
         """
         Add direction column and values to the trajectories.
 
@@ -562,14 +587,29 @@ class TrajectoryCollection:
         ----------
         overwrite : bool
             Whether to overwrite existing direction values (default: False)
+        name : str
+            Name of the direction column (default: "direction")
+        n_threads : int
+            Number of threads to use for computation (default: 1)
         """
-        for traj in self:
+        if n_threads <= 1:
+            self._add_direction(self.trajectories, name, UNITS(), overwrite)
+        else:
+            self._multithread(
+                self._add_direction,
+                n_threads,
+                name,
+                UNITS(),
+                overwrite,
+            )
+
+    def _add_direction(self, trajs, name, units, overwrite):
+        for traj in trajs:
             traj.add_direction(overwrite=overwrite, name=name)
+        return trajs
 
     def add_angular_difference(
-        self,
-        overwrite=False,
-        name=ANGULAR_DIFFERENCE_COL_NAME,
+        self, overwrite=False, name=ANGULAR_DIFFERENCE_COL_NAME, n_threads=1
     ):
         """
         Add angular difference to the trajectory's DataFrame.
@@ -582,12 +622,25 @@ class TrajectoryCollection:
         ----------
         overwrite : bool
             Whether to overwrite existing angular difference values (default: False)
+        name : str
+            Name of the angular_difference column (default: "angular_difference")
+        n_threads : int
+            Number of threads to use for computation (default: 1)
         """
-        for traj in self:
+        if n_threads <= 1:
+            self._add_angular_difference(self.trajectories, name, UNITS(), overwrite)
+        else:
+            self._multithread(
+                self._add_angular_difference, n_threads, name, UNITS(), overwrite
+            )
+
+    def _add_angular_difference(self, trajs, name, units, overwrite):
+        for traj in trajs:
             traj.add_angular_difference(overwrite=overwrite, name=name)
+        return trajs
 
     def add_acceleration(
-        self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
+        self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS(), n_threads=1
     ):
         """
         Add acceleration column and values to the trajectories.
@@ -615,11 +668,22 @@ class TrajectoryCollection:
 
             For more info, check the list of supported units at
             https://movingpandas.org/units
+        n_threads : int
+            Number of threads to use for computation (default: 1)
         """
-        for traj in self:
-            traj.add_acceleration(overwrite=overwrite, name=name, units=units)
+        if n_threads <= 1:
+            self._add_acceleration(self.trajectories, name, units, overwrite)
+        else:
+            self._multithread(self._add_acceleration, n_threads, name, units, overwrite)
 
-    def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=None):
+    def _add_acceleration(self, trajs, name, units, overwrite):
+        for traj in trajs:
+            traj.add_acceleration(overwrite=overwrite, name=name, units=units)
+        return trajs
+
+    def add_distance(
+        self, overwrite=False, name=DISTANCE_COL_NAME, units=None, n_threads=1
+    ):
         """
         Add distance column and values to the trajectories.
 
@@ -633,11 +697,20 @@ class TrajectoryCollection:
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units at
             https://movingpandas.org/units
+        n_threads : int
+            Number of threads to use for computation (default: 1)
         """
-        for traj in self:
-            traj.add_distance(overwrite=overwrite, name=name, units=units)
+        if n_threads <= 1:
+            self._add_distance(self.trajectories, name, units, overwrite)
+        else:
+            self._multithread(self._add_distance, n_threads, name, units, overwrite)
 
-    def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
+    def _add_distance(self, trajs, name, units, overwrite):
+        for traj in trajs:
+            traj.add_distance(overwrite=overwrite, name=name, units=units)
+        return trajs
+
+    def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME, n_threads=1):
         """
         Add timedelta column and values to the trajectories.
 
@@ -650,9 +723,18 @@ class TrajectoryCollection:
             Whether to overwrite existing timedelta values (default: False)
         name : str
             Name of the timedelta column (default: "timedelta")
+        n_threads : int
+            Number of threads to use for computation (default: 1)
         """
-        for traj in self:
+        if n_threads <= 1:
+            self._add_distance(self.trajectories, name, UNITS(), overwrite)
+        else:
+            self._multithread(self._add_distance, n_threads, name, UNITS(), overwrite)
+
+    def _add_timedelta(self, trajs, name, units, overwrite):
+        for traj in trajs:
             traj.add_timedelta(overwrite=overwrite, name=name)
+        return trajs
 
     def add_traj_id(self, overwrite=False):
         """
@@ -714,6 +796,10 @@ class TrajectoryCollection:
         Plot speed along trajectories (with legend and specified figure size):
 
         >>> trajectory_collection.plot(column='speed', legend=True, figsize=(9,5))
+
+        Plot speed along trajectories (scaling the colormap to specific min/max values):
+
+        >>> trajectory_collection.plot(column='speed', vmin=0, vmax=20)
         """
         return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
@@ -737,6 +823,10 @@ class TrajectoryCollection:
 
         >>> collection.hvplot(c='speed', line_width=7.0, width=700, height=400,
                               colorbar=True)
+
+        Plot speed along trajectories (scaling the colormap to specific min/max values):
+
+        >>> trajectory_collection.plot(column='speed', clim=(0,20))
         """  # noqa: E501
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot()
 
