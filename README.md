@@ -1,8 +1,8 @@
 <img  width="50%" src="https://movingpandas.github.io/movingpandas/assets/img/logo-wide.svg">
 
-MovingPandas is a Python library for handling movement data based on Pandas, [GeoPandas](https://geopandas.org), and [HoloViz](https://holoviz.org). 
+MovingPandas is a Python library for movement data exploration and analysis.
 
-MovingPandas provides trajectory data structures and functions for movement data exploration and analysis.
+MovingPandas provides trajectory data structures and functions for handling movement data based on Pandas, [GeoPandas](https://geopandas.org), and [HoloViz](https://holoviz.org). 
 
 The official MovingPandas API documentation is hosted on [ReadTheDocs](https://movingpandas.readthedocs.io).
 
@@ -18,12 +18,12 @@ For more information about individual releases, check out the [Changelog](https:
 
 ## Features
 
-* Easily create trajectories from diverse sources, including CSV files, GIS file formats, (Geo)DataFrames, and OGC Moving Features JSONs (MF-JSON) 
-* Find locations for given time stamps and time spans
-* Compute sampling intervals, movement direction, speed, and acceleration in a [variety of spatiotemporal units](./units)
+* Easily create trajectories from diverse sources, including CSV files, GIS file formats, (Geo)DataFrames, and OGC Moving Features JSONs (MF-JSON)
 * Detect and extract stops 
 * Split trajectories into individual trips
 * Clean, simplify, generalize, and aggregate trajectories 
+* Find locations for given time stamps and time spans
+* Compute movement direction, speed, direction, acceleration, andsampling intervals in a [variety of spatiotemporal units](./units)
 * Create static and interactive visualizations 
 
 Here are some examples:
