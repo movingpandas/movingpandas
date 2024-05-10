@@ -23,7 +23,7 @@ For more information about individual releases, check out the [Changelog](https:
 * Split trajectories into individual trips
 * Clean, simplify, generalize, and aggregate trajectories 
 * Find locations for given time stamps and time spans
-* Compute movement direction, speed, direction, acceleration, andsampling intervals in a [variety of spatiotemporal units](./units)
+* Compute movement direction, speed, direction, acceleration, and sampling intervals in a [variety of spatiotemporal units](./units)
 * Create static and interactive visualizations 
 
 Here are some examples:
