@@ -989,6 +989,7 @@ class Trajectory:
                 f"Use overwrite=True to overwrite exiting values."
             )
         self.df[TRAJ_ID_COL_NAME] = self.id
+        return self
 
     def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME):
         """
@@ -1017,6 +1018,7 @@ class Trajectory:
         # set the direction in the first row to the direction of the second row
         self.df.at[self.get_start_time(), name] = self.df.iloc[1][name]
         self.df.drop(columns=["prev_pt"], inplace=True)
+        return self
 
     def add_angular_difference(
         self,
@@ -1054,6 +1056,7 @@ class Trajectory:
         self.df.at[self.get_start_time(), name] = 0.0
         if not direction_exists:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
+        return self
 
     def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=None):
         """
@@ -1116,6 +1119,7 @@ class Trajectory:
             )
         conversion = get_conversion(units, self.crs_units)
         self.df = self._get_df_with_distance(conversion, name)
+        return self
 
     def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
         """
@@ -1186,6 +1190,7 @@ class Trajectory:
             )
         conversion = get_conversion(units, self.crs_units)
         self.df = self._get_df_with_speed(conversion, name)
+        return self
 
     def add_acceleration(
         self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
@@ -1264,6 +1269,7 @@ class Trajectory:
             )
         conversion = get_conversion(units, self.crs_units)
         self.df = self._get_df_with_acceleration(conversion, name)
+        return self
 
     def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME):
         """
@@ -1287,6 +1293,7 @@ class Trajectory:
                 f"name arg."
             )
         self.df = self._get_df_with_timedelta(name)
+        return self
 
     def _get_df_with_timedelta(self, name=TIMEDELTA_COL_NAME):
         temp_df = self.df.copy()

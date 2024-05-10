@@ -556,6 +556,7 @@ class TrajectoryCollection:
             self._add_speed(self.trajectories, name, units, overwrite)
         else:
             self._multithread(self._add_speed, n_threads, name, units, overwrite)
+        return self
 
     def _add_speed(self, trajs, name, units, overwrite):
         for traj in trajs:
@@ -575,6 +576,7 @@ class TrajectoryCollection:
         for added in p.starmap(fun, args_iter):
             results.extend(added)
         self.trajectories = results
+        return results
 
     def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME, n_threads=1):
         """
@@ -602,6 +604,7 @@ class TrajectoryCollection:
                 UNITS(),
                 overwrite,
             )
+        return self
 
     def _add_direction(self, trajs, name, units, overwrite):
         for traj in trajs:
@@ -633,6 +636,7 @@ class TrajectoryCollection:
             self._multithread(
                 self._add_angular_difference, n_threads, name, UNITS(), overwrite
             )
+        return self
 
     def _add_angular_difference(self, trajs, name, units, overwrite):
         for traj in trajs:
@@ -675,6 +679,7 @@ class TrajectoryCollection:
             self._add_acceleration(self.trajectories, name, units, overwrite)
         else:
             self._multithread(self._add_acceleration, n_threads, name, units, overwrite)
+        return self
 
     def _add_acceleration(self, trajs, name, units, overwrite):
         for traj in trajs:
@@ -704,6 +709,7 @@ class TrajectoryCollection:
             self._add_distance(self.trajectories, name, units, overwrite)
         else:
             self._multithread(self._add_distance, n_threads, name, units, overwrite)
+        return self
 
     def _add_distance(self, trajs, name, units, overwrite):
         for traj in trajs:
@@ -730,6 +736,7 @@ class TrajectoryCollection:
             self._add_distance(self.trajectories, name, UNITS(), overwrite)
         else:
             self._multithread(self._add_distance, n_threads, name, UNITS(), overwrite)
+        return self
 
     def _add_timedelta(self, trajs, name, units, overwrite):
         for traj in trajs:
@@ -747,6 +754,7 @@ class TrajectoryCollection:
         """
         for traj in self:
             traj.add_traj_id(overwrite)
+        return self
 
     def get_min(self, column):
         """

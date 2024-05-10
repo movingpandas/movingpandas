@@ -135,9 +135,9 @@ class _TrajectoryPlotter:
     def _hvplot_end_points(self, tc):
         from holoviews import dim, Overlay
 
-        try:
+        if "TrajectoryCollection" in str(type(tc)):
             end_pts = tc.get_end_locations(with_direction=True)
-        except AttributeError:  # if tc is actually a Trajectory
+        else:  # Trajectory
             tc.add_direction(name=self.direction_col_name, overwrite=True)
             end_pts = tc.df.tail(1).copy()
 
@@ -268,7 +268,7 @@ class _TrajectoryPlotter:
         self.MPD_PALETTE = list(Category10_10) + cc.palette["glasbey"]
         self.color = self.kwargs.pop("color", None)
 
-        try:
+        if "TrajectoryCollection" in str(type(self.data)):
             tc = self.data.copy()
             if self.direction_col_name not in tc.trajectories[0].df.columns:
                 tc.add_direction(name=self.direction_col_name)
@@ -276,13 +276,13 @@ class _TrajectoryPlotter:
                 if self.column == self.speed_col_name and self.speed_col_missing:
                     tc.add_speed()
             pts_gdf = tc.to_point_gdf()
-        except AttributeError:
+        else:  # Trajectory
             traj = self.data.copy()
             if self.direction_col_name not in traj.df.columns:
                 traj.add_direction(name=self.direction_col_name)
             if self.column:
                 if self.column == self.speed_col_name and self.speed_col_missing:
-                    tc.add_speed()
+                    traj.add_speed()
             pts_gdf = traj.df
 
         ids = None
