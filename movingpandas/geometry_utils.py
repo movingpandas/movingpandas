@@ -8,6 +8,7 @@ from geopy.distance import geodesic
 from packaging.version import Version
 from shapely.geometry import LineString, Point
 
+from movingpandas.tools._warnings import deprecated
 
 try:
     SHAPELY_GE_2 = Version(shapely.__version__) >= Version("2.0.0")
@@ -25,6 +26,7 @@ def _is_point(input):
         )
 
 
+@deprecated
 def measure_distance_spherical(point1, point2):
     """
     Return spherical distance between two shapely Points as a float.
@@ -83,12 +85,12 @@ def measure_distance_geodesic(point1, point2):
     return dist
 
 
-def measure_distance(point1, point2, spherical=False, conversion=None):
+def measure_distance(point1, point2, geodesic=False, conversion=None):
     """
     Convenience function that returns either euclidean or geodesic distance
     between two points
     """
-    if spherical:
+    if geodesic:
         d = measure_distance_geodesic(point1, point2)
     else:
         d = measure_distance_euclidean(point1, point2)
