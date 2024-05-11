@@ -230,6 +230,25 @@ class TrajectoryCollection:
             if traj.id == traj_id:
                 return traj
 
+    def get_trajectories(self, obj_id):
+        """
+        Return the trajectories of the requested moving object
+
+        Parameters
+        ----------
+        obj_id : any
+            Moving object ID
+
+        Returns
+        -------
+        TrajectoryCollection
+        """
+        trajs = []
+        for traj in self:
+            if traj.obj_id == obj_id:
+                trajs.append(traj)
+        return TrajectoryCollection(trajs)
+
     def get_crs(self):
         """
         Return the CRS of the trajectories

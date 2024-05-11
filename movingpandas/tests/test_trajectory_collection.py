@@ -91,6 +91,11 @@ class TestTrajectoryCollection:
         assert self.collection.get_trajectory(2).id == 2
         assert self.collection.get_trajectory(3) is None
 
+    def test_get_trajectories(self):
+        assert len(self.collection.get_trajectories("A")) == 2
+        assert len(self.collection.get_trajectories("A").to_point_gdf()) == 8
+        assert len(self.collection.get_trajectories("B")) == 0
+
     def test_get_locations_at(self):
         locs = self.collection.get_locations_at(datetime(2018, 1, 1, 12, 6, 0))
         assert len(locs) == 2
