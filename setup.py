@@ -16,7 +16,7 @@ INSTALL_REQUIRES = [
 
 setuptools.setup(
     name="movingpandas",
-    version="0.17.3",
+    version="0.18.0",
     author="Anita Graser",
     author_email="anitagraser@gmx.at",
     description="MovingPandas implements Trajectory classes and corresponding methods "
