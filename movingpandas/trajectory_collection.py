@@ -752,9 +752,9 @@ class TrajectoryCollection:
             Number of threads to use for computation (default: 1)
         """
         if n_threads <= 1:
-            self._add_distance(self.trajectories, name, UNITS(), overwrite)
+            self._add_timedelta(self.trajectories, name, UNITS(), overwrite)
         else:
-            self._multithread(self._add_distance, n_threads, name, UNITS(), overwrite)
+            self._multithread(self._add_timedelta, n_threads, name, UNITS(), overwrite)
         return self
 
     def _add_timedelta(self, trajs, name, units, overwrite):
