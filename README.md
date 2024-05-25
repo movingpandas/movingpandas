@@ -200,6 +200,8 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 * [Duarte, M. M. G., & Sakr, M. (2023). A Benchmark of Existing Tools for Outlier Detection and Cleaning in Trajectories.](https://www.researchsquare.com/article/rs-3356633/v1) - *"The benchmark includes MovingPandas, Scikit-mobility, Scikit-learn, Ptrail, PyMove, movetk, MEOS, Argosﬁlter, Stmove and MOutlier."*
 * [Lei, J., Chu, Z., Wu, Y., Liu, X., Luo, M., He, W., & Liu, C. (2024). Predicting vessel arrival times on inland waterways: A tree-based stacking approach. Ocean Engineering, 294, 116838.](https://www.sciencedirect.com/science/article/abs/pii/S0029801824001756) - *"the historical voyages are processed with the movingpandas library and stored as GeoDataFrames"*
 * [Golze, J., & Sester, M. (2024). Determining user specific semantics of locations extracted from trajectory data. Transportation Research Procedia, 78, 215-221.](https://www.sciencedirect.com/science/article/pii/S2352146524000814) - *"stop points are extracted from the GPS trajectories using the Python framework MovingPandas"*
+* [Van Deursen, J., Creany, N., Smith, B., Freimund, W., Avgar, T., & Monz, C. A. (2024). Recreation specialization: Resource selection functions as a predictive tool for protected area recreation management. Applied Geography, 167, 103276.](https://www.sciencedirect.com/science/article/abs/pii/S014362282400081X) - *"GeoPandas and MovingPandas packages in Python were used to analyze the GPS data collected and calculate the thirteen STMs (spatio-temporal metrics)"*
+
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
