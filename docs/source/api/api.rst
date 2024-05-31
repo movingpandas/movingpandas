@@ -10,6 +10,6 @@ API Reference
    TrajectoryAggregator <trajectoryaggregator>
    TrajectoryCleaner <trajectorycleaner>
    TrajectoryGeneralizer <trajectorygeneralizer>
-   TrajecotrySmoother <trajectorysmoother>
+   TrajectorySmoother <trajectorysmoother>
    TrajectorySplitter <trajectorysplitter>
    TrajectoryStopDetector <trajectorystopdetector>
