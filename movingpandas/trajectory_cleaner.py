@@ -108,14 +108,10 @@ class OutlierCleaner(TrajectoryCleaner):
 
     Parameters
     ----------
-    v_max: speed threshold
+    v_max : numeric
+        Speed threshold
     units : tuple
         Units in which to calculate speed
-        distance : str
-            Abbreviation for the distance unit
-            (default: CRS units, or metres if geographic)
-        time : str
-            Abbreviation for the time unit (default: seconds)
         For more info, check the list of supported units at
         https://movingpandas.org/units
 

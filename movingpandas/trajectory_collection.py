@@ -841,8 +841,8 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
 
-            To customize the plots, check the list of supported colormaps_.
-            .. _colormaps: https://holoviews.org/user_guide/Colormaps.html#available-colormaps
+            To customize the plots, check the list of supported colormaps: 
+            https://holoviews.org/user_guide/Colormaps.html#available-colormaps
 
         Examples
         --------
@@ -868,8 +868,8 @@ class TrajectoryCollection:
         kwargs :
             These parameters will be passed to the TrajectoryPlotter
 
-            To customize the plots, check the list of supported colormaps_.
-            .. _colormaps: https://holoviews.org/user_guide/Colormaps.html#available-colormaps
+            To customize the plots, check the list of supported colormaps: 
+            https://holoviews.org/user_guide/Colormaps.html#available-colormaps
 
         Examples
         --------
