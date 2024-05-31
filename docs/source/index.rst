@@ -8,7 +8,7 @@ MovingPandas provides trajectory data structures and functions for handling move
 .. toctree::
    :maxdepth: 2
 
-   Head to the API reference <api/api>
+   API reference <api/api>
   
 
 Looking for the project home? Head over to: http://movingpandas.org
