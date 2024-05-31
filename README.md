@@ -21,7 +21,9 @@
 
 <img align="right" src="https://movingpandas.github.io/movingpandas/assets/img/movingpandas.png">
 
-MovingPandas implements a Trajectory class and corresponding methods based on **[GeoPandas](https://geopandas.org)**.
+MovingPandas is a Python library for movement data exploration and analysis.
+
+MovingPandas provides trajectory data structures and functions for handling movement data based on Pandas, **[GeoPandas](https://geopandas.org)**, and HoloViz.
 
 Visit **[movingpandas.org](http://movingpandas.org)** for details! 
 
