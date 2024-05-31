@@ -5,6 +5,7 @@ MovingPandas implements trajectory classes and functions built on top of GeoPand
 
 
 .. toctree::
+   :maxdepth: 1
 
    API reference <api/api>
   
