@@ -2,6 +2,7 @@ MovingPandas.TrajectorySplitter
 ===========================================
 
 .. automodule:: movingpandas
+    :members:
     :noindex:
 
 .. autoclass:: TrajectorySplitter

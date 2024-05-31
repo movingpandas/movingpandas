@@ -15,3 +15,4 @@ dependencies:
   - hdf5
   - pip
   - sphinx
+  - pydata-sphinx-theme

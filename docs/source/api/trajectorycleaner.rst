@@ -4,7 +4,7 @@ MovingPandas.TrajectoryCleaner
 .. automodule:: movingpandas
     :noindex:
 
-.. autoclass:: TrajectoryCleaner
+.. autoclass:: IqrCleaner
    :members:
 
    .. automethod:: __init__

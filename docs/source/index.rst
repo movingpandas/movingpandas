@@ -1,32 +1,14 @@
-Welcome to MovingPandas's documentation!
-========================================
+Welcome to the MovingPandas documentation!
+==========================================
 
 MovingPandas implements trajectory classes and functions built on top of GeoPandas.
 
-The project home is: http://movingpandas.org
-
-The code repository is: https://github.com/movingpandas/movingpandas
-
-Extensive analysis examples are available from: https://github.com/movingpandas/movingpandas-examples
-
-MovingPandas classes
---------------------
 
 .. toctree::
-   :maxdepth: 1
 
-   trajectory
-   trajectorycollection
-   trajectorygeneralizer
-   trajectoryaggregator
-   trajectorysplitter
-   trajectorystopdetector
-   trajectorysmoother
-   trajectorycleaner
+   API reference <api/api>
+  
 
+Looking for the project home? Head over to: http://movingpandas.org
 
-All Functions
---------------
-
-* :ref:`genindex`
-
+Looking for tutorials & examples? See: https://movingpandas.org/examples
