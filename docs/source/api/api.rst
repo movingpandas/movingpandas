@@ -2,6 +2,7 @@ API Reference
 =============
 
 .. toctree::
+   :maxdepth: 1
 
    Trajectory <trajectory>
    TrajectoryCollection <trajectorycollection>
