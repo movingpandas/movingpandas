@@ -5,13 +5,13 @@ from movingpandas.trajectory_collection import TrajectoryCollection
 from .test_trajectory import make_traj, Node
 from movingpandas.trajectory_cleaner import IqrCleaner, OutlierCleaner
 import pandas as pd
-from fiona.crs import from_epsg
+from pyproj import CRS
 from shapely.geometry import Point
 from datetime import datetime
 from geopandas import GeoDataFrame
 
-CRS_METRIC = from_epsg(31256)
-CRS_LATLON = from_epsg(4326)
+CRS_METRIC = CRS.from_user_input(31256)
+CRS_LATLON = CRS.from_user_input(4326)
 
 
 class TestTrajectoryCleaner:

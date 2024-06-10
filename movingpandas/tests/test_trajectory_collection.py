@@ -6,7 +6,7 @@ from math import sqrt
 
 import pandas as pd
 import pytest
-from fiona.crs import from_epsg
+from pyproj import CRS
 from geopandas import GeoDataFrame
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
@@ -24,8 +24,8 @@ from movingpandas.trajectory import (
 from movingpandas.trajectory_collection import TrajectoryCollection
 from . import requires_holoviews
 
-CRS_METRIC = from_epsg(31256)
-CRS_LATLON = from_epsg(4326)
+CRS_METRIC = CRS.from_user_input(31256)
+CRS_LATLON = CRS.from_user_input(4326)
 
 
 class TestTrajectoryCollection:

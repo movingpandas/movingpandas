@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime, timedelta
 from pytz import timezone
 
-from fiona.crs import from_epsg
+from pyproj import CRS
 from numpy import issubdtype
 
 from movingpandas.trajectory_collection import TrajectoryCollection
@@ -12,8 +12,8 @@ from movingpandas.trajectory_splitter import StopSplitter
 from movingpandas.trajectory_stop_detector import TrajectoryStopDetector
 from .test_trajectory import Node, make_traj
 
-CRS_METRIC = from_epsg(31256)
-CRS_LATLON = from_epsg(4326)
+CRS_METRIC = CRS.from_user_input(31256)
+CRS_LATLON = CRS.from_user_input(4326)
 
 
 class TestTrajectoryStopDetector:

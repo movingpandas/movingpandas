@@ -32,7 +32,7 @@ def test_get_deps_info():
 
     assert "geopandas" in deps_info
     assert "pandas" in deps_info
-    assert "fiona" in deps_info
+    assert "pyproj" in deps_info
     assert "numpy" in deps_info
     assert "shapely" in deps_info
     assert "rtree" in deps_info
