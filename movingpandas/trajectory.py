@@ -1542,4 +1542,4 @@ class Trajectory:
             The polygon or line (in case of only two points)
             of the Minimum Convex Polygon
         """
-        return self.df.geometry.unary_union.convex_hull
+        return self.df.geometry.union_all().convex_hull
