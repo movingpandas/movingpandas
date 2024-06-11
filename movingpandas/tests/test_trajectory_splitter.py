@@ -88,7 +88,7 @@ class TestTrajectorySplitter:
 
     def test_split_by_2H(self):
         traj = make_traj([Node(), Node(second=1), Node(hour=2), Node(hour=2, second=1)])
-        split = TemporalSplitter(traj).split(mode="2H")
+        split = TemporalSplitter(traj).split(mode="2h")
         assert type(split) == TrajectoryCollection
         assert len(split) == 2
         assert split.trajectories[0] == make_traj(
