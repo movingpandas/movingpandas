@@ -1544,5 +1544,5 @@ class Trajectory:
         """
         try:
             return self.df.geometry.union_all().convex_hull
-        except:
+        except AttributeError:
             return self.df.geometry.unary_union.convex_hull

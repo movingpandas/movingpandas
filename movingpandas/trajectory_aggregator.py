@@ -238,7 +238,7 @@ class _SequenceGenerator:
         self.cells = cells
         try:
             self.cells_union = cells.geometry.union_all()
-        except:
+        except AttributeError:
             self.cells_union = cells.geometry.unary_union
 
         self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
