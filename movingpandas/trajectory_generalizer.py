@@ -112,7 +112,7 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
     def _generalize_traj(self, traj, tolerance):
         temp_df = traj.df.copy()
         temp_df["t"] = temp_df.index
-        prev_t = temp_df.head(1)["t"][0]
+        prev_t = temp_df["t"].iat[0]
         keep_rows = [0]
 
         for i, (_, row) in enumerate(temp_df.iterrows()):
