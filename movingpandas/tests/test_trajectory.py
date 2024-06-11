@@ -6,7 +6,7 @@ from pandas.testing import assert_frame_equal
 from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString
 from datetime import datetime, timedelta
-from fiona.crs import from_epsg
+from pyproj import CRS
 from movingpandas.trajectory import (
     Trajectory,
     DIRECTION_COL_NAME,
@@ -22,8 +22,8 @@ from movingpandas.unit_utils import MissingCRSWarning
 from . import requires_holoviews, has_holoviews
 
 
-CRS_METRIC = from_epsg(31256)
-CRS_LATLON = from_epsg(4326)
+CRS_METRIC = CRS.from_user_input(31256)
+CRS_LATLON = CRS.from_user_input(4326)
 
 
 def assert_frame_not_equal(*args, **kwargs):

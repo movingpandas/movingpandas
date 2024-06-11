@@ -93,7 +93,6 @@ class Trajectory:
         >>> import pandas as pd
         >>> import geopandas as gpd
         >>> import movingpandas as mpd
-        >>> from fiona.crs import from_epsg
         >>>
         >>> df = pd.DataFrame([
         ...     {'geometry':Point(0,0), 't':datetime(2018,1,1,12,0,0)},
@@ -101,7 +100,7 @@ class Trajectory:
         ...     {'geometry':Point(6,6), 't':datetime(2018,1,1,12,10,0)},
         ...     {'geometry':Point(9,9), 't':datetime(2018,1,1,12,15,0)}
         ... ]).set_index('t')
-        >>> gdf = gpd.GeoDataFrame(df, crs=from_epsg(31256))
+        >>> gdf = gpd.GeoDataFrame(df, crs=31256)
         >>> traj = mpd.Trajectory(gdf, 1)
 
         For more examples, see the tutorial notebooks_.
@@ -1543,4 +1542,7 @@ class Trajectory:
             The polygon or line (in case of only two points)
             of the Minimum Convex Polygon
         """
-        return self.df.geometry.unary_union.convex_hull
+        try:
+            return self.df.geometry.union_all().convex_hull
+        except AttributeError:
+            return self.df.geometry.unary_union.convex_hull

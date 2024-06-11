@@ -236,7 +236,10 @@ class _PtsExtractor:
 class _SequenceGenerator:
     def __init__(self, cells, traj_collection):
         self.cells = cells
-        self.cells_union = cells.geometry.unary_union
+        try:
+            self.cells_union = cells.geometry.union_all()
+        except AttributeError:
+            self.cells_union = cells.geometry.unary_union
 
         self.id_to_centroid = {i: [f, [0, 0, 0, 0, 0]] for i, f in cells.iterrows()}
         self.sequences = Counter()

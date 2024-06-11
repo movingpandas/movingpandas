@@ -2,7 +2,7 @@
 
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from fiona.crs import from_epsg
+from pyproj import CRS
 from datetime import timedelta, datetime
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
@@ -17,8 +17,8 @@ from movingpandas.trajectory_splitter import (
 )
 
 
-CRS_METRIC = from_epsg(31256)
-CRS_LATLON = from_epsg(4326)
+CRS_METRIC = CRS.from_user_input(31256)
+CRS_LATLON = CRS.from_user_input(4326)
 
 
 class TestTrajectorySplitter:
@@ -88,7 +88,7 @@ class TestTrajectorySplitter:
 
     def test_split_by_2H(self):
         traj = make_traj([Node(), Node(second=1), Node(hour=2), Node(hour=2, second=1)])
-        split = TemporalSplitter(traj).split(mode="2H")
+        split = TemporalSplitter(traj).split(mode="2h")
         assert type(split) == TrajectoryCollection
         assert len(split) == 2
         assert split.trajectories[0] == make_traj(
