@@ -81,7 +81,7 @@ class TemporalSplitter(TrajectorySplitter):
 
     def _split_traj(self, traj, mode="day", min_length=0):
         result = []
-        modes = {"hour": "H", "day": "D", "month": "M", "year": "Y"}
+        modes = {"hour": "h", "day": "D", "month": "ME", "year": "YE"}
         if mode in modes.keys():
             mode = modes[mode]
         grouped = traj.df.groupby(Grouper(freq=mode))
