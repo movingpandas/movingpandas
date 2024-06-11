@@ -48,6 +48,8 @@ jobs:
             os: ubuntu-latest
           - env: environment-minimum-3.9.yml
             os: ubuntu-latest
+          - env: environment-geopandas-1.0.yml
+            os: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
