@@ -21,8 +21,10 @@ from movingpandas.unit_utils import MissingCRSWarning
 
 from . import requires_holoviews, has_holoviews
 
+
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
+
 
 def assert_frame_not_equal(*args, **kwargs):
     # Taken from https://stackoverflow.com/a/38778401/6046019
