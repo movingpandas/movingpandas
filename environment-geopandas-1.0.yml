@@ -10,4 +10,4 @@ dependencies:
   - pytest-cov
   - pip
   - pip:
-    - geopandas==1.0.0a1
+    - geopandas==1.0.0rc1
