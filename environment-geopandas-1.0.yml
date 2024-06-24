@@ -5,7 +5,6 @@ dependencies:
   - python=3.10
   - matplotlib-base
   - geopy
-  - rtree
   - pytest
   - pytest-cov
   - pip
