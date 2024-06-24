@@ -10,3 +10,4 @@ dependencies:
   - rtree
   - pytest
   - pytest-cov
+  - pyproj
