@@ -14,3 +14,4 @@ def _importorskip(modname):
 
 has_stonesoup, requires_stonesoup = _importorskip("stonesoup")
 has_holoviews, requires_holoviews = _importorskip("holoviews")
+has_folium, requires_folium = _importorskip("folium")

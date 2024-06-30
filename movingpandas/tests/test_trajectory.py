@@ -19,7 +19,7 @@ from movingpandas.trajectory import (
 )
 from movingpandas.unit_utils import MissingCRSWarning
 
-from . import requires_holoviews, has_holoviews
+from . import requires_holoviews, has_holoviews, requires_folium
 
 
 CRS_METRIC = CRS.from_user_input(31256)
@@ -776,6 +776,7 @@ class TestTrajectory:
         plot = self.default_traj_metric.plot()
         assert isinstance(plot, Axes)
 
+    @requires_folium
     def test_explore_exists(self):
         from folium.folium import Map
 
