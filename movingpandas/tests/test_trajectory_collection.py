@@ -235,6 +235,12 @@ class TestTrajectoryCollection:
         result = self.collection.plot()
         assert isinstance(result, Axes)
 
+    def test_explore_exists(self):
+        from folium.folium import Map
+
+        plot = self.collection.explore()
+        assert isinstance(plot, Map)
+
     @requires_holoviews
     def test_hvplot_exists(self):
         import holoviews

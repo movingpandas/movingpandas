@@ -62,7 +62,7 @@ class IqrCleaner(TrajectoryCleaner):
     ----------
     columns: dictionary
         Information regarding the columns that will be used to clean the trajectory
-        and the accompanying thresholds. 
+        and the accompanying thresholds.
 
         Key-value pairs of columns and alpha (IQR multiplier).
         Note: Setting alpha=3 is widely used.

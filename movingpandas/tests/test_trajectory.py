@@ -776,6 +776,12 @@ class TestTrajectory:
         plot = self.default_traj_metric.plot()
         assert isinstance(plot, Axes)
 
+    def test_explore_exists(self):
+        from folium.folium import Map
+
+        plot = self.default_traj_metric.explore()
+        assert isinstance(plot, Map)
+
     @requires_holoviews
     def test_hvplot_exists(self):
         import holoviews

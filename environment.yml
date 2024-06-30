@@ -1,4 +1,4 @@
-name: movingpandas
+name: movingpandas-dev
 channels:
   - conda-forge
 dependencies:
