@@ -19,7 +19,7 @@ def _skip_if_geopandas_pre_1():
         has = True
     else:
         has = False
-    func = pytest.mark.skipif(not has, reason=f"requires geopandas >= 1.0")
+    func = pytest.mark.skipif(not has, reason="requires geopandas >= 1.0")
     return has, func
 
 
