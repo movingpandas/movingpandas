@@ -284,7 +284,7 @@ class Trajectory:
         from importlib.metadata import version
 
         if version("geopandas") >= "1.0.0":
-            return self.df.reset_index().explore(*args, **kwargs)
+            return self.to_line_gdf().explore(*args, **kwargs)
         else:
             raise (
                 NotImplementedError(
