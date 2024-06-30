@@ -22,7 +22,7 @@ from movingpandas.trajectory import (
     TIMEDELTA_COL_NAME,
 )
 from movingpandas.trajectory_collection import TrajectoryCollection
-from . import requires_holoviews, requires_folium
+from . import requires_holoviews, requires_folium, requires_geopandas1
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
@@ -236,6 +236,7 @@ class TestTrajectoryCollection:
         assert isinstance(result, Axes)
 
     @requires_folium
+    @requires_geopandas1
     def test_explore_exists(self):
         from folium.folium import Map
 
