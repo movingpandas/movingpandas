@@ -236,7 +236,6 @@ class TestTrajectoryCollection:
         assert isinstance(result, Axes)
 
     @requires_folium
-    @requires_geopandas1
     def test_explore_exists(self):
         from folium.folium import Map
 
