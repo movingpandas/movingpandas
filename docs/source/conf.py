@@ -57,8 +57,8 @@ toc_object_entries_show_parents = "hide"
 html_theme = "pydata_sphinx_theme"
 
 html_context = {
-   # ...
-   "default_mode": "light"
+    # ...
+    "default_mode": "light"
 }
 
 # The name of an image file (relative to this directory) to place at the top
@@ -88,9 +88,6 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-
-
 
 
 autodoc_mock_imports = [

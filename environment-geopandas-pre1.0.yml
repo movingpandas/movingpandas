@@ -7,6 +7,4 @@ dependencies:
   - geopy
   - pytest
   - pytest-cov
-  - pip
-  - pip:
-    - geopandas==1.0.0rc1
+  - geopandas=0.14.4

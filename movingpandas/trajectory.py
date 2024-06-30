@@ -258,6 +258,40 @@ class Trajectory:
         """
         return _TrajectoryPlotter(self, *args, **kwargs).plot()
 
+    def explore(self, *args, **kwargs):
+        """
+        Generate a plot using GeoPandas explore (folium/leaflet.js)
+        https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.explore.html
+
+        Parameters
+        ----------
+        args :
+            These parameters will be passed to GeoPandas explore
+        kwargs :
+            These parameters will be passed to GeoPandas explore
+
+        Returns
+        -------
+        m : folium.folium.Map
+            folium Map instance
+
+        Examples
+        --------
+        Plot speed along trajectory (with legend and specified figure size):
+
+        >>> trajectory.explore(column='speed', vmax=20, tiles="CartoDB positron")
+        """  # noqa: E501
+        from importlib.metadata import version
+
+        if version("geopandas") >= "1.0.0":
+            return self.to_line_gdf().explore(*args, **kwargs)
+        else:
+            raise (
+                NotImplementedError(
+                    "Please install geopandas >= 1.0.0 to use this function."
+                )
+            )
+
     def hvplot(self, *args, **kwargs):
         """
         Generate an interactive plot using HoloViews.
