@@ -19,7 +19,7 @@ from movingpandas.trajectory import (
 )
 from movingpandas.unit_utils import MissingCRSWarning
 
-from . import requires_holoviews, has_holoviews, requires_folium, requires_geopandas1
+from . import requires_holoviews, has_holoviews, requires_folium, has_geopandas1
 
 
 CRS_METRIC = CRS.from_user_input(31256)
@@ -777,12 +777,15 @@ class TestTrajectory:
         assert isinstance(plot, Axes)
 
     @requires_folium
-    @requires_geopandas1
     def test_explore_exists(self):
         from folium.folium import Map
 
-        plot = self.default_traj_metric.explore()
-        assert isinstance(plot, Map)
+        if has_geopandas1:
+            plot = self.default_traj_metric.explore()
+            assert isinstance(plot, Map)
+        else:
+            with pytest.raises(NotImplementedError):
+                plot = self.default_traj_metric.explore()
 
     @requires_holoviews
     def test_hvplot_exists(self):

@@ -22,7 +22,7 @@ from movingpandas.trajectory import (
     TIMEDELTA_COL_NAME,
 )
 from movingpandas.trajectory_collection import TrajectoryCollection
-from . import requires_holoviews, requires_folium, requires_geopandas1
+from . import requires_holoviews, requires_folium, has_geopandas1
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
@@ -240,8 +240,12 @@ class TestTrajectoryCollection:
     def test_explore_exists(self):
         from folium.folium import Map
 
-        plot = self.collection.explore()
-        assert isinstance(plot, Map)
+        if has_geopandas1:
+            plot = self.collection.explore()
+            assert isinstance(plot, Map)
+        else:
+            with pytest.raises(NotImplementedError):
+                plot = self.collection.explore()
 
     @requires_holoviews
     def test_hvplot_exists(self):
