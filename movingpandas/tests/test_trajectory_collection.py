@@ -569,3 +569,10 @@ class TestTrajectoryCollection:
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
 
         assert_frame_equal(traj_gdf, expected_line_gdf)
+
+    def test_to_mf_json(self):
+        json = self.collection.to_mf_json()
+        assert (
+            str(json)
+            == """{'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'properties': {'id': 1, 'obj': 'A', 'val': 9, 'val2': 'a'}, 'temporalGeometry': {'type': 'MovingPoint', 'coordinates': [(0.0, 0.0), (6.0, 0.0), (6.0, 6.0), (9.0, 9.0)], 'datetimes': [Timestamp('2018-01-01 12:00:00'), Timestamp('2018-01-01 12:06:00'), Timestamp('2018-01-01 14:10:00'), Timestamp('2018-01-01 14:15:00')]}}, {'type': 'Feature', 'properties': {'id': 2, 'obj': 'A', 'val': 10, 'val2': 'e'}, 'temporalGeometry': {'type': 'MovingPoint', 'coordinates': [(10.0, 10.0), (16.0, 10.0), (16.0, 16.0), (190.0, 10.0)], 'datetimes': [Timestamp('2018-01-01 12:00:00'), Timestamp('2018-01-01 12:06:00'), Timestamp('2018-01-02 13:10:00'), Timestamp('2018-01-02 13:15:00')]}}]}"""  # noqa F401
+        )

@@ -14,6 +14,7 @@ from .trajectory import (
 )
 from .trajectory_plotter import _TrajectoryPlotter
 from .unit_utils import UNITS
+from .io import gdf_to_mf_json
 
 
 @staticmethod
@@ -178,6 +179,24 @@ class TrajectoryCollection:
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
+
+    def to_mf_json(self):
+        """
+        Converts a TrajectoryCollection to a dictionary compatible with the Moving
+        Features JSON (MF-JSON) specification.
+
+        Examples
+        --------
+
+        >>> tc.to_mf_json()
+
+        Returns:
+            dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
+        """
+        tmp = self.to_point_gdf()
+        t = tmp.index.name
+        mf_json = gdf_to_mf_json(tmp.reset_index(), self.get_traj_id_col(), t)
+        return mf_json
 
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col, t, x, y, crs):
         trajectories = []

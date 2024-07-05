@@ -1009,6 +1009,13 @@ class TestTrajectory:
 
         assert_frame_equal(traj_gdf_wkt, expected_line_gdf_wkt)
 
+    def test_to_mf_json(self):
+        json = self.default_traj_metric.to_mf_json()
+        assert (
+            str(json)
+            == """{'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'properties': {'traj_id': 1, 'value': 1}, 'temporalGeometry': {'type': 'MovingPoint', 'coordinates': [(0.0, 0.0), (6.0, 0.0), (10.0, 0.0)], 'datetimes': [Timestamp('1970-01-01 00:00:00'), Timestamp('1970-01-01 00:00:10'), Timestamp('1970-01-01 00:00:20')]}}]}"""  # noqa F401
+        )
+
     def test_error_due_to_wrong_gdf_index(self):
         with pytest.raises(TypeError):
             df = pd.DataFrame(
