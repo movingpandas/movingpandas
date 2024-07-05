@@ -182,8 +182,8 @@ class TrajectoryCollection:
 
     def to_mf_json(self):
         """
-        Converts a TrajectoryCollection to a dictionary compatible with the Moving Features JSON
-        (MF-JSON) specification.
+        Converts a TrajectoryCollection to a dictionary compatible with the Moving 
+        Features JSON (MF-JSON) specification.
 
         Examples
         --------
