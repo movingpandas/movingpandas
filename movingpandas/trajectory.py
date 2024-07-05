@@ -33,6 +33,7 @@ from .unit_utils import (
 )
 from .spatiotemporal_utils import get_speed2
 from .trajectory_plotter import _TrajectoryPlotter
+from .io import gdf_to_mf_json
 
 warnings.filterwarnings(  # see https://github.com/movingpandas/movingpandas/issues/289
     "ignore", message="CRS not set for some of the concatenation inputs."
@@ -641,6 +642,24 @@ class Trajectory:
         df = DataFrame([properties])
         traj_gdf = GeoDataFrame(df, crs=self.crs)
         return traj_gdf
+
+    def to_mf_json(self):
+        """
+        Converts a Trajectory to a dictionary compatible with the Moving Features JSON
+        (MF-JSON) specification.
+
+        Examples
+        --------
+
+        >>> traj.to_mf_json()
+
+        Returns:
+            dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
+        """
+        tmp = self.to_point_gdf()
+        t = tmp.index.name
+        mf_json = gdf_to_mf_json(tmp.reset_index(), self.get_traj_id_col(), t)
+        return mf_json
 
     def get_start_location(self):
         """
