@@ -4,8 +4,6 @@ from typing import Callable, Dict
 from geopandas import GeoDataFrame
 from pandas import DataFrame
 
-from movingpandas import Trajectory, TrajectoryCollection
-
 
 def gdf_to_mf_json(
     gdf: GeoDataFrame,
@@ -245,6 +243,8 @@ def _get_temporal_properties(data):
 
 
 def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
+    from movingpandas import Trajectory
+
     df = _create_geometry(data)
     if traj_id_property:
         traj_id = _get_id_property_value(data, traj_id_property)
@@ -257,6 +257,8 @@ def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
 
 
 def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_property):
+    from movingpandas import TrajectoryCollection
+
     assert (
         traj_id_property is not None
     ), "traj_id_property must be supplied when reading a collection of trajectories"
