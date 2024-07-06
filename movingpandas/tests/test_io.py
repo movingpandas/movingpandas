@@ -16,12 +16,26 @@ from movingpandas.io import (
 class TestIO:
     test_dir = os.path.dirname(os.path.realpath(__file__))
 
-    def test_mf_file(self):
+    def test_mf_file_movingpoint(self):
         traj = read_mf_json(os.path.join(self.test_dir, "movingfeatures.json"), "id")
         assert traj.id == "9569"
         assert traj.size() == 5
         actual = traj.df.columns
         expected = ["pressure", "wind", "class", "geometry", "id"]
+        assert len(actual) == len(expected)
+        assert all([a == b for a, b in zip(actual, expected)])
+        actual = list(traj.df["pressure"])
+        expected = [1004.0, 1004.0, 1004.0, 1004.0, 1000.0]
+        assert actual == expected
+
+    def test_mf_file_mftrajectory(self):
+        traj = read_mf_json(
+            os.path.join(self.test_dir, "mftrajectory.json"), traj_id=9569
+        )
+        assert traj.id == 9569
+        assert traj.size() == 5
+        actual = traj.df.columns
+        expected = ["pressure", "wind", "class", "geometry", "traj_id"]
         assert len(actual) == len(expected)
         assert all([a == b for a, b in zip(actual, expected)])
         actual = list(traj.df["pressure"])
