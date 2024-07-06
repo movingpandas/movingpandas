@@ -201,7 +201,7 @@ class TrajectoryCollection:
             self.get_traj_id_col(),
             t,
             datetime_to_str=datetime_to_str,
-            temporal_columns=temporal_columns
+            temporal_columns=temporal_columns,
         )
         return mf_json
 
