@@ -5,6 +5,10 @@ from geopandas import GeoDataFrame
 from pandas import DataFrame
 
 
+def _datetime_to_string(dt, format="%Y-%m-%d %H:%M:%S"):
+    return dt.strftime(format)
+
+
 def gdf_to_mf_json(
     gdf: GeoDataFrame,
     traj_id_column: str,
@@ -15,6 +19,7 @@ def gdf_to_mf_json(
     crs=None,
     trs=None,
     datetime_encoder: Callable = None,
+    datetime_to_str: bool = False,
     # simplified typing hint due to https://github.com/movingpandas/movingpandas/issues/345  # noqa F401
 ) -> dict:
     """
@@ -49,6 +54,9 @@ def gdf_to_mf_json(
         temporal_columns = []
 
     rows = []
+
+    if datetime_to_str:
+        datetime_encoder = _datetime_to_string
 
     for identifier, row in gdf.groupby(traj_id_column):
         datetimes = _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row)
