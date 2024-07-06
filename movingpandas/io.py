@@ -5,17 +5,7 @@ from geopandas import GeoDataFrame
 from pandas import DataFrame
 
 
-def datetime_to_string(dt, format="%Y-%m-%d %H:%M:%S"):
-    """
-    Convert a datetime object to a string.
-
-    Parameters:
-    dt (datetime): The datetime object to convert.
-    format (str): The format string to use for conversion. Default is "%Y-%m-%d %H:%M:%S".
-
-    Returns:
-    str: The formatted datetime string.
-    """
+def _datetime_to_string(dt, format="%Y-%m-%d %H:%M:%S"):
     return dt.strftime(format)
 
 
@@ -66,7 +56,7 @@ def gdf_to_mf_json(
     rows = []
 
     if datetime_to_str:
-        datetime_encoder = datetime_to_string
+        datetime_encoder = _datetime_to_string
 
     for identifier, row in gdf.groupby(traj_id_column):
         datetimes = _retrieve_datetimes_from_row(datetime_column, datetime_encoder, row)
