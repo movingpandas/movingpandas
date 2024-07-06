@@ -643,7 +643,7 @@ class Trajectory:
         traj_gdf = GeoDataFrame(df, crs=self.crs)
         return traj_gdf
 
-    def to_mf_json(self):
+    def to_mf_json(self, datetime_to_str=True):
         """
         Converts a Trajectory to a dictionary compatible with the Moving
         Features JSON (MF-JSON) specification.
@@ -658,7 +658,7 @@ class Trajectory:
         """
         tmp = self.to_point_gdf()
         t = tmp.index.name
-        mf_json = gdf_to_mf_json(tmp.reset_index(), self.get_traj_id_col(), t)
+        mf_json = gdf_to_mf_json(tmp.reset_index(), self.get_traj_id_col(), t, datetime_to_str=datetime_to_str)
         return mf_json
 
     def get_start_location(self):
