@@ -28,7 +28,7 @@ class TestIO:
         expected = [1004.0, 1004.0, 1004.0, 1004.0, 1000.0]
         assert actual == expected
 
-    def test_mf_file_movingpoint(self):
+    def test_mf_file_mftrajectory(self):
         traj = read_mf_json(
             os.path.join(self.test_dir, "mftrajectory.json"), traj_id=9569
         )
