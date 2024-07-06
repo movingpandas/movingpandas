@@ -194,7 +194,6 @@ class TrajectoryCollection:
             dict: The MF-JSON representation of the GeoDataFrame as a dictionary.
         """
         tmp = self.to_point_gdf()
-        print(tmp)
         t = tmp.index.name
         mf_json = gdf_to_mf_json(
             tmp.reset_index(),
