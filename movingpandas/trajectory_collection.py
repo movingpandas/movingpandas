@@ -180,7 +180,7 @@ class TrajectoryCollection:
         gdf.reset_index(drop=True, inplace=True)
         return gdf
 
-    def to_mf_json(self, datetime_to_str=True):
+    def to_mf_json(self, datetime_to_str=True, temporal_columns=None):
         """
         Converts a TrajectoryCollection to a dictionary compatible with the Moving
         Features JSON (MF-JSON) specification.
@@ -200,6 +200,7 @@ class TrajectoryCollection:
             self.get_traj_id_col(),
             t,
             datetime_to_str=datetime_to_str,
+            temporal_columns=temporal_columns,
         )
         return mf_json
 
