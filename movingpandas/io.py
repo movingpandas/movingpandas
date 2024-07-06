@@ -193,29 +193,17 @@ def _create_objects_from_mf_json_dict(data, traj_id_property=None, traj_id=0):
     if not isinstance(data, dict):
         raise ValueError("Not a supported MovingFeatures JSON")
     if data["type"] == "Feature" and "temporalGeometry" in data:
-        return _create_traj_from_movingfeature_json(data, traj_id_property, traj_id)
+        return _create_traj_from_mfjson_movingpoint(data, traj_id_property, traj_id)
+    elif data["type"] == "Feature" and "geometry" in data:
+        return _create_traj_from_mfjson_trajectory(data, traj_id_property, traj_id)
     elif data["type"] == "FeatureCollection" and "features" in data:
-        return _create_trajcollection_from_movingfeaturecollection_json(
-            data, traj_id_property
-        )
+        return _create_tc_from_mfcollection_json(data, traj_id_property)
     else:
         raise ValueError(
             f"Not a supported MovingFeatures JSON: "
-            f"expected Feature or FeatureCollection"
+            f"expected Feature or FeatureCollection "
             f"but got {data['type']}"
         )
-
-
-def _create_geometry(data):
-    if data["temporalGeometry"]["type"] != "MovingPoint":
-        raise RuntimeError(
-            f"Not a supported MovingFeatures JSON: "
-            f"temporalGeometry type must be MovingPoint "
-            f"(but is {data['temporalGeometry']['type']}"
-        )
-    t = data["temporalGeometry"]["datetimes"]
-    x, y = map(list, zip(*data["temporalGeometry"]["coordinates"]))
-    return DataFrame(list(zip(t, x, y)), columns=["t", "x", "y"])
 
 
 def _get_id_property_value(data, traj_id_property):
@@ -226,6 +214,56 @@ def _get_id_property_value(data, traj_id_property):
             f"No property '{traj_id_property}'. "
             f"Available properties are: {data['properties'].keys()}"
         )
+
+
+def _create_geometry_from_linestring(data):
+    if data["geometry"]["type"] == "LineString":
+        t = data["properties"]["datetimes"]
+        x, y = map(list, zip(*data["geometry"]["coordinates"]))
+        return DataFrame(list(zip(t, x, y)), columns=["t", "x", "y"])
+    else:
+        raise RuntimeError(
+            f"Not a supported MovingFeatures JSON: "
+            f"geometry type must be LineString "
+            f"(but is {data['geometry']['type']}"
+        )
+
+
+def _add_properties(df, data):
+    # https://docs.ogc.org/is/19-045r3/19-045r3.html#_mf_json_trajectory_encoding
+
+    for property_name, values in data["properties"].items():
+        if len(values) == len(df):
+            # The array of a time-varying attribute with linear interpolation
+            # has elements with the same number of positions of the "datetimes"
+            # member; and
+            if property_name != "datetimes":
+                df[property_name] = values
+        elif len(values) == len(df) - 1:
+            # The array of a time-varying attribute with step interpolation
+            # has elements with one less than the number of positions of the
+            # "datetimes" member;
+            values.append(values[-1])
+            df[property_name] = values
+        elif len(values) == 1:
+            # The array of a fixed attribute during the whole of "datetimes"
+            # has only one element.
+            df[property_name] = values[0]
+        else:
+            pass
+
+    return df
+
+
+def _create_traj_from_mfjson_trajectory(data, traj_id_property, traj_id):
+    from movingpandas import Trajectory
+
+    df = _create_geometry_from_linestring(data)
+
+    if "properties" in data:
+        df = _add_properties(df, data)
+
+    return Trajectory(df, traj_id, t="t", x="x", y="y")
 
 
 def _get_temporal_properties(data):
@@ -242,10 +280,23 @@ def _get_temporal_properties(data):
     return DataFrame(transposed, columns=cols)
 
 
-def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
+def _create_geometry_from_movingpoint(data):
+    if data["temporalGeometry"]["type"] == "MovingPoint":
+        t = data["temporalGeometry"]["datetimes"]
+        x, y = map(list, zip(*data["temporalGeometry"]["coordinates"]))
+        return DataFrame(list(zip(t, x, y)), columns=["t", "x", "y"])
+    else:
+        raise RuntimeError(
+            f"Not a supported MovingFeatures JSON: "
+            f"temporalGeometry type must be MovingPoint "
+            f"(but is {data['temporalGeometry']['type']}"
+        )
+
+
+def _create_traj_from_mfjson_movingpoint(data, traj_id_property, traj_id):
     from movingpandas import Trajectory
 
-    df = _create_geometry(data)
+    df = _create_geometry_from_movingpoint(data)
     if traj_id_property:
         traj_id = _get_id_property_value(data, traj_id_property)
     if "temporalProperties" in data:
@@ -256,7 +307,7 @@ def _create_traj_from_movingfeature_json(data, traj_id_property, traj_id):
     return Trajectory(df, traj_id, t="t", x="x", y="y", traj_id_col=traj_id_property)
 
 
-def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_property):
+def _create_tc_from_mfcollection_json(data, traj_id_property):
     from movingpandas import TrajectoryCollection
 
     assert (
@@ -266,7 +317,7 @@ def _create_trajcollection_from_movingfeaturecollection_json(data, traj_id_prope
     trajectories = []
     for feature in data["features"]:
         trajectories.append(
-            _create_traj_from_movingfeature_json(feature, traj_id_property, None)
+            _create_traj_from_mfjson_movingpoint(feature, traj_id_property, None)
         )
 
     return TrajectoryCollection(trajectories)
