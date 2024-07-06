@@ -195,7 +195,12 @@ class TrajectoryCollection:
         """
         tmp = self.to_point_gdf()
         t = tmp.index.name
-        mf_json = gdf_to_mf_json(tmp.reset_index(), self.get_traj_id_col(), t, datetime_to_str=datetime_to_str)
+        mf_json = gdf_to_mf_json(
+            tmp.reset_index(),
+            self.get_traj_id_col(),
+            t,
+            datetime_to_str=datetime_to_str,
+        )
         return mf_json
 
     def _df_to_trajectories(self, df, traj_id_col, obj_id_col, t, x, y, crs):
