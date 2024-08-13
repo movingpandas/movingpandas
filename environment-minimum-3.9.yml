@@ -7,7 +7,6 @@ dependencies:
   - matplotlib-base
   - fiona
   - geopy
-  - rtree
   - pytest
   - pytest-cov
   - pyproj

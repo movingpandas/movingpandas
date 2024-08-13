@@ -92,7 +92,6 @@ def _get_deps_info():
         "fiona",
         "numpy",
         "shapely",
-        "rtree",
         "pyproj",
         "matplotlib",
         "mapclassify",
