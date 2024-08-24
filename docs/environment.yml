@@ -1,4 +1,4 @@
-name: mpd_docs
+name: mpd-docs
 channels:
   - conda-forge
 dependencies:
