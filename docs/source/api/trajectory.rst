@@ -36,6 +36,7 @@ Enrichment
    Trajectory.add_timedelta
    Trajectory.add_traj_id
 
+
 General methods and attributes
 ---------------------------------
 
@@ -44,6 +45,8 @@ General methods and attributes
 
    Trajectory.copy
    Trajectory.drop
+   Trajectory.get_max
+   Trajectory.get_min
    Trajectory.is_valid
    Trajectory.size
 
@@ -82,9 +85,7 @@ Spatiotemporal analysis
    Trajectory.get_end_time
    Trajectory.get_length
    Trajectory.get_linestring_between
-   Trajectory.get_max
    Trajectory.get_mcp
-   Trajectory.get_min
    Trajectory.get_position_at
    Trajectory.get_row_at
    Trajectory.get_sampling_interval
