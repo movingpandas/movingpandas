@@ -42,10 +42,14 @@ The official API documentation is hosted on **[ReadTheDocs](https://movingpandas
 ## Examples
 
 
+### Trajectory plots 
 
-### Trajectory plots [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/2-analysis-examples/bird-migration.ipynb)
+Create interactive trajectory plots using Folium and Geoviews with ease
 
-Create interactive trajectory plots, including multiple linked plots with ease
+![image](https://github.com/user-attachments/assets/5cb0a2ef-a775-4c9a-99dd-021159cc3a3c)
+
+
+#### Including multiple linked plots  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/bird-migration.html)
 
 ![movingpandas_animated](https://user-images.githubusercontent.com/590385/137953765-33f9ce1b-037c-4c86-82b2-0620de5ca28f.gif)
 
@@ -55,33 +59,33 @@ Create interactive trajectory plots, including multiple linked plots with ease
 ![Bicycle tracks from object tracking in videos](https://github.com/movingpandas/movingpandas/assets/590385/c4a0f682-bb94-4b15-ac03-a4d854008937)
 
 
-#### Including plots in custom projections [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/2-analysis-examples/iceberg.ipynb)
+#### Including plots in custom projections [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/iceberg.html)
 
 ![MovingPandas Iceberg trajectory in custom SouthPolarStereo projection](https://github.com/movingpandas/movingpandas/assets/590385/334304eb-da78-4779-b46b-5492fd54d8ed)
 
 
-### Stop detection  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/8-detecting-stops.ipynb)
+### Stop detection  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/1-tutorials/8-detecting-stops.html)
 
 Detect stops in trajectories, extract them as points or segments, and use them to split trajectories
 
 ![movingpandas_stop_detection](https://user-images.githubusercontent.com/590385/236671475-a37aa046-76d6-48b9-ae6d-d1358a591953.png)
 
 
-### Trajectory generalization  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/7-generalizing-trajectories.ipynb)
+### Trajectory generalization  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/1-tutorials/7-generalizing-trajectories.html)
 
 Generalize trajectories using spatial, temporal, and spatiotemporal methods
 
 ![movingpandas_generalize](https://user-images.githubusercontent.com/590385/142756559-012a15fe-736c-474c-b244-0ee02090d592.gif)
 
 
-### Trajectory cleaning & smoothing  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/10-smoothing-trajectories.ipynb)
+### Trajectory cleaning & smoothing  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/1-tutorials/10-smoothing-trajectories.html)
 
 Clean and sooth trajectories by removing outliers and applying Kalman filters
 
 ![movingpandas smooth](https://user-images.githubusercontent.com/590385/184359439-52eca394-5df6-40b2-a5b3-54543c3ccf34.png)
 
 
-### Trajectory aggregation [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-lightgrey.svg)](https://github.com/movingpandas/movingpandas-examples/blob/main/1-tutorials/9-aggregating-trajectories.ipynb)
+### Trajectory aggregation [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/1-tutorials/9-aggregating-trajectories.html)
 
 Aggregate trajectories to explore larger patterns
 
