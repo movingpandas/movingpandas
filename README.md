@@ -46,7 +46,7 @@ The official API documentation is hosted on **[ReadTheDocs](https://movingpandas
 
 Create interactive trajectory plots using Folium and Geoviews with ease
 
-![image](https://github.com/user-attachments/assets/5cb0a2ef-a775-4c9a-99dd-021159cc3a3c)
+![image](https://github.com/user-attachments/assets/a62b3a4e-e5fc-4d96-b67d-e03dff29a20e)
 
 
 #### Including multiple linked plots  [![View Jupyter Notebook](https://img.shields.io/badge/view-Jupyter%20notebook-white.svg)](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/bird-migration.html)
