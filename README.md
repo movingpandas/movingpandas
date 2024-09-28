@@ -13,7 +13,6 @@
 [![pyOpenSci](https://tinyurl.com/y22nb8up)](https://github.com/pyOpenSci/software-review/issues/18)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
-
 [![Mastodon Follow](https://img.shields.io/mastodon/follow/109434720057484377?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@movingpandas)
 
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
@@ -208,6 +207,7 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 * [Golze, J., & Sester, M. (2024). Determining user specific semantics of locations extracted from trajectory data. Transportation Research Procedia, 78, 215-221.](https://www.sciencedirect.com/science/article/pii/S2352146524000814) - *"stop points are extracted from the GPS trajectories using the Python framework MovingPandas"*
 * [Van Deursen, J., Creany, N., Smith, B., Freimund, W., Avgar, T., & Monz, C. A. (2024). Recreation specialization: Resource selection functions as a predictive tool for protected area recreation management. Applied Geography, 167, 103276.](https://www.sciencedirect.com/science/article/abs/pii/S014362282400081X) - *"GeoPandas and MovingPandas packages in Python were used to analyze the GPS data collected and calculate the thirteen STMs (spatio-temporal metrics)"*
 * [Wicaksono, S. B. (2024). From Data Cleaning to Predictive Models: A Strategic Approach to Analyzing Bus and Ship Trajectories. Master Thesis in Data Science, Department of Mathemetics, University of Padova.](https://thesis.unipd.it/handle/20.500.12608/69505) - *"we utilize the stop detection tools provided by MovingPandas"*
+* [Skåntorp, J., Rolfes, J., Haraldsson, R., Liu, X., Zhao, S., & Rothhämel, M. (2024). Data-driven bicycle driving cycles via mixed-integer programming Data-driven bicycle driving cycles via mixed-integer programming. 10.13140/RG.2.2.19928.10240](http://dx.doi.org/10.13140/RG.2.2.19928.10240) - *"we utilizedthe Kalman filter from the MovingPandas library"*
 
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
