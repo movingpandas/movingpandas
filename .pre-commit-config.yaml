@@ -10,4 +10,4 @@ repos:
     hooks:
       - id: flake8
         language_version: python3
-        language: python_venv
+        language: python
