@@ -6,6 +6,7 @@ dependencies:
   - geopandas-base
   - matplotlib-base
   - geopy
+  - pyogrio
   - pytest
   - pytest-cov
   - pyproj
