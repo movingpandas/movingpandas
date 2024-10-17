@@ -9,7 +9,6 @@ with open("README.md", "r") as fh:
 INSTALL_REQUIRES = [
     "matplotlib",
     "geopandas",
-    "fiona",
     "geopy",
 ]
 
