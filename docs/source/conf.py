@@ -104,7 +104,6 @@ autodoc_mock_imports = [
     "contextily",
     "holoviews",
     "geopandas",
-    "fiona",
     "shapely",
     "geopy",
     "stonesoup",

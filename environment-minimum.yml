@@ -5,8 +5,8 @@ dependencies:
   - python=3.10
   - geopandas-base
   - matplotlib-base
-  - fiona
   - geopy
+  - pyogrio
   - pytest
   - pytest-cov
   - pyproj
