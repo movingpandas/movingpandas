@@ -124,6 +124,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[1].geometry in [Point(0, 0), Point(10, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
         assert isinstance(locs, GeoDataFrame)
+        assert locs.crs == CRS_METRIC
 
     def test_timestamp_column_present_in_start_locations(self):
         locs = self.collection.get_start_locations()
@@ -152,6 +153,7 @@ class TestTrajectoryCollection:
         assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 10)]
         assert locs.iloc[0].geometry != locs.iloc[1].geometry
         assert isinstance(locs, GeoDataFrame)
+        assert locs.crs == CRS_METRIC
 
     def test_get_segments_between(self):
         collection = self.collection.get_segments_between(

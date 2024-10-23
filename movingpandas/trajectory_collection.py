@@ -385,9 +385,11 @@ class TrajectoryCollection:
             df.reset_index(inplace=True)
             df.rename(columns={"index": t}, inplace=True)
 
-            return GeoDataFrame(df)
+            gdf = GeoDataFrame(df)
+            gdf.set_crs(self.get_crs(), inplace=True)
         else:
-            return GeoDataFrame()
+            gdf = GeoDataFrame()
+        return gdf
 
     def get_start_locations(self, with_direction=False):
         """
