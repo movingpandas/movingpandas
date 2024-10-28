@@ -208,6 +208,8 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 * [Van Deursen, J., Creany, N., Smith, B., Freimund, W., Avgar, T., & Monz, C. A. (2024). Recreation specialization: Resource selection functions as a predictive tool for protected area recreation management. Applied Geography, 167, 103276.](https://www.sciencedirect.com/science/article/abs/pii/S014362282400081X) - *"GeoPandas and MovingPandas packages in Python were used to analyze the GPS data collected and calculate the thirteen STMs (spatio-temporal metrics)"*
 * [Wicaksono, S. B. (2024). From Data Cleaning to Predictive Models: A Strategic Approach to Analyzing Bus and Ship Trajectories. Master Thesis in Data Science, Department of Mathemetics, University of Padova.](https://thesis.unipd.it/handle/20.500.12608/69505) - *"we utilize the stop detection tools provided by MovingPandas"*
 * [Skåntorp, J., Rolfes, J., Haraldsson, R., Liu, X., Zhao, S., & Rothhämel, M. (2024). Data-driven bicycle driving cycles via mixed-integer programming. 10.13140/RG.2.2.19928.10240](http://dx.doi.org/10.13140/RG.2.2.19928.10240) - *"we utilized the Kalman filter from the MovingPandas library"*
+* [Hoffmann, V., Webert, J. H., Murray, B., & Graf, R. (2024). Data-driven construction of maritime traffic networks for AI-based route prediction. Journal of Physics: Conference Series, 2867.](https://iopscience.iop.org/article/10.1088/1742-6596/2867/1/012048) - *"Messages are converted to trajectories
+using MovingPandas"*
 
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
