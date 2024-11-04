@@ -41,6 +41,7 @@ class TestTrajectoryStopDetector:
             stop_segments.trajectories[0].to_linestringm_wkt()
             == "LINESTRING M (0.0 20.0 2.0, 0.0 21.0 4.0, 0.0 22.0 6.0)"
         )
+        assert stop_segments.get_crs() == CRS_METRIC
 
     def test_stop_times_middle_stop(self):
         stop_times = self.detector.get_stop_time_ranges(
