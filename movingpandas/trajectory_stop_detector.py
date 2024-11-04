@@ -34,12 +34,14 @@ class TrajectoryStopDetector:
 
     def get_stop_time_ranges(self, max_diameter, min_duration):
         """
-        Returns detected stop start and end times
+        Returns detected stop start and end times.
 
         Parameters
         ----------
         max_diameter : float
-            Maximum diameter for stop detection
+            Maximum diameter for stop detection. (Distances will be calculated
+            in meters using geodesic distance calculations for geographic projections
+            (e.g. EPSG:4326 WGS84) and in CRS units for all other projections)
         min_duration : datetime.timedelta
             Minimum stop duration
 
@@ -148,12 +150,14 @@ class TrajectoryStopDetector:
 
     def get_stop_segments(self, max_diameter, min_duration):
         """
-        Returns detected stop trajectory segments
+        Returns detected stop trajectory segments.
 
         Parameters
         ----------
         max_diameter : float
-            Maximum diameter for stop detection
+            Maximum diameter for stop detection. (Distances will be calculated
+            in meters using geodesic distance calculations for geographic projections
+            (e.g. EPSG:4326 WGS84) and in CRS units for all other projections)
         min_duration : datetime.timedelta
             Minimum stop duration
 
@@ -176,12 +180,14 @@ class TrajectoryStopDetector:
 
     def get_stop_points(self, max_diameter, min_duration):
         """
-        Returns detected stop location points
+        Returns detected stop location points.
 
         Parameters
         ----------
         max_diameter : float
-            Maximum diameter for stop detection
+            Maximum diameter for stop detection. (Distances will be calculated
+            in meters using geodesic distance calculations for geographic projections
+            (e.g. EPSG:4326 WGS84) and in CRS units for all other projections)
         min_duration : datetime.timedelta
             Minimum stop duration
 
