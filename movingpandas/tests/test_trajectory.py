@@ -479,13 +479,14 @@ class TestTrajectory:
 
     def test_add_speed_with_nanoseconds(self):
         import numpy as np
-        start_time = pd.Timestamp.now()+ pd.Timedelta(nanoseconds=10)
+
+        start_time = pd.Timestamp.now() + pd.Timedelta(nanoseconds=10)
         timedeltas = np.arange(10) * pd.Timedelta(seconds=0.2)
         timestamps = start_time + timedeltas
-        df = pd.DataFrame({'datetime': timestamps})
-        df['x'] = np.arange(0,10)*100
-        df['y'] = np.arange(0,10)*100
-        traj = Trajectory(df,traj_id=1, t="datetime", y='y', x='x',crs='epsg:32632')
+        df = pd.DataFrame({"datetime": timestamps})
+        df["x"] = np.arange(0, 10) * 100
+        df["y"] = np.arange(0, 10) * 100
+        traj = Trajectory(df, traj_id=1, t="datetime", y="y", x="x", crs="epsg:32632")
         traj.add_speed()
         assert len(traj.df) == 10
 
