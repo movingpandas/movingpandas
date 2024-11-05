@@ -477,6 +477,19 @@ class TestTrajectory:
         traj.add_speed()
         traj.add_speed(overwrite=True)
 
+    def test_add_speed_with_nanoseconds(self):
+        import numpy as np
+
+        start_time = pd.Timestamp.now() + pd.Timedelta(nanoseconds=10)
+        timedeltas = np.arange(10) * pd.Timedelta(seconds=0.2)
+        timestamps = start_time + timedeltas
+        df = pd.DataFrame({"datetime": timestamps})
+        df["x"] = np.arange(0, 10) * 100
+        df["y"] = np.arange(0, 10) * 100
+        traj = Trajectory(df, traj_id=1, t="datetime", y="y", x="x", crs="epsg:32632")
+        traj.add_speed()
+        assert len(traj.df) == 10
+
     def test_add_acceleration(self):
         traj = make_traj([Node(0, 0), Node(6, 0, second=1), Node(18, 0, second=2)])
         traj.add_acceleration()
