@@ -1369,7 +1369,8 @@ class Trajectory:
         except ValueError as e:
             raise e
         # set the distance in the first row to zero
-        temp_df.at[self.get_start_time(), name] = 0
+        t0 = self.df.index.min().to_datetime64()
+        temp_df.at[t0, name] = 0
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
@@ -1383,7 +1384,8 @@ class Trajectory:
         except ValueError as e:
             raise e
         # set the speed in the first row to the speed of the second row
-        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
+        t0 = self.df.index.min().to_datetime64()
+        temp_df.at[t0, name] = temp_df.iloc[1][name]
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
 
@@ -1396,7 +1398,8 @@ class Trajectory:
         )
         # set the acceleration in the first row to the acceleration of the
         # second row
-        temp_df.at[self.get_start_time(), name] = temp_df.iloc[1][name]
+        t0 = self.df.index.min().to_datetime64()
+        temp_df.at[t0, name] = temp_df.iloc[1][name]
         return temp_df.drop(columns=["speed_temp"])
 
     def intersects(self, polygon):
