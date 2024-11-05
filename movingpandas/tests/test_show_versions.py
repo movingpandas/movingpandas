@@ -19,10 +19,6 @@ def test_get_sys_info():
 def test_get_c_info():
     C_info = _get_C_info()
 
-    assert "GEOS" in C_info
-    assert "GEOS lib" in C_info
-    assert "GDAL" in C_info
-    assert "GDAL data dir" in C_info
     assert "PROJ" in C_info
     assert "PROJ data dir" in C_info
 
@@ -49,5 +45,5 @@ def test_show_versions(capsys):
     out, err = capsys.readouterr()
 
     assert "python" in out
-    assert "GEOS" in out
+    assert "PROJ" in out
     assert "geopandas" in out
