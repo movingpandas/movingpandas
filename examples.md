@@ -11,6 +11,7 @@
 9. [Aggregating trajectories](https://movingpandas.github.io/movingpandas-website/1-tutorials/9-aggregating-trajectories.html)
 10. [Smoothing trajectories](https://movingpandas.github.io/movingpandas-website/1-tutorials/10-smoothing-trajectories.html)
 11. [Measuring distances](https://movingpandas.github.io/movingpandas-website/1-tutorials/11-measuring-distances.html)
+12. [OGC MovingFeatures functionality](https://movingpandas.github.io/movingpandas-website/1-tutorials/12-ogc-moving-features.html)
 
 
 ## Analysis Examples
@@ -22,3 +23,4 @@
 5. [OSM traces](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/osm-traces.html)
 6. [Ship AIS data](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/ship-data.html)
 7. [Soccer game](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/soccer-game.html)
+8. [Pollution data](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/pollution-data.html)
