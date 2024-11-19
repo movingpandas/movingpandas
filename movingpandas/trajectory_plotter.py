@@ -63,6 +63,37 @@ class _TrajectoryPlotter:
 
         return line_plot
 
+    def explore(self):
+        tc = self.preprocess_data()
+        explore_plot = self._explore_lines(tc)
+
+        to_drop = [x for x in tc.get_column_names() if x not in self.column_names]
+        tc.drop(columns=to_drop)
+
+        return explore_plot
+
+    def _explore_lines(self, tc):
+        from importlib.metadata import version
+
+        cols = [self.traj_id_col_name, self.geom_col_name]
+        if self.column:
+            cols = cols + [self.column]
+        cols = list(set(cols))
+
+        if self.column is None:
+            line_gdf = tc.to_line_gdf()
+        else:
+            line_gdf = tc.to_line_gdf(columns=cols)
+
+        if version("geopandas") >= "1.0.0":
+            return line_gdf.explore(*self.args, **self.kwargs)
+        else:
+            raise (
+                NotImplementedError(
+                    "Please install geopandas >= 1.0.0 to use this function."
+                )
+            )
+
     def preprocess_data(self):
         tc = self.data
 
