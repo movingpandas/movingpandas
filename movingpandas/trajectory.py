@@ -1065,7 +1065,8 @@ class Trajectory:
         self._add_prev_pt()
         self.df[name] = self.df.apply(self._compute_heading, axis=1)
         # set the direction in the first row to the direction of the second row
-        self.df.at[self.get_start_time(), name] = self.df.iloc[1][name]
+        t0 = self.df.index.min().to_datetime64()
+        self.df.at[t0, name] = self.df.iloc[1][name]
         self.df.drop(columns=["prev_pt"], inplace=True)
         return self
 
@@ -1102,7 +1103,8 @@ class Trajectory:
         temp_df["prev_" + direction_col] = temp_df[direction_col].shift()
         self.df[name] = temp_df.apply(self._compute_angular_difference, axis=1)
         # set the first row to be 0
-        self.df.at[self.get_start_time(), name] = 0.0
+        t0 = self.df.index.min().to_datetime64()
+        self.df.at[t0, name] = 0.0
         if not direction_exists:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
         return self
