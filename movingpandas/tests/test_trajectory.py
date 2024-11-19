@@ -866,6 +866,11 @@ class TestTrajectory:
         traj.plot(column="speed")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
 
+    def test_explore_does_not_alter_df(self):
+        traj = self.default_traj_metric.copy()
+        traj.explore(column="speed")
+        assert_frame_equal(self.default_traj_metric.df, traj.df)
+
     def test_linestringbetween_does_not_alter_df(self):
         traj = self.default_traj_metric.copy()
         traj.get_linestring_between(
@@ -877,6 +882,13 @@ class TestTrajectory:
         traj = self.default_traj_metric.copy()
         traj.get_position_at(datetime(1970, 1, 1, 0, 0, 2), method="nearest")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
+
+    @requires_folium
+    def test_explore_speed(self):
+        from folium.folium import Map
+
+        result = self.default_traj_metric.explore(column="speed")
+        assert isinstance(result, Map)
 
     @requires_holoviews
     def test_support_for_subclasses_of_point(self):

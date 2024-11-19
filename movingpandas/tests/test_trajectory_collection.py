@@ -301,6 +301,22 @@ class TestTrajectoryCollection:
             ]
         )
 
+    def test_explore_speed_not_altering_collection(self):
+        self.collection.explore(column="speed")
+        assert all(
+            [
+                "speed" not in traj.df.columns.values
+                for traj in self.collection.trajectories
+            ]
+        )
+
+    @requires_folium
+    def test_explore_speed(self):
+        from folium.folium import Map
+
+        result = self.collection.explore(column="speed")
+        assert isinstance(result, Map)
+
     def test_traj_with_less_than_two_points(self):
         df = pd.DataFrame(
             [[1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0), 9, "a"]],
