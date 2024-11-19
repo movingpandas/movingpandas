@@ -866,6 +866,7 @@ class TestTrajectory:
         traj.plot(column="speed")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
 
+    @requires_folium
     def test_explore_does_not_alter_df(self):
         traj = self.default_traj_metric.copy()
         traj.explore(column="speed")

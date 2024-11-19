@@ -301,6 +301,7 @@ class TestTrajectoryCollection:
             ]
         )
 
+    @requires_folium
     def test_explore_speed_not_altering_collection(self):
         self.collection.explore(column="speed")
         assert all(
