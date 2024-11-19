@@ -880,16 +880,7 @@ class TrajectoryCollection:
 
         >>> trajectory_collection.explore(column='speed', vmax=20, tiles="CartoDB positron")
         """  # noqa: E501
-        from importlib.metadata import version
-
-        if version("geopandas") >= "1.0.0":
-            return self.to_line_gdf().explore(*args, **kwargs)
-        else:
-            raise (
-                NotImplementedError(
-                    "Please install geopandas >= 1.0.0 to use this function."
-                )
-            )
+        return _TrajectoryPlotter(self, *args, **kwargs).explore()
 
     def hvplot(self, *args, **kwargs):
         """

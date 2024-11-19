@@ -22,7 +22,7 @@ from movingpandas.trajectory import (
     TIMEDELTA_COL_NAME,
 )
 from movingpandas.trajectory_collection import TrajectoryCollection
-from . import requires_holoviews, requires_folium, has_geopandas1
+from . import requires_holoviews, requires_folium, has_geopandas1, requires_geopandas1
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
@@ -300,6 +300,25 @@ class TestTrajectoryCollection:
                 for traj in self.collection.trajectories
             ]
         )
+
+    @requires_geopandas1
+    @requires_folium
+    def test_explore_speed_not_altering_collection(self):
+        self.collection.explore(column="speed")
+        assert all(
+            [
+                "speed" not in traj.df.columns.values
+                for traj in self.collection.trajectories
+            ]
+        )
+
+    @requires_geopandas1
+    @requires_folium
+    def test_explore_speed(self):
+        from folium.folium import Map
+
+        result = self.collection.explore(column="speed")
+        assert isinstance(result, Map)
 
     def test_traj_with_less_than_two_points(self):
         df = pd.DataFrame(
