@@ -19,7 +19,13 @@ from movingpandas.trajectory import (
 )
 from movingpandas.unit_utils import MissingCRSWarning
 
-from . import requires_holoviews, has_holoviews, requires_folium, has_geopandas1
+from . import (
+    requires_holoviews,
+    has_holoviews,
+    requires_folium,
+    has_geopandas1,
+    requires_geopandas1,
+)
 
 
 CRS_METRIC = CRS.from_user_input(31256)
@@ -866,6 +872,7 @@ class TestTrajectory:
         traj.plot(column="speed")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
 
+    @requires_geopandas1
     @requires_folium
     def test_explore_does_not_alter_df(self):
         traj = self.default_traj_metric.copy()
@@ -884,6 +891,7 @@ class TestTrajectory:
         traj.get_position_at(datetime(1970, 1, 1, 0, 0, 2), method="nearest")
         assert_frame_equal(self.default_traj_metric.df, traj.df)
 
+    @requires_geopandas1
     @requires_folium
     def test_explore_speed(self):
         from folium.folium import Map
