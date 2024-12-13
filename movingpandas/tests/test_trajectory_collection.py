@@ -202,7 +202,7 @@ class TestTrajectoryCollection:
         polygon = MultiPolygon(
             [
                 Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
-                Polygon([(3, -1), (3, 1), (4, 1), (4, -1), (3, -1)])
+                Polygon([(3, -1), (3, 1), (4, 1), (4, -1), (3, -1)]),
             ]
         )
         collection = self.collection.clip(polygon)
