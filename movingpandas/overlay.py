@@ -200,12 +200,12 @@ def _determine_time_ranges_linebased(traj, polygon):
     # Intersecting trajectories with complex geometries (e.g. multipolygons with holes)
     # often ends up as MultiLineStrings, which we can't handle downstream.
     # Ensure we break MultiLineStrings into simple LineStrings
-    if 'MultiLineString' in possible_matches['spatial_intersection'].geom_type.unique():
-        spatial_intersection_exp = possible_matches['spatial_intersection'].explode(
+    if "MultiLineString" in possible_matches["spatial_intersection"].geom_type.unique():
+        spatial_intersection_exp = possible_matches["spatial_intersection"].explode(
             index_parts=False
         )
         possible_matches = possible_matches.reindex(spatial_intersection_exp.index)
-        possible_matches['spatial_intersection'] = spatial_intersection_exp
+        possible_matches["spatial_intersection"] = spatial_intersection_exp
 
     possible_matches["spatiotemporal_intersection"] = possible_matches.apply(
         _get_spatiotemporal_ref, axis=1

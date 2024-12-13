@@ -199,10 +199,12 @@ class TestTrajectoryCollection:
         assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (6 1, 6 3)"
 
     def test_clip_with_multipolygon2(self):
-        polygon = MultiPolygon([
-            Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
-            Polygon([(3, -1), (3, 1), (4, 1), (4, -1), (3, -1)])
-        ])
+        polygon = MultiPolygon(
+            [
+                Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
+                Polygon([(3, -1), (3, 1), (4, 1), (4, -1), (3, -1)])
+            ]
+        )
         collection = self.collection.clip(polygon)
         assert len(collection) == 2
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
