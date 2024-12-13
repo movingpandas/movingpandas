@@ -275,3 +275,39 @@ class AngleChangeSplitter(TrajectorySplitter):
                 )
 
         return TrajectoryCollection(result, min_length=min_length)
+
+
+class ValueChangeSplitter(TrajectorySplitter):
+    """
+    Split trajectories into subtrajectories whenever there is a change in
+    the specified column values.
+
+    Parameters
+    ----------
+    col_name : string
+        Name of the col to monitor for changes in consecutive values
+    min_length : numeric
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
+
+    Examples
+    --------
+
+    >>> mpd.ValueChangeSplitter(traj).split(col_name='column1')
+    """
+
+    def _split_traj(self, traj, col_name, min_length=0):
+        result = []
+        temp_df = traj.df.copy()
+        temp_df["t"] = temp_df.index
+        temp_df["gap"] = temp_df[col_name].shift() != temp_df[col_name]
+        temp_df["gap"] = temp_df["gap"].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in temp_df.groupby(temp_df["gap"])]
+        for i, df in enumerate(dfs):
+            df = df.drop(columns=["t", "gap"])
+            if len(df) > 1:
+                result.append(
+                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                )
+        return TrajectoryCollection(result, min_length=min_length)
