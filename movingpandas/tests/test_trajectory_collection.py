@@ -198,7 +198,6 @@ class TestTrajectoryCollection:
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
         assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (6 1, 6 3)"
 
-    """ Fails, related to https://github.com/movingpandas/movingpandas/discussions/235
     def test_clip_with_multipolygon2(self):
         polygon = MultiPolygon([
             Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]),
@@ -208,7 +207,6 @@ class TestTrajectoryCollection:
         assert len(collection) == 2
         assert collection.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 1 0)"
         assert collection.trajectories[1].to_linestring().wkt == "LINESTRING (3 0, 4 0)"
-    """
 
     def test_clip_with_min_length(self):
         polygon = Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)])
