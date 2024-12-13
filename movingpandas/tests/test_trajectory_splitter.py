@@ -14,6 +14,7 @@ from movingpandas.trajectory_splitter import (
     SpeedSplitter,
     StopSplitter,
     AngleChangeSplitter,
+    ValueChangeSplitter,
 )
 
 
@@ -26,13 +27,13 @@ class TestTrajectorySplitter:
         df = pd.DataFrame(
             [
                 [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0), 9, "a"],
-                [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0), 5, "b"],
-                [1, "A", Point(6, 6), datetime(2018, 1, 1, 14, 10, 0), 2, "c"],
-                [1, "A", Point(9, 9), datetime(2018, 1, 1, 14, 15, 0), 4, "d"],
-                [2, "A", Point(10, 10), datetime(2018, 1, 1, 12, 0, 0), 10, "e"],
-                [2, "A", Point(16, 10), datetime(2018, 1, 1, 12, 6, 0), 6, "f"],
-                [2, "A", Point(16, 16), datetime(2018, 1, 2, 13, 10, 0), 7, "g"],
-                [2, "A", Point(190, 19), datetime(2018, 1, 2, 13, 15, 0), 3, "h"],
+                [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0), 5, "a"],
+                [1, "A", Point(6, 6), datetime(2018, 1, 1, 14, 10, 0), 2, "a"],
+                [1, "A", Point(9, 9), datetime(2018, 1, 1, 14, 15, 0), 4, "a"],
+                [2, "A", Point(10, 10), datetime(2018, 1, 1, 12, 0, 0), 10, "a"],
+                [2, "A", Point(16, 10), datetime(2018, 1, 1, 12, 6, 0), 6, "a"],
+                [2, "A", Point(16, 16), datetime(2018, 1, 2, 13, 10, 0), 7, "b"],
+                [2, "A", Point(190, 19), datetime(2018, 1, 2, 13, 15, 0), 3, "b"],
             ],
             columns=["id", "obj", "geometry", "t", "val", "val2"],
         ).set_index("t")
@@ -358,3 +359,13 @@ class TestTrajectorySplitter:
             split.trajectories[2].to_linestring().wkt
             == "LINESTRING (8 8, 10 10, 12 12)"
         )
+
+    def test_split_by_value_change(self):
+        split = ValueChangeSplitter(self.collection).split(col_name="val2")
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 3
+
+    def test_split_by_value_change_empty_results(self):
+        split = ValueChangeSplitter(self.collection).split(col_name="val")
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 0
