@@ -114,8 +114,9 @@ class _TrajectoryPlotter:
         line_gdf = tc.to_line_gdf()
 
         if self.column and self.colormap:
-            line_gdf["color"] = "grey"
-            line_gdf["color"] = line_gdf[self.column].apply(lambda x: self.colormap[x])
+            line_gdf["color"] = line_gdf[self.column].apply(
+                lambda x: self.colormap[x] if x in self.colormap else "grey"
+            )
             return line_gdf.plot(
                 ax=self.ax, color=line_gdf["color"], *self.args, **self.kwargs
             )
