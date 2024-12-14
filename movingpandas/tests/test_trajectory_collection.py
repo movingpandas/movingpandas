@@ -487,16 +487,20 @@ class TestTrajectoryCollection:
         result1 = self.collection.trajectories[1].df[TIMEDELTA_COL_NAME].tolist()
         assert result1 == expected.trajectories[1].df[TIMEDELTA_COL_NAME].tolist()
 
-    def test_to_point_gdf(self):
+    def test_to_point_gdf(self, tmp_path):
         point_gdf = self.collection.to_point_gdf()
-        point_gdf.to_file("temp.gpkg", layer="points", driver="GPKG")
+        gpkg_path = tmp_path / "temp.gpkg"
+        point_gdf.to_file(gpkg_path, layer="points", driver="GPKG")
+        assert gpkg_path.exists()
         assert_frame_equal(point_gdf, self.geo_df)
 
-    def test_to_line_gdf(self):
+    def test_to_line_gdf(self, tmp_path):
         temp_df = self.geo_df.drop(columns=["obj", "val", "val2"])
         tc = TrajectoryCollection(temp_df, "id")
         line_gdf = tc.to_line_gdf()
-        line_gdf.to_file("temp.gpkg", layer="lines", driver="GPKG")
+        gpkg_path = tmp_path / "temp.gpkg"
+        line_gdf.to_file(gpkg_path, layer="lines", driver="GPKG")
+        assert gpkg_path.exists()
         t1 = [
             datetime(2018, 1, 1, 12, 0),
             datetime(2018, 1, 1, 12, 6),
@@ -523,11 +527,13 @@ class TestTrajectoryCollection:
         expected_line_gdf = GeoDataFrame(df2, crs=CRS_METRIC)
         assert_frame_equal(line_gdf, expected_line_gdf)
 
-    def test_to_traj_gdf(self):
+    def test_to_traj_gdf(self, tmp_path):
         temp_df = self.geo_df.drop(columns=["obj", "val", "val2"])
         tc = TrajectoryCollection(temp_df, "id")
         traj_gdf = tc.to_traj_gdf()
-        traj_gdf.to_file("temp.gpkg", layer="trajs", driver="GPKG")
+        gpkg_path = tmp_path / "temp.gpkg"
+        traj_gdf.to_file(gpkg_path, layer="trajs", driver="GPKG")
+        assert gpkg_path.exists()
         rows = [
             {
                 "id": 1,
