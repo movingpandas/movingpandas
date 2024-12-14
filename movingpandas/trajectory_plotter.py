@@ -117,6 +117,9 @@ class _TrajectoryPlotter:
             line_gdf["color"] = line_gdf[self.column].apply(
                 lambda x: self.colormap[x] if x in self.colormap else "grey"
             )
+            self.kwargs.pop(
+                "column"
+            )  # to avoid gpd warning (only specify one of 'column' or 'color')
             return line_gdf.plot(
                 ax=self.ax, color=line_gdf["color"], *self.args, **self.kwargs
             )
