@@ -146,6 +146,8 @@ def _get_segments_for_ranges(traj, ranges):
             continue
         segment.id = f"{traj.id}_{next(counter)}"
         segment.parent = traj
+        # remove timestamps from trajectory IDs
+        segment.df[segment.get_traj_id_col()] = segment.id
         segments.append(segment)
     return segments
 
