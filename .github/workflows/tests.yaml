@@ -52,24 +52,22 @@ jobs:
             os: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/setup-micromamba@v2
         with:
           environment-file: ${{ matrix.env }}
-          miniforge-version: latest
-          miniforge-variant: Mambaforge
-          use-mamba: true
 
       - name: Check and Log Environment
         run: |
           python -V
           python -c "import movingpandas; movingpandas.show_versions();"
-          conda info
-
+          micromamba info
+          micromamba list
+          
       - name: Test
         run: |
           pytest -v -r s --color=yes --cov=movingpandas --cov-append --cov-report term-missing --cov-report xml movingpandas/
 
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v5
