@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import warnings
+
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 
@@ -148,4 +150,9 @@ class OutlierCleaner(TrajectoryCleaner):
             prev = curr
 
         out_traj.df.drop(ixs, inplace=True)
+
+        if not out_traj.is_valid():
+            warnings.warn(f"Cannot clean trajectory {out_traj.id}.", UserWarning)
+            out_traj = traj.copy()
+
         return out_traj
