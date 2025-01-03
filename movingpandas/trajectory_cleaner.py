@@ -153,8 +153,8 @@ class OutlierCleaner(TrajectoryCleaner):
 
         if not out_traj.is_valid():
             warnings.warn(
-                f"Cleaning failed for trajectory {out_traj.id}"
-                "due to invalid result (e.g. <2 points remaining)."
+                f"Cleaning failed for trajectory {out_traj.id} "
+                "due to invalid result (e.g. <2 points remaining). "
                 "Returning original trajectory.",
                 UserWarning,
             )
