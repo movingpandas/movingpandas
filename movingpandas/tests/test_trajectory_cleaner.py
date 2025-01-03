@@ -4,6 +4,7 @@ from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from .test_trajectory import make_traj, Node
 from movingpandas.trajectory_cleaner import IqrCleaner, OutlierCleaner
+import pytest
 import pandas as pd
 from pyproj import CRS
 from shapely.geometry import Point
@@ -92,3 +93,10 @@ class TestTrajectoryCleaner:
         cleaned = OutlierCleaner(traj).clean(v_max=100, units=("km", "h"))
         expected = "LINESTRING (-8.5829 41.1451, -8.5843 41.1464, -8.586 41.1487, -8.5872 41.1492, -8.5882 41.1489)"  # noqa F401
         assert cleaned.to_linestring().wkt == expected
+
+        # when traj is invalid after cleaning (e.g. <2 points),
+        # must give warning & return original traj
+        with pytest.warns(UserWarning):
+            cleaned = OutlierCleaner(traj).clean(v_max=0.001)
+            assert cleaned.is_valid()
+            assert cleaned == traj
