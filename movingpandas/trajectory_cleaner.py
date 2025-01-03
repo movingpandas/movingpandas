@@ -152,7 +152,12 @@ class OutlierCleaner(TrajectoryCleaner):
         out_traj.df.drop(ixs, inplace=True)
 
         if not out_traj.is_valid():
-            warnings.warn(f"Cannot clean trajectory {out_traj.id}.", UserWarning)
+            warnings.warn(
+                f"Cleaning failed for trajectory {out_traj.id}"
+                "due to invalid result (e.g. <2 points remaining)."
+                "Returning original trajectory.",
+                UserWarning,
+            )
             out_traj = traj.copy()
 
         return out_traj
