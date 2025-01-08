@@ -364,6 +364,14 @@ class TestTrajectorySplitter:
         split = ValueChangeSplitter(self.collection).split(col_name="val2")
         assert type(split) == TrajectoryCollection
         assert len(split) == 3
+        assert (
+            split.trajectories[2].to_linestring().wkt
+            == "LINESTRING (16 16, 190 19)"
+        )
+        assert (
+            split.trajectories[1].to_linestring().wkt
+            == "LINESTRING (10 10, 16 10, 16 16)"
+        )
 
     def test_split_by_value_change_empty_results(self):
         split = ValueChangeSplitter(self.collection).split(col_name="val")
