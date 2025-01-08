@@ -264,10 +264,10 @@ class AngleChangeSplitter(TrajectorySplitter):
         for i, df in enumerate(dfs):
             df = df.drop(columns=["dirChange"])
             if len(df) > 1:
-                prev_i = dfs[i - 1].iloc[-1].name
-                prev_d = dfs[i - 1].iloc[-1].to_dict()
+                prev_index = dfs[i - 1].iloc[-1].name
+                prev_values = dfs[i - 1].iloc[-1].to_dict()
                 if i > 0:
-                    df.loc[prev_i] = prev_d
+                    df.loc[prev_index] = prev_values
                     df = df.sort_index(ascending=True)
 
                 result.append(
@@ -301,11 +301,16 @@ class ValueChangeSplitter(TrajectorySplitter):
         result = []
         temp_df = traj.df.copy()
         temp_df["t"] = temp_df.index
-        temp_df["gap"] = temp_df[col_name].shift() != temp_df[col_name]
-        temp_df["gap"] = temp_df["gap"].apply(lambda x: 1 if x else 0).cumsum()
-        dfs = [group[1] for group in temp_df.groupby(temp_df["gap"])]
+        temp_df["change"] = temp_df[col_name].shift() != temp_df[col_name]
+        temp_df["change"] = temp_df["change"].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in temp_df.groupby(temp_df["change"])]
         for i, df in enumerate(dfs):
-            df = df.drop(columns=["t", "gap"])
+            df = df.drop(columns=["t", "change"])
+            if i < (len(dfs)-1):
+                next_index = dfs[i + 1].iloc[0].name
+                next_values = dfs[i + 1].iloc[0].to_dict()
+                df.loc[next_index] = next_values
+                df = df.sort_index(ascending=True)
             if len(df) > 1:
                 result.append(
                     Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
