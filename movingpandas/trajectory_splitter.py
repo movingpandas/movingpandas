@@ -85,14 +85,17 @@ class TemporalSplitter(TrajectorySplitter):
         if mode in modes.keys():
             mode = modes[mode]
         grouped = traj.df.groupby(Grouper(freq=mode))
-        for key, values in grouped:
-            if len(values) > 1:
+        dfs = [values for key, values in grouped if len(values)>0]
+        print(dfs)
+        for i, df in enumerate(dfs):
+            if i < len(dfs)-1:
+                next_index = dfs[i + 1].iloc[0].name
+                next_values = dfs[i + 1].iloc[0].to_dict()
+                df.loc[next_index] = next_values
+                df = df.sort_index(ascending=True)
+            if len(df) > 1:
                 result.append(
-                    Trajectory(
-                        values,
-                        f"{traj.id}_{key}",
-                        traj_id_col=traj.get_traj_id_col(),
-                    )
+                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
                 )
         return TrajectoryCollection(result, min_length=min_length)
 
