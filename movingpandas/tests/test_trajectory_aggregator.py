@@ -10,7 +10,7 @@ from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.trajectory_aggregator import (
     TrajectoryCollectionAggregator,
-    _PtsExtractor,
+    PtsExtractor,
 )
 
 CRS_METRIC = CRS.from_user_input(31256)
@@ -40,7 +40,7 @@ class TestPtsExtractor:
         ).set_index("t")
         geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         traj = Trajectory(geo_df, "id")
-        extractor = _PtsExtractor(traj, 5, 0, min_stop_duration=timedelta(hours=12))
+        extractor = PtsExtractor(traj, 5, 0, min_stop_duration=timedelta(hours=12))
         actual = extractor.find_significant_points()
         expected = [Point(0, 0), Point(6, 0), Point(6, 6)]
         assert len(actual) == len(expected)
@@ -62,7 +62,7 @@ class TestPtsExtractor:
         ).set_index("t")
         geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         traj = Trajectory(geo_df, "id")
-        extractor = _PtsExtractor(traj, 4, 0, min_stop_duration=timedelta(hours=12))
+        extractor = PtsExtractor(traj, 4, 0, min_stop_duration=timedelta(hours=12))
         actual = extractor.find_significant_points()
         expected = [Point(0, 0), Point(4, 0), Point(6, 0), Point(6, 6)]
         assert len(actual) == len(expected)
@@ -84,7 +84,7 @@ class TestPtsExtractor:
         ).set_index("t")
         geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         traj = Trajectory(geo_df, "id")
-        extractor = _PtsExtractor(traj, 10, 2, min_stop_duration=timedelta(hours=10))
+        extractor = PtsExtractor(traj, 10, 2, min_stop_duration=timedelta(hours=10))
         actual = extractor.find_significant_points()
         for pt in actual:
             print(pt)
@@ -108,7 +108,7 @@ class TestPtsExtractor:
         ).set_index("t")
         geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         traj = Trajectory(geo_df, "id")
-        extractor = _PtsExtractor(traj, 10, 2, min_stop_duration=timedelta(hours=1))
+        extractor = PtsExtractor(traj, 10, 2, min_stop_duration=timedelta(hours=1))
         actual = extractor.find_significant_points()
         for pt in actual:
             print(pt)

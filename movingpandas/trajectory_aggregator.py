@@ -123,7 +123,7 @@ class TrajectoryCollectionAggregator:
     def _extract_significant_points(self):
         sig_points = []
         for traj in self.traj_collection:
-            a = _PtsExtractor(
+            a = PtsExtractor(
                 traj,
                 self.max_distance,
                 self.min_distance,
@@ -138,7 +138,7 @@ class TrajectoryCollectionAggregator:
         return sg.create_flow_lines()
 
 
-class _PtsExtractor:
+class PtsExtractor:
     def __init__(
         self, traj, max_distance, min_distance, min_stop_duration, min_angle=45
     ):

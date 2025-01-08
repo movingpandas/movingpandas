@@ -17,7 +17,10 @@ from .trajectory_generalizer import (  # noqa F401
 )
 from .trajectory_collection import TrajectoryCollection  # noqa F401
 from .io import read_mf_json, read_mf_dict, gdf_to_mf_json  # noqa F401
-from .trajectory_aggregator import TrajectoryCollectionAggregator  # noqa F401
+from .trajectory_aggregator import (  # noqa F401
+    TrajectoryCollectionAggregator,
+    PtsExtractor,
+)
 from .trajectory_splitter import (  # noqa F401
     TrajectorySplitter,
     TemporalSplitter,
