@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal
 from pyproj import CRS
@@ -65,7 +66,8 @@ class TestTrajectorySplitter:
         traj = make_traj(
             [Node(), Node(second=1), Node(year=2000), Node(year=2000, second=1)]
         )
-        split = TemporalSplitter(traj).split()
+        with pytest.warns(UserWarning):
+            split = TemporalSplitter(traj).split()
         assert type(split) == TrajectoryCollection
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
@@ -140,7 +142,8 @@ class TestTrajectorySplitter:
                 Node(year=2000, second=1),
             ]
         )
-        split = TemporalSplitter(traj).split(mode="year")
+        with pytest.warns(UserWarning):
+            split = TemporalSplitter(traj).split(mode="year")
         assert type(split) == TrajectoryCollection
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(

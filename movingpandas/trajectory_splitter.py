@@ -3,6 +3,7 @@
 from copy import copy
 from pandas import Grouper
 import numpy as np
+import warnings
 
 from .trajectory_stop_detector import TrajectoryStopDetector
 from .trajectory import Trajectory
@@ -85,7 +86,19 @@ class TemporalSplitter(TrajectorySplitter):
         if mode in modes.keys():
             mode = modes[mode]
         grouped = traj.df.groupby(Grouper(freq=mode))
-        dfs = [values for key, values in grouped if len(values) > 0]
+        dfs = []
+        show_warning = False
+        for _, values in grouped:
+            if len(values) == 0:
+                show_warning = True
+            else:
+                dfs.append(values)
+        if show_warning:
+            warnings.warn(
+                f"Temporal splitting results contain observation gaps that exceed your "
+                f"split size of {mode}. Consider running the ObservationGapSplitter to "
+                f"further clean the results."
+            )
         print(dfs)
         for i, df in enumerate(dfs):
             if i < len(dfs) - 1:
