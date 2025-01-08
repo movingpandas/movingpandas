@@ -85,10 +85,10 @@ class TemporalSplitter(TrajectorySplitter):
         if mode in modes.keys():
             mode = modes[mode]
         grouped = traj.df.groupby(Grouper(freq=mode))
-        dfs = [values for key, values in grouped if len(values)>0]
+        dfs = [values for key, values in grouped if len(values) > 0]
         print(dfs)
         for i, df in enumerate(dfs):
-            if i < len(dfs)-1:
+            if i < len(dfs) - 1:
                 next_index = dfs[i + 1].iloc[0].name
                 next_values = dfs[i + 1].iloc[0].to_dict()
                 df.loc[next_index] = next_values
@@ -309,7 +309,7 @@ class ValueChangeSplitter(TrajectorySplitter):
         dfs = [group[1] for group in temp_df.groupby(temp_df["change"])]
         for i, df in enumerate(dfs):
             df = df.drop(columns=["t", "change"])
-            if i < (len(dfs)-1):
+            if i < (len(dfs) - 1):
                 next_index = dfs[i + 1].iloc[0].name
                 next_values = dfs[i + 1].iloc[0].to_dict()
                 df.loc[next_index] = next_values
