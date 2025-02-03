@@ -209,7 +209,7 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 * [Wicaksono, S. B. (2024). From Data Cleaning to Predictive Models: A Strategic Approach to Analyzing Bus and Ship Trajectories. Master Thesis in Data Science, Department of Mathemetics, University of Padova.](https://thesis.unipd.it/handle/20.500.12608/69505) - *"we utilize the stop detection tools provided by MovingPandas"*
 * [Skåntorp, J., Rolfes, J., Haraldsson, R., Liu, X., Zhao, S., & Rothhämel, M. (2024). Data-driven bicycle driving cycles via mixed-integer programming. 10.13140/RG.2.2.19928.10240](http://dx.doi.org/10.13140/RG.2.2.19928.10240) - *"we utilized the Kalman filter from the MovingPandas library"*
 * [Hoffmann, V., Webert, J. H., Murray, B., & Graf, R. (2024). Data-driven construction of maritime traffic networks for AI-based route prediction. Journal of Physics: Conference Series, 2867.](https://iopscience.iop.org/article/10.1088/1742-6596/2867/1/012048) - *"Messages are converted to trajectories using MovingPandas"* (Horizon 2020 project no. 957237 VesselAI).
-
+* [Mehri, S., Hooshangi, N., & Mahdizadeh Gharakhanlou, N. (2025). A Novel Context-Aware Douglas–Peucker (CADP) Trajectory Compression Method. ISPRS International Journal of Geo-Information, 14(2), 58.](https://www.mdpi.com/2220-9964/14/2/58) - *"AIS messages are converted into trajectories using a Python library named MovingPandas"*
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
