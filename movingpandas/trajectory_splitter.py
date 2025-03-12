@@ -99,7 +99,7 @@ class TemporalSplitter(TrajectorySplitter):
                 f"split size of {mode}. Consider running the ObservationGapSplitter to "
                 f"further clean the results."
             )
-        print(dfs)
+
         for i, df in enumerate(dfs):
             if i < len(dfs) - 1:
                 next_index = dfs[i + 1].iloc[0].name
