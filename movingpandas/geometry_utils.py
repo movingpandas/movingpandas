@@ -117,7 +117,10 @@ def measure_length(geoseries, spherical=False, conversion=None):
     else:  # The following distance will be in CRS units that might not be meters!
         length = LineString(pt_tuples).length
 
-    return length / conversion.distance
+    if conversion:
+        length = length / conversion.distance
+    
+    return length 
 
 
 def calculate_initial_compass_bearing(point1, point2):
