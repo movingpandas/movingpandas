@@ -2,6 +2,7 @@
 
 from copy import copy
 from pandas import Grouper
+from geopandas import GeoDataFrame
 import numpy as np
 import warnings
 
@@ -328,7 +329,9 @@ class ValueChangeSplitter(TrajectorySplitter):
                 df.loc[next_index] = next_values
                 df = df.sort_index(ascending=True)
             if len(df) > 1:
-                result.append(
-                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                df = GeoDataFrame(df).set_crs(traj.df.crs)
+                traj = Trajectory(
+                    df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col()
                 )
+                result.append(traj)
         return TrajectoryCollection(result, min_length=min_length)
