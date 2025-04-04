@@ -119,8 +119,8 @@ def measure_length(geoseries, spherical=False, conversion=None):
 
     if conversion:
         length = length / conversion.distance
-    
-    return length 
+
+    return length
 
 
 def calculate_initial_compass_bearing(point1, point2):
