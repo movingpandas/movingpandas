@@ -313,6 +313,7 @@ class TestTrajectorySplitter:
             split.trajectories[0].to_linestring().wkt
             == "LINESTRING (0 1, 0 22, 0 30, 0 40, 1 50)"
         )
+        assert split.get_crs() == "EPSG:31256"
 
     def test_angle_splitter(self):
         traj = make_traj(
@@ -378,6 +379,7 @@ class TestTrajectorySplitter:
             split.trajectories[2].to_linestring().wkt
             == "LINESTRING (8 8, 10 10, 12 12)"
         )
+        assert split.get_crs() == "EPSG:31256"
 
     def test_split_by_value_change(self):
         split = ValueChangeSplitter(self.collection).split(col_name="val2")
@@ -388,8 +390,10 @@ class TestTrajectorySplitter:
             == "LINESTRING (10 10, 16 10, 16 16)"
         )
         assert split.trajectories[2].to_linestring().wkt == "LINESTRING (16 16, 190 19)"
+        assert split.get_crs() == "EPSG:31256"
 
     def test_split_by_value_change_empty_results(self):
         split = ValueChangeSplitter(self.collection).split(col_name="val")
         assert type(split) == TrajectoryCollection
         assert len(split) == 6
+        assert split.get_crs() == "EPSG:31256"
