@@ -10,13 +10,14 @@ import pytest
 
 from movingpandas.cpa import CPA
 
+# create local coordinate system
 crs_wkt = """
 ENGCRS["Custom 3D Cartesian Engineering CRS",
     EDATUM["Local Engineering Datum"],
     CS[Cartesian,3],
-    AXIS["ahead (x)",forward,ORDER[1]],
-    AXIS["right (y)",starboard,ORDER[2]],
-    AXIS["down (z)",down,ORDER[3]],
+    AXIS["east (x)", east],
+    AXIS["north (y)", north],
+    AXIS["up (z)", up],
     LENGTHUNIT["metre",1.0]
 ]
 """
