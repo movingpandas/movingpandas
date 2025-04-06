@@ -1,16 +1,18 @@
 import datetime
 
 import geopandas as gpd
-import movingpandas as mpd
+import numpy as np
 import pandas as pd
 import pyproj
 import shapely
 
 import pytest
 
+import movingpandas as mpd
 from movingpandas.cpa import CPA
 
 # create local coordinate system
+# or use a projected system?
 crs_wkt = """
 ENGCRS["Custom 3D Cartesian Engineering CRS",
     EDATUM["Local Engineering Datum"],
@@ -73,13 +75,35 @@ def test_invalid_trajectory(traj_a, traj_b):
         CPA(traj_a.df, traj_b)
 
 
+def test_postgis_example(traj_a, traj_b):
+    cpa = CPA(traj_a, traj_b)
+    cpa.min()
+
+    # TODO: postgis finds, why do we have 1.965....
+    # Expected: 1.96036833151395
+    #
+    # Postgis docs are not consistent whether 3d is used:
+    # - Returns the distance (in 2D) between two trajectories at their closest point of approach.
+    # - This function supports 3d and will not drop the z-index.
+    # 2d gives: 1.7888543819
+
+    np.testing.assert_almost_equal(cpa.min().dist, 1.965214737762069)
+
+
 def test_non_overlapping_time():
     traj_a = create_traj((0, 0), (0, 0), 0, 1)
     traj_b = create_traj((0, 0), (0, 0), 2, 5)
 
     cpa = CPA(traj_a, traj_b)
-    # TODO: make sure no overlap is reported
     result = cpa.min()
+
+    # we should have NaT and NaN  (postgis returns time of -2)
+    assert pd.isna(
+        result.t
+    ), f"cpa.t should be NaT if times do not overlap, got {result.t}"
+    assert pd.isna(
+        result.dist
+    ), f"cpa.t should be NaT if times do not overlap, got {result.dist}"
 
 
 def test_two_stationary_touching_time():

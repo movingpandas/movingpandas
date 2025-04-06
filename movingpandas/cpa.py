@@ -43,7 +43,7 @@ class CPA:
             dv2: squared distance of p and q vectors
             dist: distance at cpa # KEEP
             dist2: squared distance at cpa
-            status: string representing "converging" (t_tot < 0), "diverging" (t_tot > 1), "approaching"  0 < t_tot < 1, or "parallel" (dist2 == 0)
+            status: string representing "no-overlap", "converging" (t_tot < 0), "diverging" (t_tot > 1), "approaching"  0 < t_tot < 1, or "parallel" (dist2 == 0)
     """
 
     def __init__(self, traj_a: mpd.Trajectory, traj_b: mpd.Trajectory):
@@ -55,6 +55,14 @@ class CPA:
 
         self.traj_a = traj_a
         self.traj_b = traj_b
+
+    @staticmethod
+    def _no_overlap():
+        t = pd.NaT
+        dist = np.nan
+        status = "no-overlap"
+        data = dict(t=t, dist=dist, status=status)
+        return pd.Series(data=data)
 
     @staticmethod
     def _segment(
@@ -265,18 +273,10 @@ class CPA:
         mindist2 = np.finfo(np.double).max
 
         cpa = None
-
         # we follow the implementation of postgis
         # https://github.com/postgis/postgis/blob/9637dc369361ac118e1ad37da7a519dae9dfab5e/postgis/lwgeom_functions_temporal.c#L83
 
-        # gbox is the bounding box in x,y,z,m
-        # tmin = FP_MAX(gbox1.mmin, gbox2.mmin);
-        # tmax = FP_MIN(gbox1.mmax, gbox2.mmax);
-
-        t_min = max(traj_a.get_start_time(), traj_b.get_start_time())
-        t_max = min(traj_a.get_end_time(), traj_b.get_end_time())
-        t_min, t_max
-
+        # TODO: filter t_ab on common range (t_min, t_max)....
         # * Collect M values in common time range from inputs
         # nmvals in postgis
         t_ab = np.unique(np.sort(np.r_[traj_a.df.index, traj_b.df.index]))
@@ -311,6 +311,21 @@ class CPA:
         """
             + CPA.variable_doc
         )
+
+        # gbox is the bounding box in x,y,z,m
+        # tmin = FP_MAX(gbox1.mmin, gbox2.mmin);
+        # tmax = FP_MIN(gbox1.mmax, gbox2.mmax);
+
+        traj_a = self.traj_a
+        traj_b = self.traj_b
+
+        # check temporal overlap
+        t_min = max(traj_a.get_start_time(), traj_b.get_start_time())
+        t_max = min(traj_a.get_end_time(), traj_b.get_end_time())
+
+        # check if we have an overlapping range
+        if t_max < t_min:
+            return self._no_overlap()
 
         min_dist = np.finfo(np.double).max
         min_cpa = None
