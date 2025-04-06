@@ -64,6 +64,40 @@ class CPA:
         data = dict(t=t, dist=dist, status=status)
         return pd.Series(data=data)
 
+    def _touching_times(self):
+        """return a result if traj a and b are overlapping"""
+        traj_a = self.traj_a
+        traj_b = self.traj_b
+
+        # check temporal overlap
+        t_min = max(traj_a.get_start_time(), traj_b.get_start_time())
+        t_max = min(traj_a.get_end_time(), traj_b.get_end_time())
+
+        assert t_min == t_max, f"t_min should equal t_max, but got {t_min}, {t_max}"
+        traj = None
+        if traj_a.get_start_time() == t_min:
+            traj = traj_a
+        elif traj_b.get_start_time() == t_min:
+            traj = traj_b
+        else:
+            raise ValueError("traj_a or traj_b should start at t_min")
+
+        # lookup  position at time t_min
+
+        pos_a = traj_a.get_position_at(t_min)
+        pos_b = traj_b.get_position_at(t_min)
+
+        # compute distance between a and b (in 2 or 3d)
+        d_ab = np.asarray(pos_a.coords)[0] - np.asarray(pos_b.coords)[0]
+        dist2 = np.dot(d_ab, d_ab).item()
+        dist = dist2**0.5
+
+        t = pd.Timestamp(t_min)
+        dist = dist
+        status = "touching"
+        data = dict(t=t, dist=dist, status=status)
+        return pd.Series(data=data)
+
     @staticmethod
     def _segment(
         p0: shapely.Point,
@@ -157,7 +191,7 @@ class CPA:
                     q1=q1_orig,
                     t0=t0,
                     t1=t1,
-                    t=t0,  # start time
+                    t=pd.Timestamp(t0),  # start time
                     t_tot=0,  # 0 fraction (arbitrary)
                     p=p0_orig,
                     q=q0_orig,
@@ -242,7 +276,7 @@ class CPA:
                 q1=q1_orig,
                 t0=t0,
                 t1=t1,
-                t=t,
+                t=pd.Timestamp(t),
                 t_tot=t_tot,
                 p=p,
                 q=q,
@@ -276,10 +310,24 @@ class CPA:
         # we follow the implementation of postgis
         # https://github.com/postgis/postgis/blob/9637dc369361ac118e1ad37da7a519dae9dfab5e/postgis/lwgeom_functions_temporal.c#L83
 
+        # check temporal overlap
+        t_min = max(traj_a.get_start_time(), traj_b.get_start_time())
+        t_max = min(traj_a.get_end_time(), traj_b.get_end_time())
+
+        # check if we have an overlapping range
+        if t_max < t_min:
+            return self._no_overlap()
+
         # TODO: filter t_ab on common range (t_min, t_max)....
         # * Collect M values in common time range from inputs
         # nmvals in postgis
         t_ab = np.unique(np.sort(np.r_[traj_a.df.index, traj_b.df.index]))
+
+        # filter, inclusive
+        t_ab = t_ab[
+            np.logical_and(t_ab >= np.datetime64(t_min), t_ab <= np.datetime64(t_max))
+        ]
+
         t_ab_intervals = np.c_[t_ab[:-1], t_ab[1:]]
 
         for interval in t_ab_intervals:
@@ -326,6 +374,9 @@ class CPA:
         # check if we have an overlapping range
         if t_max < t_min:
             return self._no_overlap()
+
+        if t_min == t_max:
+            return self._touching_times()
 
         min_dist = np.finfo(np.double).max
         min_cpa = None
