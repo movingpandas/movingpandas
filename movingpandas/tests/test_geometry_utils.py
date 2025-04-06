@@ -2,12 +2,14 @@
 
 import pytest
 from math import sqrt
+from geopandas import GeoSeries
 from shapely.geometry import MultiPoint, Point
 from movingpandas.geometry_utils import (
     azimuth,
     calculate_initial_compass_bearing,
     angular_difference,
     mrr_diagonal,
+    measure_length,
     measure_distance_geodesic,
     measure_distance_euclidean,
     measure_distance_spherical,
@@ -126,3 +128,8 @@ class TestGeometryUtils:
             ),
             spherical=True,
         ) == pytest.approx(3944411)
+
+    def test_measure_length(self):
+        geoseries = GeoSeries([Point(0, 0), Point(0, 1)])
+        length = measure_length(geoseries)
+        assert length == 1

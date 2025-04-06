@@ -13,4 +13,6 @@ python:
     path: .
 conda:
   environment: docs/environment.yml
+sphinx:
+  configuration: docs/source/conf.py
 formats: []
