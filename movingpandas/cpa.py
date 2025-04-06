@@ -12,7 +12,7 @@ import movingpandas as mpd
 date_type = Union[np.datetime64, datetime.datetime, pd.Timestamp]
 
 
-class CPA:
+class CPACalculator:
     """
     Closest Point of Approach calculator.
 
@@ -113,7 +113,7 @@ class CPA:
             """
         Compute the closest point of approach (cpa) for one segment, a two pairs of points ((p0, p1), (q0, q1)) for time window (t0, t1)
         """
-            + CPA.variable_doc
+            + CPACalculator.variable_doc
         )
 
         if not isinstance(p0, shapely.Point):
@@ -300,7 +300,7 @@ class CPA:
         Generate the closest point of approach variables for all time steps of trajectories a and b.
 
         """
-            + CPA.variable_doc
+            + CPACalculator.variable_doc
         )
 
         traj_a = self.traj_a
@@ -359,7 +359,7 @@ class CPA:
         Generate the minimum closest point of approach over all time steps of trajectories a and b.
 
         """
-            + CPA.variable_doc
+            + CPACalculator.variable_doc
         )
 
         # gbox is the bounding box in x,y,z,m
@@ -396,7 +396,7 @@ class CPA:
         The geometry column is set to the pq linestring. The crs is reused from traj_a.
 
         """
-            + CPA.variable_doc
+            + CPACalculator.variable_doc
         )
 
         cpas = []

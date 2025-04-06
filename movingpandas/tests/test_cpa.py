@@ -9,7 +9,7 @@ import shapely
 import pytest
 
 import movingpandas as mpd
-from movingpandas.cpa import CPA
+from movingpandas.cpa import CPACalculator
 
 # create local coordinate system
 # or use a projected system?
@@ -77,11 +77,11 @@ def create_traj(p0: tuple, p1: tuple, t0: float, t1: float):
 def test_invalid_trajectory(traj_a, traj_b):
     with pytest.raises(TypeError):
         # should not work if you pass a data frame
-        CPA(traj_a.df, traj_b)
+        CPACalculator(traj_a.df, traj_b)
 
 
 def test_postgis_example(traj_a, traj_b):
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     cpa.min()
 
     # TODO: postgis finds, why do we have 1.965....
@@ -99,7 +99,7 @@ def test_non_overlapping_time():
     traj_a = create_traj((0, 0), (0, 0), 0, 1)
     traj_b = create_traj((0, 0), (0, 0), 2, 5)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # we should have NaT and NaN  (postgis returns time of -2)
@@ -117,7 +117,7 @@ def test_two_stationary_touching_time():
     traj_a = create_traj((0, 0), (0, 0), 0, 1)
     traj_b = create_traj((0, 0), (0, 0), 1, 5)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 1.0);
@@ -132,7 +132,7 @@ def test_one_stationary_one_moving():
     traj_a = create_traj((0, 0), (0, 0), 1, 5)
     traj_b = create_traj((-10, 10), (10, 10), 1, 5)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 3.0);
@@ -148,7 +148,7 @@ def test_equal_trajectories():
     traj_a = create_traj((0, 0), (10, 0), 10, 20)
     traj_b = create_traj((0, 0), (10, 0), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
@@ -163,7 +163,7 @@ def test_inverse_trajectories():
     traj_a = create_traj((0, 0), (10, 0), 10, 20)
     traj_b = create_traj((10, 0), (0, 0), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 15.0);
@@ -179,7 +179,7 @@ def test_parallel_trajectories():
     traj_a = create_traj((2, 0), (12, 0), 10, 20)
     traj_b = create_traj((13, 0), (23, 0), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
@@ -197,7 +197,7 @@ def test_parallel_b_faster():
     # 0.7m/s
     traj_b = create_traj((2, 0), (9, 0), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 20.0);
     # ASSERT_DOUBLE_EQUAL(dist, 1.0);
@@ -215,7 +215,7 @@ def test_parallel_a_faster():
     # 0.4m/s
     traj_b = create_traj((2, 0), (6, 0), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
     # ASSERT_DOUBLE_EQUAL(dist, 2.0);
@@ -229,7 +229,7 @@ def test_collision():
     traj_a = create_traj((0, 0), (10, 0), 0, 10)
     traj_b = create_traj((5, -8), (5, 8), 0, 10)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 5.0);
@@ -244,7 +244,7 @@ def test_crossing():
     traj_a = create_traj((0, 0), (10, 0), 0, 10)
     traj_b = create_traj((8, -5), (8, 5), 0, 10)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 6.5);
@@ -265,7 +265,7 @@ def test_touch_start():
     traj_a = create_traj((0, 0), (10, 0), 1, 10)
     traj_b = create_traj((0, 0), (-100, 0), 1, 10)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 1.0);
@@ -282,7 +282,7 @@ def test_touch_end():
     traj_a = create_traj((10, 0), (0, 0), 1, 10)
     traj_b = create_traj((0, -100), (0, 0), 1, 10)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
@@ -297,7 +297,7 @@ def test_converging_3d():
     traj_a = create_traj((0, 0, 0), (10, 0, 0), 10, 20)
     traj_b = create_traj((0, 0, 8), (10, 0, 5), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 20.0);
     # ASSERT_DOUBLE_EQUAL(dist, 5.0);
@@ -336,7 +336,7 @@ def test_stop_and_pass():
     gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=crs)
     traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=crs)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 3.0);
@@ -351,7 +351,7 @@ def test_converging_3d():
     traj_a = create_traj((0, 0, 0), (10, 0, 0), 10, 20)
     traj_b = create_traj((0, 0, 8), (10, 0, 5), 10, 20)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 20.0);
     # ASSERT_DOUBLE_EQUAL(dist, 5.0);
@@ -387,7 +387,7 @@ def test_miliseconds():
     gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=crs)
     traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=crs)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 1432291464.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
@@ -405,7 +405,7 @@ def test_single_point():
     traj_a = create_traj((0, 0), (1, 0), 0, 2)
     traj_b = create_traj((0, 0), (1, 0), 2, 3)
 
-    cpa = CPA(traj_a, traj_b)
+    cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
     # ASSERT_DOUBLE_EQUAL(m, 2.0);
@@ -414,6 +414,3 @@ def test_single_point():
     assert result.t.timestamp() == 2, "t should equal 2"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "touching", "status should be touching"
-
-
-#
