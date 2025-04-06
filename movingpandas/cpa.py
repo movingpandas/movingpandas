@@ -29,6 +29,8 @@ class CPA:
 
     """
 
+    # TODO: separate
+    # t_to and t_at/t_of
     variable_doc = """
         Results contain the following variables:
             p0, p1, q0, q1, t0, t1: input variables
