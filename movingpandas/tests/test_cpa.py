@@ -25,6 +25,7 @@ ENGCRS["Custom 3D Cartesian Engineering CRS",
 ]
 """
 CRS = pyproj.CRS.from_wkt(CRS_WKT)
+UTC = datetime.timezone.utc
 
 
 @pytest.fixture
@@ -69,10 +70,10 @@ def create_traj(p0: tuple, p1: tuple, t0: float, t1: float):
     point_1 = shapely.Point(*p1)
     points = [point_0, point_1]
     # make sure we get non-local date naive dates
-    date_0 = datetime.datetime.fromtimestamp(t0, tz=datetime.UTC)
+    date_0 = datetime.datetime.fromtimestamp(t0, tz=UTC)
     date_0 = date_0.replace(tzinfo=None)
 
-    date_1 = datetime.datetime.fromtimestamp(t1, tz=datetime.UTC)
+    date_1 = datetime.datetime.fromtimestamp(t1, tz=UTC)
     date_1 = date_1.replace(tzinfo=None)
     t = [date_0, date_1]
 
@@ -312,7 +313,7 @@ def test_converging_3d():
     #
     assert result.t_at.timestamp() == 20, "t should equal 20"
     assert result.dist == 5, "distance should equal 5"
-    assert result.status == "approaching", "status should be approaching"
+    assert result.status == "converging", "status should be converging"
 
 
 def test_stop_and_pass():
@@ -323,16 +324,10 @@ def test_stop_and_pass():
 
     points_a = [(0, 0), (0, 1), (0, 1), (0, 10)]
     t_a = [0, 1, 4, 13]
-    t_a = [
-        datetime.datetime.fromtimestamp(t, tz=datetime.UTC).replace(tzinfo=None)
-        for t in t_a
-    ]
+    t_a = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_a]
     points_b = [(-10, 2), (0, 2), (12, 2)]
     t_b = [0, 3, 13]
-    t_b = [
-        datetime.datetime.fromtimestamp(t, tz=datetime.UTC).replace(tzinfo=None)
-        for t in t_b
-    ]
+    t_b = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_b]
 
     geometry_a = [shapely.Point(*point) for point in points_a]
     df_a = pd.DataFrame(data=dict(t=t_a))
@@ -361,10 +356,7 @@ def test_miliseconds():
     points_a = [(0, 0), (2, 0)]
     t_a = [1432291464, 1432291536]
     # convert to datetime
-    t_a = [
-        datetime.datetime.fromtimestamp(t, tz=datetime.UTC).replace(tzinfo=None)
-        for t in t_a
-    ]
+    t_a = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_a]
     geometry_a = [shapely.Point(*point) for point in points_a]
     df_a = pd.DataFrame(data=dict(t=t_a))
     gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=CRS)
@@ -373,10 +365,7 @@ def test_miliseconds():
     points_b = [(0, 0), (1, 0), (2, 0)]
     t_b = [1432291464, 1432291466.25, 1432291500]
     # convert to datetime
-    t_b = [
-        datetime.datetime.fromtimestamp(t, tz=datetime.UTC).replace(tzinfo=None)
-        for t in t_b
-    ]
+    t_b = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_b]
     geometry_b = [shapely.Point(*point) for point in points_b]
     df_b = pd.DataFrame(data=dict(t=t_b))
     gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=CRS)
