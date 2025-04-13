@@ -211,9 +211,13 @@ class CPACalculator:
         # In lwgeom t_tot is overriden by t.
         t_tot = -np.dot(w0, dv).item() / dv2
 
+        # This is what in nautical applications is referred to as time to closest point of approach, .e.g  http://dx.doi.org/10.12716/1001.09.01.06
+        t_to = t_tot
+
         # We introduce the concept of status so we can recall if objects are diverging or not.
         status = ""
-        # t clipped when converging or diverging
+        # t = t_tot clipped when converging or diverging (t_tot, t are in line with naming in postgis / lwgeom)
+        #
         t = t_tot
         if t_tot > 1:
             # converging
@@ -238,11 +242,11 @@ class CPACalculator:
         p = shapely.Point(*p_coords)
         q = shapely.Point(*q_coords)
 
-        # We can now also compute tcpa
+        # We can now also compute tcpa (here the variant of aerial applications, t_at, is used)
         # In python you can operate on datetimes with fractions (t1 - t0) is a time delta, t is a fraction
         # Added to t0 this gives a datetime. This saves us from converting to timestamps and back.
-
         # t = t0 + (t1 - t0) * t;
+        #
         t = t0 + (t1 - t0) * t
 
         # Now we can compute the distance
@@ -257,8 +261,8 @@ class CPACalculator:
         # The line runs from a point on p0-p1 to a point on q0-q1.
         pq = shapely.LineString([p, q])
 
+        # make sure we have a timestamp
         t_at = pd.Timestamp(t)
-        t_to = (t_at - t0).total_seconds()
         geometry = pq
         result = pd.Series(
             dict(
