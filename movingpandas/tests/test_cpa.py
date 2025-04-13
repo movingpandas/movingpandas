@@ -355,7 +355,8 @@ def test_stop_and_pass():
 
 
 def test_miliseconds():
-    """Test related to subsecond timestamps https://trac.osgeo.org/postgis/ticket/3136"""
+    """Test related to subsecond timestamps
+    https://trac.osgeo.org/postgis/ticket/3136"""
 
     points_a = [(0, 0), (2, 0)]
     t_a = [1432291464, 1432291536]
