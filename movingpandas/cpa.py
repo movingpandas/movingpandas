@@ -1,5 +1,5 @@
 import datetime
-from typing import Iterator, Union, get_args
+from typing import Iterator, Optional, Union, get_args
 
 import geopandas as gpd
 import numpy as np
@@ -29,23 +29,22 @@ class CPACalculator:
 
     """
 
-    # TODO: separate
-    # t_to and t_at/t_of
     variable_doc = """
         Results contain the following variables:
             t_at: time at closest point of approach (datetime)
             t_to: time to closest point of approach (float)
             geometry: line between traj_a and traj_b at closest approach
-            dist: distance at cpa # KEEP
+            dist: distance at cpa
             status: string representing
-            - "no-overlap", "converging" (t_tot < 0),
-            - "diverging" (t_tot > 1),
-            - "approaching"  0 < t_tot < 1, or
+            - "no-overlap",
+            - "converging" (t_tot < 0)
+            - "diverging" (t_tot > 1)
+            - "approaching"  0 < t_tot < 1
             - "parallel" (dist2 == 0)
     """
 
     def __init__(self, traj_a: mpd.Trajectory, traj_b: mpd.Trajectory):
-        """generate a CPA calculation"""
+        """Generate a CPA calculation"""
         if not isinstance(traj_a, mpd.Trajectory):
             raise TypeError(f"traj_a should be a trajectory, got a {type(traj_a)}")
         if not isinstance(traj_b, mpd.Trajectory):
@@ -56,17 +55,20 @@ class CPACalculator:
 
     @staticmethod
     def _no_overlap():
+        """Generate a result for the case if there is no temporal overlap
+        between two trajectories."""
         t_at = pd.NaT
         t_to = np.nan
         dist = np.nan
         status = "no-overlap"
+
         # empty LineString (check with is_empty)
         geometry = shapely.LineString()
         data = dict(t_at=t_at, t_to=t_to, dist=dist, geometry=geometry, status=status)
         return pd.Series(data=data)
 
     def _touching_times(self):
-        """return a result if traj a and b are overlapping"""
+        """Return a result if temporal intervals of traj a and b are touching."""
         traj_a = self.traj_a
         traj_b = self.traj_b
 
@@ -124,7 +126,8 @@ class CPACalculator:
             raise TypeError(f"t1 should be a datetime, got a {type(t1)}")
 
         # we follow the implementation of postgis
-        # https://github.com/postgis/postgis/blob/9637dc369361ac118e1ad37da7a519dae9dfab5e/postgis/lwgeom_functions_temporal.c#L83
+        # In partical the function segments_tcpa in
+        # https://github.com/postgis/postgis/blob/master/liblwgeom/lwlinearreferencing.c
 
         # This function corresponds with segments_tcpa Here we keep track of
         # cpa, distance and tcpa, so the function is renamed to cpa_segment.
@@ -141,21 +144,16 @@ class CPACalculator:
         q0 = np.asarray(q0.coords)[0]
         q1 = np.asarray(q1.coords)[0]
 
-        # This is the lwgeom code that we are now following
-        # pv; /* velocity of p, aka u */
-        # qv; /* velocity of q, aka v */
-        # dv; /* velocity difference */
-        # w0; /* vector between first points *#
-
-        # pv = (p1 - p0);
+        # velocity of p, trajectory a
         pv = p1 - p0
 
-        # qv = (q1 - q0);
+        # velocity of q, trajectory b
         qv = q1 - q0
 
-        # dv = pv - qv
+        # velocity difference of p an q
         dv = pv - qv
 
+        # dv2 is the squared length of the vector of dv
         # Dot operator returns a vector of length 1, we only want the scalar
         dv2 = np.dot(dv, dv).item()
 
@@ -195,13 +193,9 @@ class CPACalculator:
         # Now we have to find out if the objects meet in our time window, in the
         # past or in the future.
 
-        # /* Distance at any given time, with t0 */
-
-        # p0 - q0
+        # Vector between current points in trajectory a and b
         w0 = p0 - q0
-        w0
 
-        # t = -DOT(w0, dv) / dv2;
         assert dv2 != 0, "dv2 should not be 0"
         # This is the relative time in our time window when objects meet.
         # We use t_tot because we later clip t_tot between 0 and 1 and rename it to t.
@@ -209,15 +203,21 @@ class CPACalculator:
         t_tot = -np.dot(w0, dv).item() / dv2
 
         # This is what in nautical applications is referred to as time to
-        # closest point of approach, .e.g
+        # closest point of approach, e.g.
         # http://dx.doi.org/10.12716/1001.09.01.06
         t_to = t_tot
 
         # We introduce the concept of status so we can recall if objects are
         # diverging or not.
         status = ""
-        # t = t_tot clipped when converging or diverging (t_tot, t are in line
-        # with naming in postgis / lwgeom)
+
+        # Now that we know the time to the closest point of approach we can
+        # determine if trajectories are moving closer together (converging) or
+        # away from each other (diverging), or in the time window t0 - t1, are
+        # approaching (reaching the closest point).
+        #
+        # Compute t as the clipped version of t_tot when converging or
+        # diverging (naming of t_tot, t are in line with naming in postgis / lwgeom)
         #
         t = t_tot
         if t_tot > 1:
@@ -231,11 +231,8 @@ class CPACalculator:
         else:
             status = "approaching"
 
-        # Update p0 moving trajectory with velocity pv and time t
-        # p0 += pv * t;
-        # q0 += qv * t;
-
-        # we'll create a separate variable (unlike the code in lwgeom)
+        # Create new coordinates when moving over the duration of
+        # We'll create a separate variable.
         p_coords = p0 + pv * t
         q_coords = q0 + qv * t
 
@@ -266,6 +263,9 @@ class CPACalculator:
 
         # make sure we have a timestamp
         t_at = pd.Timestamp(t)
+        # TODO: I think this should be multiplied with the duration of the
+        # interval, as this is now a fraction of time
+        t_to = t_tot
         geometry = pq
         result = pd.Series(
             dict(
@@ -317,14 +317,7 @@ class CPACalculator:
         for interval in t_ab_intervals:
             t0, t1 = interval
 
-            # determine p0, p1, q0, q1
-
-            # Equivalent code from lwgeom:
-            # seg = ptarray_locate_along_linear(l1->points, t0, &p0, 0);
-            # seg = ptarray_locate_along_linear(l1->points, t1, &p1, seg);
-            # seg = ptarray_locate_along_linear(l2->points, t0, &q0, 0);
-            # seg = ptarray_locate_along_linear(l2->points, t1, &q1, seg);
-
+            # Equivalent code from lwgeom ptarray_locate_along_linear
             p0 = traj_a.interpolate_position_at(t0)
             p1 = traj_a.interpolate_position_at(t1)
             q0 = traj_b.interpolate_position_at(t0)
@@ -335,7 +328,7 @@ class CPACalculator:
             cpa = self._segment(p0=p0, p1=p1, q0=q0, q1=q1, t0=t0, t1=t1)
             yield cpa
 
-    def min(self) -> pd.Series:
+    def min(self) -> Optional[pd.Series]:
         (
             """
         Generate the minimum closest point of approach over all time
