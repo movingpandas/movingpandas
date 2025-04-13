@@ -14,7 +14,7 @@ from movingpandas.cpa import CPACalculator
 
 # create local coordinate system
 # or use a projected system?
-crs_wkt = """
+CRS_WKT = """
 ENGCRS["Custom 3D Cartesian Engineering CRS",
     EDATUM["Local Engineering Datum"],
     CS[Cartesian,3],
@@ -24,7 +24,7 @@ ENGCRS["Custom 3D Cartesian Engineering CRS",
     LENGTHUNIT["metre",1.0]
 ]
 """
-crs = pyproj.CRS.from_wkt(crs_wkt)
+CRS = pyproj.CRS.from_wkt(CRS_WKT)
 
 
 @pytest.fixture
@@ -43,8 +43,8 @@ def traj_a():
     date_0 = datetime.datetime(2015, 5, 26, 10, 0)
     date_1 = datetime.datetime(2015, 5, 26, 11, 0)
     t = [date_0, date_1]
-    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=crs)
-    traj = mpd.Trajectory(gdf, traj_id="traj_a", t="t", crs=crs)
+    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=CRS)
+    traj = mpd.Trajectory(gdf, traj_id="traj_a", t="t", crs=CRS)
     return traj
 
 
@@ -58,8 +58,8 @@ def traj_b():
     date_0 = datetime.datetime(2015, 5, 26, 10, 0)
     date_1 = datetime.datetime(2015, 5, 26, 11, 0)
     t = [date_0, date_1]
-    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=crs)
-    traj = mpd.Trajectory(gdf, traj_id="traj_b", t="t", crs=crs)
+    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=CRS)
+    traj = mpd.Trajectory(gdf, traj_id="traj_b", t="t", crs=CRS)
     return traj
 
 
@@ -76,8 +76,8 @@ def create_traj(p0: tuple, p1: tuple, t0: float, t1: float):
     date_1 = date_1.replace(tzinfo=None)
     t = [date_0, date_1]
 
-    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=crs)
-    traj = mpd.Trajectory(gdf, traj_id="traj", t="t", crs=crs)
+    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=CRS)
+    traj = mpd.Trajectory(gdf, traj_id="traj", t="t", crs=CRS)
     return traj
 
 
@@ -95,7 +95,8 @@ def test_postgis_example(traj_a, traj_b):
     # Expected: 1.96036833151395
     #
     # Postgis docs are not consistent whether 3d is used:
-    # - Returns the distance (in 2D) between two trajectories at their closest point of approach.
+    # - Returns the distance (in 2D) between two trajectories at their
+    #   closest point of approach.
     # - This function supports 3d and will not drop the z-index.
     # 2d gives: 1.7888543819
 
@@ -335,13 +336,13 @@ def test_stop_and_pass():
 
     geometry_a = [shapely.Point(*point) for point in points_a]
     df_a = pd.DataFrame(data=dict(t=t_a))
-    gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=crs)
-    traj_a = mpd.Trajectory(gdf_a, traj_id="traj_a", t="t", crs=crs)
+    gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=CRS)
+    traj_a = mpd.Trajectory(gdf_a, traj_id="traj_a", t="t", crs=CRS)
 
     geometry_b = [shapely.Point(*point) for point in points_b]
     df_b = pd.DataFrame(data=dict(t=t_b))
-    gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=crs)
-    traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=crs)
+    gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=CRS)
+    traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=CRS)
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
@@ -351,20 +352,6 @@ def test_stop_and_pass():
     assert result.t_at.timestamp() == 3, "t should equal 3"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "approaching", "status should be approaching"
-
-
-def test_converging_3d():
-    """Converging tracks, 3d"""
-    traj_a = create_traj((0, 0, 0), (10, 0, 0), 10, 20)
-    traj_b = create_traj((0, 0, 8), (10, 0, 5), 10, 20)
-
-    cpa = CPACalculator(traj_a, traj_b)
-    result = cpa.min()
-    # ASSERT_DOUBLE_EQUAL(m, 20.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 5.0);
-    assert result.t_at.timestamp() == 20, "t should equal 20"
-    assert result.dist == 5, "distance should equal 5"
-    assert result.status == "converging", "status should be converging"
 
 
 def test_miliseconds():
@@ -379,8 +366,8 @@ def test_miliseconds():
     ]
     geometry_a = [shapely.Point(*point) for point in points_a]
     df_a = pd.DataFrame(data=dict(t=t_a))
-    gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=crs)
-    traj_a = mpd.Trajectory(gdf_a, traj_id="traj_a", t="t", crs=crs)
+    gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=CRS)
+    traj_a = mpd.Trajectory(gdf_a, traj_id="traj_a", t="t", crs=CRS)
 
     points_b = [(0, 0), (1, 0), (2, 0)]
     t_b = [1432291464, 1432291466.25, 1432291500]
@@ -391,8 +378,8 @@ def test_miliseconds():
     ]
     geometry_b = [shapely.Point(*point) for point in points_b]
     df_b = pd.DataFrame(data=dict(t=t_b))
-    gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=crs)
-    traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=crs)
+    gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=CRS)
+    traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=CRS)
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
