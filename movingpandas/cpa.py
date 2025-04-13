@@ -33,18 +33,10 @@ class CPACalculator:
     # t_to and t_at/t_of
     variable_doc = """
         Results contain the following variables:
-            p0, p1, q0, q1, t0, t1: input variables
-            t: closest point of approach (datetime)  # KEEP
-            t_tot: relative time in the interval when objects reach eachother
-            p: point at closest approach for object p
-            q: point at closest approach for object q
-            pq: line between p and q at closest approach # KEEP (so we only have one geometry)
-            pv: vector of p
-            qv: vector of q
-            dv: difference between p and q vectors
-            dv2: squared distance of p and q vectors
+            t_at: time at closest point of approach (datetime)
+            t_to: time to closest point of approach (float)
+            geometry: line between traj_a and traj_b at closest approach
             dist: distance at cpa # KEEP
-            dist2: squared distance at cpa
             status: string representing "no-overlap", "converging" (t_tot < 0), "diverging" (t_tot > 1), "approaching"  0 < t_tot < 1, or "parallel" (dist2 == 0)
     """
 
@@ -60,10 +52,13 @@ class CPACalculator:
 
     @staticmethod
     def _no_overlap():
-        t = pd.NaT
+        t_at = pd.NaT
+        t_to = np.nan
         dist = np.nan
         status = "no-overlap"
-        data = dict(t=t, dist=dist, status=status)
+        # empty LineString (check with is_empty)
+        geometry = shapely.LineString()
+        data = dict(t_at=t_at, t_to=t_to, dist=dist, geometry=geometry, status=status)
         return pd.Series(data=data)
 
     def _touching_times(self):
@@ -94,10 +89,12 @@ class CPACalculator:
         dist2 = np.dot(d_ab, d_ab).item()
         dist = dist2**0.5
 
-        t = pd.Timestamp(t_min)
+        t_at = pd.Timestamp(t_min)
+        t_to = 0
         dist = dist
         status = "touching"
-        data = dict(t=t, dist=dist, status=status)
+        geometry = shapely.LineString([pos_a, pos_b])
+        data = dict(t_at=t_at, t_to=t_to, dist=dist, geometry=geometry, status=status)
         return pd.Series(data=data)
 
     @staticmethod
@@ -185,25 +182,15 @@ class CPACalculator:
             dist = dist2**0.5
 
             pq = shapely.LineString([p0_orig, q0_orig])
+
+            t_at = pd.Timestamp(t0)
+            t_to = (t_at - t0).total_seconds()
             result = pd.Series(
                 dict(
-                    p0=p0_orig,
-                    p1=p1_orig,
-                    q0=q0_orig,
-                    q1=q1_orig,
-                    t0=t0,
-                    t1=t1,
-                    t=pd.Timestamp(t0),  # start time
-                    t_tot=0,  # 0 fraction (arbitrary)
-                    p=p0_orig,
-                    q=q0_orig,
-                    pq=pq,
-                    pv=pv,
-                    qv=qv,
-                    dv=dv,
-                    dv2=dv2,
+                    t_at=t_at,  # start time
+                    t_to=t_to,
+                    geometry=pq,
                     dist=dist,
-                    dist2=dist2,
                     status=status,
                 )
             )
@@ -270,25 +257,15 @@ class CPACalculator:
         # The line runs from a point on p0-p1 to a point on q0-q1.
         pq = shapely.LineString([p, q])
 
+        t_at = pd.Timestamp(t)
+        t_to = (t_at - t0).total_seconds()
+        geometry = pq
         result = pd.Series(
             dict(
-                p0=p0_orig,
-                p1=p1_orig,
-                q0=q0_orig,
-                q1=q1_orig,
-                t0=t0,
-                t1=t1,
-                t=pd.Timestamp(t),
-                t_tot=t_tot,
-                p=p,
-                q=q,
-                pq=pq,
-                pv=pv,
-                qv=qv,
-                dv=dv,
-                dv2=dv2,
+                t_at=t_at,
+                t_to=t_to,
+                geometry=geometry,
                 dist=dist,
-                dist2=dist2,
                 status=status,
             )
         )
@@ -402,5 +379,5 @@ class CPACalculator:
         cpas = []
         for cpa in self.iter_segments():
             cpas.append(cpa)
-        result = gpd.GeoDataFrame(cpas, geometry="pq", crs=self.traj_a.crs)
+        result = gpd.GeoDataFrame(cpas, geometry="geometry", crs=self.traj_a.crs)
         return result

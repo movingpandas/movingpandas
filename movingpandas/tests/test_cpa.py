@@ -104,8 +104,8 @@ def test_non_overlapping_time():
 
     # we should have NaT and NaN  (postgis returns time of -2)
     assert pd.isna(
-        result.t
-    ), f"cpa.t should be NaT if times do not overlap, got {result.t}"
+        result.t_at
+    ), f"cpa.t should be NaT if times do not overlap, got {result.t_at}"
     assert pd.isna(
         result.dist
     ), f"cpa.t should be NaT if times do not overlap, got {result.dist}"
@@ -122,7 +122,7 @@ def test_two_stationary_touching_time():
 
     # ASSERT_DOUBLE_EQUAL(m, 1.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
-    assert result.t.timestamp() == 1, "t should equal 1"
+    assert result.t_at.timestamp() == 1, "t should equal 1"
     assert result.dist == 0, "t should equal 0"
     assert result.status == "touching", "status should should be touching"
 
@@ -138,7 +138,7 @@ def test_one_stationary_one_moving():
     # ASSERT_DOUBLE_EQUAL(m, 3.0);
     # ASSERT_DOUBLE_EQUAL(dist, 10.0);
     #
-    assert result.t.timestamp() == 3, "time of cpa should be 3"
+    assert result.t_at.timestamp() == 3, "time of cpa should be 3"
     assert result.dist == 10, "distance should be 10"
     assert result.status == "approaching", "distance should be 10"
 
@@ -153,7 +153,7 @@ def test_equal_trajectories():
 
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
-    assert result.t.timestamp() == 10, "t should equal 10"
+    assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "parallel", "status should be parallel"
 
@@ -168,7 +168,7 @@ def test_inverse_trajectories():
 
     # ASSERT_DOUBLE_EQUAL(m, 15.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
-    assert result.t.timestamp() == 15, "t should equal 15"
+    assert result.t_at.timestamp() == 15, "t should equal 15"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
 
@@ -184,7 +184,7 @@ def test_parallel_trajectories():
 
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
     # ASSERT_DOUBLE_EQUAL(dist, 11.0);
-    assert result.t.timestamp() == 10, "t should equal 10"
+    assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 11, "distance should equal 11"
     assert result.status == "parallel", "status should be parallel"
 
@@ -202,7 +202,7 @@ def test_parallel_b_faster():
     # ASSERT_DOUBLE_EQUAL(m, 20.0);
     # ASSERT_DOUBLE_EQUAL(dist, 1.0);
 
-    assert result.t.timestamp() == 20, "t should equal 20"
+    assert result.t_at.timestamp() == 20, "t should equal 20"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "converging", "status should be converging"
 
@@ -219,7 +219,7 @@ def test_parallel_a_faster():
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
     # ASSERT_DOUBLE_EQUAL(dist, 2.0);
-    assert result.t.timestamp() == 10, "t should equal 10"
+    assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 2, "distance should equal 2"
     assert result.status == "diverging", "status should be diverging"
 
@@ -234,7 +234,7 @@ def test_collision():
 
     # ASSERT_DOUBLE_EQUAL(m, 5.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
-    assert result.t.timestamp() == 5, "t should equal 5"
+    assert result.t_at.timestamp() == 5, "t should equal 5"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
 
@@ -251,7 +251,7 @@ def test_crossing():
     # ASSERT_DOUBLE_EQUAL(rint(dist*100), 212.0);
 
     np.testing.assert_almost_equal(
-        result.t.timestamp(), 6.5, err_msg="t should equal 6.5"
+        result.t_at.timestamp(), 6.5, err_msg="t should equal 6.5"
     )
     np.testing.assert_almost_equal(
         result.dist, 2.121320, decimal=5, err_msg="distance should equal 212"
@@ -271,7 +271,7 @@ def test_touch_start():
     # ASSERT_DOUBLE_EQUAL(m, 1.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
 
-    assert result.t.timestamp() == 1, "t should equal 1"
+    assert result.t_at.timestamp() == 1, "t should equal 1"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
 
@@ -287,7 +287,7 @@ def test_touch_end():
 
     # ASSERT_DOUBLE_EQUAL(m, 10.0);
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
-    assert result.t.timestamp() == 10, "t should equal 10"
+    assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
 
@@ -302,7 +302,7 @@ def test_converging_3d():
     # ASSERT_DOUBLE_EQUAL(m, 20.0);
     # ASSERT_DOUBLE_EQUAL(dist, 5.0);
     #
-    assert result.t.timestamp() == 20, "t should equal 20"
+    assert result.t_at.timestamp() == 20, "t should equal 20"
     assert result.dist == 5, "distance should equal 5"
     assert result.status == "approaching", "status should be approaching"
 
@@ -341,7 +341,7 @@ def test_stop_and_pass():
 
     # ASSERT_DOUBLE_EQUAL(m, 3.0);
     # ASSERT_DOUBLE_EQUAL(dist, 1.0);
-    assert result.t.timestamp() == 3, "t should equal 3"
+    assert result.t_at.timestamp() == 3, "t should equal 3"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "approaching", "status should be approaching"
 
@@ -355,7 +355,7 @@ def test_converging_3d():
     result = cpa.min()
     # ASSERT_DOUBLE_EQUAL(m, 20.0);
     # ASSERT_DOUBLE_EQUAL(dist, 5.0);
-    assert result.t.timestamp() == 20, "t should equal 20"
+    assert result.t_at.timestamp() == 20, "t should equal 20"
     assert result.dist == 5, "distance should equal 5"
     assert result.status == "converging", "status should be converging"
 
@@ -393,7 +393,7 @@ def test_miliseconds():
     # ASSERT_DOUBLE_EQUAL(dist, 0.0);
 
     np.testing.assert_almost_equal(
-        result.t.timestamp(), 1432291464.0, err_msg="t should equal 1432291464.0"
+        result.t_at.timestamp(), 1432291464.0, err_msg="t should equal 1432291464.0"
     )
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
@@ -411,6 +411,6 @@ def test_single_point():
     # ASSERT_DOUBLE_EQUAL(m, 2.0);
     # ASSERT_DOUBLE_EQUAL(dist, 1.0);
     #
-    assert result.t.timestamp() == 2, "t should equal 2"
+    assert result.t_at.timestamp() == 2, "t should equal 2"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "touching", "status should be touching"
