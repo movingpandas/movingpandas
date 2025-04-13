@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 
 import geopandas as gpd
 import numpy as np
@@ -24,6 +25,12 @@ ENGCRS["Custom 3D Cartesian Engineering CRS",
 ]
 """
 crs = pyproj.CRS.from_wkt(crs_wkt)
+
+
+@pytest.fixture
+def data_dir():
+    data_dir = pathlib.Path(__file__).parent
+    return data_dir
 
 
 @pytest.fixture
@@ -414,3 +421,36 @@ def test_single_point():
     assert result.t_at.timestamp() == 2, "t should equal 2"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "touching", "status should be touching"
+
+
+def test_ais_dk(data_dir):
+    """Two ships in the AIS.dk test set."""
+
+    # data src: http://web.ais.dk/aisdata/
+    mmsi_a = 265550210
+    mmsi_b = 265410000
+    ais_gdf = gpd.read_file(data_dir / "ais-utm32N.json")
+    ais_gdf = ais_gdf.set_index("t")
+
+    traj_collection = mpd.TrajectoryCollection(ais_gdf, traj_id_col="MMSI")
+    traj_a = traj_collection.get_trajectory(mmsi_a)
+    traj_b = traj_collection.get_trajectory(mmsi_b)
+
+    cpa_calc = CPACalculator(traj_a, traj_b)
+    expected_cpa_min_dist = 380.2040792594374
+
+    # test result of min cpa
+    cpa = cpa_calc.min()
+    np.testing.assert_almost_equal(
+        cpa.dist,
+        expected_cpa_min_dist,
+        err_msg="Expected distance of closest approach of aproach to be 380m",
+    )
+
+    # this same value should also be present in the dataframe
+    cpa_df = cpa_calc.segments_gdf()
+    np.testing.assert_almost_equal(
+        cpa_df["dist"].min(),
+        expected_cpa_min_dist,
+        err_msg="Expected distance of closest approach of aproach to be 380m",
+    )
