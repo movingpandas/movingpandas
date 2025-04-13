@@ -37,7 +37,11 @@ class CPACalculator:
             t_to: time to closest point of approach (float)
             geometry: line between traj_a and traj_b at closest approach
             dist: distance at cpa # KEEP
-            status: string representing "no-overlap", "converging" (t_tot < 0), "diverging" (t_tot > 1), "approaching"  0 < t_tot < 1, or "parallel" (dist2 == 0)
+            status: string representing
+            - "no-overlap", "converging" (t_tot < 0),
+            - "diverging" (t_tot > 1),
+            - "approaching"  0 < t_tot < 1, or
+            - "parallel" (dist2 == 0)
     """
 
     def __init__(self, traj_a: mpd.Trajectory, traj_b: mpd.Trajectory):
@@ -71,16 +75,8 @@ class CPACalculator:
         t_max = min(traj_a.get_end_time(), traj_b.get_end_time())
 
         assert t_min == t_max, f"t_min should equal t_max, but got {t_min}, {t_max}"
-        traj = None
-        if traj_a.get_start_time() == t_min:
-            traj = traj_a
-        elif traj_b.get_start_time() == t_min:
-            traj = traj_b
-        else:
-            raise ValueError("traj_a or traj_b should start at t_min")
 
         # lookup  position at time t_min
-
         pos_a = traj_a.get_position_at(t_min)
         pos_b = traj_b.get_position_at(t_min)
 
@@ -108,7 +104,8 @@ class CPACalculator:
     ) -> pd.Series:
         (
             """
-        Compute the closest point of approach (cpa) for one segment, a two pairs of points ((p0, p1), (q0, q1)) for time window (t0, t1)
+        Compute the closest point of approach (cpa) for one segment,
+            a two pairs of points ((p0, p1), (q0, q1)) for time window (t0, t1)
         """
             + CPACalculator.variable_doc
         )
@@ -129,18 +126,16 @@ class CPACalculator:
         # we follow the implementation of postgis
         # https://github.com/postgis/postgis/blob/9637dc369361ac118e1ad37da7a519dae9dfab5e/postgis/lwgeom_functions_temporal.c#L83
 
-        # This function corresponds with segments_tcpa
-        # Here we keep track of cpa, distance and tcpa, so the function is renamed to cpa_segment.
+        # This function corresponds with segments_tcpa Here we keep track of
+        # cpa, distance and tcpa, so the function is renamed to cpa_segment.
 
-        # We keep track of the points
+        # We keep track of the original points
         p0_orig = p0
-        p1_orig = p1
         q0_orig = q0
-        q1_orig = q1
 
-        # We convert to vectors because the - operator in shapely is the spatial difference operator
-        # Here we are thinking in arrays / vectors
-        # Coords returns a 1x2 matrix. By using [0] we get the vector of length 2
+        # We convert to vectors because the - operator in shapely is the spatial
+        # difference operator Here we are thinking in arrays / vectors Coords
+        # returns a 1x2 matrix. By using [0] we get the vector of length 2
         p0 = np.asarray(p0.coords)[0]
         p1 = np.asarray(p1.coords)[0]
         q0 = np.asarray(q0.coords)[0]
@@ -164,16 +159,17 @@ class CPACalculator:
         # Dot operator returns a vector of length 1, we only want the scalar
         dv2 = np.dot(dv, dv).item()
 
-        # This is a special case. This happens when p and q are moving in the same direction.
-        # If this is the case we are done. We'll introduce a special status (parallel)
+        # This is a special case. This happens when p and q are moving in the
+        # same direction. If this is the case we are done. We'll introduce a
+        # special status (parallel)
         if dv2 == 0.0:
             # /* Distance is the same at any time, we pick the earliest */
             # relative distance is similar we can't compute approach
             status = "parallel"
 
-            # Now for a bit of extra work
-            # We have to return a similar series to what we return when we did find a cpa
-            # We'll use the point, distance, time at t0
+            # Now for a bit of extra work We have to return a similar series to
+            # what we return when we did find a cpa We'll use the point,
+            # distance, time at t0
             p = p0_orig
             q = q0_orig
             # compute distance at t0
@@ -196,7 +192,8 @@ class CPACalculator:
             )
             return result
 
-        # Now we have to find out if the objects meet in our time window, in the past or in the future.
+        # Now we have to find out if the objects meet in our time window, in the
+        # past or in the future.
 
         # /* Distance at any given time, with t0 */
 
@@ -211,12 +208,16 @@ class CPACalculator:
         # In lwgeom t_tot is overriden by t.
         t_tot = -np.dot(w0, dv).item() / dv2
 
-        # This is what in nautical applications is referred to as time to closest point of approach, .e.g  http://dx.doi.org/10.12716/1001.09.01.06
+        # This is what in nautical applications is referred to as time to
+        # closest point of approach, .e.g
+        # http://dx.doi.org/10.12716/1001.09.01.06
         t_to = t_tot
 
-        # We introduce the concept of status so we can recall if objects are diverging or not.
+        # We introduce the concept of status so we can recall if objects are
+        # diverging or not.
         status = ""
-        # t = t_tot clipped when converging or diverging (t_tot, t are in line with naming in postgis / lwgeom)
+        # t = t_tot clipped when converging or diverging (t_tot, t are in line
+        # with naming in postgis / lwgeom)
         #
         t = t_tot
         if t_tot > 1:
@@ -242,23 +243,25 @@ class CPACalculator:
         p = shapely.Point(*p_coords)
         q = shapely.Point(*q_coords)
 
-        # We can now also compute tcpa (here the variant of aerial applications, t_at, is used)
-        # In python you can operate on datetimes with fractions (t1 - t0) is a time delta, t is a fraction
-        # Added to t0 this gives a datetime. This saves us from converting to timestamps and back.
-        # t = t0 + (t1 - t0) * t;
+        # We can now also compute tcpa (here the variant of aerial applications,
+        # t_at, is used) In python you can operate on datetimes with fractions
+        # (t1 - t0) is a time delta, t is a fraction Added to t0 this gives a
+        # datetime. This saves us from converting to timestamps and back. t = t0
+        # + (t1 - t0) * t;
         #
         t = t0 + (t1 - t0) * t
 
-        # Now we can compute the distance
-        # Because we do everything using coords this also works when geometry contains a z coordinate
-        # For example for airplanes and submarines.
+        # Now we can compute the distance Because we do everything using coords
+        # this also works when geometry contains a z coordinate For example for
+        # airplanes and submarines.
         d_pq = np.asarray(p.coords)[0] - np.asarray(q.coords)[0]
         dist2 = np.dot(d_pq, d_pq).item()
         dist = dist2**0.5
 
-        # Geopandas (in particular certain gis formats) do not support multiple geometry columns.
-        # So we'll return the closest point of approach as the closest line of approach.
-        # The line runs from a point on p0-p1 to a point on q0-q1.
+        # Geopandas (in particular certain gis formats) do not support multiple
+        # geometry columns. So we'll return the closest point of approach as the
+        # closest line of approach. The line runs from a point on p0-p1 to a
+        # point on q0-q1.
         pq = shapely.LineString([p, q])
 
         # make sure we have a timestamp
@@ -277,8 +280,8 @@ class CPACalculator:
 
     def iter_segments(self) -> Iterator[pd.Series]:
         (
-            """
-        Generate the closest point of approach variables for all time steps of trajectories a and b.
+            """Generate the closest point of approach variables for all time
+        steps of trajectories a and b.
 
         """
             + CPACalculator.variable_doc
@@ -286,8 +289,6 @@ class CPACalculator:
 
         traj_a = self.traj_a
         traj_b = self.traj_b
-
-        mindist2 = np.finfo(np.double).max
 
         cpa = None
         # we follow the implementation of postgis
@@ -337,7 +338,8 @@ class CPACalculator:
     def min(self) -> pd.Series:
         (
             """
-        Generate the minimum closest point of approach over all time steps of trajectories a and b.
+        Generate the minimum closest point of approach over all time
+        steps of trajectories a and b.
 
         """
             + CPACalculator.variable_doc
@@ -372,9 +374,9 @@ class CPACalculator:
 
     def segments_gdf(self) -> gpd.GeoDataFrame:
         (
-            """
-        Generate a GeoDataFrame with all closest point of approach variables for all time steps of trajectories a and b.
-        The geometry column is set to the pq linestring. The crs is reused from traj_a.
+            """Generate a GeoDataFrame with all closest point of approach
+        variables for all time steps of trajectories a and b. The geometry
+        column is set to the pq linestring. The crs is reused from traj_a.
 
         """
             + CPACalculator.variable_doc
