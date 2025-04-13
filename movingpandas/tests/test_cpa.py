@@ -87,6 +87,40 @@ def test_invalid_trajectory(traj_a, traj_b):
         # should not work if you pass a data frame
         CPACalculator(traj_a.df, traj_b)
 
+    with pytest.raises(TypeError):
+        # should not work if you pass a data frame to traj_b
+        CPACalculator(traj_a, traj_b.df)
+
+
+def test_segment(traj_a, traj_b):
+    cpa = CPACalculator(traj_a, traj_b)
+    # lookup all times of a and b
+    t_ab = np.unique(np.sort(np.r_[traj_a.df.index, traj_b.df.index]))
+    t0 = t_ab[0]
+    t1 = t_ab[1]
+    p0 = traj_a.interpolate_position_at(t0)
+    p1 = traj_a.interpolate_position_at(t1)
+    q0 = traj_b.interpolate_position_at(t0)
+    q1 = traj_b.interpolate_position_at(t1)
+
+    result = cpa._segment(p0, p1, q0, q1, t0, t1)
+    np.testing.assert_almost_equal(
+        result.dist, 1.965214737762069, err_msg="Distance should be 1.965"
+    )
+
+    with pytest.raises(TypeError):
+        cpa._segment(0, p1, q0, q1, t0, t1)
+    with pytest.raises(TypeError):
+        cpa._segment(p0, 0, q0, q1, t0, t1)
+    with pytest.raises(TypeError):
+        cpa._segment(p0, p1, 0, q1, t0, t1)
+    with pytest.raises(TypeError):
+        cpa._segment(p0, p1, q0, 0, t0, t1)
+    with pytest.raises(TypeError):
+        cpa._segment(p0, p1, q0, q1, 0, t1)
+    with pytest.raises(TypeError):
+        cpa._segment(p0, p1, q0, q1, t0, 0)
+
 
 def test_postgis_example(traj_a, traj_b):
     cpa = CPACalculator(traj_a, traj_b)
