@@ -126,15 +126,9 @@ def test_postgis_example(traj_a, traj_b):
     cpa = CPACalculator(traj_a, traj_b)
     cpa.min()
 
-    # TODO: postgis finds, why do we have 1.965....
-    # Expected: 1.96036833151395
-    #
-    # Postgis docs are not consistent whether 3d is used:
-    # - Returns the distance (in 2D) between two trajectories at their
-    #   closest point of approach.
-    # - This function supports 3d and will not drop the z-index.
-    # 2d gives: 1.7888543819
-
+    # Postgis docs are not consistent on this number
+    # Corresponds to https://postgis.net/docs/ST_CPAWithin.html (1.96521473776207)
+    # But not: https://postgis.net/docs/ST_DistanceCPA.html  (1.96036833151395)
     np.testing.assert_almost_equal(cpa.min().dist, 1.965214737762069)
 
 
