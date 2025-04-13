@@ -111,17 +111,17 @@ class CPACalculator:
         )
 
         if not isinstance(p0, shapely.Point):
-            raise ValueError(f"p0 should be a shapely.Point, got a {type(p0)}")
+            raise TypeError(f"p0 should be a shapely.Point, got a {type(p0)}")
         if not isinstance(p1, shapely.Point):
-            raise ValueError(f"p1 should be a shapely.Point, got a {type(p1)}")
+            raise TypeError(f"p1 should be a shapely.Point, got a {type(p1)}")
         if not isinstance(q0, shapely.Point):
-            raise ValueError(f"q0 should be a shapely.Point, got a {type(q0)}")
+            raise TypeError(f"q0 should be a shapely.Point, got a {type(q0)}")
         if not isinstance(q1, shapely.Point):
-            raise ValueError(f"q1 should be a shapely.Point, got a {type(q1)}")
+            raise TypeError(f"q1 should be a shapely.Point, got a {type(q1)}")
         if not isinstance(t0, get_args(date_type)):
-            raise ValueError(f"t0 should be a datetime, got a {type(t0)}")
+            raise TypeError(f"t0 should be a datetime, got a {type(t0)}")
         if not isinstance(t1, get_args(date_type)):
-            raise ValueError(f"t1 should be a datetime, got a {type(t1)}")
+            raise TypeError(f"t1 should be a datetime, got a {type(t1)}")
 
         # we follow the implementation of postgis
         # https://github.com/postgis/postgis/blob/9637dc369361ac118e1ad37da7a519dae9dfab5e/postgis/lwgeom_functions_temporal.c#L83
