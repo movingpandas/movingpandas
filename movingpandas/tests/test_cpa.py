@@ -1,5 +1,6 @@
 import datetime
 import pathlib
+import unittest.mock
 
 import geopandas as gpd
 import numpy as np
@@ -146,6 +147,11 @@ def test_non_overlapping_time():
     assert pd.isna(
         result.dist
     ), f"cpa.t should be NaT if times do not overlap, got {result.dist}"
+
+    # we should return the result of _no_overlap
+    cpa._no_overlap = unittest.mock.MagicMock()
+    cpa.min()
+    cpa._no_overlap.assert_called()
 
 
 def test_two_stationary_touching_time():
