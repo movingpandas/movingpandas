@@ -271,7 +271,9 @@ def _create_traj_from_mfjson_trajectory(data, traj_id_property, traj_id):
     if "properties" in data:
         df = _add_properties(df, data)
 
-    return Trajectory(df, traj_id, t="t", x="x", y="y")
+    traj = Trajectory(df, traj_id, t="t", x="x", y="y")
+    traj.populate_geometry_column()
+    return traj
 
 
 def _get_temporal_properties(data):
@@ -312,7 +314,9 @@ def _create_traj_from_mfjson_movingpoint(data, traj_id_property, traj_id):
             df.set_index("t", inplace=True)
             df = df.join(_get_temporal_properties(property_group).set_index("t"))
             df["t"] = df.index
-    return Trajectory(df, traj_id, t="t", x="x", y="y", traj_id_col=traj_id_property)
+    traj = Trajectory(df, traj_id, t="t", x="x", y="y", traj_id_col=traj_id_property)
+    traj.populate_geometry_column()
+    return traj
 
 
 def _create_tc_from_mfcollection_json(data, traj_id_property):

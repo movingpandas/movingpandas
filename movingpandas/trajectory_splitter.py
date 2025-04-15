@@ -109,7 +109,13 @@ class TemporalSplitter(TrajectorySplitter):
                 df = df.sort_index(ascending=True)
             if len(df) > 1:
                 result.append(
-                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                    Trajectory(
+                        df,
+                        f"{traj.id}_{i}",
+                        traj_id_col=traj.get_traj_id_col(),
+                        x=traj.x,
+                        y=traj.y,
+                    )
                 )
         return TrajectoryCollection(result, min_length=min_length)
 
@@ -144,7 +150,13 @@ class ObservationGapSplitter(TrajectorySplitter):
             df = df.drop(columns=["t", "gap"])
             if len(df) > 1:
                 result.append(
-                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                    Trajectory(
+                        df,
+                        f"{traj.id}_{i}",
+                        traj_id_col=traj.get_traj_id_col(),
+                        x=traj.x,
+                        y=traj.y,
+                    )
                 )
         return TrajectoryCollection(result, min_length=min_length)
 
@@ -288,7 +300,13 @@ class AngleChangeSplitter(TrajectorySplitter):
                     df = df.sort_index(ascending=True)
 
                 result.append(
-                    Trajectory(df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col())
+                    Trajectory(
+                        df,
+                        f"{traj.id}_{i}",
+                        traj_id_col=traj.get_traj_id_col(),
+                        x=traj.x,
+                        y=traj.y,
+                    )
                 )
 
         return TrajectoryCollection(result, min_length=min_length)
@@ -331,7 +349,11 @@ class ValueChangeSplitter(TrajectorySplitter):
             if len(df) > 1:
                 df = GeoDataFrame(df).set_crs(traj.df.crs)
                 traj = Trajectory(
-                    df, f"{traj.id}_{i}", traj_id_col=traj.get_traj_id_col()
+                    df,
+                    f"{traj.id}_{i}",
+                    traj_id_col=traj.get_traj_id_col(),
+                    x=traj.x,
+                    y=traj.y,
                 )
                 result.append(traj)
         return TrajectoryCollection(result, min_length=min_length)
