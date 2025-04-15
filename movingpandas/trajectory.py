@@ -54,7 +54,6 @@ class TimeZoneWarning(UserWarning, ValueError):
 
 
 class Trajectory:
-
     def __init__(
         self,
         df,
