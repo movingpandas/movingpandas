@@ -988,6 +988,43 @@ class Trajectory:
         return measure_length(self.df.geometry, self.is_latlon, conversion)
 
     @requires_geometry
+    def is_long_enough(self, min_length, units=UNITS()):
+        """
+        Return True as soon as the accumulated length exceeds min_length.
+        Returns False if it doesn't exceed it after checking all segments.
+
+        Parameters
+        ----------
+        min_length : float
+            The minimum length to check against
+        units : tuple(str)
+            Units to convert to if needed
+
+        Returns
+        -------
+        bool
+        """
+        if not hasattr(self, 'df') or self.df.geometry.isnull().all():
+            return False
+
+        from .unit_utils import get_conversion
+        from .geometry_utils import measure_distance
+
+        conversion = get_conversion(units, self.crs_units)
+
+        geom_col = self.get_geom_col()
+        points = self.df[geom_col].tolist()
+
+        accumulated = 0.0
+        for i in range(1, len(points)):
+            d = measure_distance(points[i - 1], points[i], self.is_latlon, conversion)
+            accumulated += d
+            if accumulated >= min_length:
+                return True
+        return False
+
+
+    @requires_geometry
     def get_direction(self):
         """
         Return the direction of the trajectory.

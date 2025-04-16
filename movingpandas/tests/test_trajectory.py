@@ -1115,7 +1115,7 @@ class TestTrajectory:
         line = LineString([(2, 4), (3, 4)])
         assert traj.distance(line, units="km") == 0.001
 
-    def test_distance_warning(self):
+    def test_euclidean_distance_warning(self):
         with pytest.warns(UserWarning):
             point = Point(0, 0)
             self.default_traj_latlon.distance(point)
