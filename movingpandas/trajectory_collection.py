@@ -78,8 +78,9 @@ class TrajectoryCollection:
         if type(data) == list:
             if min_length > 0:
                 self.trajectories = [
-                    traj for traj in data if traj.is_long_enough(min_length)
-                    #traj for traj in data if  traj.get_length() >= min_length
+                    traj
+                    for traj in data
+                    if traj.is_long_enough(min_length)
                 ]
             else:
                 self.trajectories = data

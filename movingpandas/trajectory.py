@@ -1004,7 +1004,7 @@ class Trajectory:
         -------
         bool
         """
-        if not hasattr(self, 'df') or self.df.geometry.isnull().all():
+        if not hasattr(self, "df") or self.df.geometry.isnull().all():
             return False
 
         from .unit_utils import get_conversion
@@ -1022,7 +1022,6 @@ class Trajectory:
             if accumulated >= min_length:
                 return True
         return False
-
 
     @requires_geometry
     def get_direction(self):
