@@ -40,7 +40,8 @@ def data_dir():
 
 @pytest.fixture
 def traj_a():
-    """Example trajectory that moves 10 meters horizontal and 5 meters vertical in 1 minute."""
+    """Example trajectory that moves 10 meters horizontal and 5 meters vertical
+    in 1 minute."""
     # Corresponding https://postgis.net/docs/ST_DistanceCPA.html
     point_0 = shapely.Point(0, 0, 0)
     point_1 = shapely.Point(10, 0, 5)
@@ -55,7 +56,8 @@ def traj_a():
 
 @pytest.fixture
 def traj_b():
-    """Example trajectory that moves 12 by 1 meters horizontal and 8 meters down vertical in 1 minute."""
+    """Example trajectory that moves 12 by 1 meters horizontal and 8 meters down
+    vertical in 1 minute."""
     # Corresponding example in https://postgis.net/docs/ST_DistanceCPA.html
     point_0 = shapely.Point(0, 2, 10)
     point_1 = shapely.Point(12, 1, 2)

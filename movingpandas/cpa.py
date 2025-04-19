@@ -13,9 +13,8 @@ date_type = Union[np.datetime64, datetime.datetime, pd.Timestamp]
 
 
 class CPACalculator:
-    """
-    Closest Point of Approach calculator.
-    The algorithm works in 2d or 3d. Coordinates are expected to be cartesian, in meters.
+    """Closest Point of Approach calculator. The algorithm works in 2d or 3d.
+    Coordinates are expected to be cartesian, in meters.
 
     Parameters:
     -----------
@@ -40,7 +39,8 @@ class CPACalculator:
             status: A string indicating the relative movement pattern between
             two trajectories (traj_a and traj_b). The following status values
             can occur:
-            - "no-overlap": The time periods covered by the two trajectories do not overlap at all.
+            - "no-overlap": The time periods covered by the two trajectories do
+              not overlap at all.
             - "converging": The objects are currently moving closer together,
               but their point of closest approach (CPA) is predicted to occur
               after the current time interval (t_to < 0).
