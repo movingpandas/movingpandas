@@ -32,15 +32,16 @@ class CPACalculator:
     variable_doc = """
         Results contain the following variables:
             t_at: time at closest point of approach (datetime)
-            t_to: time to closest point of approach (float)
+            t_to: time to closest point of approach (timedelta)
             geometry: line between traj_a and traj_b at closest approach
             dist: distance at cpa
             status: string representing
-            - "no-overlap",
-            - "converging" (t_tot < 0)
-            - "diverging" (t_tot > 1)
-            - "approaching"  0 < t_tot < 1
-            - "parallel" (dist2 == 0)
+            - "no-overlap", non overlap of time intervals of traj_a and traj_b.
+            - "converging" (t_to < 0), objects are moving closer together and CPA is still ahead.
+            - "diverging" (t_to > t1 - t0), objects are moving away from eachother, CPA is passed.
+            - "approaching"  0 < t_to < (t1 - t0), objects are reaching CPA in current time window.
+            - "parallel" (dist2 == 0), objects are moving in parallel.
+            - "touching" (t1 == t0), time interval of traj_a and traj_b only touch at one point in time.
     """
 
     def __init__(self, traj_a: mpd.Trajectory, traj_b: mpd.Trajectory):
@@ -180,13 +181,13 @@ class CPACalculator:
             t_at = pd.Timestamp(t0)
             t_to = (t_at - t0).total_seconds()
             result = pd.Series(
-                dict(
-                    t_at=t_at,  # start time
-                    t_to=t_to,
-                    geometry=pq,
-                    dist=dist,
-                    status=status,
-                )
+                {
+                    "t_at": t_at,
+                    "t_to": t_to,
+                    "geometry": pq,
+                    "dist": dist,
+                    "status": status,
+                }
             )
             return result
 
@@ -197,21 +198,17 @@ class CPACalculator:
         w0 = p0 - q0
 
         assert dv2 != 0, "dv2 should not be 0"
-        # This is the relative time in our time window when objects meet.
-        # We use t_tot because we later clip t_tot between 0 and 1 and rename it to t.
-        # In lwgeom t_tot is overriden by t.
+        # This is the relative time (as a fraction of t1 - t0)
+        # when objects are closest together.
+        # In nautical applications is referred to as time to/until closest point
+        # of approach, e.g. http://dx.doi.org/10.12716/1001.09.01.06
         t_tot = -np.dot(w0, dv).item() / dv2
-
-        # This is what in nautical applications is referred to as time to
-        # closest point of approach, e.g.
-        # http://dx.doi.org/10.12716/1001.09.01.06
-        t_to = t_tot
 
         # We introduce the concept of status so we can recall if objects are
         # diverging or not.
         status = ""
 
-        # Now that we know the time to the closest point of approach we can
+        # Now that we know the fractional time to the closest point of approach we can
         # determine if trajectories are moving closer together (converging) or
         # away from each other (diverging), or in the time window t0 - t1, are
         # approaching (reaching the closest point).
@@ -240,13 +237,20 @@ class CPACalculator:
         p = shapely.Point(*p_coords)
         q = shapely.Point(*q_coords)
 
-        # We can now also compute tcpa (here the variant of aerial applications,
-        # t_at, is used) In python you can operate on datetimes with fractions
-        # (t1 - t0) is a time delta, t is a fraction Added to t0 this gives a
-        # datetime. This saves us from converting to timestamps and back. t = t0
-        # + (t1 - t0) * t;
-        #
-        t = t0 + (t1 - t0) * t
+        # We can now also compute time of the closest point of approach (also
+        # referred to as TCPA in aerial applications) We refer to t_at
+        # (datetime) as time at the closest point of approach and t_to as the
+        # time to the closest point of approach. In python you can operate on
+        # datetimes with fractions (t1 - t0) is a time delta, t is a fraction
+        # Added to t0 this gives a datetime. This saves us from converting to
+        # timestamps and back. t = t0 + (t1 - t0) * t;
+
+        # t_to is not clipped to the current time window
+        t_to = (t1 - t0) * t_tot
+        # t_at is clipped, so we use t
+        t_at = t0 + (t1 - t0) * t
+        # make sure we have a timestamp
+        t_at = pd.Timestamp(t_at)
 
         # Now we can compute the distance Because we do everything using coords
         # this also works when geometry contains a z coordinate For example for
@@ -261,20 +265,17 @@ class CPACalculator:
         # point on q0-q1.
         pq = shapely.LineString([p, q])
 
-        # make sure we have a timestamp
-        t_at = pd.Timestamp(t)
         # TODO: I think this should be multiplied with the duration of the
         # interval, as this is now a fraction of time
-        t_to = t_tot
         geometry = pq
         result = pd.Series(
-            dict(
-                t_at=t_at,
-                t_to=t_to,
-                geometry=geometry,
-                dist=dist,
-                status=status,
-            )
+            {
+                "t_at": t_at,
+                "t_to": t_to,
+                "geometry": geometry,
+                "dist": dist,
+                "status": status,
+            }
         )
         return result
 
