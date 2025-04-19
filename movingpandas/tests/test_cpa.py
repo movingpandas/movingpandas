@@ -13,8 +13,8 @@ import pytest
 import movingpandas as mpd
 from movingpandas.cpa import CPACalculator
 
-# create local coordinate system
-# or use a projected system?
+# Create local 3d engineering coordinate system
+# CPA algorithm works in 2d cartesian or 3d cartesian
 CRS_WKT = """
 ENGCRS["Custom 3D Cartesian Engineering CRS",
     EDATUM["Local Engineering Datum"],
@@ -28,6 +28,9 @@ ENGCRS["Custom 3D Cartesian Engineering CRS",
 CRS = pyproj.CRS.from_wkt(CRS_WKT)
 UTC = datetime.timezone.utc
 
+# Many tests here are based on the tests in lwgeom, cu_measures / test_lwgeom_tcpa:
+# https://github.com/postgis/postgis/blob/master/liblwgeom/cunit/cu_measures.c
+
 
 @pytest.fixture
 def data_dir():
@@ -37,30 +40,30 @@ def data_dir():
 
 @pytest.fixture
 def traj_a():
-    """trajectory a of postgis docs"""
-    # https://postgis.net/docs/ST_DistanceCPA.html
+    """Example trajectory that moves 10 meters horizontal and 5 meters vertical in 1 minute."""
+    # Corresponding https://postgis.net/docs/ST_DistanceCPA.html
     point_0 = shapely.Point(0, 0, 0)
     point_1 = shapely.Point(10, 0, 5)
     points = [point_0, point_1]
     date_0 = datetime.datetime(2015, 5, 26, 10, 0)
     date_1 = datetime.datetime(2015, 5, 26, 11, 0)
     t = [date_0, date_1]
-    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=CRS)
+    gdf = gpd.GeoDataFrame(data={"t": t}, geometry=points, crs=CRS)
     traj = mpd.Trajectory(gdf, traj_id="traj_a", t="t", crs=CRS)
     return traj
 
 
 @pytest.fixture
 def traj_b():
-    """trajectory b of postgis docs"""
-    # https://postgis.net/docs/ST_DistanceCPA.html
+    """Example trajectory that moves 12 by 1 meters horizontal and 8 meters down vertical in 1 minute."""
+    # Corresponding example in https://postgis.net/docs/ST_DistanceCPA.html
     point_0 = shapely.Point(0, 2, 10)
     point_1 = shapely.Point(12, 1, 2)
     points = [point_0, point_1]
     date_0 = datetime.datetime(2015, 5, 26, 10, 0)
     date_1 = datetime.datetime(2015, 5, 26, 11, 0)
     t = [date_0, date_1]
-    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=CRS)
+    gdf = gpd.GeoDataFrame(data={"t": t}, geometry=points, crs=CRS)
     traj = mpd.Trajectory(gdf, traj_id="traj_b", t="t", crs=CRS)
     return traj
 
@@ -78,7 +81,7 @@ def create_traj(p0: tuple, p1: tuple, t0: float, t1: float):
     date_1 = date_1.replace(tzinfo=None)
     t = [date_0, date_1]
 
-    gdf = gpd.GeoDataFrame(data=dict(t=t), geometry=points, crs=CRS)
+    gdf = gpd.GeoDataFrame(data={"t": t}, geometry=points, crs=CRS)
     traj = mpd.Trajectory(gdf, traj_id="traj", t="t", crs=CRS)
     return traj
 
@@ -127,9 +130,7 @@ def test_postgis_example(traj_a, traj_b):
     cpa = CPACalculator(traj_a, traj_b)
     cpa.min()
 
-    # Postgis docs are not consistent on this number
     # Corresponds to https://postgis.net/docs/ST_CPAWithin.html (1.96521473776207)
-    # But not: https://postgis.net/docs/ST_DistanceCPA.html  (1.96036833151395)
     np.testing.assert_almost_equal(cpa.min().dist, 1.965214737762069)
 
 
@@ -140,7 +141,7 @@ def test_non_overlapping_time():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # we should have NaT and NaN  (postgis returns time of -2)
+    # We should have NaT and NaN
     assert pd.isna(
         result.t_at
     ), f"cpa.t should be NaT if times do not overlap, got {result.t_at}"
@@ -163,11 +164,9 @@ def test_two_stationary_touching_time():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 1.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
     assert result.t_at.timestamp() == 1, "t should equal 1"
     assert result.dist == 0, "t should equal 0"
-    assert result.status == "touching", "status should should be touching"
+    assert result.status == "touching", "status should be touching"
 
 
 def test_one_stationary_one_moving():
@@ -178,9 +177,6 @@ def test_one_stationary_one_moving():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 3.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 10.0);
-    #
     assert result.t_at.timestamp() == 3, "time of cpa should be 3"
     assert result.dist == 10, "distance should be 10"
     assert result.status == "approaching", "distance should be 10"
@@ -194,8 +190,6 @@ def test_equal_trajectories():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 10.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
     assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "parallel", "status should be parallel"
@@ -209,8 +203,6 @@ def test_inverse_trajectories():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 15.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
     assert result.t_at.timestamp() == 15, "t should equal 15"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
@@ -225,8 +217,6 @@ def test_parallel_trajectories():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 10.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 11.0);
     assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 11, "distance should equal 11"
     assert result.status == "parallel", "status should be parallel"
@@ -242,8 +232,6 @@ def test_parallel_b_faster():
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
-    # ASSERT_DOUBLE_EQUAL(m, 20.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 1.0);
 
     assert result.t_at.timestamp() == 20, "t should equal 20"
     assert result.dist == 1, "distance should equal 1"
@@ -260,8 +248,7 @@ def test_parallel_a_faster():
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
-    # ASSERT_DOUBLE_EQUAL(m, 10.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 2.0);
+
     assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 2, "distance should equal 2"
     assert result.status == "diverging", "status should be diverging"
@@ -275,8 +262,6 @@ def test_collision():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 5.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
     assert result.t_at.timestamp() == 5, "t should equal 5"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
@@ -289,9 +274,6 @@ def test_crossing():
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
-
-    # ASSERT_DOUBLE_EQUAL(m, 6.5);
-    # ASSERT_DOUBLE_EQUAL(rint(dist*100), 212.0);
 
     np.testing.assert_almost_equal(
         result.t_at.timestamp(), 6.5, err_msg="t should equal 6.5"
@@ -311,9 +293,6 @@ def test_touch_start():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 1.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
-
     assert result.t_at.timestamp() == 1, "t should equal 1"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
@@ -328,8 +307,6 @@ def test_touch_end():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 10.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
     assert result.t_at.timestamp() == 10, "t should equal 10"
     assert result.dist == 0, "distance should equal 0"
     assert result.status == "approaching", "status should be approaching"
@@ -342,9 +319,7 @@ def test_converging_3d():
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
-    # ASSERT_DOUBLE_EQUAL(m, 20.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 5.0);
-    #
+
     assert result.t_at.timestamp() == 20, "t should equal 20"
     assert result.dist == 5, "distance should equal 5"
     assert result.status == "converging", "status should be converging"
@@ -364,20 +339,18 @@ def test_stop_and_pass():
     t_b = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_b]
 
     geometry_a = [shapely.Point(*point) for point in points_a]
-    df_a = pd.DataFrame(data=dict(t=t_a))
+    df_a = pd.DataFrame(data={"t": t_a})
     gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=CRS)
     traj_a = mpd.Trajectory(gdf_a, traj_id="traj_a", t="t", crs=CRS)
 
     geometry_b = [shapely.Point(*point) for point in points_b]
-    df_b = pd.DataFrame(data=dict(t=t_b))
+    df_b = pd.DataFrame(data={"t": t_b})
     gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=CRS)
     traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=CRS)
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 3.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 1.0);
     assert result.t_at.timestamp() == 3, "t should equal 3"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "approaching", "status should be approaching"
@@ -392,7 +365,7 @@ def test_miliseconds():
     # convert to datetime
     t_a = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_a]
     geometry_a = [shapely.Point(*point) for point in points_a]
-    df_a = pd.DataFrame(data=dict(t=t_a))
+    df_a = pd.DataFrame(data={"t": t_a})
     gdf_a = gpd.GeoDataFrame(df_a, geometry=geometry_a, crs=CRS)
     traj_a = mpd.Trajectory(gdf_a, traj_id="traj_a", t="t", crs=CRS)
 
@@ -401,14 +374,12 @@ def test_miliseconds():
     # convert to datetime
     t_b = [datetime.datetime.fromtimestamp(t, tz=UTC).replace(tzinfo=None) for t in t_b]
     geometry_b = [shapely.Point(*point) for point in points_b]
-    df_b = pd.DataFrame(data=dict(t=t_b))
+    df_b = pd.DataFrame(data={"t": t_b})
     gdf_b = gpd.GeoDataFrame(df_b, geometry=geometry_b, crs=CRS)
     traj_b = mpd.Trajectory(gdf_b, traj_id="traj_b", t="t", crs=CRS)
 
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
-    # ASSERT_DOUBLE_EQUAL(m, 1432291464.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 0.0);
 
     np.testing.assert_almost_equal(
         result.t_at.timestamp(), 1432291464.0, err_msg="t should equal 1432291464.0"
@@ -426,9 +397,6 @@ def test_single_point():
     cpa = CPACalculator(traj_a, traj_b)
     result = cpa.min()
 
-    # ASSERT_DOUBLE_EQUAL(m, 2.0);
-    # ASSERT_DOUBLE_EQUAL(dist, 1.0);
-    #
     assert result.t_at.timestamp() == 2, "t should equal 2"
     assert result.dist == 1, "distance should equal 1"
     assert result.status == "touching", "status should be touching"
@@ -437,6 +405,8 @@ def test_single_point():
 def test_ais_dk(data_dir):
     """Two ships in the AIS.dk test set."""
 
+    # Regression test based on real world example
+    #
     # data src: http://web.ais.dk/aisdata/
     mmsi_a = 265550210
     mmsi_b = 265410000
@@ -452,6 +422,7 @@ def test_ais_dk(data_dir):
 
     # test result of min cpa
     cpa = cpa_calc.min()
+
     np.testing.assert_almost_equal(
         cpa.dist,
         expected_cpa_min_dist,
