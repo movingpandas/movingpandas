@@ -15,6 +15,7 @@ date_type = Union[np.datetime64, datetime.datetime, pd.Timestamp]
 class CPACalculator:
     """
     Closest Point of Approach calculator.
+    The algorithm works in 2d or 3d. Coordinates are expected to be cartesian, in meters.
 
     Parameters:
     -----------
@@ -35,13 +36,24 @@ class CPACalculator:
             t_to: time to closest point of approach (timedelta)
             geometry: line between traj_a and traj_b at closest approach
             dist: distance at cpa
-            status: string representing
-            - "no-overlap", non overlap of time intervals of traj_a and traj_b.
-            - "converging" (t_to < 0), objects are moving closer together and CPA is still ahead.
-            - "diverging" (t_to > t1 - t0), objects are moving away from eachother, CPA is passed.
-            - "approaching"  0 < t_to < (t1 - t0), objects are reaching CPA in current time window.
-            - "parallel" (dist2 == 0), objects are moving in parallel.
-            - "touching" (t1 == t0), time interval of traj_a and traj_b only touch at one point in time.
+
+            status: A string indicating the relative movement pattern between
+            two trajectories (traj_a and traj_b). The following status values
+            can occur:
+            - "no-overlap": The time periods covered by the two trajectories do not overlap at all.
+            - "converging": The objects are currently moving closer together,
+              but their point of closest approach (CPA) is predicted to occur
+              after the current time interval (t_to < 0).
+            - "diverging": The objects are currently moving apart, indicating
+              their point of closest approach (CPA) occurred before the current
+              time interval (t_to > t1 - t0).
+            - "approaching": The objects are moving towards their point of
+              closest approach (CPA), which is predicted to occur within the
+              current time interval (0 < t_to < (t1 - t0)).
+            - "parallel": The objects are moving in parallel directions relative
+              to each other (dist2 == 0).
+            - "touching": The time intervals of the two trajectories only
+              intersect at a single, instantaneous point in time (t1 == t0).
     """
 
     def __init__(self, traj_a: mpd.Trajectory, traj_b: mpd.Trajectory):
@@ -58,14 +70,23 @@ class CPACalculator:
     def _no_overlap():
         """Generate a result for the case if there is no temporal overlap
         between two trajectories."""
+        # Time is not defined
         t_at = pd.NaT
-        t_to = np.nan
+        # time delta undefined is also NaT
+        t_to = pd.NaT
+        # Distance is not defined
         dist = np.nan
         status = "no-overlap"
 
         # empty LineString (check with is_empty)
         geometry = shapely.LineString()
-        data = dict(t_at=t_at, t_to=t_to, dist=dist, geometry=geometry, status=status)
+        data = {
+            "t_at": t_at,
+            "t_to": t_to,
+            "dist": dist,
+            "geometry": geometry,
+            "status": status,
+        }
         return pd.Series(data=data)
 
     def _touching_times(self):
@@ -83,17 +104,25 @@ class CPACalculator:
         pos_a = traj_a.get_position_at(t_min)
         pos_b = traj_b.get_position_at(t_min)
 
-        # compute distance between a and b (in 2 or 3d)
+        # compute distance between a and b (in 2 or 3d, depending on length of coords)
         d_ab = np.asarray(pos_a.coords)[0] - np.asarray(pos_b.coords)[0]
+        # distances computed with np.dot, instead of shapely distance, so that
+        # 3d is supported
         dist2 = np.dot(d_ab, d_ab).item()
         dist = dist2**0.5
 
         t_at = pd.Timestamp(t_min)
-        t_to = 0
+        t_to = pd.Timedelta(0)
         dist = dist
         status = "touching"
         geometry = shapely.LineString([pos_a, pos_b])
-        data = dict(t_at=t_at, t_to=t_to, dist=dist, geometry=geometry, status=status)
+        data = {
+            "t_at": t_at,
+            "t_to": t_to,
+            "dist": dist,
+            "geometry": geometry,
+            "status": status,
+        }
         return pd.Series(data=data)
 
     @staticmethod
@@ -179,7 +208,7 @@ class CPACalculator:
             pq = shapely.LineString([p0_orig, q0_orig])
 
             t_at = pd.Timestamp(t0)
-            t_to = (t_at - t0).total_seconds()
+            t_to = t_at - t0
             result = pd.Series(
                 {
                     "t_at": t_at,
