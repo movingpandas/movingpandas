@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import warnings
 
 from geopy import distance
 from math import hypot
@@ -20,17 +21,49 @@ class TrajectoryStopDetector:
     at least the specified duration.
     """
 
-    def __init__(self, traj, n_threads=1):
+    def __init__(self, traj, n_processes=1, **kwargs):
         """
-        Create StopDetector
+        Create a StopDetector.
 
         Parameters
         ----------
         traj : Trajectory or TrajectoryCollection
-        n_threads: number of threads to use for computation (default: 1)
+            The trajectory or collection of trajectories to analyze.
+
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
+
+        Raises
+        ------
+        ValueError
+            If both `n_processes` and the deprecated `n_threads` are provided.
         """
+        n_threads = kwargs.pop("n_threads", None)
+
+        if n_threads is not None and n_processes != 1:
+            raise ValueError(
+                "You cannot pass both `n_threads` (deprecated) and `n_processes`. "
+                "Please use only `n_processes`."
+            )
+
+        if n_threads is not None:
+            warnings.warn(
+                "`n_threads` is deprecated and will be removed in a future version. "
+                "Please use `n_processes` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            n_processes = n_threads
+
         self.traj = traj
-        self.n_threads = n_threads
+        self.n_processes = n_processes
 
     def get_stop_time_ranges(self, max_diameter, min_duration):
         """
@@ -54,7 +87,7 @@ class TrajectoryStopDetector:
             return self._process_traj(self.traj, max_diameter, min_duration)
         elif isinstance(self.traj, TrajectoryCollection):
             trajs = self.traj.trajectories
-            if self.n_threads > 1:
+            if self.n_processes > 1 or self.n_processes is None:
                 return self._process_traj_collection_multithreaded(
                     trajs, max_diameter, min_duration
                 )
@@ -73,8 +106,8 @@ class TrajectoryStopDetector:
     def _process_traj_collection_multithreaded(self, trajs, max_diameter, min_duration):
         from movingpandas.tools._multi_threading import split_list
 
-        p = Pool(self.n_threads)
-        data = split_list(trajs, self.n_threads)
+        p = Pool(self.n_processes)
+        data = split_list(trajs, self.n_processes)
 
         results = []
         for stops in p.starmap(
