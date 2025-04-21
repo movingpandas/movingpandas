@@ -18,6 +18,7 @@ MovingPandas.CPACalculator
 This example shows how to create two trajectories and use them for a closest point of approach calculation.
 
 .. code:: python
+
     import pandas as pd
     import geopandas as gpd
     from shapely.geometry import Point
