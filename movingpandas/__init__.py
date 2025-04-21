@@ -5,7 +5,6 @@ of GeoPandas
 
 import warnings
 
-
 from .trajectory import Trajectory  # noqa F401
 from .trajectory_generalizer import (  # noqa F401
     TrajectoryGeneralizer,
@@ -33,7 +32,8 @@ from .trajectory_splitter import (  # noqa F401
 from .trajectory_cleaner import IqrCleaner, OutlierCleaner  # noqa F401
 from .trajectory_stop_detector import TrajectoryStopDetector  # noqa F401
 from .point_clusterer import PointClusterer  # noqa F401
-from .tools._show_versions import show_versions  # noqa F401
+from .cpa import CPACalculator  # noqa F401
+from .tools._show_versions import show_versions
 
 try:
     from .trajectory_smoother import KalmanSmootherCV  # noqa F401
