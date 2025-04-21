@@ -32,7 +32,7 @@ from .trajectory_splitter import (  # noqa F401
 from .trajectory_cleaner import IqrCleaner, OutlierCleaner  # noqa F401
 from .trajectory_stop_detector import TrajectoryStopDetector  # noqa F401
 from .point_clusterer import PointClusterer  # noqa F401
-from .cpa import CPACalculator
+from .cpa import CPACalculator  # noqa F401
 from .tools._show_versions import show_versions  # noqa F401
 
 try:
