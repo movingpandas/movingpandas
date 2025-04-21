@@ -70,7 +70,7 @@ def traj_b():
     return traj
 
 
-def create_traj(p0: tuple, p1: tuple, t0: float, t1: float):
+def create_traj(p0: tuple, p1: tuple, t0: float, t1: float, crs=None):
     """Create a trajectory based on two points and two floating point times"""
     point_0 = shapely.Point(*p0)
     point_1 = shapely.Point(*p1)
@@ -83,9 +83,21 @@ def create_traj(p0: tuple, p1: tuple, t0: float, t1: float):
     date_1 = date_1.replace(tzinfo=None)
     t = [date_0, date_1]
 
-    gdf = gpd.GeoDataFrame(data={"t": t}, geometry=points, crs=CRS)
-    traj = mpd.Trajectory(gdf, traj_id="traj", t="t", crs=CRS)
+    # use default CRS (3d cartesian)
+    if crs is None:
+        crs = CRS
+
+    gdf = gpd.GeoDataFrame(data={"t": t}, geometry=points, crs=crs)
+    traj = mpd.Trajectory(gdf, traj_id="traj", t="t", crs=crs)
     return traj
+
+
+def test_latlon_trajectory():
+    traj_a = create_traj((0, 1), (0, 0), 2, 5, crs="EPSG:4326")
+    traj_b = create_traj((0, 0), (0, 1), 2, 5, crs="EPSG:4326")
+    # should warn about lack of projection
+    with pytest.warns(UserWarning):
+        CPACalculator(traj_a, traj_b)
 
 
 def test_invalid_trajectory(traj_a, traj_b):
