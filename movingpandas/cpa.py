@@ -1,5 +1,26 @@
+"""Calculates the Closest Point of Approach (CPA) between two trajectories.
+
+This module provides functionality to determine the point in time and space
+where two trajectories are predicted to be closest to each other, assuming
+current speed and direction between consecutive observations.
+
+The core calculation determines:
+- The minimum distance expected between the two objects (Distance at CPA).
+- The time until this minimum distance occurs (Time to CPA, TCPA).
+- The linestring connecting the two objects at the moment of CPA
+
+You can instantiate a calculation `CPACalculator`, with two MovingPandas
+Trajectory objects as input. Using the `min` function allows to find the CPA
+distance, TCPA, and the corresponding locations on each trajectory.
+
+This type of analysis is used in several domains, including:
+- Maritime traffic management for collision risk assessment.
+- Air traffic control.
+"""
+
 import datetime
 from typing import Iterator, Optional, Union, get_args
+import warnings
 
 import geopandas as gpd
 import numpy as np
@@ -62,6 +83,19 @@ class CPACalculator:
             raise TypeError(f"traj_a should be a trajectory, got a {type(traj_a)}")
         if not isinstance(traj_b, mpd.Trajectory):
             raise TypeError(f"traj_b should be a trajectory, got a {type(traj_b)}")
+
+        if traj_a.is_latlon:
+            message = (
+                f"Distances in CPA are computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {traj_a.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        if traj_b.is_latlon:
+            message = (
+                f"Distances in CPA are computed using Euclidean geometry but "
+                f"the traj_b coordinate system is {traj_b.crs}."
+            )
+            warnings.warn(message, UserWarning)
 
         self.traj_a = traj_a
         self.traj_b = traj_b
@@ -275,7 +309,7 @@ class CPACalculator:
         # timestamps and back. t = t0 + (t1 - t0) * t;
 
         # t_to is not clipped to the current time window
-        t_to = (t1 - t0) * t_tot
+        t_to = (pd.Timestamp(t1) - pd.Timestamp(t0)) * t_tot
         # t_at is clipped, so we use t
         t_at = t0 + (t1 - t0) * t
         # make sure we have a timestamp
@@ -293,9 +327,6 @@ class CPACalculator:
         # closest line of approach. The line runs from a point on p0-p1 to a
         # point on q0-q1.
         pq = shapely.LineString([p, q])
-
-        # TODO: I think this should be multiplied with the duration of the
-        # interval, as this is now a fraction of time
         geometry = pq
         result = pd.Series(
             {
@@ -332,9 +363,8 @@ class CPACalculator:
         if t_max < t_min:
             return self._no_overlap()
 
-        # TODO: filter t_ab on common range (t_min, t_max)....
-        # * Collect M values in common time range from inputs
-        # nmvals in postgis
+        # Filter t_ab on common range (t_min, t_max)....
+        # and collect values in common time range from inputs
         t_ab = np.unique(np.sort(np.r_[traj_a.df.index, traj_b.df.index]))
 
         # filter, inclusive
