@@ -283,3 +283,25 @@ class TestTrajectoryStopDetector:
         detector = StopSplitter(collection)
         stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
         assert len(stops) == 1
+
+
+class TestTrajectoryStopDetectorWithDeprecations:
+    """Test whether deprecations are working as expected."""
+
+    def setup_method(self):
+        self.traj = make_traj(
+            [
+                Node(0, 0),
+                Node(0, 10, second=1),
+            ]
+        )
+
+    def test_deprecation_warning_when_using_n_threads(self):
+        """Test to ensure a DeprecationWarning is raised when using `n_threads`."""
+        with pytest.deprecated_call():
+            TrajectoryStopDetector(traj=self.traj, n_threads=2)
+
+    def test_using_n_threads_and_n_processes_together_gives_error(self):
+        """Test whether using both mutually-exclusive arguments raises `ValueError`."""
+        with pytest.raises(ValueError):
+            TrajectoryStopDetector(traj=self.traj, n_threads=2, n_processes=2)
