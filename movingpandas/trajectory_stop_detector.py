@@ -88,7 +88,7 @@ class TrajectoryStopDetector:
         elif isinstance(self.traj, TrajectoryCollection):
             trajs = self.traj.trajectories
             if self.n_processes > 1 or self.n_processes is None:
-                return self._process_traj_collection_multithreaded(
+                return self._process_traj_collection_multiprocessing(
                     trajs, max_diameter, min_duration
                 )
             else:
@@ -103,7 +103,9 @@ class TrajectoryStopDetector:
                 results.append(time_range)
         return results
 
-    def _process_traj_collection_multithreaded(self, trajs, max_diameter, min_duration):
+    def _process_traj_collection_multiprocessing(
+        self, trajs, max_diameter, min_duration
+    ):
         from movingpandas.tools._multi_threading import split_list
 
         p = Pool(self.n_processes)
