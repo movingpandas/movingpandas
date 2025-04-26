@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import warnings
 
 from pandas import concat
 from copy import copy
@@ -570,7 +571,12 @@ class TrajectoryCollection:
         return result
 
     def add_speed(
-        self, overwrite=False, name=SPEED_COL_NAME, units=UNITS(), n_threads=1
+        self,
+        overwrite=False,
+        name=SPEED_COL_NAME,
+        units=UNITS(),
+        n_processes=1,
+        **kwargs,
     ):
         """
         Add speed column and values to the trajectories.
@@ -595,13 +601,28 @@ class TrajectoryCollection:
 
             For more info, check the list of supported units at
             https://movingpandas.org/units
-        n_threads : int
-            Number of threads to use for computation (default: 1)
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
+
+        Raises
+        ------
+        ValueError
+            If both `n_processes` and the deprecated `n_threads` are provided.
         """
-        if n_threads <= 1:
-            self._add_speed(self.trajectories, name, units, overwrite)
+        n_processes = self._add_deprecation_warning_for_n_threads(
+            n_processes=n_processes, **kwargs
+        )
+
+        if n_processes > 1 or n_processes is None:
+            self._multiprocess(self._add_speed, n_processes, name, units, overwrite)
         else:
-            self._multithread(self._add_speed, n_threads, name, units, overwrite)
+            self._add_speed(self.trajectories, name, units, overwrite)
         return self
 
     def _add_speed(self, trajs, name, units, overwrite):
@@ -609,13 +630,13 @@ class TrajectoryCollection:
             traj.add_speed(name=name, units=units, overwrite=overwrite)
         return trajs
 
-    def _multithread(self, fun, n_threads, name, units, overwrite):
+    def _multiprocess(self, fun, n_processes, name, units, overwrite):
         from multiprocessing import Pool
         from itertools import repeat
         from movingpandas.tools._multi_threading import split_list
 
-        p = Pool(int(n_threads))
-        data = split_list(self.trajectories, n_threads)
+        p = Pool(n_processes)
+        data = split_list(self.trajectories, n_processes)
         self.trajectories = []
         args_iter = zip(data, repeat(name), repeat(units), repeat(overwrite))
         results = []
@@ -624,7 +645,9 @@ class TrajectoryCollection:
         self.trajectories = results
         return results
 
-    def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME, n_threads=1):
+    def add_direction(
+        self, overwrite=False, name=DIRECTION_COL_NAME, n_processes=1, **kwargs
+    ):
         """
         Add direction column and values to the trajectories.
 
@@ -637,19 +660,30 @@ class TrajectoryCollection:
             Whether to overwrite existing direction values (default: False)
         name : str
             Name of the direction column (default: "direction")
-        n_threads : int
-            Number of threads to use for computation (default: 1)
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
         """
-        if n_threads <= 1:
-            self._add_direction(self.trajectories, name, UNITS(), overwrite)
-        else:
-            self._multithread(
+        n_processes = self._add_deprecation_warning_for_n_threads(
+            n_processes=n_processes, **kwargs
+        )
+
+        if n_processes > 1 or n_processes is None:
+            self._multiprocess(
                 self._add_direction,
-                n_threads,
+                n_processes,
                 name,
                 UNITS(),
                 overwrite,
             )
+        else:
+            self._add_direction(self.trajectories, name, UNITS(), overwrite)
+
         return self
 
     def _add_direction(self, trajs, name, units, overwrite):
@@ -658,7 +692,7 @@ class TrajectoryCollection:
         return trajs
 
     def add_angular_difference(
-        self, overwrite=False, name=ANGULAR_DIFFERENCE_COL_NAME, n_threads=1
+        self, overwrite=False, name=ANGULAR_DIFFERENCE_COL_NAME, n_processes=1, **kwargs
     ):
         """
         Add angular difference to the trajectory's DataFrame.
@@ -673,15 +707,26 @@ class TrajectoryCollection:
             Whether to overwrite existing angular difference values (default: False)
         name : str
             Name of the angular_difference column (default: "angular_difference")
-        n_threads : int
-            Number of threads to use for computation (default: 1)
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
         """
-        if n_threads <= 1:
-            self._add_angular_difference(self.trajectories, name, UNITS(), overwrite)
-        else:
-            self._multithread(
-                self._add_angular_difference, n_threads, name, UNITS(), overwrite
+        n_processes = self._add_deprecation_warning_for_n_threads(
+            n_processes=n_processes, **kwargs
+        )
+
+        if n_processes > 1 or n_processes is None:
+            self._multiprocess(
+                self._add_angular_difference, n_processes, name, UNITS(), overwrite
             )
+        else:
+            self._add_angular_difference(self.trajectories, name, UNITS(), overwrite)
+
         return self
 
     def _add_angular_difference(self, trajs, name, units, overwrite):
@@ -690,7 +735,12 @@ class TrajectoryCollection:
         return trajs
 
     def add_acceleration(
-        self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS(), n_threads=1
+        self,
+        overwrite=False,
+        name=ACCELERATION_COL_NAME,
+        units=UNITS(),
+        n_processes=1,
+        **kwargs,
     ):
         """
         Add acceleration column and values to the trajectories.
@@ -718,13 +768,26 @@ class TrajectoryCollection:
 
             For more info, check the list of supported units at
             https://movingpandas.org/units
-        n_threads : int
-            Number of threads to use for computation (default: 1)
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
         """
-        if n_threads <= 1:
-            self._add_acceleration(self.trajectories, name, units, overwrite)
+        n_processes = self._add_deprecation_warning_for_n_threads(
+            n_processes=n_processes, **kwargs
+        )
+
+        if n_processes > 1 or n_processes is None:
+            self._multiprocess(
+                self._add_acceleration, n_processes, name, units, overwrite
+            )
         else:
-            self._multithread(self._add_acceleration, n_threads, name, units, overwrite)
+            self._add_acceleration(self.trajectories, name, units, overwrite)
+
         return self
 
     def _add_acceleration(self, trajs, name, units, overwrite):
@@ -733,7 +796,12 @@ class TrajectoryCollection:
         return trajs
 
     def add_distance(
-        self, overwrite=False, name=DISTANCE_COL_NAME, units=None, n_threads=1
+        self,
+        overwrite=False,
+        name=DISTANCE_COL_NAME,
+        units=None,
+        n_processes=1,
+        **kwargs,
     ):
         """
         Add distance column and values to the trajectories.
@@ -748,13 +816,21 @@ class TrajectoryCollection:
             Units in which to calculate distance values (default: CRS units)
             For more info, check the list of supported units at
             https://movingpandas.org/units
-        n_threads : int
-            Number of threads to use for computation (default: 1)
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
         """
-        if n_threads <= 1:
-            self._add_distance(self.trajectories, name, units, overwrite)
+        n_processes = self._add_deprecation_warning_for_n_threads(n_processes, **kwargs)
+
+        if n_processes > 1 or n_processes is None:
+            self._multiprocess(self._add_distance, n_processes, name, units, overwrite)
         else:
-            self._multithread(self._add_distance, n_threads, name, units, overwrite)
+            self._add_distance(self.trajectories, name, units, overwrite)
         return self
 
     def _add_distance(self, trajs, name, units, overwrite):
@@ -762,7 +838,9 @@ class TrajectoryCollection:
             traj.add_distance(overwrite=overwrite, name=name, units=units)
         return trajs
 
-    def add_timedelta(self, overwrite=False, name=TIMEDELTA_COL_NAME, n_threads=1):
+    def add_timedelta(
+        self, overwrite=False, name=TIMEDELTA_COL_NAME, n_processes=1, **kwargs
+    ):
         """
         Add timedelta column and values to the trajectories.
 
@@ -775,13 +853,25 @@ class TrajectoryCollection:
             Whether to overwrite existing timedelta values (default: False)
         name : str
             Name of the timedelta column (default: "timedelta")
-        n_threads : int
-            Number of threads to use for computation (default: 1)
+        n_processes : int or None, optional
+            Number of processes to use for computation (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing.
+        n_threads : int, optional
+            DEPRECATED. Use `n_processes` instead. This parameter will be
+            removed in a future version.
         """
-        if n_threads <= 1:
-            self._add_timedelta(self.trajectories, name, UNITS(), overwrite)
+        n_processes = self._add_deprecation_warning_for_n_threads(
+            n_processes=n_processes, **kwargs
+        )
+
+        if n_processes > 1 or n_processes is None:
+            self._multiprocess(
+                self._add_timedelta, n_processes, name, UNITS(), overwrite
+            )
         else:
-            self._multithread(self._add_timedelta, n_threads, name, UNITS(), overwrite)
+            self._add_timedelta(self.trajectories, name, UNITS(), overwrite)
         return self
 
     def _add_timedelta(self, trajs, name, units, overwrite):
@@ -930,6 +1020,26 @@ class TrajectoryCollection:
         >>> collection.hvplot_pts(c='speed', width=700, height=400, colorbar=True)
         """  # noqa: E501
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot_pts()
+
+    def _add_deprecation_warning_for_n_threads(self, n_processes, **kwargs):
+        """Add a deprecation warning if `n_threads` is used and return `n_processes.`"""
+        n_threads = kwargs.pop("n_threads", None)
+
+        if n_threads is not None and n_processes != 1:
+            raise ValueError(
+                "You cannot pass both `n_threads` (deprecated) and `n_processes`. "
+                "Please use only `n_processes`."
+            )
+        if n_threads is not None:
+            warnings.warn(
+                "`n_threads` is deprecated and will be removed in a future version. "
+                "Please use `n_processes` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            n_processes = n_threads
+
+        return n_processes
 
 
 def _get_location_at(traj, t, columns=None):
