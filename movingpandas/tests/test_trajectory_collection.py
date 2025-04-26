@@ -384,11 +384,11 @@ class TestTrajectoryCollection:
         assert result1[0] == pytest.approx(0.01667, 0.001)
         assert len(result0) == 4
 
-    def test_add_speed_multithreaded(self):
+    def test_add_speed_multiprocessing(self):
         self.collection.trajectories += self.collection.trajectories
         expected = self.collection.copy()
         expected.add_speed()
-        self.collection.add_speed(n_threads=2)
+        self.collection.add_speed(n_processes=2)
         print(self.collection.to_point_gdf())
         result0 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[SPEED_COL_NAME].tolist()
@@ -402,11 +402,11 @@ class TestTrajectoryCollection:
         result1 = self.collection.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
         assert len(result1) == 4
 
-    def test_add_acceleration_multithreaded(self):
+    def test_add_acceleration_multiprocessing(self):
         expected = self.collection.copy()
         expected.add_acceleration()
         print(expected.to_point_gdf())
-        self.collection.add_acceleration(n_threads=2)
+        self.collection.add_acceleration(n_processes=2)
         print(self.collection.to_point_gdf())
         result0 = self.collection.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
@@ -418,11 +418,11 @@ class TestTrajectoryCollection:
         result = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
         assert len(result) == 4
 
-    def test_add_direction_multithreaded(self):
+    def test_add_direction_multiprocessing(self):
         expected = self.collection.copy()
         expected.add_direction()
         print(expected.to_point_gdf())
-        self.collection.add_direction(n_threads=2)
+        self.collection.add_direction(n_processes=2)
         print(self.collection.to_point_gdf())
         result0 = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[DIRECTION_COL_NAME].tolist()
@@ -434,11 +434,11 @@ class TestTrajectoryCollection:
         result0 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
         assert len(result0) == 4
 
-    def test_add_distance_multithreaded(self):
+    def test_add_distance_multiprocessing(self):
         expected = self.collection.copy()
         expected.add_distance()
         print(expected.to_point_gdf())
-        self.collection.add_distance(n_threads=2)
+        self.collection.add_distance(n_processes=2)
         print(self.collection.to_point_gdf())
         result0 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[DISTANCE_COL_NAME].tolist()
@@ -452,11 +452,11 @@ class TestTrajectoryCollection:
         )
         assert len(result1) == 4
 
-    def test_add_angular_difference_multithreaded(self):
+    def test_add_angular_difference_multiprocessing(self):
         expected = self.collection.copy()
         expected.add_angular_difference()
         print(expected.to_point_gdf())
-        self.collection.add_angular_difference(n_threads=2)
+        self.collection.add_angular_difference(n_processes=2)
         print(self.collection.to_point_gdf())
         result0 = (
             self.collection.trajectories[0].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
@@ -476,11 +476,11 @@ class TestTrajectoryCollection:
         result1 = self.collection.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
         assert len(result1) == 4
 
-    def test_add_timedelta_multithreaded(self):
+    def test_add_timedelta_multiprocessing(self):
         expected = self.collection.copy()
         expected.add_timedelta()
         print(expected.to_point_gdf())
-        self.collection.add_timedelta(n_threads=2)
+        self.collection.add_timedelta(n_processes=2)
         print(self.collection.to_point_gdf())
         result0 = self.collection.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
@@ -603,3 +603,7 @@ class TestTrajectoryCollection:
             str(json)
             == """{'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'properties': {'id': 1, 'obj': 'A', 'val': 9, 'val2': 'a'}, 'temporalGeometry': {'type': 'MovingPoint', 'coordinates': [(0.0, 0.0), (6.0, 0.0), (6.0, 6.0), (9.0, 9.0)], 'datetimes': [Timestamp('2018-01-01 12:00:00'), Timestamp('2018-01-01 12:06:00'), Timestamp('2018-01-01 14:10:00'), Timestamp('2018-01-01 14:15:00')]}}, {'type': 'Feature', 'properties': {'id': 2, 'obj': 'A', 'val': 10, 'val2': 'e'}, 'temporalGeometry': {'type': 'MovingPoint', 'coordinates': [(10.0, 10.0), (16.0, 10.0), (16.0, 16.0), (190.0, 10.0)], 'datetimes': [Timestamp('2018-01-01 12:00:00'), Timestamp('2018-01-01 12:06:00'), Timestamp('2018-01-02 13:10:00'), Timestamp('2018-01-02 13:15:00')]}}]}"""  # noqa F401
         )
+
+    def test_deprecation_warning_when_using_n_threads(self):
+        with pytest.deprecated_call():
+            self.collection.add_speed(n_threads=2)
