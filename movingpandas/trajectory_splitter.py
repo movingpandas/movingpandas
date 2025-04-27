@@ -64,7 +64,7 @@ class TrajectorySplitter:
         else:
             raise TypeError
 
-    def _split_traj_collection(self, trajs, **kwargs) -> TrajectoryCollection:
+    def _split_traj_collection(self, trajs, **kwargs):
         trips = []
 
         for traj in trajs:
