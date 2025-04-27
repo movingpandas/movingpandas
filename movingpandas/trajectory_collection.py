@@ -77,9 +77,12 @@ class TrajectoryCollection:
         self.min_duration = min_duration
         self.t = t
         if type(data) == list:
-            self.trajectories = [
-                traj for traj in data if traj.get_length() >= min_length
-            ]
+            if min_length > 0:
+                self.trajectories = [
+                    traj for traj in data if traj.is_long_enough(min_length)
+                ]
+            else:
+                self.trajectories = data
             if min_duration:
                 self.trajectories = [
                     traj
@@ -227,7 +230,7 @@ class TrajectoryCollection:
             if self.min_duration:
                 if trajectory.get_duration() < self.min_duration:
                     continue
-            if trajectory.df.geometry.count() < 2:
+            if len(trajectory.df) < 2:
                 continue
             if self.min_length > 0:
                 if trajectory.get_length() < self.min_length:

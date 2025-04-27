@@ -2,11 +2,12 @@
 
 import warnings
 
+from functools import wraps
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
 from pandas import DataFrame, to_datetime, Series
 from pandas.core.indexes.datetimes import DatetimeIndex
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, points_from_xy
 
 try:
     from pyproj import CRS
@@ -109,6 +110,22 @@ class Trajectory:
         .. _notebooks: https://mybinder.org/v2/gh/movingpandas/movingpandas/main?filepath=tutorials/1-getting-started.ipynb
         """  # noqa: E501
 
+        self.id = traj_id
+        self.obj_id = obj_id
+        self.parent = parent
+        self.x = x
+        self.y = y
+
+        df = self._prepare_dataframe(df, t, x, y, crs)
+        df = self._handle_timezone(df)
+        df.sort_index(inplace=True)
+        self.df = df[~df.index.duplicated(keep="first")].copy()
+        self.crs = self.df.crs
+
+        self._set_traj_id_column(traj_id_col)
+        self._initialize_crs_attributes()
+
+    def _prepare_dataframe(self, df, t, x, y, crs):
         if len(df) < 2:
             raise ValueError("The input DataFrame must have at least two rows.")
         if not isinstance(df, GeoDataFrame):
@@ -117,10 +134,12 @@ class Trajectory:
                     "The input DataFrame needs to be a GeoDataFrame or x and y columns"
                     "need to be specified."
                 )
+            if "geometry" not in df.columns:
+                df["geometry"] = None
             df = GeoDataFrame(
-                df.drop([x, y], axis=1),
+                df,  # df.drop([x, y], axis=1),
                 crs=crs,
-                geometry=[Point(xy) for xy in zip(df[x], df[y])],
+                # geometry=[Point(xy) for xy in zip(df[x], df[y])],
             )
         if not isinstance(df.index, DatetimeIndex):
             if t is None:
@@ -131,8 +150,9 @@ class Trajectory:
                 )
             df[t] = to_datetime(df[t])
             df = df.set_index(t)
+        return df
 
-        #  Drop any time zone information, to avoid errors (see issue 303)
+    def _handle_timezone(self, df):
         if df.index.tzinfo is not None:
             self.df_orig_tz = df.index.tzinfo
             warnings.warn(
@@ -144,37 +164,45 @@ class Trajectory:
                 category=TimeZoneWarning,
             )
             df = df.tz_localize(None)
+        return df
 
-        self.id = traj_id
-        self.obj_id = obj_id
-        df.sort_index(inplace=True)
-        self.df = df[~df.index.duplicated(keep="first")].copy()
-        self.crs = df.crs
-        self.parent = parent
-
-        if traj_id_col is not None:
-            self.traj_id_col_name = traj_id_col
-        else:
-            self.traj_id_col_name = TRAJ_ID_COL_NAME
-        self.df[self.traj_id_col_name] = traj_id
+    def _set_traj_id_column(self, traj_id_col):
+        self.traj_id_col_name = traj_id_col or TRAJ_ID_COL_NAME
+        self.df[self.traj_id_col_name] = self.id
         self.df[self.traj_id_col_name].astype("category")
 
+    def _initialize_crs_attributes(self):
         if self.crs is not None:
-            self.crs_units = self.crs.axis_info[0].unit_name
+            try:
+                crs = CRS.from_user_input(self.crs)
+                self.is_latlon = crs.is_geographic
+                self.crs_units = self.crs.axis_info[0].unit_name
+            except NameError:
+                self.is_latlon = self.crs["init"] == from_epsg(4326)["init"]
+                self.crs_units = None
         else:
+            self.is_latlon = False
             self.crs_units = None
             warnings.warn(
                 "Trajectory generated without CRS. Computations will use Euclidean"
                 " distances.",
                 category=MissingCRSWarning,
             )
-            self.is_latlon = False
-            return
-        try:
-            crs = CRS.from_user_input(self.crs)
-            self.is_latlon = crs.is_geographic
-        except NameError:
-            self.is_latlon = self.crs["init"] == from_epsg(4326)["init"]
+
+    def requires_geometry(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            if self.df.geometry.isnull().all():
+                self.populate_geometry_column()
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    def populate_geometry_column(self):
+        if self.x is None or self.y is None:
+            raise ValueError("x and y coordinate column names must be set.")
+        self.df.geometry = points_from_xy(self.df[self.x], self.df[self.y])
+        self.df.drop(columns=["x", "y"], inplace=True)
 
     def __str__(self):
         try:
@@ -517,6 +545,7 @@ class Trajectory:
         """
         return self.df.geometry.name
 
+    @requires_geometry
     def to_linestring(self):
         """
         Return trajectory geometry as LineString.
@@ -530,6 +559,7 @@ class Trajectory:
         except RuntimeError:
             raise RuntimeError("Cannot generate LineString")
 
+    @requires_geometry
     def to_linestringm_wkt(self):
         """
         Return the WKT string of the trajectory LineStringM representation.
@@ -547,6 +577,7 @@ class Trajectory:
         wkt = f"LINESTRING M ({', '.join(coords)})"
         return wkt
 
+    @requires_geometry
     def to_point_gdf(self, return_orig_tz=False):
         """
         Return the trajectory's points as GeoDataFrame.
@@ -564,6 +595,7 @@ class Trajectory:
             return self.df.tz_localize(self.df_orig_tz)
         return self.df
 
+    @requires_geometry
     def to_line_gdf(self, columns=None):
         """
         Return the trajectory's line segments as GeoDataFrame.
@@ -581,6 +613,7 @@ class Trajectory:
             line_gdf.set_crs(self.crs, inplace=True)
         return line_gdf
 
+    @requires_geometry
     def to_traj_gdf(self, wkt=False, agg=False):
         """
         Return a GeoDataFrame with one row containing the trajectory as a
@@ -634,6 +667,7 @@ class Trajectory:
         traj_gdf = GeoDataFrame(df, crs=self.crs)
         return traj_gdf
 
+    @requires_geometry
     def to_mf_json(self, datetime_to_str=True, temporal_columns=None):
         """
         Converts a Trajectory to a dictionary compatible with the Moving
@@ -658,6 +692,7 @@ class Trajectory:
         )
         return mf_json
 
+    @requires_geometry
     def get_start_location(self):
         """
         Return the trajectory's start location.
@@ -669,6 +704,7 @@ class Trajectory:
         """
         return self.df.geometry.iloc[0]
 
+    @requires_geometry
     def get_end_location(self):
         """Return the trajectory's end location.
 
@@ -679,6 +715,7 @@ class Trajectory:
         """
         return self.df.geometry.iloc[-1]
 
+    @requires_geometry
     def get_bbox(self):
         """
         Return the trajectory's bounding box.
@@ -746,6 +783,7 @@ class Trajectory:
             idx = index.get_indexer([t], method=method)[0]
             return self.df.iloc[idx]
 
+    @requires_geometry
     def interpolate_position_at(self, t):
         """
         Compute and return interpolated position at time t.
@@ -775,6 +813,7 @@ class Trajectory:
         interpolated_position = line.interpolate(t_diff_at / t_diff * line.length)
         return interpolated_position
 
+    @requires_geometry
     def get_position_at(self, t, method="interpolated"):
         """
         Compute and return position at time t.
@@ -830,6 +869,7 @@ class Trajectory:
             except TypeError:
                 return row[self.get_geom_col()]
 
+    @requires_geometry
     def get_linestring_between(self, t1, t2, method="interpolated"):
         """
         Return LineString of segment between times t1 and t2.
@@ -867,6 +907,7 @@ class Trajectory:
             except RuntimeError:
                 raise RuntimeError(f"Cannot generate linestring between {t1} and {t2}")
 
+    @requires_geometry
     def get_segment_between(self, t1, t2):
         """
         Return Trajectory segment between times t1 and t2.
@@ -895,6 +936,7 @@ class Trajectory:
             )
         return segment
 
+    @requires_geometry
     def _compute_distance(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -906,6 +948,7 @@ class Trajectory:
             return 0.0
         return measure_distance(pt0, pt1, self.is_latlon, conversion)
 
+    @requires_geometry
     def _add_prev_pt(self, force=True):
         """
         Create a shifted geometry column with previous positions.
@@ -914,6 +957,7 @@ class Trajectory:
             # TODO: decide on default enforcement behavior
             self.df = self.df.assign(prev_pt=self.df.geometry.shift())
 
+    @requires_geometry
     def get_length(self, units=UNITS()):
         """
         Return the length of the trajectory.
@@ -943,6 +987,43 @@ class Trajectory:
         conversion = get_conversion(units, self.crs_units)
         return measure_length(self.df.geometry, self.is_latlon, conversion)
 
+    @requires_geometry
+    def is_long_enough(self, min_length, units=UNITS()):
+        """
+        Return True as soon as the accumulated length exceeds min_length.
+        Returns False if it doesn't exceed it after checking all segments.
+
+        Parameters
+        ----------
+        min_length : float
+            The minimum length to check against
+        units : tuple(str)
+            Units to convert to if needed
+
+        Returns
+        -------
+        bool
+        """
+        if not hasattr(self, "df") or self.df.geometry.isnull().all():
+            return False
+
+        from .unit_utils import get_conversion
+        from .geometry_utils import measure_distance
+
+        conversion = get_conversion(units, self.crs_units)
+
+        geom_col = self.get_geom_col()
+        points = self.df[geom_col].tolist()
+
+        accumulated = 0.0
+        for i in range(1, len(points)):
+            d = measure_distance(points[i - 1], points[i], self.is_latlon, conversion)
+            accumulated += d
+            if accumulated >= min_length:
+                return True
+        return False
+
+    @requires_geometry
     def get_direction(self):
         """
         Return the direction of the trajectory.
@@ -980,6 +1061,7 @@ class Trajectory:
                 return self.df[self.timedelta_col_name].median()
         return self._get_df_with_timedelta()[TIMEDELTA_COL_NAME].median()
 
+    @requires_geometry
     def _compute_heading(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -992,6 +1074,7 @@ class Trajectory:
         else:
             return azimuth(pt0, pt1)
 
+    @requires_geometry
     def _compute_angular_difference(self, row):
         degrees1 = row["prev_direction"]
         degrees2 = row["direction"]
@@ -1000,6 +1083,7 @@ class Trajectory:
         else:
             return angular_difference(degrees1, degrees2)
 
+    @requires_geometry
     def _compute_speed(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -1011,6 +1095,7 @@ class Trajectory:
             return 0.0
         return get_speed2(pt0, pt1, row["delta_t"], self.is_latlon, conversion)
 
+    @requires_geometry
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -1040,6 +1125,7 @@ class Trajectory:
         self.df[TRAJ_ID_COL_NAME] = self.id
         return self
 
+    @requires_geometry
     def add_direction(self, overwrite=False, name=DIRECTION_COL_NAME):
         """
         Add direction column and values to the trajectory's DataFrame.
@@ -1070,6 +1156,7 @@ class Trajectory:
         self.df.drop(columns=["prev_pt"], inplace=True)
         return self
 
+    @requires_geometry
     def add_angular_difference(
         self,
         overwrite=False,
@@ -1109,6 +1196,7 @@ class Trajectory:
             self.df.drop(columns=[DIRECTION_COL_NAME], inplace=True)
         return self
 
+    @requires_geometry
     def add_distance(self, overwrite=False, name=DISTANCE_COL_NAME, units=None):
         """
         Add distance column and values to the trajectory's DataFrame.
@@ -1172,6 +1260,7 @@ class Trajectory:
         self.df = self._get_df_with_distance(conversion, name)
         return self
 
+    @requires_geometry
     def add_speed(self, overwrite=False, name=SPEED_COL_NAME, units=UNITS()):
         """
         Add speed column and values to the trajectory's DataFrame.
@@ -1243,6 +1332,7 @@ class Trajectory:
         self.df = self._get_df_with_speed(conversion, name)
         return self
 
+    @requires_geometry
     def add_acceleration(
         self, overwrite=False, name=ACCELERATION_COL_NAME, units=UNITS()
     ):
@@ -1352,6 +1442,7 @@ class Trajectory:
         temp_df[name] = times.diff().values
         return temp_df
 
+    @requires_geometry
     def _get_df_with_distance(self, conversion, name=DISTANCE_COL_NAME):
         temp_df = self.df.copy()
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
@@ -1367,6 +1458,7 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt"])
         return temp_df
 
+    @requires_geometry
     def _get_df_with_speed(self, conversion, name=SPEED_COL_NAME):
         temp_df = self._get_df_with_timedelta(name="delta_t")
         temp_df = temp_df.assign(prev_pt=temp_df.geometry.shift())
@@ -1382,6 +1474,7 @@ class Trajectory:
         temp_df = temp_df.drop(columns=["prev_pt", "delta_t"])
         return temp_df
 
+    @requires_geometry
     def _get_df_with_acceleration(self, conversion, name=ACCELERATION_COL_NAME):
         temp_df = self._get_df_with_speed(conversion, name="speed_temp")
         temp_df[name] = (
@@ -1395,6 +1488,7 @@ class Trajectory:
         temp_df.at[t0, name] = temp_df.iloc[1][name]
         return temp_df.drop(columns=["speed_temp"])
 
+    @requires_geometry
     def intersects(self, polygon):
         """
         Return whether the trajectory intersects the given polygon.
@@ -1410,6 +1504,7 @@ class Trajectory:
         """
         return intersects(self, polygon)
 
+    @requires_geometry
     def distance(self, other, units=UNITS()):
         """
         Return the minimum distance to the other geometric object (based on shapely
@@ -1448,6 +1543,7 @@ class Trajectory:
         conversion = get_conversion(units, self.crs_units)
         return measure_distance_line(self.to_linestring(), other, conversion)
 
+    @requires_geometry
     def hausdorff_distance(self, other, units=UNITS()):
         """
         Return the Hausdorff distance to the other geometric object (based on shapely
@@ -1489,6 +1585,7 @@ class Trajectory:
         conversion = get_conversion(units, self.crs_units)
         return dist / conversion.distance
 
+    @requires_geometry
     def clip(self, polygon, point_based=False):
         """
         Return trajectory segments clipped by the given polygon.
@@ -1514,6 +1611,7 @@ class Trajectory:
         segments = clip(self, polygon, point_based)
         return TrajectoryCollection(segments)
 
+    @requires_geometry
     def intersection(self, feature, point_based=False):
         """
         Return the trajectory segments that intersects the given polygon feature.
@@ -1567,6 +1665,7 @@ class Trajectory:
         """
         self.df[column] = self.df[column].shift(offset, freq="1min")
 
+    @requires_geometry
     def _to_line_df(self, columns=None):
         """
         Convert trajectory data GeoDataFrame of points to GeoDataFrame of lines
@@ -1588,6 +1687,7 @@ class Trajectory:
         line_df = line_df.set_geometry("line")[1:]
         return line_df
 
+    @requires_geometry
     def get_mcp(self):
         """Return the Minimum Convex Polygon of the trajectory data
 

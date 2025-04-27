@@ -44,7 +44,9 @@ class TestTrajectoryCollection:
             columns=["id", "obj", "geometry", "t", "val", "val2"],
         ).set_index("t")
         self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
-        self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
+        self.collection = TrajectoryCollection(
+            self.geo_df, traj_id_col="id", obj_id_col="obj"
+        )
         self.geo_df_latlon = GeoDataFrame(df).set_crs(
             crs=CRS_LATLON, allow_override=True
         )
@@ -53,6 +55,16 @@ class TestTrajectoryCollection:
         )
 
     def test_number_of_trajectories(self):
+        assert len(self.collection) == 2
+
+    def test_number_of_trajectories_nongeo_df(self):
+        df = pd.DataFrame(self.geo_df)
+        df["x"] = self.geo_df.geometry.x
+        df["y"] = self.geo_df.geometry.y
+        df = df.drop(columns="geometry")
+        self.collection = TrajectoryCollection(
+            df, traj_id_col="id", obj_id_col="obj", x="x", y="y"
+        )
         assert len(self.collection) == 2
 
     def test_number_of_trajectories_min_length(self):

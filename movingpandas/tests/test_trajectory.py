@@ -734,6 +734,18 @@ class TestTrajectory:
         assert traj.get_length() == 5
         # assert len(traj) == pytest.approx(5, 1)
 
+    def test_get_length_nongeo_df(self):
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "t": [start + timedelta(seconds=i) for i in range(n)],
+            "x": [0, 1, 2],
+            "y": [0, 0, 0],
+        }
+        df = pd.DataFrame(data)
+        traj = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
+        assert traj.get_length() == 2
+
     def test_get_length_spherical(self):
         traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)
         result = traj.get_length() / 1000
@@ -1103,7 +1115,7 @@ class TestTrajectory:
         line = LineString([(2, 4), (3, 4)])
         assert traj.distance(line, units="km") == 0.001
 
-    def test_distance_warning(self):
+    def test_euclidean_distance_warning(self):
         with pytest.warns(UserWarning):
             point = Point(0, 0)
             self.default_traj_latlon.distance(point)
