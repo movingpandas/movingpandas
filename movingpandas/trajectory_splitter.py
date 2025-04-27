@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+from functools import partial
+from multiprocessing import Pool
 from pandas import Grouper
 from geopandas import GeoDataFrame
 import numpy as np
@@ -29,12 +31,19 @@ class TrajectorySplitter:
         """
         self.traj = traj
 
-    def split(self, **kwargs):
+    def split(self, n_processes=1, **kwargs):
         """
         Split the input Trajectory/TrajectoryCollection.
 
         Parameters
         ----------
+        n_processes : int or None, optional
+            Number of processes to use for computation when splitting on a
+            `TrajectoryCollection` (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`
+            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
+            utilization via multiprocessing. This argument will be ignored when used
+            with a `Trajectory` object.
         kwargs : any type
             Split parameters, differs by splitter
 
@@ -46,18 +55,43 @@ class TrajectorySplitter:
         if isinstance(self.traj, Trajectory):
             return self._split_traj(self.traj, **kwargs)
         elif isinstance(self.traj, TrajectoryCollection):
-            return self._split_traj_collection(**kwargs)
+            if n_processes > 1 or n_processes is None:
+                return self._split_traj_collection_multiprocessing(
+                    n_processes, **kwargs
+                )
+            else:
+                return self._split_traj_collection(self.traj, **kwargs)
         else:
             raise TypeError
 
-    def _split_traj_collection(self, **kwargs):
+    def _split_traj_collection(self, trajs, **kwargs) -> TrajectoryCollection:
         trips = []
-        for traj in self.traj:
+
+        for traj in trajs:
             for x in self._split_traj(traj, **kwargs):
                 if x.get_length() > self.traj.min_length:
                     trips.append(x)
         result = copy(self.traj)
         result.trajectories = trips
+        return result
+
+    def _split_traj_collection_multiprocessing(self, n_processes, **kwargs):
+        from movingpandas.tools._multi_threading import split_list
+
+        p = Pool(n_processes)
+        data = split_list(self.traj.trajectories, n_processes)
+        data = [d for d in data]
+
+        split_traj_collection_with_kwargs = partial(
+            self._split_traj_collection, **kwargs
+        )
+
+        splits = []
+        for split in p.map(split_traj_collection_with_kwargs, data):
+            splits.extend(split)
+
+        result = copy(self.traj)
+        result.trajectories = splits
         return result
 
     def _split_traj(self, traj, **kwargs):
