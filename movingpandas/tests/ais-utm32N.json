@@ -1,0 +1,136 @@
+{
+    "type": "FeatureCollection",
+    "name": "ais-utm32N",
+    "crs": {
+        "type": "name",
+        "properties": { "name": "urn:ogc:def:crs:EPSG::32632" }
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:26",
+                "MMSI": 265410000,
+                "NavStatus": "Under way using engine",
+                "SOG": 11.7,
+                "COG": 259.3,
+                "Name": "STENA JUTLANDICA",
+                "ShipType": "Passenger",
+                "t": "2017-07-05T19:08:26",
+                "t_min_t_0": 506.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669602.236020239652134, 6397106.855186901055276]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:36",
+                "MMSI": 265410000,
+                "NavStatus": "Under way using engine",
+                "SOG": 12.0,
+                "COG": 259.4,
+                "Name": "STENA JUTLANDICA",
+                "ShipType": "Passenger",
+                "t": "2017-07-05T19:08:36",
+                "t_min_t_0": 516.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669541.739781316253357, 6397093.057121472433209]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:46",
+                "MMSI": 265410000,
+                "NavStatus": "Under way using engine",
+                "SOG": 12.4,
+                "COG": 259.5,
+                "Name": "STENA JUTLANDICA",
+                "ShipType": "Passenger",
+                "t": "2017-07-05T19:08:46",
+                "t_min_t_0": 526.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669479.47392701858189, 6397078.739863369613886]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:25",
+                "MMSI": 265550210,
+                "NavStatus": "Unknown value",
+                "SOG": 7.3,
+                "COG": 153.0,
+                "Name": "TANKSKAR",
+                "ShipType": "Tanker",
+                "t": "2017-07-05T19:08:25",
+                "t_min_t_0": 505.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669659.083999051712453, 6397485.994962014257908]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:26",
+                "MMSI": 265550210,
+                "NavStatus": "Unknown value",
+                "SOG": 7.3,
+                "COG": 153.0,
+                "Name": "TANKSKAR",
+                "ShipType": "Tanker",
+                "t": "2017-07-05T19:08:26",
+                "t_min_t_0": 506.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669659.083999051712453, 6397485.994962014257908]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:35",
+                "MMSI": 265550210,
+                "NavStatus": "Unknown value",
+                "SOG": 7.4,
+                "COG": 155.6,
+                "Name": "TANKSKAR",
+                "ShipType": "Tanker",
+                "t": "2017-07-05T19:08:35",
+                "t_min_t_0": 515.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669676.947953292634338, 6397452.971613046713173]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Timestamp": "05/07/2017 19:08:45",
+                "MMSI": 265550210,
+                "NavStatus": "Unknown value",
+                "SOG": 7.6,
+                "COG": 158.2,
+                "Name": "TANKSKAR",
+                "ShipType": "Tanker",
+                "t": "2017-07-05T19:08:45",
+                "t_min_t_0": 525.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [669693.663597511244006, 6397417.44783890247345]
+            }
+        }
+    ]
+}

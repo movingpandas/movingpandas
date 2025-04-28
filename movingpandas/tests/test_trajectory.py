@@ -67,6 +67,9 @@ class Node:
 
 
 class TestPoint(Point):
+    # Avoids warnings that this class can not be run by pytest
+    __test__ = False
+
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
 

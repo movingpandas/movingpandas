@@ -13,3 +13,5 @@ API Reference
    TrajectorySmoother <trajectorysmoother>
    TrajectorySplitter <trajectorysplitter>
    TrajectoryStopDetector <trajectorystopdetector>
+
+   CPACalculator <cpa>
