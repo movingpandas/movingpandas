@@ -14,7 +14,7 @@ INSTALL_REQUIRES = [
 
 setuptools.setup(
     name="movingpandas",
-    version="0.21.3",
+    version="0.22.0",
     author="Anita Graser",
     author_email="anitagraser@gmx.at",
     description="MovingPandas provides trajectory data structures and "
