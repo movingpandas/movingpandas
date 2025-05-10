@@ -202,7 +202,7 @@ class Trajectory:
         if self.x is None or self.y is None:
             raise ValueError("x and y coordinate column names must be set.")
         self.df.geometry = points_from_xy(self.df[self.x], self.df[self.y])
-        self.df.drop(columns=["x", "y"], inplace=True)
+        self.df.drop(columns=[self.x, self.y], inplace=True)
 
     def __str__(self):
         try:

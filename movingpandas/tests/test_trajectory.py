@@ -746,6 +746,18 @@ class TestTrajectory:
         traj = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
         assert traj.get_length() == 2
 
+    def test_get_length_nongeo_df_custom_col_names(self):
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "a": [start + timedelta(seconds=i) for i in range(n)],
+            "b": [0, 1, 2],
+            "c": [0, 0, 0],
+        }
+        df = pd.DataFrame(data)
+        traj = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+        assert traj.get_length() == 2        
+
     def test_get_length_spherical(self):
         traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)
         result = traj.get_length() / 1000
