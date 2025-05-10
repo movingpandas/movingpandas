@@ -756,7 +756,7 @@ class TestTrajectory:
         }
         df = pd.DataFrame(data)
         traj = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
-        assert traj.get_length() == 2        
+        assert traj.get_length() == 2
 
     def test_get_length_spherical(self):
         traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)
