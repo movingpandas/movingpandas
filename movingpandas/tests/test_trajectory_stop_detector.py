@@ -287,6 +287,7 @@ class TestTrajectoryStopDetector:
     def test_nongeo_df(self):
         from pandas import DataFrame
         from movingpandas.trajectory import Trajectory
+
         n = 3
         start = datetime(2023, 1, 1)
         data = {
@@ -298,11 +299,12 @@ class TestTrajectoryStopDetector:
         traj = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
         detector = StopSplitter(traj)
         stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
-        assert len(stops) == 1 
+        assert len(stops) == 1
 
     def test_nongeo_df_custom_col_names(self):
         from pandas import DataFrame
         from movingpandas.trajectory import Trajectory
+
         n = 3
         start = datetime(2023, 1, 1)
         data = {
@@ -314,7 +316,7 @@ class TestTrajectoryStopDetector:
         traj = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
         detector = StopSplitter(traj)
         stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
-        assert len(stops) == 1 
+        assert len(stops) == 1
 
 
 class TestTrajectoryStopDetectorWithDeprecations:

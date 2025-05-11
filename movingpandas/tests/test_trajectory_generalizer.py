@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+from pandas import DataFrame
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from pyproj import CRS
@@ -52,6 +53,23 @@ class TestTrajectoryGeneralizer:
         self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
         self.collection = TrajectoryCollection(self.geo_df, "id", obj_id_col="obj")
 
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "t": [start + timedelta(seconds=i) for i in range(n)],
+            "x": [0, 1, 2],
+            "y": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        self.traj_nongeo_xyt = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
+        data = {
+            "a": [start + timedelta(seconds=i) for i in range(n)],
+            "b": [0, 1, 2],
+            "c": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        self.traj_nongeo_abc = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+
     def test_douglas_peucker(self):
         result = DouglasPeuckerGeneralizer(self.traj).generalize(tolerance=1)
         assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
@@ -61,6 +79,8 @@ class TestTrajectoryGeneralizer:
             self.traj_other_geometry_column_names
         ).generalize(tolerance=1)
         assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
+
+
 
     def test_tdtr(self):
         result = TopDownTimeRatioGeneralizer(self.traj).generalize(tolerance=1)
@@ -85,6 +105,8 @@ class TestTrajectoryGeneralizer:
         ).generalize(tolerance=1)
         assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
 
+
+
     def test_max_distance(self):
         result = MaxDistanceGeneralizer(self.traj).generalize(tolerance=1)
         assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
@@ -94,6 +116,8 @@ class TestTrajectoryGeneralizer:
             self.traj_other_geometry_column_names
         ).generalize(tolerance=1)
         assert result == make_traj([self.nodes[0], self.nodes[3], self.nodes[4]])
+
+
 
     def test_min_time_delta(self):
         nodes = [
@@ -119,6 +143,7 @@ class TestTrajectoryGeneralizer:
         result = MinDistanceGeneralizer(traj).generalize(tolerance=1)
         assert result == make_traj([nodes[0], nodes[3], nodes[4]], CRS_METRIC)
 
+
     def test_collection(self):
         collection = MinTimeDeltaGeneralizer(self.collection).generalize(
             tolerance=timedelta(minutes=10)
@@ -128,3 +153,64 @@ class TestTrajectoryGeneralizer:
         assert wkt1 == "LINESTRING (0 0, 6 6, 9 9)"
         wkt2 = collection.trajectories[1].to_linestring().wkt
         assert wkt2 == "LINESTRING (10 10, 16 16, 190 19)"
+
+
+class TestTrajectoryGeneralizerNonGeo:
+    def setup_method(self):
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "t": [start + timedelta(seconds=i) for i in range(n)],
+            "x": [0, 1, 2],
+            "y": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        self.traj_nongeo_xyt = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
+
+        data = {
+            "a": [start + timedelta(seconds=i) for i in range(n)],
+            "b": [0, 1, 2],
+            "c": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        self.traj_nongeo_abc = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+
+    def test_douglas_peucker_nongeo_df(self):
+        result = DouglasPeuckerGeneralizer(self.traj_nongeo_xyt).generalize(tolerance=1)
+        assert result 
+
+    def test_douglas_peucker_nongeo_df_custom_col_names(self):
+        result = DouglasPeuckerGeneralizer(self.traj_nongeo_abc).generalize(tolerance=1)
+        assert result
+
+    def test_tdtr_nongeo_df(self):
+        result = TopDownTimeRatioGeneralizer(self.traj_nongeo_xyt).generalize(tolerance=1)
+        assert result 
+
+    def test_tdtr_nongeo_df_custom_col_names(self):
+        result = TopDownTimeRatioGeneralizer(self.traj_nongeo_abc).generalize(tolerance=1)
+        assert result
+
+    def test_max_dist_nongeo_df(self):
+        result = MaxDistanceGeneralizer(self.traj_nongeo_xyt).generalize(tolerance=1)
+        assert result 
+
+    def test_max_dist_nongeo_df_custom_col_names(self):
+        result = MaxDistanceGeneralizer(self.traj_nongeo_abc).generalize(tolerance=1)
+        assert result
+
+    def test_min_time_delta_nongeo_df(self):
+        result = MinTimeDeltaGeneralizer(self.traj_nongeo_xyt).generalize(timedelta(minutes=10))
+        assert result 
+
+    def test_min_time_delta_nongeo_df_custom_col_names(self):
+        result = MinTimeDeltaGeneralizer(self.traj_nongeo_abc).generalize(timedelta(minutes=10))
+        assert result
+
+    def test_min_distance_nongeo_df(self):
+        result = MinDistanceGeneralizer(self.traj_nongeo_xyt).generalize(tolerance=1)
+        assert result 
+
+    def test_min_distance_nongeo_df_custom_col_names(self):
+        result = MinDistanceGeneralizer(self.traj_nongeo_abc).generalize(tolerance=1)
+        assert result        

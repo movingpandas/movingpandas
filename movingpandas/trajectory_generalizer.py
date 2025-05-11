@@ -78,6 +78,8 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
+        if traj.df.geometry.isnull().all():
+            traj.populate_geometry_column()
         temp_df = traj.df.copy()
         prev_pt = temp_df.iloc[0][traj.get_geom_col()]
         keep_rows = [0]
@@ -229,6 +231,8 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
+        if traj.df.geometry.isnull().all():
+            traj.populate_geometry_column()
         generalized = self.td_tr(traj.df.copy(), tolerance)
         return Trajectory(generalized, traj.id, traj_id_col=traj.get_traj_id_col())
 
