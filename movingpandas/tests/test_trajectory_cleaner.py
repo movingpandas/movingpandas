@@ -101,6 +101,7 @@ class TestTrajectoryCleaner:
             assert cleaned.is_valid()
             assert cleaned == traj
 
+
 class TestTrajectoryCleanerNonGeo:
     def setup_method(self):
         df = DataFrame(
