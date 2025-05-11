@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import pandas as pd
+from pandas import DataFrame
 from pandas.testing import assert_frame_equal
 from pyproj import CRS
 from datetime import timedelta, datetime
@@ -25,7 +25,7 @@ CRS_LATLON = CRS.from_user_input(4326)
 
 class TestTrajectorySplitter:
     def setup_method(self):
-        df = pd.DataFrame(
+        df = DataFrame(
             [
                 [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0), 9, "a"],
                 [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0), 5, "a"],
@@ -500,4 +500,58 @@ class TestTrajectorySplitter:
         split = ValueChangeSplitter(self.collection).split(col_name="val")
         assert type(split) == TrajectoryCollection
         assert len(split) == 6
+        assert split.get_crs() == "EPSG:31256"
+
+
+class TestTrajectorySplitterNonGeo:
+    def setup_method(self):
+        df = DataFrame(
+            [
+                [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0), 9, "a"],
+                [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0), 5, "a"],
+                [1, "A", Point(6, 6), datetime(2018, 1, 1, 14, 10, 0), 2, "a"],
+                [1, "A", Point(9, 9), datetime(2018, 1, 1, 14, 15, 0), 4, "a"],
+                [2, "A", Point(10, 10), datetime(2018, 1, 1, 12, 0, 0), 10, "a"],
+                [2, "A", Point(16, 10), datetime(2018, 1, 1, 12, 6, 0), 6, "a"],
+                [2, "A", Point(16, 16), datetime(2018, 1, 2, 13, 10, 0), 7, "b"],
+                [2, "A", Point(190, 19), datetime(2018, 1, 2, 13, 15, 0), 3, "b"],
+            ],
+            columns=["id", "obj", "geometry", "t", "val", "val2"],
+        ).set_index("t")
+        gdf = GeoDataFrame(df, crs=CRS_METRIC)
+        gdf["x"] = gdf.geometry.x
+        gdf["y"] = gdf.geometry.y
+        df = DataFrame(gdf)
+        df = df.drop(columns=["geometry"])
+        print(df)
+        self.collection = TrajectoryCollection(
+            df, "id", obj_id_col="obj", x="x", y="y", crs=CRS_METRIC
+        )
+
+    def test_collection_split_by_date_nongeo(self):
+        split = TemporalSplitter(self.collection).split(mode="day")
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 3
+
+    def test_collection_split_by_observation_gap_nongeo(self):
+        split = ObservationGapSplitter(self.collection).split(gap=timedelta(hours=1))
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 4
+
+    def test_collection_split_by_observation_gap_multiprocessing_nongeo(self):
+        split = ObservationGapSplitter(self.collection).split(
+            n_processes=2, gap=timedelta(hours=1)
+        )
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 4
+
+    def test_split_by_value_change_nongeo(self):
+        split = ValueChangeSplitter(self.collection).split(col_name="val2")
+        assert type(split) == TrajectoryCollection
+        assert len(split) == 3
+        assert (
+            split.trajectories[1].to_linestring().wkt
+            == "LINESTRING (10 10, 16 10, 16 16)"
+        )
+        assert split.trajectories[2].to_linestring().wkt == "LINESTRING (16 16, 190 19)"
         assert split.get_crs() == "EPSG:31256"

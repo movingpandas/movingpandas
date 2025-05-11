@@ -145,6 +145,9 @@ class KalmanSmootherCV(TrajectorySmoother):
         )
 
     def _smooth_traj(self, traj, process_noise_std=0.5, measurement_noise_std=1):
+        if traj.df.geometry.isnull().all():
+            traj.populate_geometry_column()
+
         # Get detector
         detector = self._get_detector(traj)
 

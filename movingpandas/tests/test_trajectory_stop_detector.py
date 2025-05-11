@@ -6,7 +6,9 @@ from pytz import timezone
 
 from pyproj import CRS
 from numpy import issubdtype
+from pandas import DataFrame
 
+from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.trajectory_splitter import StopSplitter
 from movingpandas.trajectory_stop_detector import TrajectoryStopDetector
@@ -281,6 +283,29 @@ class TestTrajectoryStopDetector:
         )
         collection = TrajectoryCollection([traj1])
         detector = StopSplitter(collection)
+        stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
+        assert len(stops) == 1
+
+
+class TestTrajectoryStopDetectorNonGeo:
+    def setup_method(self):
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "a": [start + timedelta(seconds=i) for i in range(n)],
+            "b": [0, 1, 2],
+            "c": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        self.traj = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+
+    def test_nongeo_df(self):
+        detector = StopSplitter(self.traj)
+        stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
+        assert len(stops) == 1
+
+    def test_nongeo_df_custom_col_names(self):
+        detector = StopSplitter(self.traj)
         stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
         assert len(stops) == 1
 
