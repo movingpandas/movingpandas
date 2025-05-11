@@ -88,7 +88,7 @@ class IqrCleaner(TrajectoryCleaner):
             ixs.append(ix.tolist())
 
         indices = pd.Series(list(map(any, zip(*ixs))), index=df.index)
-        return Trajectory(df[~indices], traj.id, traj_id_col=traj.get_traj_id_col())
+        return Trajectory(df[~indices], traj.id, traj_id_col=traj.get_traj_id_col(), x=traj.x, y=traj.y)
 
     def _calc_outliers(self, series, alpha=3):
         """
@@ -126,6 +126,9 @@ class OutlierCleaner(TrajectoryCleaner):
     """
 
     def _clean_traj(self, traj, v_max=None, units=UNITS(), alpha=3):
+        if traj.df.geometry.isnull().all():
+            traj.populate_geometry_column()
+            
         out_traj = traj.copy()
         conversion = get_conversion(units, traj.crs_units)
 
