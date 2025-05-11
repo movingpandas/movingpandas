@@ -128,6 +128,9 @@ class TrajectoryStopDetector:
         is_stopped = False
         previously_stopped = False
 
+        if traj.df.geometry.isnull().all():
+            traj.populate_geometry_column()
+
         for t, pt in traj.df[traj.get_geom_col()].items():
             pts.append(pt)
             xs.append(pt.x)

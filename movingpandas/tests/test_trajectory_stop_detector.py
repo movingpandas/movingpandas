@@ -284,6 +284,38 @@ class TestTrajectoryStopDetector:
         stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
         assert len(stops) == 1
 
+    def test_nongeo_df(self):
+        from pandas import DataFrame
+        from movingpandas.trajectory import Trajectory
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "t": [start + timedelta(seconds=i) for i in range(n)],
+            "x": [0, 1, 2],
+            "y": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        traj = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
+        detector = StopSplitter(traj)
+        stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
+        assert len(stops) == 1 
+
+    def test_nongeo_df_custom_col_names(self):
+        from pandas import DataFrame
+        from movingpandas.trajectory import Trajectory
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "a": [start + timedelta(seconds=i) for i in range(n)],
+            "b": [0, 1, 2],
+            "c": [0, 0, 0],
+        }
+        df = DataFrame(data)
+        traj = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+        detector = StopSplitter(traj)
+        stops = detector.split(max_diameter=1, min_duration=timedelta(seconds=1))
+        assert len(stops) == 1 
+
 
 class TestTrajectoryStopDetectorWithDeprecations:
     """Test whether deprecations are working as expected."""
