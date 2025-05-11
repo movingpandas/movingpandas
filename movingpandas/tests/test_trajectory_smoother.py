@@ -2,13 +2,12 @@
 
 import numpy as np
 from pandas import DataFrame
-from datetime import datetime, timedelta
+from datetime import datetime
 from pyproj import CRS
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from shapely.wkt import loads
 
-from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 
 from .test_trajectory import make_traj, Node
