@@ -157,12 +157,14 @@ class TestTrajectorySmootherNonGeo:
             columns=["id", "obj", "geometry", "t"],
         ).set_index("t")
         gdf = GeoDataFrame(df, crs=CRS_METRIC)
-        gdf['x'] = gdf.geometry.x
-        gdf['y'] = gdf.geometry.y
+        gdf["x"] = gdf.geometry.x
+        gdf["y"] = gdf.geometry.y
         df = DataFrame(gdf)
-        df = df.drop(columns=['geometry'])
+        df = df.drop(columns=["geometry"])
         print(df)
-        self.collection = TrajectoryCollection(df, "id", obj_id_col="obj", x='x', y='y', crs=CRS_METRIC)
+        self.collection = TrajectoryCollection(
+            df, "id", obj_id_col="obj", x="x", y="y", crs=CRS_METRIC
+        )
 
     @requires_stonesoup
     def test_kalman_smoother_sv_collection(self):

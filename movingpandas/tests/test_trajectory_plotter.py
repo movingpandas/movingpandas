@@ -37,6 +37,7 @@ class TestTrajectoryCollection:
         assert min_value == 2
         assert max_value == 10
 
+
 class TestTrajectoryCollectionNonGeo:
     def setup_method(self):
         n = 3
@@ -45,19 +46,23 @@ class TestTrajectoryCollectionNonGeo:
             "t": [start + timedelta(seconds=i) for i in range(n)],
             "x": [0, 1, 2],
             "y": [0, 0, 0],
-            "val": [2, 5, 10]
+            "val": [2, 5, 10],
         }
         df = DataFrame(data)
-        self.traj_nongeo_xyt = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
+        self.traj_nongeo_xyt = Trajectory(
+            df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC
+        )
 
         data = {
             "a": [start + timedelta(seconds=i) for i in range(n)],
             "b": [0, 1, 2],
             "c": [0, 0, 0],
-            "val": [2, 5, 10]
+            "val": [2, 5, 10],
         }
         df = DataFrame(data)
-        self.traj_nongeo_abc = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+        self.traj_nongeo_abc = Trajectory(
+            df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC
+        )
 
     def test_get_min_max_values_nongeo(self):
         self.plotter = _TrajectoryPlotter(self.traj_nongeo_xyt, column="val")
@@ -69,4 +74,4 @@ class TestTrajectoryCollectionNonGeo:
         self.plotter = _TrajectoryPlotter(self.traj_nongeo_abc, column="val")
         min_value, max_value = self.plotter.get_min_max_values()
         assert min_value == 2
-        assert max_value == 10        
+        assert max_value == 10
