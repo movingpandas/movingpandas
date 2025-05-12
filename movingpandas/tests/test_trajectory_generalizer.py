@@ -208,12 +208,14 @@ class TestTrajectoryGeneralizerNonGeo:
         result = MinTimeDeltaGeneralizer(self.traj_nongeo_xyt).generalize(
             timedelta(minutes=10)
         )
+        result.populate_geometry_column()
         assert result
 
     def test_min_time_delta_nongeo_df_custom_col_names(self):
         result = MinTimeDeltaGeneralizer(self.traj_nongeo_abc).generalize(
             timedelta(minutes=10)
         )
+        result.populate_geometry_column()
         assert result
 
     def test_min_distance_nongeo_df(self):

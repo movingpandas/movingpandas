@@ -126,7 +126,9 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
 
         keep_rows.append(len(traj.df) - 1)
         new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id, traj_id_col=traj.get_traj_id_col())
+        new_traj = Trajectory(
+            new_df, traj.id, traj_id_col=traj.get_traj_id_col(), x=traj.x, y=traj.y
+        )
         return new_traj
 
 
@@ -190,6 +192,9 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
+        if traj.df.geometry.isnull().all():
+            traj.populate_geometry_column()
+
         keep_rows = []
         simplified = (
             traj.to_linestring().simplify(tolerance, preserve_topology=False).coords
