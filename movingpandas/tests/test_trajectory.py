@@ -734,30 +734,6 @@ class TestTrajectory:
         assert traj.get_length() == 5
         # assert len(traj) == pytest.approx(5, 1)
 
-    def test_get_length_nongeo_df(self):
-        n = 3
-        start = datetime(2023, 1, 1)
-        data = {
-            "t": [start + timedelta(seconds=i) for i in range(n)],
-            "x": [0, 1, 2],
-            "y": [0, 0, 0],
-        }
-        df = pd.DataFrame(data)
-        traj = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
-        assert traj.get_length() == 2
-
-    def test_get_length_nongeo_df_custom_col_names(self):
-        n = 3
-        start = datetime(2023, 1, 1)
-        data = {
-            "a": [start + timedelta(seconds=i) for i in range(n)],
-            "b": [0, 1, 2],
-            "c": [0, 0, 0],
-        }
-        df = pd.DataFrame(data)
-        traj = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
-        assert traj.get_length() == 2
-
     def test_get_length_spherical(self):
         traj = make_traj([Node(0, 1), Node(6, 0, day=2)], CRS_LATLON)
         result = traj.get_length() / 1000
@@ -1166,3 +1142,32 @@ class TestTrajectory:
         new_df = traj.df.to_crs(epsg=3857)
         self.assertEqual(new_df.crs, from_epsg(3857))
     """
+
+
+class TestTrajectoryNonGeo:
+    def setup_method(self):
+        n = 3
+        start = datetime(2023, 1, 1)
+        data = {
+            "t": [start + timedelta(seconds=i) for i in range(n)],
+            "x": [0, 1, 2],
+            "y": [0, 0, 0],
+        }
+        df = pd.DataFrame(data)
+        self.traj_xyt = Trajectory(df, traj_id=1, t="t", x="x", y="y", crs=CRS_METRIC)
+
+        data = {
+            "a": [start + timedelta(seconds=i) for i in range(n)],
+            "b": [0, 1, 2],
+            "c": [0, 0, 0],
+        }
+        df = pd.DataFrame(data)
+        self.traj_abc = Trajectory(df, traj_id=1, t="a", x="b", y="c", crs=CRS_METRIC)
+
+    def test_get_length_nongeo_df(self):
+        assert self.traj_xyt.get_length() == 2
+        assert self.traj_abc.get_length() == 2
+
+    def test_start_location_nongeo(self):
+        assert self.traj_xyt.get_start_location() == Point(0, 0)
+        assert self.traj_abc.get_start_location() == Point(0, 0)

@@ -3,7 +3,7 @@ import warnings
 
 from pandas import concat
 from copy import copy
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, points_from_xy
 from .trajectory import (
     Trajectory,
     SPEED_COL_NAME,
@@ -388,7 +388,9 @@ class TrajectoryCollection:
             t = self.t or "t"
             df.reset_index(inplace=True)
             df.rename(columns={"index": t}, inplace=True)
-
+            non_geo = traj.df.geometry.isnull().all()
+            if non_geo:
+                df["geometry"] = points_from_xy(df[traj.x], df[traj.y])
             gdf = GeoDataFrame(df)
             gdf.set_crs(self.get_crs(), inplace=True)
         else:
