@@ -57,16 +57,6 @@ class TestTrajectoryCollection:
     def test_number_of_trajectories(self):
         assert len(self.collection) == 2
 
-    def test_number_of_trajectories_nongeo_df(self):
-        df = pd.DataFrame(self.geo_df)
-        df["x"] = self.geo_df.geometry.x
-        df["y"] = self.geo_df.geometry.y
-        df = df.drop(columns="geometry")
-        self.collection = TrajectoryCollection(
-            df, traj_id_col="id", obj_id_col="obj", x="x", y="y"
-        )
-        assert len(self.collection) == 2
-
     def test_number_of_trajectories_min_length(self):
         collection = TrajectoryCollection(
             self.geo_df, "id", obj_id_col="obj", min_length=100
@@ -619,3 +609,57 @@ class TestTrajectoryCollection:
     def test_deprecation_warning_when_using_n_threads(self):
         with pytest.deprecated_call():
             self.collection.add_speed(n_threads=2)
+
+
+class TestTrajectoryCollectionNonGeo:
+    def setup_method(self):
+        df = pd.DataFrame(
+            [
+                [1, "A", Point(0, 0), datetime(2018, 1, 1, 12, 0, 0), 9, "a"],
+                [1, "A", Point(6, 0), datetime(2018, 1, 1, 12, 6, 0), 5, "b"],
+                [1, "A", Point(6, 6), datetime(2018, 1, 1, 14, 10, 0), 2, "c"],
+                [1, "A", Point(9, 9), datetime(2018, 1, 1, 14, 15, 0), 4, "d"],
+                [2, "A", Point(10, 10), datetime(2018, 1, 1, 12, 0, 0), 10, "e"],
+                [2, "A", Point(16, 10), datetime(2018, 1, 1, 12, 6, 0), 6, "f"],
+                [2, "A", Point(16, 16), datetime(2018, 1, 2, 13, 10, 0), 7, "g"],
+                [2, "A", Point(190, 10), datetime(2018, 1, 2, 13, 15, 0), 3, "h"],
+            ],
+            columns=["id", "obj", "geometry", "t", "val", "val2"],
+        ).set_index("t")
+        self.geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        df = pd.DataFrame(self.geo_df)
+        df["x"] = self.geo_df.geometry.x
+        df["y"] = self.geo_df.geometry.y
+        df = df.drop(columns="geometry")
+        self.collection = TrajectoryCollection(
+            df, traj_id_col="id", obj_id_col="obj", x="x", y="y", crs=CRS_METRIC
+        )
+
+    def test_number_of_trajectories_nongeo(self):
+        assert len(self.collection) == 2
+
+    def test_get_start_locations_nongeo(self):
+        locs = self.collection.get_start_locations()
+        assert len(locs) == 2
+        assert locs.iloc[0].geometry in [Point(0, 0), Point(10, 10)]
+        assert locs.iloc[0].id in [1, 2]
+        assert locs.iloc[0].obj == "A"
+        assert locs.iloc[0].val in [9, 10]
+        assert locs.iloc[0].val2 in ["a", "e"]
+        assert locs.iloc[1].geometry in [Point(0, 0), Point(10, 10)]
+        assert locs.iloc[0].geometry != locs.iloc[1].geometry
+        assert isinstance(locs, GeoDataFrame)
+        assert locs.crs == CRS_METRIC
+
+    def test_get_end_locations_nongeo(self):
+        locs = self.collection.get_end_locations()
+        assert len(locs) == 2
+        assert locs.iloc[0].geometry in [Point(9, 9), Point(190, 10)]
+        assert locs.iloc[0].id in [1, 2]
+        assert locs.iloc[0].obj == "A"
+        assert locs.iloc[0].val in [4, 3]
+        assert locs.iloc[0].val2 in ["d", "h"]
+        assert locs.iloc[1].geometry in [Point(9, 9), Point(190, 10)]
+        assert locs.iloc[0].geometry != locs.iloc[1].geometry
+        assert isinstance(locs, GeoDataFrame)
+        assert locs.crs == CRS_METRIC
