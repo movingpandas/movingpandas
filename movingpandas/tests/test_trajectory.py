@@ -1172,8 +1172,11 @@ class TestTrajectoryNonGeo:
         assert self.traj_xyt.get_start_location() == Point(0, 0)
         assert self.traj_abc.get_start_location() == Point(0, 0)
 
-    def test_traj_copy_x_y(self):
+    def test_traj_copy_custom_col(self):
         traj_0 = self.traj_abc
         traj = traj_0.copy()
         assert traj.x == traj_0.x
         assert traj.y == traj_0.y
+        traj.populate_geometry_column()
+        traj.add_speed()
+        traj.add_direction()
