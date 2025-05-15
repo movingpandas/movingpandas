@@ -250,6 +250,8 @@ class Trajectory:
             self.id,
             parent=self.parent,
             traj_id_col=self.traj_id_col_name,
+            x=self.x,
+            y=self.y,
         )
         return copied
 
