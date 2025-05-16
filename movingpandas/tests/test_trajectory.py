@@ -1177,6 +1177,5 @@ class TestTrajectoryNonGeo:
         traj = traj_0.copy()
         assert traj.x == traj_0.x
         assert traj.y == traj_0.y
-        traj.populate_geometry_column()
         traj.add_speed()
         traj.add_direction()
