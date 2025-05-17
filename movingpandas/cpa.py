@@ -190,7 +190,7 @@ class CPACalculator:
             raise TypeError(f"t1 should be a datetime, got a {type(t1)}")
 
         # we follow the implementation of postgis
-        # In partical the function segments_tcpa in
+        # In particalur the function segments_tcpa in
         # https://github.com/postgis/postgis/blob/master/liblwgeom/lwlinearreferencing.c
 
         # This function corresponds with segments_tcpa Here we keep track of
