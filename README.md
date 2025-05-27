@@ -219,7 +219,8 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 ### Platforms using MovingPandas
 
 * [MoveApps](https://www.moveapps.org) the free analysis platform for animal tracking data hosted by the Max Planck Institute of Animal Behavior uses MovingPandas TrajectoryCollections as their [default Python IO type](https://docs.moveapps.org/#/create_py_app?id=io-types).
-* [AIT Mobility Observation Box](https://www.ait.ac.at/en/solutions/traffic-safety/safe/mobility-observation-box/) uses MovingPandas for processing video-based trajectories 
+* [AIT Mobility Observation Box](https://www.ait.ac.at/en/solutions/traffic-safety/safe/mobility-observation-box/) uses MovingPandas for processing video-based trajectories
+* [CARTO Workflows](https://youtu.be/xFbSA_Iq5Qg?si=r95Gk6weKIIeJrhu&t=1119) leverages MovingPandas in the Trajectory Analytics toolbox
 
 
 ### Teaching materials referencing MovingPandas
