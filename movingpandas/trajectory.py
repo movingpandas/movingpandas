@@ -938,7 +938,6 @@ class Trajectory:
             )
         return segment
 
-    @requires_geometry
     def _compute_distance(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -1063,7 +1062,6 @@ class Trajectory:
                 return self.df[self.timedelta_col_name].median()
         return self._get_df_with_timedelta()[TIMEDELTA_COL_NAME].median()
 
-    @requires_geometry
     def _compute_heading(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -1076,7 +1074,6 @@ class Trajectory:
         else:
             return azimuth(pt0, pt1)
 
-    @requires_geometry
     def _compute_angular_difference(self, row):
         degrees1 = row["prev_direction"]
         degrees2 = row["direction"]
@@ -1085,7 +1082,6 @@ class Trajectory:
         else:
             return angular_difference(degrees1, degrees2)
 
-    @requires_geometry
     def _compute_speed(self, row, conversion):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
@@ -1097,7 +1093,6 @@ class Trajectory:
             return 0.0
         return get_speed2(pt0, pt1, row["delta_t"], self.is_latlon, conversion)
 
-    @requires_geometry
     def _connect_prev_pt_and_geometry(self, row):
         pt0 = row["prev_pt"]
         pt1 = row[self.get_geom_col()]
