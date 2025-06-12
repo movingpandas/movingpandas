@@ -230,10 +230,10 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 ### Workshop videos
 
-* [Graser, A. (2019). Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school, Münster, Germany.](http://www.youtube.com/watch?v=qeLQfnpJV1g)
-* [Graser, A. (2023). Data Engineering for Mobility Data Science. Workshop at the OpenGeoHub summer school, Poznan, Poland.](https://youtu.be/roPF1oth2Pk)
-  
+* Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school 2019, Münster, Germany.
 [![WorkshopVideo](https://user-images.githubusercontent.com/590385/67161044-f08cb100-f356-11e9-8799-f972175ec7f4.png)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Anita Graser: Analyzing movement data")
+* Data Engineering for Mobility Data Science. Workshop at the OpenGeoHub summer school 2023, Poznan, Poland.
 [![ogh2023](https://github-production-user-asset-6210df.s3.amazonaws.com/590385/273573344-5aff5369-3db4-4d9e-9758-c9efccfd29a5.png)](https://youtu.be/roPF1oth2Pk)
-[![sdsc2025]()](https://youtu.be/37ZeOw878uY?si=c7qP9yijhxl6vsy-)
+
+  
 
