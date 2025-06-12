@@ -220,7 +220,7 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 * [MoveApps](https://www.moveapps.org) the free analysis platform for animal tracking data hosted by the Max Planck Institute of Animal Behavior uses MovingPandas TrajectoryCollections as their [default Python IO type](https://docs.moveapps.org/#/create_py_app?id=io-types).
 * [AIT Mobility Observation Box](https://www.ait.ac.at/en/solutions/traffic-safety/safe/mobility-observation-box/) uses MovingPandas for processing video-based trajectories
-* [CARTO Workflows](https://youtu.be/xFbSA_Iq5Qg?si=r95Gk6weKIIeJrhu&t=1119) leverages MovingPandas in the Trajectory Analytics toolbox
+* [CARTO Workflows](https://youtu.be/xFbSA_Iq5Qg?si=r95Gk6weKIIeJrhu&t=1119) leverages [MovingPandas in the Trajectory Analytics toolbox](https://youtu.be/37ZeOw878uY?si=c7qP9yijhxl6vsy-)
 
 
 ### Teaching materials referencing MovingPandas
@@ -235,3 +235,5 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
   
 [![WorkshopVideo](https://user-images.githubusercontent.com/590385/67161044-f08cb100-f356-11e9-8799-f972175ec7f4.png)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Anita Graser: Analyzing movement data")
 [![ogh2023](https://github-production-user-asset-6210df.s3.amazonaws.com/590385/273573344-5aff5369-3db4-4d9e-9758-c9efccfd29a5.png)](https://youtu.be/roPF1oth2Pk)
+[![sdsc2025]()](https://youtu.be/37ZeOw878uY?si=c7qP9yijhxl6vsy-)
+
