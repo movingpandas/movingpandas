@@ -213,8 +213,7 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 1. [Elkin-Frankston, S., McIntyre, J., Brunyé, T.T. et al. (2025). Beyond boundaries: a location-based toolkit for quantifying group dynamics in diverse contexts. Cogn. Research 10, 10 (2025).](https://doi.org/10.1186/s41235-025-00617-6) - *"we first segmented time periods when the group was in motion by identifying break periods using the stop detection feature from the MovingPandas Python package"*
 1. [Koszewski, K., Olszewski, R., Pałka, P. et al. (2025). Utilizing IoT Sensors and Spatial Data Mining for Analysis of Urban Space Actors’ Behavior in University Campus Space Design. Sensors, 25(5), 1393.](https://doi.org/10.3390/s25051393) - *"trajectories were processed by the MovingPandas Python library, which offers several valuable processing algorithms, like calculation of velocity, direction of movement, intersections, as well as enabling easy data exchange with other GIS tools using built-in exporters" & "One useful solution turned out to be the MovingPandas’ built-in TrajectoryStopDetector"*
 2. [Garcez Duarte, M. M., & Sakr, M. (2025). An experimental study of existing tools for outlier detection and cleaning in trajectories. GeoInformatica, 29(1), 31-51.](https://doi.org/10.1007/s10707-024-00522-y) - *"MovingPandas uses the Kalman Filter (KF) algorithm for outlier detection"*
-3. [Alexanne, W., Marchal, F., & Castagnos, S. (2025, June). BIRD: A Museum Open Dataset Combining Behavior Patterns and Identity Types to Better Model Visitors' Experience. In Adjunct Proceedings of the 33rd ACM Conference on User Modeling, Adaptation and Personalization.](https://dl.acm.org/doi/full/10.1145/3708319.3733686) - *"We relied on the MovingPandas library v0.20.0 to normalize the trajectories with an interval of two seconds between two different positions." "From each trajectory, we can extract a set of features to further
-analyze the visitor’s behavior by relying on MovingPandas."*
+3. [Alexanne, W., Marchal, F., & Castagnos, S. (2025, June). BIRD: A Museum Open Dataset Combining Behavior Patterns and Identity Types to Better Model Visitors' Experience. In Adjunct Proceedings of the 33rd ACM Conference on User Modeling, Adaptation and Personalization.](https://dl.acm.org/doi/full/10.1145/3708319.3733686) - *"We relied on the MovingPandas library v0.20.0 to normalize the trajectories with an interval of two seconds between two different positions." "From each trajectory, we can extract a set of features to further analyze the visitor’s behavior by relying on MovingPandas."*
 
 [Full Google Scholar list](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=10366998261774464895)
 
@@ -232,9 +231,12 @@ analyze the visitor’s behavior by relying on MovingPandas."*
 
 ### Workshop videos
 
-* Analyzing Movement Data with MovingPandas. Workshop at the OpenGeoHub summer school 2019, Münster, Germany.
+**Analyzing Movement Data with MovingPandas.** Workshop at the OpenGeoHub summer school 2019, Münster, Germany.
+
 [![WorkshopVideo](https://user-images.githubusercontent.com/590385/67161044-f08cb100-f356-11e9-8799-f972175ec7f4.png)](http://www.youtube.com/watch?v=qeLQfnpJV1g "Anita Graser: Analyzing movement data")
-* Data Engineering for Mobility Data Science. Workshop at the OpenGeoHub summer school 2023, Poznan, Poland.
+
+**Data Engineering for Mobility Data Science.** Workshop at the OpenGeoHub summer school 2023, Poznan, Poland.
+
 [![ogh2023](https://github-production-user-asset-6210df.s3.amazonaws.com/590385/273573344-5aff5369-3db4-4d9e-9758-c9efccfd29a5.png)](https://youtu.be/roPF1oth2Pk)
 
   
