@@ -485,7 +485,7 @@ class TestTrajectorySplitter:
         assert split.trajectories[0].id == "1_0"
         assert split.trajectories[1].id == "2_0"
         assert split.trajectories[2].id == "2_1"
-    
+
     def test_split_by_value_change_multiprocessing(self):
         split = ValueChangeSplitter(self.collection).split(
             n_processes=2, col_name="val2"
