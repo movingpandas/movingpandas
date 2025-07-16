@@ -382,12 +382,13 @@ class ValueChangeSplitter(TrajectorySplitter):
                 df = df.sort_index(ascending=True)
             if len(df) > 1:
                 df = GeoDataFrame(df).set_crs(traj.df.crs)
-                traj = Trajectory(
-                    df,
-                    f"{traj.id}_{i}",
-                    traj_id_col=traj.get_traj_id_col(),
-                    x=traj.x,
-                    y=traj.y,
+                result.append(
+                    Trajectory(
+                        df,
+                        f"{traj.id}_{i}",
+                        traj_id_col=traj.get_traj_id_col(),
+                        x=traj.x,
+                        y=traj.y,
+                    )
                 )
-                result.append(traj)
         return TrajectoryCollection(result, min_length=min_length)

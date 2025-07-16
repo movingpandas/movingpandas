@@ -482,6 +482,9 @@ class TestTrajectorySplitter:
         )
         assert split.trajectories[2].to_linestring().wkt == "LINESTRING (16 16, 190 19)"
         assert split.get_crs() == "EPSG:31256"
+        assert split.trajectories[0].id == "1_0"
+        assert split.trajectories[1].id == "2_0"
+        assert split.trajectories[2].id == "2_1"
 
     def test_split_by_value_change_multiprocessing(self):
         split = ValueChangeSplitter(self.collection).split(
