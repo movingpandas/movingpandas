@@ -29,7 +29,15 @@ repository = "https://github.com/movingpandas/movingpandas"
 
 [project.optional-dependencies]
 smoothing = ["stonesoup"]
-viz = ["bokeh", "cartopy", "geoviews", "hvplot"]
+viz = [
+    "bokeh",
+    "cartopy",
+    "folium>=0.12",
+    "geoviews",
+    "hvplot",
+    "mapclassify>=2.6.0",
+    "matplotlib>=3.7.5",
+]
 
 [tool.setuptools]
 packages = [
