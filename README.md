@@ -121,10 +121,10 @@ conda env create -f environment.yml
 
 ### Develop mode
 
-To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode) you may use: 
+To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/3_pyproject.html#installing-and-using-your-package) you may use: 
 
 ```
-python setup.py develop
+pip install --editable .
 ```
 
 
