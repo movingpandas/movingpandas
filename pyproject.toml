@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "movingpandas"
+version = "0.22.4"
+authors = [
+    {name = "Anita Graser", email = "anitagraser@gmx.at"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+description = """MovingPandas provides trajectory data structures and functions \
+for handling movement data based on Pandas, GeoPandas, and more. \
+Visit movingpandas.org for details."""
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "matplotlib",
+    "geopandas",
+    "geopy",
+]
+license = "BSD-3-Clause"
+
+[project.urls]
+repository = "https://github.com/movingpandas/movingpandas"
+
+[project.optional-dependencies]
+smoothing = ["stonesoup"]
+viz = [
+    "bokeh",
+    "cartopy",
+    "folium>=0.12",
+    "geoviews",
+    "hvplot",
+    "mapclassify>=2.6.0",
+    "matplotlib>=3.7.5",
+]
+
+[tool.setuptools]
+packages = [
+    "movingpandas",
+    "movingpandas.tools",
+    "movingpandas.tests",
+]
