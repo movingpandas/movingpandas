@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import warnings
 
+from os import cpu_count
 from pandas import concat
 from copy import copy
 from geopandas import GeoDataFrame, points_from_xy
@@ -624,7 +625,9 @@ class TrajectoryCollection:
             n_processes=n_processes, **kwargs
         )
 
-        if n_processes > 1 or n_processes is None:
+        if n_processes is None:
+            self._multiprocess(self._add_speed, cpu_count(), name, units, overwrite)
+        elif n_processes > 1:
             self._multiprocess(self._add_speed, n_processes, name, units, overwrite)
         else:
             self._add_speed(self.trajectories, name, units, overwrite)

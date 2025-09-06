@@ -399,6 +399,19 @@ class TestTrajectoryCollection:
         assert len(expected.trajectories) == len(self.collection.trajectories)
         assert len(expected.trajectories) == 4
 
+    def test_add_speed_multiprocessing_with_all_threads(self):
+        self.collection.trajectories += self.collection.trajectories
+        expected = self.collection.copy()
+        expected.add_speed()
+        self.collection.add_speed(n_processes=None)
+        print(self.collection.to_point_gdf())
+        result0 = self.collection.trajectories[0].df[SPEED_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[SPEED_COL_NAME].tolist()
+        result1 = self.collection.trajectories[-1].df[SPEED_COL_NAME].tolist()
+        assert result1 == expected.trajectories[-1].df[SPEED_COL_NAME].tolist()
+        assert len(expected.trajectories) == len(self.collection.trajectories)
+        assert len(expected.trajectories) == 4
+
     def test_add_acceleration(self):
         self.collection.add_acceleration()
         result1 = self.collection.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
