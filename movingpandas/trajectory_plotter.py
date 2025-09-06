@@ -87,10 +87,7 @@ class _TrajectoryPlotter:
             line_gdf = tc.to_line_gdf(columns=cols)
 
         if version("geopandas") >= "1.0.0":
-            return line_gdf.explore(
-                tiles=self.explore_tiles,
-                *self.args, 
-                **self.kwargs)
+            return line_gdf.explore(tiles=self.explore_tiles, *self.args, **self.kwargs)
         else:
             raise (
                 NotImplementedError(
@@ -135,7 +132,7 @@ class _TrajectoryPlotter:
                 vmin=self.min_value,
                 vmax=self.max_value,
                 *self.args,
-                **self.kwargs
+                **self.kwargs,
             )
 
     def hvplot(self):  # noqa F811
@@ -205,7 +202,7 @@ class _TrajectoryPlotter:
                 size=self.marker_size,
                 clim=self.clim,
                 *self.args,
-                **self.kwargs
+                **self.kwargs,
             )
         else:
             plots = []
@@ -219,7 +216,7 @@ class _TrajectoryPlotter:
                     size=self.marker_size,
                     color=self.get_color(i),
                     *self.args,
-                    **self.kwargs
+                    **self.kwargs,
                 )
                 plots.append(tmp)
             return Overlay(plots)
@@ -262,7 +259,7 @@ class _TrajectoryPlotter:
                 color=self.get_color(i),
                 colorbar=self.colorbar,
                 *self.args,
-                **self.kwargs
+                **self.kwargs,
             )
             self.hvplot_tiles = None
             plots.append(tmp)
@@ -286,7 +283,7 @@ class _TrajectoryPlotter:
             clim=self.clim,
             colorbar=self.colorbar,
             *self.args,
-            **self.kwargs
+            **self.kwargs,
         )
 
     def hvplot_pts(self):
@@ -362,7 +359,7 @@ class _TrajectoryPlotter:
                 line_width=self.marker_size / 70.0,
                 clim=self.clim,
                 *self.args,
-                **self.kwargs
+                **self.kwargs,
             )
             arrow_head = pts_gdf.hvplot(
                 geo=self.hvplot_is_geo,
@@ -372,7 +369,7 @@ class _TrajectoryPlotter:
                 size=self.marker_size,
                 clim=self.clim,
                 *self.args,
-                **self.kwargs
+                **self.kwargs,
             )
             return arrow_shaft * arrow_head
         else:
@@ -388,7 +385,7 @@ class _TrajectoryPlotter:
                     line_width=self.marker_size / 70.0,
                     color=self.get_color(i),
                     *self.args,
-                    **self.kwargs
+                    **self.kwargs,
                 )
                 arrow_head = tmp.hvplot(
                     geo=self.hvplot_is_geo,
@@ -398,7 +395,7 @@ class _TrajectoryPlotter:
                     size=self.marker_size,
                     color=self.get_color(i),
                     *self.args,
-                    **self.kwargs
+                    **self.kwargs,
                 )
                 plots.append(arrow_shaft * arrow_head)
             return Overlay(plots)
