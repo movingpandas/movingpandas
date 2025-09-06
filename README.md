@@ -93,13 +93,13 @@ Aggregate trajectories to explore larger patterns
 
 ## Installation
 
-MovingPandas for Python >= 3.7 and all its dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
+MovingPandas for Python >= 3.8 and all its dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
 
 `conda install -c conda-forge movingpandas`
  
  or faster using 
  
- `mamba install -c conda-forge movingpandas`
+`mamba install -c conda-forge movingpandas`
 
 
 Note that it is **NOT recommended** to install MovingPandas from [PyPI](https://pypi.org/project/movingpandas/)!
@@ -110,20 +110,10 @@ On Ubuntu, pip install may fail, e.g. on cartopy with "Proj 4.9.0 must be instal
 
 ## Development installation 
 
-Use the following steps to run the notebooks using the current development version:
-
-
-### Using conda / mamba
+Use the following steps to install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/3_pyproject.html#installing-and-using-your-package) and run the notebooks using the current development version:
 
 ```
 conda env create -f environment.yml
-```
-
-### Develop mode
-
-To install MovingPandas in ["develop" or "editable" mode](https://python-packaging-tutorial.readthedocs.io/en/latest/3_pyproject.html#installing-and-using-your-package) you may use: 
-
-```
 pip install --editable .
 ```
 
