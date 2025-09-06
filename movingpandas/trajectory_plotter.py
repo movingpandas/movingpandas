@@ -25,6 +25,7 @@ class _TrajectoryPlotter:
 
         self.overlay = None
         self.hvplot_is_geo = kwargs.pop("geo", True)
+        self.explore_tiles = kwargs.get("tiles", "OpenStreetMap")
         self.hvplot_tiles = kwargs.pop("tiles", "OSM")
 
         self.plot_lines = kwargs.pop("plot_lines", True)
@@ -86,7 +87,10 @@ class _TrajectoryPlotter:
             line_gdf = tc.to_line_gdf(columns=cols)
 
         if version("geopandas") >= "1.0.0":
-            return line_gdf.explore(*self.args, **self.kwargs)
+            return line_gdf.explore(
+                tiles=self.explore_tiles,
+                *self.args, 
+                **self.kwargs)
         else:
             raise (
                 NotImplementedError(
