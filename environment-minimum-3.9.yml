@@ -1,8 +1,8 @@
-name: mpd-mini-3.10
+name: mpd-mini-3.9
 channels:
   - conda-forge
 dependencies:
-  - python=3.10
+  - python=3.9
   - geopandas-base
   - matplotlib-base
   - fiona
