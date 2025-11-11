@@ -46,7 +46,7 @@ jobs:
             os: windows-latest
           - env: environment-minimum.yml
             os: ubuntu-latest
-          - env: environment-minimum-3.9.yml
+          - env: environment-minimum-3.10.yml
             os: ubuntu-latest
           - env: environment-geopandas-pre1.0.yml
             os: ubuntu-latest
