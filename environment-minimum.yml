@@ -2,7 +2,7 @@ name: mpd-mini
 channels:
   - conda-forge
 dependencies:
-  - python=3.12
+  - python=3.14
   - geopandas-base
   - matplotlib-base
   - geopy
