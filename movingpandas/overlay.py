@@ -16,7 +16,7 @@ def _get_spatiotemporal_ref(row):
     """
     if row["spatial_intersection"].is_empty:
         return None
-    if isinstance(type(row["spatial_intersection"]), LineString):
+    if isinstance(row["spatial_intersection"], LineString):
         pt0 = Point(row["spatial_intersection"].coords[0])
         ptn = Point(row["spatial_intersection"].coords[-1])
         t = row["prev_t"]
@@ -76,7 +76,7 @@ def is_equal(t1, t2):
     """
     Similar timestamps are considered equal to avoid numerical issues.
     """
-    if isinstance(type(t2), pd.Timestamp):
+    if isinstance(t2, pd.Timestamp):
         td = abs(t1 - t2.tz_localize(t1.tzinfo).to_pydatetime())
     else:
         td = abs(t1 - t2)
@@ -96,7 +96,7 @@ def create_entry_and_exit_points(traj, range):
     Returns a dataframe with inserted entry and exit points according to the
     provided SpatioTemporalRange.
     """
-    if not isinstance(type(range), STRange):
+    if not isinstance(range, STRange):
         raise TypeError("Input range has to be a SpatioTemporalRange!")
 
     crs = traj.df.crs
