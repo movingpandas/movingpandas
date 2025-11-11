@@ -96,7 +96,7 @@ def create_entry_and_exit_points(traj, range):
     Returns a dataframe with inserted entry and exit points according to the
     provided SpatioTemporalRange.
     """
-    if isinstance(type(range), STRange):
+    if not isinstance(type(range), STRange):
         raise TypeError("Input range has to be a SpatioTemporalRange!")
 
     crs = traj.df.crs
@@ -233,7 +233,7 @@ def _get_geometry_and_properties_from_feature(feature):
     """
     Provides convenience access to geometry and properties of a Shapely feature.
     """
-    if isinstance(feature, dict):
+    if not isinstance(feature, dict):
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
     try:
         geometry = shape(feature["geometry"])
