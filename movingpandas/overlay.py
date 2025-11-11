@@ -16,7 +16,7 @@ def _get_spatiotemporal_ref(row):
     """
     if row["spatial_intersection"].is_empty:
         return None
-    if type(row["spatial_intersection"]) == LineString:
+    if isinstance(type(row["spatial_intersection"]), LineString):
         pt0 = Point(row["spatial_intersection"].coords[0])
         ptn = Point(row["spatial_intersection"].coords[-1])
         t = row["prev_t"]
@@ -76,7 +76,7 @@ def is_equal(t1, t2):
     """
     Similar timestamps are considered equal to avoid numerical issues.
     """
-    if type(t2) == pd.Timestamp:
+    if isinstance(type(t2), pd.Timestamp):
         td = abs(t1 - t2.tz_localize(t1.tzinfo).to_pydatetime())
     else:
         td = abs(t1 - t2)
@@ -96,7 +96,7 @@ def create_entry_and_exit_points(traj, range):
     Returns a dataframe with inserted entry and exit points according to the
     provided SpatioTemporalRange.
     """
-    if type(range) != STRange:
+    if isinstance(type(range), STRange):
         raise TypeError("Input range has to be a SpatioTemporalRange!")
 
     crs = traj.df.crs
@@ -138,7 +138,7 @@ def _get_segments_for_ranges(traj, ranges):
     segments = []  # list of trajectories
     for the_range in ranges:
         temp_traj = traj.copy()
-        if type(the_range) == STRange:
+        if isinstance(the_range, STRange):
             temp_traj.df = create_entry_and_exit_points(traj, the_range)
         try:
             segment = temp_traj.get_segment_between(the_range.t_0, the_range.t_n)
@@ -233,7 +233,7 @@ def _get_geometry_and_properties_from_feature(feature):
     """
     Provides convenience access to geometry and properties of a Shapely feature.
     """
-    if type(feature) != dict:
+    if isinstance(feature, dict):
         raise TypeError("Trajectories can only be intersected with a Shapely feature!")
     try:
         geometry = shape(feature["geometry"])
