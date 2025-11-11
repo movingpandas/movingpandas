@@ -4,7 +4,7 @@ channels:
 dependencies:
   - python=3.12
   - geopandas-base
-  - matplotlib-base
+  - matplotlib
   - geopy
   - pyogrio
   - pytest
