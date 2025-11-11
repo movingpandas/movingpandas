@@ -77,7 +77,7 @@ class TrajectoryCollection:
         self.min_length = min_length
         self.min_duration = min_duration
         self.t = t
-        if type(data) == list:
+        if isinstance(data, list):
             if min_length > 0:
                 self.trajectories = [
                     traj for traj in data if traj.is_long_enough(min_length)
@@ -565,7 +565,7 @@ class TrajectoryCollection:
         """
         filtered = []
         for traj in self:
-            if type(property_values) == list:
+            if isinstance(property_values, list):
                 if traj.df.iloc[0][property_name] in property_values:
                     filtered.append(traj)
             else:
