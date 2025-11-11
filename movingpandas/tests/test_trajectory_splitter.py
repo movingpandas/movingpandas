@@ -44,7 +44,7 @@ class TestTrajectorySplitter:
     def test_split_by_daybreak(self):
         traj = make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1)])
         split = TemporalSplitter(traj).split()
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj([Node(), Node(second=1), Node(day=2)], id="1_0")
@@ -56,7 +56,7 @@ class TestTrajectorySplitter:
     def test_split_by_date_ignores_single_node_sgements(self):
         traj = make_traj([Node(), Node(second=1), Node(day=2)])
         split = TemporalSplitter(traj).split()
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 1
         assert str(split.trajectories[0]) == str(
             make_traj([Node(), Node(second=1), Node(day=2)], id="1_0")
@@ -68,7 +68,7 @@ class TestTrajectorySplitter:
         )
         with pytest.warns(UserWarning):
             split = TemporalSplitter(traj).split()
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj([Node(), Node(second=1), Node(year=2000)], id="1_0")
@@ -80,7 +80,7 @@ class TestTrajectorySplitter:
     def test_split_by_hour(self):
         traj = make_traj([Node(), Node(second=1), Node(hour=1), Node(hour=1, second=1)])
         split = TemporalSplitter(traj).split(mode="hour")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj([Node(), Node(second=1), Node(hour=1)], id="1_0")
@@ -92,7 +92,7 @@ class TestTrajectorySplitter:
     def test_split_by_2H(self):
         traj = make_traj([Node(), Node(second=1), Node(hour=2), Node(hour=2, second=1)])
         split = TemporalSplitter(traj).split(mode="2h")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj([Node(), Node(second=1), Node(hour=2)], id="1_0")
@@ -113,7 +113,7 @@ class TestTrajectorySplitter:
             ]
         )
         split = TemporalSplitter(traj).split(mode="month")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj(
@@ -144,7 +144,7 @@ class TestTrajectorySplitter:
         )
         with pytest.warns(UserWarning):
             split = TemporalSplitter(traj).split(mode="year")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj(
@@ -165,7 +165,7 @@ class TestTrajectorySplitter:
     def test_split_by_observation_gap(self):
         traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=6)])
         split = ObservationGapSplitter(traj).split(gap=timedelta(seconds=120))
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert split.trajectories[0] == make_traj([Node(), Node(minute=1)], id="1_0")
         assert split.trajectories[1] == make_traj(
@@ -175,7 +175,7 @@ class TestTrajectorySplitter:
     def test_split_by_observation_gap_skip_single_points(self):
         traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=7)])
         split = ObservationGapSplitter(traj).split(gap=timedelta(seconds=61))
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 1
         assert split.trajectories[0] == make_traj([Node(), Node(minute=1)], id="1_0")
 
@@ -200,7 +200,7 @@ class TestTrajectorySplitter:
         traj_copy = traj.copy()
         split = SpeedSplitter(traj).split(speed=5, duration=timedelta(seconds=2))
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
 
     def test_speed_splitter_multiprocessing(self):
@@ -220,7 +220,7 @@ class TestTrajectorySplitter:
             n_processes=2, speed=5, duration=timedelta(seconds=2)
         )
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
 
     def test_speed_splitter_max_speed(self):
@@ -243,7 +243,7 @@ class TestTrajectorySplitter:
             speed=2, duration=timedelta(seconds=2), max_speed=8
         )
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
 
     def test_stop_splitter(self):
@@ -264,7 +264,7 @@ class TestTrajectorySplitter:
             max_diameter=3, min_duration=timedelta(seconds=2)
         )
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert (
             split.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 0 10, 0 20)"
@@ -292,7 +292,7 @@ class TestTrajectorySplitter:
             n_processes=2, max_diameter=3, min_duration=timedelta(seconds=2)
         )
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 2
         assert (
             split.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 0 10, 0 20)"
@@ -320,7 +320,7 @@ class TestTrajectorySplitter:
             max_diameter=3, min_duration=timedelta(seconds=2), min_length=25
         )
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 1
         assert (
             split.trajectories[0].to_linestring().wkt
@@ -329,19 +329,19 @@ class TestTrajectorySplitter:
 
     def test_collection_split_by_date(self):
         split = TemporalSplitter(self.collection).split(mode="day")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
 
     def test_collection_split_by_observation_gap(self):
         split = ObservationGapSplitter(self.collection).split(gap=timedelta(hours=1))
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 4
 
     def test_collection_split_by_observation_gap_multiprocessing(self):
         split = ObservationGapSplitter(self.collection).split(
             n_processes=2, gap=timedelta(hours=1)
         )
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 4
 
     def test_stop_splitter_stop_at_start(self):
@@ -362,7 +362,7 @@ class TestTrajectorySplitter:
             max_diameter=3, min_duration=timedelta(seconds=2)
         )
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 1
         assert (
             split.trajectories[0].to_linestring().wkt
@@ -389,7 +389,7 @@ class TestTrajectorySplitter:
         split = AngleChangeSplitter(traj).split(min_angle=45, min_speed=1.0)
 
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
         assert (
             split.trajectories[0].to_linestring().wkt
@@ -425,7 +425,7 @@ class TestTrajectorySplitter:
         )
 
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
         assert (
             split.trajectories[0].to_linestring().wkt
@@ -459,7 +459,7 @@ class TestTrajectorySplitter:
         split = AngleChangeSplitter(traj).split(min_angle=45, min_speed=1.5)
 
         assert_frame_equal(traj.df, traj_copy.df)
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
         assert (
             split.trajectories[0].to_linestring().wkt
@@ -474,7 +474,7 @@ class TestTrajectorySplitter:
 
     def test_split_by_value_change(self):
         split = ValueChangeSplitter(self.collection).split(col_name="val2")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
         assert (
             split.trajectories[1].to_linestring().wkt
@@ -490,7 +490,7 @@ class TestTrajectorySplitter:
         split = ValueChangeSplitter(self.collection).split(
             n_processes=2, col_name="val2"
         )
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
         assert (
             split.trajectories[1].to_linestring().wkt
@@ -501,7 +501,7 @@ class TestTrajectorySplitter:
 
     def test_split_by_value_change_empty_results(self):
         split = ValueChangeSplitter(self.collection).split(col_name="val")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 6
         assert split.get_crs() == "EPSG:31256"
 
@@ -533,24 +533,24 @@ class TestTrajectorySplitterNonGeo:
 
     def test_collection_split_by_date_nongeo(self):
         split = TemporalSplitter(self.collection).split(mode="day")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
 
     def test_collection_split_by_observation_gap_nongeo(self):
         split = ObservationGapSplitter(self.collection).split(gap=timedelta(hours=1))
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 4
 
     def test_collection_split_by_observation_gap_multiprocessing_nongeo(self):
         split = ObservationGapSplitter(self.collection).split(
             n_processes=2, gap=timedelta(hours=1)
         )
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 4
 
     def test_split_by_value_change_nongeo(self):
         split = ValueChangeSplitter(self.collection).split(col_name="val2")
-        assert type(split) == TrajectoryCollection
+        assert isinstance(split, TrajectoryCollection)
         assert len(split) == 3
         assert (
             split.trajectories[1].to_linestring().wkt
