@@ -404,7 +404,7 @@ class Trajectory:
         >>> reprojected = trajectory.to_crs(CRS(4088))
         """
         temp = self.copy()
-        if type(crs) != CRS:
+        if not isinstance(crs, CRS):
             crs = CRS(crs)
         temp.crs = crs
         temp.df = temp.df.to_crs(crs)
@@ -653,7 +653,7 @@ class Trajectory:
             properties["wkt"] = self.to_linestringm_wkt()
         if agg:
             for col, agg_modes in agg.items():
-                if type(agg_modes) != list:
+                if not isinstance(agg_modes, list):
                     agg_modes = [agg_modes]
                 for agg_mode in agg_modes:
                     if agg_mode == "mode":
@@ -1534,7 +1534,7 @@ class Trajectory:
                 f"the trajectory coordinate system is {self.crs}."
             )
             warnings.warn(message, UserWarning)
-        if type(other) == Trajectory:
+        if isinstance(other, Trajectory):
             other = other.to_linestring()
 
         conversion = get_conversion(units, self.crs_units)
@@ -1576,7 +1576,7 @@ class Trajectory:
                 f"the trajectory coordinate system is {self.crs}."
             )
             warnings.warn(message, UserWarning)
-        if type(other) == Trajectory:
+        if isinstance(other, Trajectory):
             other = other.to_linestring()
         dist = self.to_linestring().hausdorff_distance(other)
         conversion = get_conversion(units, self.crs_units)

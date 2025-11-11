@@ -16,7 +16,7 @@ description = """MovingPandas provides trajectory data structures and functions 
 for handling movement data based on Pandas, GeoPandas, and more. \
 Visit movingpandas.org for details."""
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "matplotlib",
     "geopandas",
