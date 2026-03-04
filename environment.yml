@@ -20,6 +20,7 @@ dependencies:
   - pre-commit
   - pytest
   - pytest-cov
+  - pytz
   - rasterio
   - scikit-learn
   - seaborn

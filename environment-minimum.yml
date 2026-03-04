@@ -10,3 +10,4 @@ dependencies:
   - pytest
   - pytest-cov
   - pyproj
+  - pytz
