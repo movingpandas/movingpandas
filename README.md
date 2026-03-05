@@ -230,5 +230,7 @@ Please cite [[0]](#publications) when using MovingPandas in your research and re
 
 [![ogh2023](https://github-production-user-asset-6210df.s3.amazonaws.com/590385/273573344-5aff5369-3db4-4d9e-9758-c9efccfd29a5.png)](https://youtu.be/roPF1oth2Pk "Watch the OpenGeoHub Summer School 2023 recording")
 
-  
+## Acknowledgements
+
+This work was supported in part by the Austrian Federal Ministry for Transport, Innovation and Technology (BMVIT) within the programme ‘IKT der Zukunft’ under grant No. 861258 ([MARNG](https://projekte.ffg.at/projekt/2764882)) as well as by the Horizon Framework Programme of the European Union under grant agreement No. 101070279 ([MobiSpaces](https://mobispaces.eu)) and No. 101093051 ([EMERALDS](https://www.emeralds-horizon.eu/)).
 
