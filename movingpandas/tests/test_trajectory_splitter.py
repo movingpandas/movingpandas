@@ -223,7 +223,7 @@ class TestTrajectorySplitter:
         assert str(split.trajectories[0]) == str(make_traj(
             [Node(), Node(minute=1)], id="1_0", crs=None
         ))
- 
+
     def test_split_by_observation_gap_does_not_alter_df(self):
         traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=7)])
         traj_copy = traj.copy()
