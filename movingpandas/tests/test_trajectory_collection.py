@@ -60,11 +60,11 @@ class TestTrajectoryCollection:
 
     def test_repr_html_contains_trajectory_count(self):
         html = self.collection._repr_html_()
-        assert f" 2 trajectories" in html
+        assert "with 2 trajectories" in html
 
     def test_repr_html_contains_trajectory_info(self):
         html = self.collection._repr_html_()
-        assert "Start: 2018-01-01" in html  # start time present somewhere
+        assert "Start: 2018-01-01" in html
 
     def test_number_of_trajectories(self):
         assert len(self.collection) == 2
