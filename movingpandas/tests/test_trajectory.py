@@ -127,6 +127,23 @@ class TestTrajectory:
             "Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
 
+    def test_repr_html_returns_string(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        html = traj._repr_html_()
+        assert isinstance(html, str)
+
+    def test_repr_html_contains_id(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC, id=42)
+        assert "42" in traj._repr_html_()
+
+    def test_repr_html_contains_key_info(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        html = traj._repr_html_()
+        assert "1970-01-01" in html  # start time
+        assert "1970-01-02" in html  # end time
+        assert f"No. rows: {traj.size()}" in html
+        assert "EPSG:31256" in html  # CRS
+
     def test_size(self):
         assert self.default_traj_metric.size() == 3
         assert self.default_traj_metric_5.size() == 5

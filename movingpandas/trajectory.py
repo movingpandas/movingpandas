@@ -218,6 +218,35 @@ class Trajectory:
     def __repr__(self):
         return self.__str__()
 
+    def _repr_html_(self):
+        try:
+            length = round(self.get_length(), 1)
+        except Exception:
+            return "<b>Invalid Trajectory</b>"
+        col_info = ", ".join(
+            f"{col} ({dtype})"
+            for col, dtype in self.df.dtypes.items()
+            if col != self.get_geom_col()
+        )
+        units = "metres" if self.is_latlon else f"{self.crs_units}s"
+        return (
+            f"<div style='border:1px solid #ccc;padding:10px'>"
+            f"<h4 style='margin:0 0 6px 0'>Trajectory {self.id} "
+            f"(No. rows: {self.size()} | Length: {length} {units})</h4>"
+            f"<table>"
+            f"<tr><td style='text-align:left'>Start: {self.get_start_time()}</td>"
+            f"<td style='text-align:left'>End: {self.get_end_time()}</td>"
+            f"<td style='text-align:left'>Duration: {self.get_duration()}</td></tr>"
+            f"<tr><td colspan='2' style='text-align:left'>Bounds: {self.get_bbox()}</td>"
+            f"<td style='text-align:left'>CRS: {self.crs}</td></tr>"
+            f"<tr><td colspan='3' style='text-align:left'>Columns: {col_info}</td></tr>"
+            f"</table>"
+            f"<details><summary>Data preview</summary>"
+            f"{self.df.head()._repr_html_()}"
+            f"</details>"
+            f"</div>"
+        )
+
     def __eq__(self, other):
         # TODO: make bullet proof
         return (
