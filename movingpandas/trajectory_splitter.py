@@ -149,6 +149,7 @@ class TemporalSplitter(TrajectorySplitter):
                         traj_id_col=traj.get_traj_id_col(),
                         x=traj.x,
                         y=traj.y,
+                        crs=traj.crs,
                     )
                 )
         return TrajectoryCollection(result, min_length=min_length)

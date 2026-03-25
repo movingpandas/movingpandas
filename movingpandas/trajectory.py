@@ -141,6 +141,8 @@ class Trajectory:
                 crs=crs,
                 # geometry=[Point(xy) for xy in zip(df[x], df[y])],
             )
+        elif df.crs is None and crs is not None:
+            df = df.set_crs(crs)
         if not isinstance(df.index, DatetimeIndex):
             if t is None:
                 raise TypeError(
@@ -209,9 +211,10 @@ class Trajectory:
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
+        units = "metres" if self.is_latlon else f"{self.crs_units}s"
         return (
             f"Trajectory {self.id} ({self.get_start_time()} to {self.get_end_time()}) "
-            f"| Size: {self.size()} | Length: {round(self.get_length(), 1)}m\n"
+            f"| Size: {self.size()} | Length: {round(self.get_length(), 1)} {units}\n"
             f"Bounds: {self.get_bbox()}\n{line.wkt[:100]}"
         )
 

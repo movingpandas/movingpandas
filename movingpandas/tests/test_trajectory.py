@@ -77,9 +77,7 @@ def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None, tz=False):
     if tz:
         df = df.tz_localize("CET")
     gdf = GeoDataFrame(df)
-    if crs:
-        gdf = gdf.set_crs(crs=crs, allow_override=True)
-    return Trajectory(gdf, id, parent=parent)
+    return Trajectory(gdf, id, parent=parent, crs=crs)
 
 
 class TestTrajectory:
@@ -124,7 +122,7 @@ class TestTrajectory:
         assert (
             str(traj)
             == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | "
-            "Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
+            "Length: 1.0 metres\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
 
     def test_repr_html_returns_string(self):
