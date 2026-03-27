@@ -214,7 +214,7 @@ class Trajectory:
             return length, "m"
         if self.crs_units is None:
             return length, "unknown units"
-        units = f"{self.crs_units}s".replace('foots', 'feet')
+        units = f"{self.crs_units}s".replace("foots", "feet")
         return length, units
 
     def __str__(self):
