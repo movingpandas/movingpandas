@@ -125,6 +125,16 @@ class TestTrajectory:
             "Length: 1.0 metres\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
 
+    def test_str_without_crs_shows_unknown_units(self):
+        with pytest.warns(MissingCRSWarning):
+            traj = make_traj([Node(0, 0), Node(0, 1, day=2)], None)
+        assert "1.0 unknown units" in str(traj)
+
+    def test_repr_html_without_crs_shows_unknown_units(self):
+        with pytest.warns(MissingCRSWarning):
+            traj = make_traj([Node(0, 0), Node(0, 1, day=2)], None)
+        assert "1.0 unknown units" in traj._repr_html_()
+
     def test_repr_html_returns_string(self):
         traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
         html = traj._repr_html_()

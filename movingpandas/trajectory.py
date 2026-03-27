@@ -211,7 +211,11 @@ class Trajectory:
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
-        units = "metres" if self.is_latlon else f"{self.crs_units}s"
+        units = (
+            "metres"
+            if self.is_latlon
+            else ("unknown units" if self.crs_units is None else f"{self.crs_units}s")
+        )
         return (
             f"Trajectory {self.id} ({self.get_start_time()} to {self.get_end_time()}) "
             f"| Size: {self.size()} | Length: {round(self.get_length(), 1)} {units}\n"
@@ -231,7 +235,11 @@ class Trajectory:
             for col, dtype in self.df.dtypes.items()
             if col != self.get_geom_col()
         )
-        units = "metres" if self.is_latlon else f"{self.crs_units}s"
+        units = (
+            "metres"
+            if self.is_latlon
+            else ("unknown units" if self.crs_units is None else f"{self.crs_units}s")
+        )
         td = "style='text-align:left'"
         return (
             f"<div style='border:1px solid #ccc;padding:10px'>"
