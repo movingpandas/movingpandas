@@ -30,6 +30,7 @@ from . import (
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
+CRS_FEET = CRS.from_user_input(2964)
 
 
 def assert_frame_not_equal(*args, **kwargs):
@@ -136,6 +137,10 @@ class TestTrajectory:
     def test_repr_html_long_length_in_km(self):
         traj = make_traj([Node(0, 0), Node(0, 2000, day=2)], CRS_METRIC)
         assert "2.0 km" in traj._repr_html_()
+
+    def test_str_with_feet_crs(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_FEET)
+        assert "1.0 US survey feet" in str(traj)
 
     def test_str_without_crs_shows_unknown_units(self):
         with pytest.warns(MissingCRSWarning):
