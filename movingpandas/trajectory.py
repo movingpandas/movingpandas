@@ -206,19 +206,25 @@ class Trajectory:
         self.df.geometry = points_from_xy(self.df[self.x], self.df[self.y])
         self.df.drop(columns=[self.x, self.y], inplace=True)
 
+    def _format_length(self):
+        length = round(self.get_length(), 1)
+        if self.is_latlon or self.crs_units in ("metre", "meter"):
+            if length >= 1000:
+                return round(length / 1000, 1), "km"
+            return length, "m"
+        if self.crs_units is None:
+            return length, "unknown units"
+        return length, f"{self.crs_units}s"
+
     def __str__(self):
         try:
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
-        units = (
-            "metres"
-            if self.is_latlon
-            else ("unknown units" if self.crs_units is None else f"{self.crs_units}s")
-        )
+        length, units = self._format_length()
         return (
             f"Trajectory {self.id} ({self.get_start_time()} to {self.get_end_time()}) "
-            f"| Size: {self.size()} | Length: {round(self.get_length(), 1)} {units}\n"
+            f"| Size: {self.size()} | Length: {length} {units}\n"
             f"Bounds: {self.get_bbox()}\n{line.wkt[:100]}"
         )
 
@@ -227,18 +233,13 @@ class Trajectory:
 
     def _repr_html_(self):
         try:
-            length = round(self.get_length(), 1)
+            length, units = self._format_length()
         except Exception:
             return "<b>Invalid Trajectory</b>"
         col_info = ", ".join(
             f"{col} ({dtype})"
             for col, dtype in self.df.dtypes.items()
             if col != self.get_geom_col()
-        )
-        units = (
-            "metres"
-            if self.is_latlon
-            else ("unknown units" if self.crs_units is None else f"{self.crs_units}s")
         )
         td = "style='text-align:left'"
         return (

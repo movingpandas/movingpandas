@@ -122,8 +122,20 @@ class TestTrajectory:
         assert (
             str(traj)
             == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | "
-            "Length: 1.0 metres\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
+            "Length: 1.0 m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
+
+    def test_str_short_length_in_m(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        assert "1.0 m" in str(traj)
+
+    def test_str_long_length_in_km(self):
+        traj = make_traj([Node(0, 0), Node(0, 2000, day=2)], CRS_METRIC)
+        assert "2.0 km" in str(traj)
+
+    def test_repr_html_long_length_in_km(self):
+        traj = make_traj([Node(0, 0), Node(0, 2000, day=2)], CRS_METRIC)
+        assert "2.0 km" in traj._repr_html_()
 
     def test_str_without_crs_shows_unknown_units(self):
         with pytest.warns(MissingCRSWarning):
