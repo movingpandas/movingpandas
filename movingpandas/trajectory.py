@@ -141,6 +141,8 @@ class Trajectory:
                 crs=crs,
                 # geometry=[Point(xy) for xy in zip(df[x], df[y])],
             )
+        elif df.crs is None and crs is not None:
+            df = df.set_crs(crs)
         if not isinstance(df.index, DatetimeIndex):
             if t is None:
                 raise TypeError(
@@ -204,19 +206,60 @@ class Trajectory:
         self.df.geometry = points_from_xy(self.df[self.x], self.df[self.y])
         self.df.drop(columns=[self.x, self.y], inplace=True)
 
+    def _format_length(self):
+        length = round(self.get_length(), 1)
+        if self.is_latlon or self.crs_units in ("metre", "meter"):
+            if length >= 1000:
+                return round(length / 1000, 1), "km"
+            return length, "m"
+        if self.crs_units is None:
+            return length, "unknown units"
+        units = f"{self.crs_units}s".replace("foots", "feet")
+        return length, units
+
     def __str__(self):
         try:
             line = self.to_linestring()
         except RuntimeError:
             return "Invalid trajectory!"
+        length, units = self._format_length()
         return (
             f"Trajectory {self.id} ({self.get_start_time()} to {self.get_end_time()}) "
-            f"| Size: {self.size()} | Length: {round(self.get_length(), 1)}m\n"
+            f"| Size: {self.size()} | Length: {length} {units}\n"
             f"Bounds: {self.get_bbox()}\n{line.wkt[:100]}"
         )
 
     def __repr__(self):
         return self.__str__()
+
+    def _repr_html_(self):
+        try:
+            length, units = self._format_length()
+        except Exception:
+            return "<b>Invalid Trajectory</b>"
+        col_info = ", ".join(
+            f"{col} ({dtype})"
+            for col, dtype in self.df.dtypes.items()
+            if col != self.get_geom_col()
+        )
+        td = "style='text-align:left'"
+        return (
+            f"<div style='border:1px solid #ccc;padding:10px'>"
+            f"<h4 style='margin:0 0 6px 0'>Trajectory {self.id} "
+            f"(No. rows: {self.size()} | Length: {length} {units})</h4>"
+            f"<table>"
+            f"<tr><td {td}>Start: {self.get_start_time()}</td>"
+            f"<td {td}>End: {self.get_end_time()}</td>"
+            f"<td {td}>Duration: {self.get_duration()}</td></tr>"
+            f"<tr><td colspan='2' {td}>Bounds: {self.get_bbox()}</td>"
+            f"<td {td}>CRS: {self.crs}</td></tr>"
+            f"<tr><td colspan='3' {td}>Columns: {col_info}</td></tr>"
+            f"</table>"
+            f"<details><summary>Data preview</summary>"
+            f"{self.df.head()._repr_html_()}"
+            f"</details>"
+            f"</div>"
+        )
 
     def __eq__(self, other):
         # TODO: make bullet proof

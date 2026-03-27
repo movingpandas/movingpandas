@@ -4,7 +4,6 @@ from copy import copy
 from functools import partial
 from multiprocessing import Pool
 from pandas import Grouper
-from geopandas import GeoDataFrame
 import numpy as np
 import warnings
 
@@ -149,6 +148,7 @@ class TemporalSplitter(TrajectorySplitter):
                         traj_id_col=traj.get_traj_id_col(),
                         x=traj.x,
                         y=traj.y,
+                        crs=traj.crs,
                     )
                 )
         return TrajectoryCollection(result, min_length=min_length)
@@ -190,6 +190,7 @@ class ObservationGapSplitter(TrajectorySplitter):
                         traj_id_col=traj.get_traj_id_col(),
                         x=traj.x,
                         y=traj.y,
+                        crs=traj.crs,
                     )
                 )
         return TrajectoryCollection(result, min_length=min_length)
@@ -340,6 +341,7 @@ class AngleChangeSplitter(TrajectorySplitter):
                         traj_id_col=traj.get_traj_id_col(),
                         x=traj.x,
                         y=traj.y,
+                        crs=traj.crs,
                     )
                 )
 
@@ -381,7 +383,6 @@ class ValueChangeSplitter(TrajectorySplitter):
                 df.loc[next_index] = next_values
                 df = df.sort_index(ascending=True)
             if len(df) > 1:
-                df = GeoDataFrame(df).set_crs(traj.df.crs)
                 result.append(
                     Trajectory(
                         df,
@@ -389,6 +390,7 @@ class ValueChangeSplitter(TrajectorySplitter):
                         traj_id_col=traj.get_traj_id_col(),
                         x=traj.x,
                         y=traj.y,
+                        crs=traj.crs,
                     )
                 )
         return TrajectoryCollection(result, min_length=min_length)

@@ -104,6 +104,21 @@ class TrajectoryCollection:
     def __repr__(self):
         return self.__str__()
 
+    def _repr_html_(self):
+        traj_html = "".join(traj._repr_html_() for traj in self.trajectories[:5])
+        more = (
+            f"<p>... and {len(self.trajectories) - 5} more trajectories</p>"
+            if len(self.trajectories) > 5
+            else ""
+        )
+        return (
+            f"<div style='border:1px solid #ccc;padding:10px'>"
+            f"<h4 style='margin:0 0 6px 0'>"
+            f"TrajectoryCollection with {len(self.trajectories)} trajectories</h4>"
+            f"{traj_html}{more}"
+            f"</div>"
+        )
+
     def __iter__(self):
         """
         Iterator for trajectories in this collection

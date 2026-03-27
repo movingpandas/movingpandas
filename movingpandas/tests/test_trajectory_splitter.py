@@ -45,12 +45,35 @@ class TestTrajectorySplitter:
         traj = make_traj([Node(), Node(second=1), Node(day=2), Node(day=2, second=1)])
         split = TemporalSplitter(traj).split()
         assert isinstance(split, TrajectoryCollection)
+        assert split.trajectories[0].get_crs() == "EPSG:31256"
         assert len(split) == 2
         assert str(split.trajectories[0]) == str(
             make_traj([Node(), Node(second=1), Node(day=2)], id="1_0")
         )
         assert str(split.trajectories[1]) == str(
             make_traj([Node(day=2), Node(day=2, second=1)], id="1_1")
+        )
+
+    def test_split_by_daybreak_is_crs_aware(self):
+        traj = make_traj(
+            [Node(), Node(second=1), Node(day=2), Node(day=2, second=1, x=10, y=10)],
+            crs=CRS_LATLON,
+        )
+        split = TemporalSplitter(traj).split()
+        assert split.trajectories[0].get_crs() == "EPSG:4326"
+        assert str(split.trajectories[1]) == str(
+            make_traj(
+                [Node(day=2), Node(day=2, second=1, x=10, y=10)],
+                id="1_1",
+                crs=CRS_LATLON,
+            )
+        )
+        assert str(split.trajectories[1]) != str(
+            make_traj(
+                [Node(day=2), Node(day=2, second=1, x=10, y=10)],
+                id="1_1",
+                crs=CRS_METRIC,
+            )
         )
 
     def test_split_by_date_ignores_single_node_sgements(self):
@@ -177,7 +200,29 @@ class TestTrajectorySplitter:
         split = ObservationGapSplitter(traj).split(gap=timedelta(seconds=61))
         assert isinstance(split, TrajectoryCollection)
         assert len(split) == 1
+        assert split.get_crs() == "EPSG:31256"
         assert split.trajectories[0] == make_traj([Node(), Node(minute=1)], id="1_0")
+
+    def test_observation_gap_splitter_is_crs_aware(self):
+        traj = make_traj(
+            [Node(x=10), Node(minute=1), Node(minute=5), Node(minute=7)], crs=CRS_LATLON
+        )
+        split = ObservationGapSplitter(traj).split(gap=timedelta(seconds=61))
+        assert str(split.trajectories[0]) == str(
+            make_traj([Node(x=10), Node(minute=1)], id="1_0", crs=CRS_LATLON)
+        )
+        assert str(split.trajectories[0]) != str(
+            make_traj([Node(x=10), Node(minute=1)], id="1_0", crs=CRS_METRIC)
+        )
+
+    def test_observation_gap_splitter_without_crs(self):
+        traj = make_traj(
+            [Node(), Node(minute=1), Node(minute=5), Node(minute=7)], crs=None
+        )
+        split = ObservationGapSplitter(traj).split(gap=timedelta(seconds=61))
+        assert str(split.trajectories[0]) == str(
+            make_traj([Node(), Node(minute=1)], id="1_0", crs=None)
+        )
 
     def test_split_by_observation_gap_does_not_alter_df(self):
         traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=7)])

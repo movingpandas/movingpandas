@@ -54,6 +54,18 @@ class TestTrajectoryCollection:
             self.geo_df_latlon, "id", obj_id_col="obj"
         )
 
+    def test_repr_html_returns_string(self):
+        html = self.collection._repr_html_()
+        assert isinstance(html, str)
+
+    def test_repr_html_contains_trajectory_count(self):
+        html = self.collection._repr_html_()
+        assert "with 2 trajectories" in html
+
+    def test_repr_html_contains_trajectory_info(self):
+        html = self.collection._repr_html_()
+        assert "Start: 2018-01-01" in html
+
     def test_number_of_trajectories(self):
         assert len(self.collection) == 2
 

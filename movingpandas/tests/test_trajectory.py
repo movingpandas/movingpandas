@@ -30,6 +30,7 @@ from . import (
 
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
+CRS_FEET = CRS.from_user_input(2964)
 
 
 def assert_frame_not_equal(*args, **kwargs):
@@ -77,9 +78,7 @@ def make_traj(nodes, crs=CRS_METRIC, id=1, parent=None, tz=False):
     if tz:
         df = df.tz_localize("CET")
     gdf = GeoDataFrame(df)
-    if crs:
-        gdf = gdf.set_crs(crs=crs, allow_override=True)
-    return Trajectory(gdf, id, parent=parent)
+    return Trajectory(gdf, id, parent=parent, crs=crs)
 
 
 class TestTrajectory:
@@ -124,8 +123,51 @@ class TestTrajectory:
         assert (
             str(traj)
             == "Trajectory 1 (1970-01-01 00:00:00 to 1970-01-02 00:00:00) | Size: 2 | "
-            "Length: 1.0m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
+            "Length: 1.0 m\nBounds: (0.0, 0.0, 0.0, 1.0)\nLINESTRING (0 0, 0 1)"
         )
+
+    def test_str_short_length_in_m(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        assert "1.0 m" in str(traj)
+
+    def test_str_long_length_in_km(self):
+        traj = make_traj([Node(0, 0), Node(0, 2000, day=2)], CRS_METRIC)
+        assert "2.0 km" in str(traj)
+
+    def test_repr_html_long_length_in_km(self):
+        traj = make_traj([Node(0, 0), Node(0, 2000, day=2)], CRS_METRIC)
+        assert "2.0 km" in traj._repr_html_()
+
+    def test_str_with_feet_crs(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_FEET)
+        assert "1.0 US survey feet" in str(traj)
+
+    def test_str_without_crs_shows_unknown_units(self):
+        with pytest.warns(MissingCRSWarning):
+            traj = make_traj([Node(0, 0), Node(0, 1, day=2)], None)
+        assert "1.0 unknown units" in str(traj)
+
+    def test_repr_html_without_crs_shows_unknown_units(self):
+        with pytest.warns(MissingCRSWarning):
+            traj = make_traj([Node(0, 0), Node(0, 1, day=2)], None)
+        assert "1.0 unknown units" in traj._repr_html_()
+
+    def test_repr_html_returns_string(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        html = traj._repr_html_()
+        assert isinstance(html, str)
+
+    def test_repr_html_contains_id(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC, id=42)
+        assert "42" in traj._repr_html_()
+
+    def test_repr_html_contains_key_info(self):
+        traj = make_traj([Node(0, 0), Node(0, 1, day=2)], CRS_METRIC)
+        html = traj._repr_html_()
+        assert "1970-01-01" in html  # start time
+        assert "1970-01-02" in html  # end time
+        assert f"No. rows: {traj.size()}" in html
+        assert "EPSG:31256" in html  # CRS
 
     def test_size(self):
         assert self.default_traj_metric.size() == 3
