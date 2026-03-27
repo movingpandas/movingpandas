@@ -6,77 +6,48 @@
 # BSD 3-Clause License
 
 import pytest
+import pandas as pd
+from datetime import datetime
+from geopandas import GeoDataFrame
 from pyproj import CRS
+from shapely.geometry import Point
 
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.mobility_metrics import MobilityMetricsCalculator
-from .test_trajectory import Node, make_traj
 
 CRS_LATLON = CRS.from_user_input(4326)
 CRS_METRIC = CRS.from_user_input(31256)
 
-NODES_U1 = [
-    Node(10.5079940, 43.8430139, 2011, 2, 3, 8, 34, 4),
-    Node(10.3261500, 43.5442700, 2011, 2, 3, 9, 34, 4),
-    Node(10.4036000, 43.7085300, 2011, 2, 3, 10, 34, 4),
-    Node(11.2462600, 43.7792500, 2011, 2, 4, 10, 34, 4),
-]
-
-NODES_U2 = [
-    Node(10.5079940, 43.8430139, 2011, 2, 3, 8, 34, 4),
-    Node(10.4036000, 43.7085300, 2011, 2, 3, 9, 34, 4),
-    Node(10.5079940, 43.8430139, 2011, 2, 4, 10, 34, 4),
-    Node(10.3261500, 43.5442700, 2011, 2, 4, 11, 34, 4),
-]
-
-NODES_U3 = [
-    Node(10.3261500, 43.5442700, 2011, 2, 3, 8, 34, 4),
-    Node(10.4036000, 43.7085300, 2011, 2, 3, 9, 34, 4),
-    Node(10.5079940, 43.8430139, 2011, 2, 4, 10, 34, 4),
-    Node(11.2462600, 43.7792500, 2011, 2, 4, 11, 34, 4),
-]
-
-NODES_U4 = [
-    Node(10.4036000, 43.7085300, 2011, 2, 4, 10, 34, 4),
-    Node(10.3261500, 43.5442700, 2011, 2, 4, 11, 34, 4),
-    Node(11.2462600, 43.7792500, 2011, 2, 4, 12, 34, 4),
-]
-
-NODES_U5 = [
-    Node(10.4036000, 43.7085300, 2011, 2, 4, 10, 34, 4),
-    Node(11.2462600, 43.7792500, 2011, 2, 4, 11, 34, 4),
-    Node(10.5079940, 43.8430139, 2011, 2, 5, 12, 34, 4),
-]
-
-NODES_U6 = [
-    Node(10.5079940, 43.8430139, 2011, 2, 4, 10, 34, 4),
-    Node(10.3261500, 43.5442700, 2011, 2, 4, 11, 34, 4),
-]
-
-NODES_U99 = [
-    Node(0, 0, 2011, 2, 4, 10, 34, 4),
-    Node(0, 20, 2011, 2, 4, 12, 34, 4),
-]
-
 
 class TestMobilityMetricsCalculator:
     def setup_method(self):
-        self.traj1 = make_traj(NODES_U1, crs=CRS_LATLON, id=1)
-        self.traj2 = make_traj(NODES_U2, crs=CRS_LATLON, id=2)
-        self.traj3 = make_traj(NODES_U3, crs=CRS_LATLON, id=3)
-        self.traj4 = make_traj(NODES_U4, crs=CRS_LATLON, id=4)
-        self.traj5 = make_traj(NODES_U5, crs=CRS_LATLON, id=5)
-        self.traj6 = make_traj(NODES_U6, crs=CRS_LATLON, id="A")
-        self.collection = TrajectoryCollection(
+        df = pd.DataFrame(
             [
-                self.traj1,
-                self.traj2,
-                self.traj3,
-                self.traj4,
-                self.traj5,
-                self.traj6,
-            ]
-        )
+                [1, Point(10.507994, 43.843014), datetime(2011, 2, 3, 8, 34, 4)],
+                [1, Point(10.326150, 43.544270), datetime(2011, 2, 3, 9, 34, 4)],
+                [1, Point(10.403600, 43.708530), datetime(2011, 2, 3, 10, 34, 4)],
+                [1, Point(11.246260, 43.779250), datetime(2011, 2, 4, 10, 34, 4)],
+                [2, Point(10.507994, 43.843014), datetime(2011, 2, 3, 8, 34, 4)],
+                [2, Point(10.403600, 43.708530), datetime(2011, 2, 3, 9, 34, 4)],
+                [2, Point(10.507994, 43.843014), datetime(2011, 2, 4, 10, 34, 4)],
+                [2, Point(10.326150, 43.544270), datetime(2011, 2, 4, 11, 34, 4)],
+                [3, Point(10.326150, 43.544270), datetime(2011, 2, 3, 8, 34, 4)],
+                [3, Point(10.403600, 43.708530), datetime(2011, 2, 3, 9, 34, 4)],
+                [3, Point(10.507994, 43.843014), datetime(2011, 2, 4, 10, 34, 4)],
+                [3, Point(11.246260, 43.779250), datetime(2011, 2, 4, 11, 34, 4)],
+                [4, Point(10.403600, 43.708530), datetime(2011, 2, 4, 10, 34, 4)],
+                [4, Point(10.326150, 43.544270), datetime(2011, 2, 4, 11, 34, 4)],
+                [4, Point(11.246260, 43.779250), datetime(2011, 2, 4, 12, 34, 4)],
+                [5, Point(10.403600, 43.708530), datetime(2011, 2, 4, 10, 34, 4)],
+                [5, Point(11.246260, 43.779250), datetime(2011, 2, 4, 11, 34, 4)],
+                [5, Point(10.507994, 43.843014), datetime(2011, 2, 5, 12, 34, 4)],
+                ["A", Point(10.507994, 43.843014), datetime(2011, 2, 4, 10, 34, 4)],
+                ["A", Point(10.326150, 43.544270), datetime(2011, 2, 4, 11, 34, 4)],
+            ],
+            columns=["id", "geometry", "t"],
+        ).set_index("t")
+        geo_df = GeoDataFrame(df, crs=CRS_LATLON)
+        self.collection = TrajectoryCollection(geo_df, traj_id_col="id")
         self.calc = MobilityMetricsCalculator(self.collection)
 
     def test_radius_of_gyration(self):
@@ -95,8 +66,16 @@ class TestMobilityMetricsCalculator:
 
 class TestMobilityMetricsCalculatorMetricCRS:
     def setup_method(self):
-        self.traj = make_traj(NODES_U99, crs=CRS_METRIC, id=99)
-        self.calc = MobilityMetricsCalculator(self.traj)
+        df = pd.DataFrame(
+            [
+                [99, Point(0, 0), datetime(2011, 2, 4, 10, 34, 4)],
+                [99, Point(0, 20), datetime(2011, 2, 4, 12, 34, 4)],
+            ],
+            columns=["id", "geometry", "t"],
+        ).set_index("t")
+        geo_df = GeoDataFrame(df, crs=CRS_METRIC)
+        traj = TrajectoryCollection(geo_df, traj_id_col="id").trajectories[0]
+        self.calc = MobilityMetricsCalculator(traj)
 
     def test_radius_of_gyration_metric(self):
         rog = self.calc.radius_of_gyration()
