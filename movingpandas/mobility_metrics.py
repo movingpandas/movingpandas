@@ -89,6 +89,43 @@ class MobilityMetricsCalculator:
             return next(iter(results.values()))
         return pd.Series(results)
 
+    def distance_straight_line(self):
+        """
+        Compute the straight-line distance.
+
+        The straight-line distance of an individual :math:`u` is defined as
+        [SQBB2010]_:
+
+        .. math::
+            d_{SL}(u) = \sum_{j=2}^{n_u} dist(r_{j-1}(u), r_j(u))
+
+        where :math:`r_j(u)` represents the :math:`n_u` positions recorded
+        for :math:`u`, and :math:`dist` is the geographic distance between
+        two points. This is the total distance covered by :math:`u`.
+
+        Returns
+        -------
+        float or pd.Series
+            float if a single Trajectory was provided, otherwise pd.Series
+            indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).distance_straight_line()
+
+        References
+        ----------
+        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010)
+           Limits of Predictability in Human Mobility. Science 327(5968),
+           1018-1021, https://science.sciencemag.org/content/327/5968/1018
+        """  # noqa: W605
+        results = {}
+        for traj in self._trajectories:
+            results[traj.id] = traj.get_length()
+        if len(self._trajectories) == 1:
+            return next(iter(results.values()))
+        return pd.Series(results)
+
     def random_entropy(self):
         """
         Compute the random entropy.

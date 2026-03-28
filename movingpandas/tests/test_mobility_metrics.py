@@ -75,6 +75,18 @@ class TestMobilityMetricsCalculator:
         assert rog.loc[5] == pytest.approx(30806.80, rel=1e-2)  # 30.727237693
         assert rog.loc["A"] == pytest.approx(18142.77, rel=1e-2)  # 18.146860183
 
+    def test_distance_straight_line(self):
+        dsl = self.calc.distance_straight_line()
+        assert len(dsl) == 6
+        # original values in km in comments, differences due to more precise
+        # distance calculations compared to scikit-mobility's Haversine formula
+        assert dsl.loc[1] == pytest.approx(123906.01, rel=1e-2)  # 123.74008488
+        assert dsl.loc[2] == pytest.approx(70572.91, rel=1e-2)  # 70.57908362
+        assert dsl.loc[3] == pytest.approx(96256.40, rel=1e-2)  # 96.10397212
+        assert dsl.loc[4] == pytest.approx(97964.95, rel=1e-2)  # 97.79046189
+        assert dsl.loc[5] == pytest.approx(128151.39, rel=1e-2)  # 127.8088686
+        assert dsl.loc["A"] == pytest.approx(36285.54, rel=1e-2)  # 36.29370121
+
 
 class TestMobilityMetricsCalculatorMetricCRS:
     def setup_method(self):
@@ -96,6 +108,9 @@ class TestMobilityMetricsCalculatorMetricCRS:
     def test_random_entropy_metric(self):
         assert self.calc.random_entropy() == pytest.approx(math.log2(2), rel=1e-2)
 
+    def test_distance_straight_line_metric(self):
+        assert self.calc.distance_straight_line() == pytest.approx(20, rel=1e-2)
+
 
 class TestMobilityMetricsCalculatorNoCRS:
     def setup_method(self):
@@ -116,3 +131,6 @@ class TestMobilityMetricsCalculatorNoCRS:
 
     def test_random_entropy_no_crs(self):
         assert self.calc.random_entropy() == pytest.approx(math.log2(2), rel=1e-2)
+
+    def test_distance_straight_line_no_crs(self):
+        assert self.calc.distance_straight_line() == pytest.approx(20, rel=1e-2)
