@@ -182,8 +182,8 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
 
     References
     ----------
-    .. [DP1973] Douglas, D., & Peucker, T. (1973). Algorithms for the reduction of the number
-      of points required to represent a digitized line or its caricature.
+    .. [DP1973] Douglas, D., & Peucker, T. (1973). Algorithms for the reduction of the
+      number of points required to represent a digitized line or its caricature.
       The Canadian Cartographer 10(2), 112–122. doi:10.3138/FM57-6770-U75U-7727.
     """
 
@@ -225,9 +225,9 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
 
     References
     ----------
-    .. [MB2004] Meratnia, N., & de By, R.A. (2004). Spatiotemporal compression techniques for
-      moving point objects. In International Conference on Extending Database Technology
-      (pp. 765-782). Springer, Berlin, Heidelberg.
+    .. [MB2004] Meratnia, N., & de By, R.A. (2004). Spatiotemporal compression
+      techniques for moving point objects. In International Conference on Extending
+      Database Technology (pp. 765-782). Springer, Berlin, Heidelberg.
     """
 
     def _generalize_traj(self, traj, tolerance):
