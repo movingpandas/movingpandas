@@ -91,18 +91,19 @@ class MobilityMetricsCalculator:
 
     def distance_straight_line(self):
         """
-        Compute the straight-line distance.
+        Compute the straight-line distance in meters (or CRS units for
+        projected CRS).
 
-        The straight-line distance of an individual :math:`u` is defined as
-        [SQBB2010]_:
+        The straight-line distance of an individual :math:`u` is defined as:
 
-        .. math::
-            d_{SL}(u) = \sum_{j=2}^{n_u} dist(r_{j-1}(u), r_j(u))
-
-        where :math:`r_j(u)` represents the :math:`n_u` positions recorded
-        for :math:`u`, and :math:`dist` is the geographic distance between
-        two points. This is the total distance covered by :math:`u`.
-
+        .. math:: d_{SL} = \sum_{j=2}^{n_u} dist(r_{j-1}, r_j)
+        
+        where :math:`n_u` is the number of points recorded for :math:`u`,
+        :math:`r_{j-1}` and :math:`r_j` are two consecutive points,
+        described as a :math:`(latitude, longitude)` pair, in :math:`u`'s
+        time-ordered trajectory, and :math:`dist` is the geographic distance
+        between the two points [WTDED2015]_.
+        
         Returns
         -------
         float or pd.Series
@@ -115,10 +116,11 @@ class MobilityMetricsCalculator:
 
         References
         ----------
-        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010)
-           Limits of Predictability in Human Mobility. Science 327(5968),
-           1018-1021, https://science.sciencemag.org/content/327/5968/1018
-        """  # noqa: W605
+        .. [WTDED2015] Williams, N. E., Thomas, T. A., Dunbar, M., Eagle, N. &
+           Dobra, A. (2015) Measures of Human Mobility Using Mobile Phone
+           Records Enhanced with GIS Data. PLOS ONE 10(7): e0133630.
+           https://doi.org/10.1371/journal.pone.0133630    
+        """
         results = {}
         for traj in self._trajectories:
             results[traj.id] = traj.get_length()
