@@ -1,8 +1,6 @@
-MovingPandas.MobilityMetricsCalculator
-=======================================
-
-.. automodule:: movingpandas
-    :noindex:
+MobilityMetricsCalculator
+=========================
+.. currentmodule:: movingpandas
 
 **MobilityMetricsCalculator** provides methods to compute various human mobility metrics for a collection of trajectories. 
 These metrics include the radius of gyration, random entropy, and other measures that capture different aspects of human mobility patterns.

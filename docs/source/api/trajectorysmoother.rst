@@ -1,9 +1,6 @@
-MovingPandas.TrajectorySmoother
-===============================
-
-.. automodule:: movingpandas
-    :members:
-    :noindex:
+TrajectorySmoother
+==================
+.. currentmodule:: movingpandas
 
 .. autoclass:: KalmanSmootherCV
    :members:

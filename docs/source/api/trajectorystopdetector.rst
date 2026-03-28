@@ -1,9 +1,6 @@
-MovingPandas.TrajectoryStopDetector
-===========================================
-
-.. automodule:: movingpandas
-    :members:
-    :noindex:
+TrajectoryStopDetector
+======================
+.. currentmodule:: movingpandas
 
 .. autoclass:: TrajectoryStopDetector
    :members:

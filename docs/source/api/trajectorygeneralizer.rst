@@ -1,9 +1,6 @@
-MovingPandas.TrajectoryGeneralizer
-===========================================
-
-.. automodule:: movingpandas
-    :members:
-    :noindex:
+TrajectoryGeneralizer
+=====================
+.. currentmodule:: movingpandas
 
 .. autoclass:: TrajectoryGeneralizer
    :members:

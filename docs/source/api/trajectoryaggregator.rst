@@ -1,8 +1,6 @@
-MovingPandas.TrajectoryCollectionAggregator
-===========================================
-
-.. automodule:: movingpandas
-    :noindex:
+TrajectoryCollectionAggregator
+==============================
+.. currentmodule:: movingpandas
 
 **TrajectoryCollectionAggregator** generalizes and aggregates trajectories by extracting
 clusters of significant trajectory points and computing flows between the clusters.
@@ -15,3 +13,5 @@ https://anitagraser.com/2016/11/07/movement-data-in-gis-3-visualizing-massive-tr
 
    .. automethod:: __init__
 
+.. autosummary::
+:toctree: api/
