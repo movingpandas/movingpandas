@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+#
+# Methods and docstrings adapted from scikit-mobility
+# https://github.com/scikit-mobility/scikit-mobility
+# Copyright (c) 2021, scikit-mobility contributors
+# BSD 3-Clause License
 
 import math
 
@@ -21,11 +26,16 @@ class MobilityMetricsCalculator:
 
     def radius_of_gyration(self):
         """
-        Radius of gyration for each trajectory.
-
-        Computes the root mean square distance of all visited locations from
-        the center of mass (mean x/y).
-        Distances are calculated in meters (or CRS units for projected CRS).
+        Computes the radius of gyration.
+        The radius of gyration of an individual :math:`u` is defined as [GHB2008]_ [PRQPG2013]_: 
+        
+        .. math:: 
+            r_g(u) = \sqrt{ \\frac{1}{n_u} \sum_{i=1}^{n_u} dist(r_i(u) - r_{cm}(u))^2}
+        
+        where :math:`r_i(u)` represents the :math:`n_u` positions recorded for :math:`u`, 
+        and :math:`r_{cm}(u)` is the center of mass of :math:`u`'s trajectory. In mobility 
+        analysis, the radius of gyration indicates the characteristic distance travelled by 
+        :math:`u`.
 
         Returns
         -------
@@ -55,6 +65,41 @@ class MobilityMetricsCalculator:
                 ]
             )
             results[traj.id] = math.sqrt(float(np.mean(distances**2)))
+        if len(self._trajectories) == 1:
+            return next(iter(results.values()))
+        return pd.Series(results)
+
+    def random_entropy(self):
+        """
+        Compute the random entropy.
+        The random entropy of an individual :math:`u` is defined as [EP2009]_ [SQBB2010]_: 
+        
+        .. math::
+            E_{rand}(u) = log_2(N_u)
+        
+        where :math:`N_u` is the number of distinct locations visited by :math:`u`, 
+        capturing the degree of predictability of :math:`u`’s whereabouts if each location 
+        is visited with equal probability. 
+
+        Returns
+        -------
+        float or pd.Series
+            float if a single Trajectory was provided, otherwise pd.Series
+            indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).random_entropy()
+
+        References
+        ----------
+        .. [EP2009] Eagle, N. & Pentland, A. S. (2009) Eigenbehaviors: identifying structure in routine. Behavioral Ecology and Sociobiology 63(7), 1057-1066, https://link.springer.com/article/10.1007/s00265-009-0830-6
+        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010) Limits of Predictability in Human Mobility. Science 327(5968), 1018-1021, https://science.sciencemag.org/content/327/5968/1018
+        """  # noqa: E501
+        results = {}
+        for traj in self._trajectories:
+            n_locations = traj.df.geometry.nunique()
+            results[traj.id] = math.log2(n_locations)
         if len(self._trajectories) == 1:
             return next(iter(results.values()))
         return pd.Series(results)

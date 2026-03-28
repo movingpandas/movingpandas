@@ -5,6 +5,7 @@
 # Copyright (c) 2021, scikit-mobility contributors
 # BSD 3-Clause License
 
+import math
 import pytest
 import pandas as pd
 from datetime import datetime
@@ -12,6 +13,7 @@ from geopandas import GeoDataFrame
 from pyproj import CRS
 from shapely.geometry import Point
 
+from movingpandas.trajectory import Trajectory
 from movingpandas.trajectory_collection import TrajectoryCollection
 from movingpandas.mobility_metrics import MobilityMetricsCalculator
 
@@ -50,6 +52,16 @@ class TestMobilityMetricsCalculator:
         self.collection = TrajectoryCollection(geo_df, traj_id_col="id")
         self.calc = MobilityMetricsCalculator(self.collection)
 
+    def test_random_entropy(self):
+        re = self.calc.random_entropy()
+        assert len(re) == 6
+        assert re.loc[1] == pytest.approx(math.log2(4), rel=1e-2)  # 2.0
+        assert re.loc[2] == pytest.approx(math.log2(3), rel=1e-2)  # 1.585
+        assert re.loc[3] == pytest.approx(math.log2(4), rel=1e-2)  # 2.0
+        assert re.loc[4] == pytest.approx(math.log2(3), rel=1e-2)  # 1.585
+        assert re.loc[5] == pytest.approx(math.log2(3), rel=1e-2)  # 1.585
+        assert re.loc["A"] == pytest.approx(math.log2(2), rel=1e-2)  # 1.0
+
     def test_radius_of_gyration(self):
         rog = self.calc.radius_of_gyration()
         assert len(rog) == 6
@@ -74,9 +86,33 @@ class TestMobilityMetricsCalculatorMetricCRS:
             columns=["id", "geometry", "t"],
         ).set_index("t")
         geo_df = GeoDataFrame(df, crs=CRS_METRIC)
-        traj = TrajectoryCollection(geo_df, traj_id_col="id").trajectories[0]
+        traj = Trajectory(geo_df, traj_id=99)
         self.calc = MobilityMetricsCalculator(traj)
 
     def test_radius_of_gyration_metric(self):
         rog = self.calc.radius_of_gyration()
         assert rog == pytest.approx(10, rel=1e-2)
+
+    def test_random_entropy_metric(self):
+        assert self.calc.random_entropy() == pytest.approx(math.log2(2), rel=1e-2)
+
+
+class TestMobilityMetricsCalculatorNoCRS:
+    def setup_method(self):
+        df = pd.DataFrame(
+            [
+                [99, Point(0, 0), datetime(2011, 2, 4, 10, 34, 4)],
+                [99, Point(0, 20), datetime(2011, 2, 4, 12, 34, 4)],
+            ],
+            columns=["id", "geometry", "t"],
+        ).set_index("t")
+        geo_df = GeoDataFrame(df)
+        traj = Trajectory(geo_df, traj_id=99, crs=None)
+        self.calc = MobilityMetricsCalculator(traj)
+
+    def test_radius_of_gyration_no_crs(self):
+        rog = self.calc.radius_of_gyration()
+        assert rog == pytest.approx(10, rel=1e-2)
+
+    def test_random_entropy_no_crs(self):
+        assert self.calc.random_entropy() == pytest.approx(math.log2(2), rel=1e-2)
