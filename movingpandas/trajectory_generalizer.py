@@ -60,7 +60,7 @@ class TrajectoryGeneralizer:
 
 class MinDistanceGeneralizer(TrajectoryGeneralizer):
     """
-    Generalizes based on distance.
+    Generalize based on distance.
 
     This generalization ensures that consecutive locations are at least a
     certain distance apart.
@@ -73,7 +73,6 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
 
     Examples
     --------
-
     >>> mpd.MinDistanceGeneralizer(traj).generalize(tolerance=1.0)
     """
 
@@ -97,7 +96,7 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
 
 class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
     """
-    Generalizes based on time.
+    Generalize based on time.
 
     This generalization ensures that consecutive rows are at least a certain
     timedelta apart.
@@ -107,7 +106,6 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
 
     Examples
     --------
-
     >>> mpd.MinTimeDeltaGeneralizer(traj).generalize(tolerance=timedelta(minutes=10))
     """
 
@@ -134,7 +132,7 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
 
 class MaxDistanceGeneralizer(TrajectoryGeneralizer):
     """
-    Generalizes based on distance.
+    Generalize based on distance.
 
     Similar to Douglas-Peuker. Single-pass implementation that checks whether
     the provided distance threshold is exceed.
@@ -144,7 +142,6 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
 
     Examples
     --------
-
     >>> mpd.MaxDistanceGeneralizer(traj).generalize(tolerance=1.0)
     """
 
@@ -174,21 +171,20 @@ class MaxDistanceGeneralizer(TrajectoryGeneralizer):
 
 class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     """
-    Generalizes using Douglas-Peucker algorithm (as implemented in shapely/Geos).
+    Generalize using Douglas-Peucker algorithm (as implemented in shapely/Geos).
 
     tolerance : float
         Distance tolerance in trajectory CRS units
 
-    References
-    ----------
-    * Douglas, D., & Peucker, T. (1973). Algorithms for the reduction of the number
-      of points required to represent a digitized line or its caricature.
-      The Canadian Cartographer 10(2), 112–122. doi:10.3138/FM57-6770-U75U-7727.
-
     Examples
     --------
-
     >>> mpd.DouglasPeuckerGeneralizer(traj).generalize(tolerance=1.0)
+
+    References
+    ----------
+    .. [DP1973] Douglas, D., & Peucker, T. (1973). Algorithms for the reduction of the number
+      of points required to represent a digitized line or its caricature.
+      The Canadian Cartographer 10(2), 112–122. doi:10.3138/FM57-6770-U75U-7727.
     """
 
     def _generalize_traj(self, traj, tolerance):
@@ -211,7 +207,7 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
 
 class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     """
-    Generalizes using Top-Down Time Ratio algorithm proposed by Meratnia & de By (2004).
+    Generalize using Top-Down Time Ratio algorithm proposed by Meratnia & de By (2004).
 
     This is a spatiotemporal trajectory generalization algorithm. Where Douglas-Peucker
     simply measures the spatial distance between points and original line geometry,
@@ -223,16 +219,15 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     tolerance : float
         Distance tolerance (distance returned by shapely Point.distance function)
 
-    References
-    ----------
-    * Meratnia, N., & de By, R.A. (2004). Spatiotemporal compression techniques for
-      moving point objects. In International Conference on Extending Database Technology
-      (pp. 765-782). Springer, Berlin, Heidelberg.
-
     Examples
     --------
-
     >>> mpd.TopDownTimeRatioGeneralizer(traj).generalize(tolerance=1.0)
+
+    References
+    ----------
+    .. [MB2004] Meratnia, N., & de By, R.A. (2004). Spatiotemporal compression techniques for
+      moving point objects. In International Conference on Extending Database Technology
+      (pp. 765-782). Springer, Berlin, Heidelberg.
     """
 
     def _generalize_traj(self, traj, tolerance):

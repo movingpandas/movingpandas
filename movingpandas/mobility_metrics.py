@@ -38,7 +38,8 @@ class MobilityMetricsCalculator:
 
     def radius_of_gyration(self):
         """
-        Computes the radius of gyration.
+        Compute the radius of gyration in meters (or CRS units for projected
+        CRS).
 
         The radius of gyration of an individual :math:`u` is defined as
         [GHB2008]_ [PRQPG2013]_:

@@ -202,7 +202,7 @@ class TrajectoryCollection:
 
     def to_mf_json(self, datetime_to_str=True, temporal_columns=None):
         """
-        Converts a TrajectoryCollection to a dictionary compatible with the Moving
+        Convert a TrajectoryCollection to a dictionary compatible with the Moving
         Features JSON (MF-JSON) specification.
 
         Examples
@@ -318,7 +318,7 @@ class TrajectoryCollection:
 
     def get_traj_id_col(self):
         """
-        Return name of the trajectory ID column
+        Return the name of the trajectory ID column
 
         Returns
         -------
@@ -328,7 +328,7 @@ class TrajectoryCollection:
 
     def get_geom_col(self):
         """
-        Return name of the geometry column
+        Return the name of the geometry column
 
         Returns
         -------
@@ -338,7 +338,7 @@ class TrajectoryCollection:
 
     def get_speed_col(self):
         """
-        Return name of the speed column
+        Return the name of the speed column
 
         Returns
         -------
@@ -348,7 +348,7 @@ class TrajectoryCollection:
 
     def get_direction_col(self):
         """
-        Return name of the direction column
+        Return the name of the direction column
 
         Returns
         -------
@@ -358,7 +358,7 @@ class TrajectoryCollection:
 
     def get_locations_at(self, t, with_direction=False):
         """
-        Returns GeoDataFrame with trajectory locations at the specified timestamp
+        Return a GeoDataFrame with trajectory locations at the specified timestamp
 
         Parameters
         ----------
@@ -415,7 +415,7 @@ class TrajectoryCollection:
 
     def get_start_locations(self, with_direction=False):
         """
-        Returns GeoDataFrame with trajectory start locations
+        Return a GeoDataFrame with trajectory start locations
 
         Returns
         -------
@@ -426,7 +426,7 @@ class TrajectoryCollection:
 
     def get_end_locations(self, with_direction=False):
         """
-        Returns GeoDataFrame with trajectory end locations
+        Return a GeoDataFrame with trajectory end locations
 
         Returns
         -------
@@ -1045,7 +1045,9 @@ class TrajectoryCollection:
         return _TrajectoryPlotter(self, *args, **kwargs).hvplot_pts()
 
     def _add_deprecation_warning_for_n_threads(self, n_processes, **kwargs):
-        """Add a deprecation warning if `n_threads` is used and return `n_processes.`"""
+        """
+        Add a deprecation warning if `n_threads` is used and return `n_processes.`
+        """
         n_threads = kwargs.pop("n_threads", None)
 
         if n_threads is not None and n_processes != 1:
