@@ -27,15 +27,17 @@ class MobilityMetricsCalculator:
     def radius_of_gyration(self):
         """
         Computes the radius of gyration.
-        The radius of gyration of an individual :math:`u` is defined as [GHB2008]_ [PRQPG2013]_:
-        
-        .. math:: 
+
+        The radius of gyration of an individual :math:`u` is defined as
+        [GHB2008]_ [PRQPG2013]_:
+
+        .. math::
             r_g(u) = \sqrt{ \\frac{1}{n_u} \sum_{i=1}^{n_u} dist(r_i(u) - r_{cm}(u))^2}
-        
-        where :math:`r_i(u)` represents the :math:`n_u` positions recorded for :math:`u`,
-        and :math:`r_{cm}(u)` is the center of mass of :math:`u`'s trajectory. In mobility
-        analysis, the radius of gyration indicates the characteristic distance travelled by
-        :math:`u`.
+
+        where :math:`r_i(u)` represents the :math:`n_u` positions recorded for
+        :math:`u`, and :math:`r_{cm}(u)` is the center of mass of :math:`u`'s
+        trajectory. In mobility analysis, the radius of gyration indicates the
+        characteristic distance travelled by :math:`u`.
 
         Returns
         -------
@@ -49,9 +51,14 @@ class MobilityMetricsCalculator:
 
         References
         ----------
-        .. [GHB2008] González, M. C., Hidalgo, C. A. & Barabási, A. L. (2008) Understanding individual human mobility patterns. Nature, 453, 779–782, https://www.nature.com/articles/nature06958.
-        .. [PRQPG2013] Pappalardo, L., Rinzivillo, S., Qu, Z., Pedreschi, D. & Giannotti, F. (2013) Understanding the patterns of car travel. European Physics Journal Special Topics 215(1), 61-73, https://link.springer.com/article/10.1140%2Fepjst%2Fe2013-01715-5
-        """  # noqa: E501
+        .. [GHB2008] González, M. C., Hidalgo, C. A. & Barabási, A. L. (2008)
+           Understanding individual human mobility patterns. Nature, 453,
+           779-782, https://www.nature.com/articles/nature06958.
+        .. [PRQPG2013] Pappalardo, L., Rinzivillo, S., Qu, Z., Pedreschi, D. &
+           Giannotti, F. (2013) Understanding the patterns of car travel.
+           European Physics Journal Special Topics 215(1), 61-73,
+           https://link.springer.com/article/10.1140%2Fepjst%2Fe2013-01715-5
+        """  # noqa: E501, W605
         results = {}
         for traj in self._trajectories:
             pts = traj.df.geometry
@@ -72,14 +79,16 @@ class MobilityMetricsCalculator:
     def random_entropy(self):
         """
         Compute the random entropy.
-        The random entropy of an individual :math:`u` is defined as [EP2009]_ [SQBB2010]_:
-        
+
+        The random entropy of an individual :math:`u` is defined as
+        [EP2009]_ [SQBB2010]_:
+
         .. math::
             E_{rand}(u) = log_2(N_u)
-        
-        where :math:`N_u` is the number of distinct locations visited by :math:`u`,
-        capturing the degree of predictability of :math:`u`’s whereabouts if each location
-        is visited with equal probability.
+
+        where :math:`N_u` is the number of distinct locations visited by
+        :math:`u`, capturing the degree of predictability of :math:`u`’s
+        whereabouts if each location is visited with equal probability.
 
         Returns
         -------
@@ -93,9 +102,14 @@ class MobilityMetricsCalculator:
 
         References
         ----------
-        .. [EP2009] Eagle, N. & Pentland, A. S. (2009) Eigenbehaviors: identifying structure in routine. Behavioral Ecology and Sociobiology 63(7), 1057-1066, https://link.springer.com/article/10.1007/s00265-009-0830-6
-        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010) Limits of Predictability in Human Mobility. Science 327(5968), 1018-1021, https://science.sciencemag.org/content/327/5968/1018
-        """  # noqa: E501
+        .. [EP2009] Eagle, N. & Pentland, A. S. (2009) Eigenbehaviors:
+           identifying structure in routine. Behavioral Ecology and
+           Sociobiology 63(7), 1057-1066,
+           https://link.springer.com/article/10.1007/s00265-009-0830-6
+        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010)
+           Limits of Predictability in Human Mobility. Science 327(5968),
+           1018-1021, https://science.sciencemag.org/content/327/5968/1018
+        """
         results = {}
         for traj in self._trajectories:
             n_locations = traj.df.geometry.nunique()
