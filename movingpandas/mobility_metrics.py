@@ -19,6 +19,18 @@ class MobilityMetricsCalculator:
     """Calculate mobility metrics for a Trajectory or TrajectoryCollection."""
 
     def __init__(self, traj):
+        """
+        Create a MobilityMetricsCalculator.
+
+        Parameters
+        ----------
+        traj : Trajectory or TrajectoryCollection
+            Trajectory or TrajectoryCollection to calculate metrics for.
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj)
+        """
         if isinstance(traj, Trajectory):
             self._trajectories = [traj]
         else:
