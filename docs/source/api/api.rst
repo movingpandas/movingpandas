@@ -1,6 +1,8 @@
 API Reference
 =============
 
+.. rubric:: Core Data Structures
+
 .. toctree::
    :maxdepth: 1
 
