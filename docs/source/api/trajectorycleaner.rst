@@ -1,8 +1,7 @@
-MovingPandas.TrajectoryCleaner
-===========================================
+TrajectoryCleaner
+=================
+.. currentmodule:: movingpandas
 
-.. automodule:: movingpandas
-    :noindex:
 
 .. autoclass:: IqrCleaner
    :members:

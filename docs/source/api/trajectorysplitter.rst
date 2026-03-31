@@ -1,9 +1,6 @@
-MovingPandas.TrajectorySplitter
-===========================================
-
-.. automodule:: movingpandas
-    :members:
-    :noindex:
+TrajectorySplitter
+==================
+.. currentmodule:: movingpandas
 
 .. autoclass:: TrajectorySplitter
    :members:

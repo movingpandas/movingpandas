@@ -63,7 +63,6 @@ class TrajectorySmoother(ABC):
         -------
         Trajectory/TrajectoryCollection
             Smoothed Trajectory or TrajectoryCollection
-
         """
         if isinstance(self.traj, Trajectory):
             return self._smooth_traj(self.traj, **kwargs)
@@ -87,7 +86,7 @@ class TrajectorySmoother(ABC):
 
 class KalmanSmootherCV(TrajectorySmoother):
     """
-    Smooths using a Kalman Filter with a Constant Velocity model.
+    Smooth using a Kalman Filter with a Constant Velocity model.
 
     The Constant Velocity model assumes that the speed between consecutive locations is
     nearly constant. For trajectories where ``traj.is_latlon = True`` the smoother

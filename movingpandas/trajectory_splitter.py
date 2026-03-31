@@ -110,7 +110,6 @@ class TemporalSplitter(TrajectorySplitter):
 
     Examples
     --------
-
     >>> mpd.TemporalSplitter(traj).split(mode="year")
     """
 
@@ -169,7 +168,6 @@ class ObservationGapSplitter(TrajectorySplitter):
 
     Examples
     --------
-
     >>> mpd.ObservationGapSplitter(traj).split(gap=timedelta(hours=1))
     """
 
@@ -218,7 +216,6 @@ class SpeedSplitter(TrajectorySplitter):
 
     Examples
     --------
-
     >>> mpd.SpeedSplitter(traj).split(speed=10, duration=timedelta(minutes=5))
     """
 
@@ -250,7 +247,6 @@ class StopSplitter(TrajectorySplitter):
 
     Examples
     --------
-
     >>> mpd.StopSplitter(traj).split(max_diameter=7, min_duration=timedelta(seconds=60))
     """
 
@@ -294,7 +290,6 @@ class AngleChangeSplitter(TrajectorySplitter):
 
     Examples
     --------
-
     >>> mpd.AngleSplitter(traj).split(min_angle=45, min_speed=15)
     """
 
@@ -364,7 +359,6 @@ class ValueChangeSplitter(TrajectorySplitter):
 
     Examples
     --------
-
     >>> mpd.ValueChangeSplitter(traj).split(col_name='column1')
     """
 

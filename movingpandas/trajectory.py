@@ -271,7 +271,7 @@ class Trajectory:
 
     def size(self):
         """
-        Returns number of rows in Trajectory.df
+        Return the number of rows in the trajectory DataFrame
 
         Returns
         -------
@@ -478,7 +478,7 @@ class Trajectory:
 
     def get_max(self, column):
         """
-        Return maximum value in the provided DataFrame column
+        Return the maximum value in the provided DataFrame column
 
         Parameters
         ----------
@@ -504,7 +504,7 @@ class Trajectory:
 
     def get_traj_id_col(self):
         """
-        Return name of the trajectory ID column
+        Return the name of the trajectory ID column
 
         Returns
         -------
@@ -517,7 +517,7 @@ class Trajectory:
 
     def get_speed_col(self):
         """
-        Return name of the speed column
+        Return the name of the speed column
 
         Returns
         -------
@@ -530,7 +530,7 @@ class Trajectory:
 
     def get_distance_col(self):
         """
-        Return name of the distance column
+        Return the name of the distance column
 
         Returns
         -------
@@ -543,7 +543,7 @@ class Trajectory:
 
     def get_direction_col(self):
         """
-        Return name of the direction column
+        Return the name of the direction column
 
         Returns
         -------
@@ -556,7 +556,7 @@ class Trajectory:
 
     def get_angular_difference_col(self):
         """
-        Return name of the angular difference column
+        Return the name of the angular difference column
 
         Returns
         -------
@@ -569,7 +569,7 @@ class Trajectory:
 
     def get_timedelta_col(self):
         """
-        Return name of the timedelta column
+        Return the name of the timedelta column
 
         Returns
         -------
@@ -582,7 +582,7 @@ class Trajectory:
 
     def get_geom_col(self):
         """
-        Return name of the geometry column
+        Return the name of the geometry column
 
         Returns
         -------
@@ -593,7 +593,7 @@ class Trajectory:
     @requires_geometry
     def to_linestring(self):
         """
-        Return trajectory geometry as LineString.
+        Return the trajectory geometry as LineString.
 
         Returns
         -------
@@ -625,7 +625,7 @@ class Trajectory:
     @requires_geometry
     def to_point_gdf(self, return_orig_tz=False):
         """
-        Return the trajectory's points as GeoDataFrame.
+        Return the trajectory's points as a GeoDataFrame.
 
         Parameters
         ----------
@@ -715,7 +715,7 @@ class Trajectory:
     @requires_geometry
     def to_mf_json(self, datetime_to_str=True, temporal_columns=None):
         """
-        Converts a Trajectory to a dictionary compatible with the Moving
+        Convert a Trajectory to a dictionary compatible with the Moving
         Features JSON (MF-JSON) specification.
 
         Examples
@@ -751,7 +751,8 @@ class Trajectory:
 
     @requires_geometry
     def get_end_location(self):
-        """Return the trajectory's end location.
+        """
+        Return the trajectory's end location.
 
         Returns
         -------

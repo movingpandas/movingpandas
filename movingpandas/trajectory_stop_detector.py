@@ -67,7 +67,7 @@ class TrajectoryStopDetector:
 
     def get_stop_time_ranges(self, max_diameter, min_duration):
         """
-        Returns detected stop start and end times.
+        Return the detected stop start and end times.
 
         Parameters
         ----------
@@ -188,7 +188,7 @@ class TrajectoryStopDetector:
 
     def get_stop_segments(self, max_diameter, min_duration):
         """
-        Returns detected stop trajectory segments.
+        Return the detected stop trajectory segments.
 
         Parameters
         ----------
@@ -206,10 +206,10 @@ class TrajectoryStopDetector:
 
         Examples
         --------
-
         >>> detector = mpd.TrajectoryStopDetector(traj)
-        >>> stops = detector.get_stop_segments(min_duration=timedelta(seconds=60),
-                                               max_diameter=100)
+        >>> stops = detector.get_stop_segments(
+               min_duration=timedelta(seconds=60),
+               max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
         return TrajectoryCollection(
@@ -218,7 +218,7 @@ class TrajectoryStopDetector:
 
     def get_stop_points(self, max_diameter, min_duration):
         """
-        Returns detected stop location points.
+        Return the detected stop location points.
 
         Parameters
         ----------
@@ -237,10 +237,10 @@ class TrajectoryStopDetector:
 
         Examples
         --------
-
         >>> detector = mpd.TrajectoryStopDetector(traj)
-        >>> stops = detector.get_stop_points(min_duration=timedelta(seconds=60),
-                                             max_diameter=100)
+        >>> stops = detector.get_stop_points(
+               min_duration=timedelta(seconds=60),
+               max_diameter=100)
         """
         stop_time_ranges = self.get_stop_time_ranges(max_diameter, min_duration)
         stops = TrajectoryCollection(
