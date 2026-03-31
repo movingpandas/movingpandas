@@ -12,6 +12,3 @@ https://anitagraser.com/2016/11/07/movement-data-in-gis-3-visualizing-massive-tr
    :members:
 
    .. automethod:: __init__
-
-.. autosummary::
-:toctree: api/
