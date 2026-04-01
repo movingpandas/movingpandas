@@ -8,7 +8,7 @@
 import math
 import pytest
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, time
 from geopandas import GeoDataFrame
 from pyproj import CRS
 from shapely.geometry import Point
@@ -87,13 +87,37 @@ class TestMobilityMetricsCalculator:
         assert dsl.loc[5] == pytest.approx(128151.39, rel=1e-2)  # 127.8088686
         assert dsl.loc["A"] == pytest.approx(36285.54, rel=1e-2)  # 36.29370121
 
+    def test_home_location_fallback(self):
+        # All timestamps are daytime, so nighttime window returns nothing and
+        # home falls back to the most visited location overall.
+        # Ties are broken by sorting locations by (lat, lon) ascending, matching
+        # scikit-mobility's groupby sort order.
+        hl = self.calc.home_location()
+        assert len(hl) == 6
+        assert hl.loc[1] == Point(
+            10.326150, 43.544270
+        )  # 4 unique locs, tie → lowest lat
+        assert hl.loc[2] == Point(10.507994, 43.843014)  # visited twice → clear winner
+        assert hl.loc[3] == Point(
+            10.326150, 43.544270
+        )  # 4 unique locs, tie → lowest lat
+        assert hl.loc[4] == Point(
+            10.326150, 43.544270
+        )  # 3 unique locs, tie → lowest lat
+        assert hl.loc[5] == Point(
+            10.403600, 43.708530
+        )  # 3 unique locs, tie → lowest lat
+        assert hl.loc["A"] == Point(
+            10.326150, 43.544270
+        )  # 2 unique locs, tie → lowest lat
+
 
 class TestMobilityMetricsCalculatorMetricCRS:
     def setup_method(self):
         df = pd.DataFrame(
             [
                 [99, Point(0, 0), datetime(2011, 2, 4, 10, 34, 4)],
-                [99, Point(0, 20), datetime(2011, 2, 4, 12, 34, 4)],
+                [99, Point(0, 20), datetime(2011, 2, 4, 23, 34, 4)],
             ],
             columns=["id", "geometry", "t"],
         ).set_index("t")
@@ -110,6 +134,10 @@ class TestMobilityMetricsCalculatorMetricCRS:
 
     def test_distance_straight_line_metric(self):
         assert self.calc.distance_straight_line() == pytest.approx(20, rel=1e-2)
+
+    def test_home_location_single_traj(self):
+        # Single trajectory → returns a Point, not a Series
+        assert self.calc.home_location() == Point(0, 20)
 
 
 class TestMobilityMetricsCalculatorNoCRS:
@@ -134,3 +162,45 @@ class TestMobilityMetricsCalculatorNoCRS:
 
     def test_distance_straight_line_no_crs(self):
         assert self.calc.distance_straight_line() == pytest.approx(20, rel=1e-2)
+
+
+class TestMobilityMetricsCalculatorHomeLocationNighttime:
+    def setup_method(self):
+        # Explicit nighttime timestamps to test the primary nighttime logic.
+        # User 1: visits A twice at 23:00, B once at 23:00, C once at 10:00 (daytime)
+        #   → nighttime: A=2, B=1 → home = A = Point(10.507994, 43.843014)
+        # User 2: visits B three times at 23:00, A once at 10:00 (daytime)
+        #   → nighttime: B=3 → home = B = Point(10.326150, 43.544270)
+        df = pd.DataFrame(
+            [
+                [1, Point(10.507994, 43.843014), datetime(2011, 2, 3, 23, 0, 0)],
+                [1, Point(10.507994, 43.843014), datetime(2011, 2, 4, 23, 0, 0)],
+                [1, Point(10.326150, 43.544270), datetime(2011, 2, 5, 23, 0, 0)],
+                [1, Point(11.246260, 43.779250), datetime(2011, 2, 6, 10, 0, 0)],
+                [2, Point(10.326150, 43.544270), datetime(2011, 2, 3, 23, 0, 0)],
+                [2, Point(10.326150, 43.544270), datetime(2011, 2, 4, 23, 0, 0)],
+                [2, Point(10.326150, 43.544270), datetime(2011, 2, 5, 23, 0, 0)],
+                [2, Point(10.507994, 43.843014), datetime(2011, 2, 6, 10, 0, 0)],
+            ],
+            columns=["id", "geometry", "t"],
+        ).set_index("t")
+        geo_df = GeoDataFrame(df, crs=CRS_LATLON)
+        self.collection = TrajectoryCollection(geo_df, traj_id_col="id")
+        self.calc = MobilityMetricsCalculator(self.collection)
+
+    def test_home_location_nighttime_collection(self):
+        hl = self.calc.home_location()
+        assert len(hl) == 2
+        assert hl.loc[1] == Point(10.507994, 43.843014)
+        assert hl.loc[2] == Point(10.326150, 43.544270)
+
+    def test_home_location_nighttime_single(self):
+        traj1 = self.collection.get_trajectory(1)
+        assert MobilityMetricsCalculator(traj1).home_location() == Point(
+            10.507994, 43.843014
+        )
+
+    def test_home_location_time_objects(self):
+        hl = self.calc.home_location(start_night=time(22, 0), end_night=time(7, 0))
+        assert hl.loc[1] == Point(10.507994, 43.843014)
+        assert hl.loc[2] == Point(10.326150, 43.544270)

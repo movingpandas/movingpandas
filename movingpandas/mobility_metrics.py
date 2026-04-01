@@ -128,6 +128,79 @@ class MobilityMetricsCalculator:
             return next(iter(results.values()))
         return pd.Series(results)
 
+    def home_location(self, start_night="22:00", end_night="07:00"):
+        """
+        Compute the home location.
+
+        The home location :math:`h(u)` of an individual :math:`u` is defined
+        as the location :math:`u` visits the most during nighttime
+        [CBTDHVSB2012]_ [PSO2012]_:
+
+        .. math::
+            h(u) = \\arg\max_{i} |\{r_i | t(r_i) \in [t_{startnight}, t_{endnight}] \}|
+
+        where :math:`r_i` is a location visited by :math:`u`, :math:`t(r_i)`
+        is the time when :math:`u` visited :math:`r_i`, and
+        :math:`t_{startnight}` and :math:`t_{endnight}` indicates the times
+        when nighttime starts and ends, respectively. If no records fall
+        within the nighttime window, the most visited location overall is
+        returned instead.
+
+        Parameters
+        ----------
+        start_night : str or datetime.time, optional
+            Start of the nighttime window, as a string in HH:MM format or a
+            datetime.time object (default: "22:00")
+        end_night : str or datetime.time, optional
+            End of the nighttime window, as a string in HH:MM format or a
+            datetime.time object (default: "07:00")
+
+        Returns
+        -------
+        Point or pd.Series
+            Point if a single Trajectory was provided, otherwise pd.Series
+            of Points indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).home_location(
+        ...     start_night="20:00", end_night="06:00"
+        ... )
+
+        References
+        ----------
+        .. [CBTDHVSB2012] Csáji, B. C., Browet, A., Traag, V. A., Delvenne,
+           J.-C., Huens, E., Van Dooren, P., Smoreda, Z. & Blondel, V. D.
+           (2012) Exploring the Mobility of Mobile Phone Users. Physica A:
+           Statistical Mechanics and its Applications 392(6), 1459-1473,
+           https://www.sciencedirect.com/science/article/pii/S0378437112010059
+        .. [PSO2012] Phithakkitnukoon, S., Smoreda, Z. & Olivier, P. (2012)
+           Socio-geography of human mobility: A study using longitudinal
+           mobile phone data. PLOS ONE 7(6): e39253.
+           https://doi.org/10.1371/journal.pone.0039253
+        """  # noqa: W605
+        results = {}
+        for traj in self._trajectories:
+            pts = traj.df.geometry
+            night_pts = pts.between_time(start_night, end_night)
+            candidates = night_pts if len(night_pts) > 0 else pts
+            results[traj.id] = self._most_visited_location(candidates)
+        if len(self._trajectories) == 1:
+            return next(iter(results.values()))
+        return pd.Series(results)
+
+    @staticmethod
+    def _most_visited_location(pts):
+        coords = pd.Series(list(zip(pts.y, pts.x)), index=pts.index)
+        counts = (
+            coords.value_counts()
+            .rename_axis("coords")
+            .reset_index(name="count")
+            .sort_values(["count", "coords"], ascending=[False, True])
+        )
+        lat, lon = counts.iloc[0]["coords"]
+        return Point(lon, lat)
+
     def random_entropy(self):
         """
         Compute the random entropy.
