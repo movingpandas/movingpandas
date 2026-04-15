@@ -24,3 +24,4 @@
 6. [Ship AIS data](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/ship-data.html)
 7. [Soccer game](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/soccer-game.html)
 8. [Pollution data](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/pollution-data.html)
+9. [Bus tracking data](https://movingpandas.github.io/movingpandas-website/2-analysis-examples/bus-trajectory-segmentation.html)
