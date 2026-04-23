@@ -128,6 +128,50 @@ class MobilityMetricsCalculator:
             return next(iter(results.values()))
         return pd.Series(results)
 
+    def jump_lengths(self):
+        """
+        Compute the jump lengths between consecutive locations.
+
+        The jump length :math:`\\Delta r_i` of an individual :math:`u` is
+        defined as [BHG2006]_:
+
+        .. math::
+            \\Delta r_i = dist(r_i, r_{i+1})
+
+        where :math:`r_i` and :math:`r_{i+1}` are two consecutive positions
+        recorded for :math:`u` and :math:`dist` is the geographic distance
+        between the two points.
+
+        Returns
+        -------
+        np.ndarray or pd.Series
+            np.ndarray of jump lengths in meters (or CRS units for projected
+            CRS) if a single Trajectory was provided, otherwise pd.Series of
+            np.ndarrays indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).jump_lengths()
+
+        References
+        ----------
+        .. [BHG2006] Brockmann, D., Hufnagel, L. & Geisel, T. (2006) The
+           scaling laws of human travel. Nature 439, 462-465,
+           https://www.nature.com/articles/nature04292
+        """  # noqa: E501, W605
+        results = {}
+        for traj in self._trajectories:
+            pts = list(traj.df.geometry)
+            results[traj.id] = np.array(
+                [
+                    measure_distance(pts[i - 1], pts[i], geodesic=traj.is_latlon)
+                    for i in range(1, len(pts))
+                ]
+            )
+        if len(self._trajectories) == 1:
+            return next(iter(results.values()))
+        return pd.Series(results)
+
     def home_location(self, start_night="22:00", end_night="07:00"):
         """
         Compute the home location.

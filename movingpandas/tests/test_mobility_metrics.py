@@ -6,6 +6,7 @@
 # BSD 3-Clause License
 
 import math
+import numpy as np
 import pytest
 import pandas as pd
 from datetime import datetime, time
@@ -87,6 +88,14 @@ class TestMobilityMetricsCalculator:
         assert dsl.loc[5] == pytest.approx(128151.39, rel=1e-2)  # 127.8088686
         assert dsl.loc["A"] == pytest.approx(36285.54, rel=1e-2)  # 36.29370121
 
+    def test_jump_lengths(self):
+        jl = self.calc.jump_lengths()
+        assert len(jl) == 6
+        np.testing.assert_allclose(jl.loc[1], [36285.54, 19290.90, 68329.58], rtol=1e-2)
+        np.testing.assert_allclose(jl.loc[2], [17143.69, 17143.69, 36285.54], rtol=1e-2)
+        assert len(jl.loc["A"]) == 1
+        assert jl.loc["A"][0] == pytest.approx(36285.54, rel=1e-2)
+
     def test_home_location_fallback(self):
         # All timestamps are daytime, so nighttime window returns nothing and
         # home falls back to the most visited location overall.
@@ -134,6 +143,12 @@ class TestMobilityMetricsCalculatorMetricCRS:
 
     def test_distance_straight_line_metric(self):
         assert self.calc.distance_straight_line() == pytest.approx(20, rel=1e-2)
+
+    def test_jump_lengths_single_traj(self):
+        jl = self.calc.jump_lengths()
+        assert isinstance(jl, np.ndarray)
+        assert len(jl) == 1
+        assert jl[0] == pytest.approx(20, rel=1e-2)
 
     def test_home_location_single_traj(self):
         # Single trajectory → returns a Point, not a Series
