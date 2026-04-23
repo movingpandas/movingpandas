@@ -254,6 +254,64 @@ class TestMobilityMetricsCalculatorNoCRS:
     def test_distance_straight_line_no_crs(self):
         assert self.calc.distance_straight_line() == pytest.approx(20, rel=1e-2)
 
+    def test_jump_lengths_no_crs(self):
+        jl = self.calc.jump_lengths()
+        assert isinstance(jl, np.ndarray)
+        assert len(jl) == 1
+        assert jl[0] == pytest.approx(20.0, rel=1e-2)
+
+    def test_waiting_times_no_crs(self):
+        wt = self.calc.waiting_times()
+        assert isinstance(wt, np.ndarray)
+        assert len(wt) == 1
+        assert wt[0] == pytest.approx(7200.0)
+
+    def test_home_location_no_crs(self):
+        # Both timestamps are daytime, so falls back to most visited.
+        # Each point visited once; tie broken by (lat, lon) ascending → Point(0, 0).
+        assert self.calc.home_location() == Point(0, 0)
+
+    def test_real_entropy_no_crs(self):
+        assert self.calc.real_entropy() == pytest.approx(2 / 3, rel=1e-4)
+
+    def test_uncorrelated_entropy_no_crs(self):
+        assert self.calc.uncorrelated_entropy() == pytest.approx(1.0, rel=1e-4)
+        assert self.calc.uncorrelated_entropy(normalize=True) == pytest.approx(
+            1.0, rel=1e-4
+        )
+
+
+class TestMobilityMetricsCalculatorSingleUniqueLocation:
+    def setup_method(self):
+        df = pd.DataFrame(
+            [
+                [99, Point(0, 0), datetime(2011, 2, 4, 10, 34, 4)],
+                [99, Point(0, 0), datetime(2011, 2, 4, 11, 34, 4)],
+            ],
+            columns=["id", "geometry", "t"],
+        ).set_index("t")
+        geo_df = GeoDataFrame(df, crs=CRS_LATLON)
+        traj = Trajectory(geo_df, traj_id=99)
+        self.calc = MobilityMetricsCalculator(traj)
+
+    def test_radius_of_gyration_single_location(self):
+        assert self.calc.radius_of_gyration() == pytest.approx(0.0, abs=1e-6)
+
+    def test_random_entropy_single_location(self):
+        assert self.calc.random_entropy() == pytest.approx(0.0, abs=1e-6)
+
+    def test_uncorrelated_entropy_single_location(self):
+        assert self.calc.uncorrelated_entropy() == pytest.approx(0.0, abs=1e-6)
+        assert self.calc.uncorrelated_entropy(normalize=True) == pytest.approx(
+            0.0, abs=1e-6
+        )
+
+    def test_jump_lengths_single_location(self):
+        jl = self.calc.jump_lengths()
+        assert isinstance(jl, np.ndarray)
+        assert len(jl) == 1
+        assert jl[0] == pytest.approx(0.0, abs=1e-6)
+
 
 class TestMobilityMetricsCalculatorHomeLocationNighttime:
     def setup_method(self):
