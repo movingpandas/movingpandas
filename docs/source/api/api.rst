@@ -20,3 +20,10 @@ API Reference
    TrajectorySmoother <trajectorysmoother>
    TrajectorySplitter <trajectorysplitter>
    TrajectoryStopDetector <trajectorystopdetector>
+
+.. rubric:: Human Mobility Metrics
+
+.. toctree::
+   :maxdepth: 1
+
+   MobilityMetricsCalculator <mobilitymetricscalculator>
