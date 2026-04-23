@@ -210,8 +210,24 @@ class TestMobilityMetricsCalculatorMetricCRS:
         assert len(jl) == 1
         assert jl[0] == pytest.approx(20, rel=1e-2)
 
+    def test_waiting_times_metric(self):
+        wt = self.calc.waiting_times()
+        assert isinstance(wt, np.ndarray)
+        assert len(wt) == 1
+        assert wt[0] == pytest.approx(46800.0)
+
+    def test_real_entropy_metric(self):
+        assert self.calc.real_entropy() == pytest.approx(2 / 3, rel=1e-4)
+
+    def test_uncorrelated_entropy_metric(self):
+        assert self.calc.uncorrelated_entropy() == pytest.approx(1.0, rel=1e-4)
+        assert self.calc.uncorrelated_entropy(normalize=True) == pytest.approx(
+            1.0, rel=1e-4
+        )
+
     def test_home_location_single_traj(self):
-        # Single trajectory → returns a Point, not a Series
+        # Single trajectory → returns a Point, not a Series.
+        # Point(0, 20) is at 23:34 (nighttime) → home = Point(0, 20)
         assert self.calc.home_location() == Point(0, 20)
 
 
