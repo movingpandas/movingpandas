@@ -86,7 +86,7 @@ class MobilityMetricsCalculator:
             )
             results[traj.id] = math.sqrt(float(np.mean(distances**2)))
         if len(self._trajectories) == 1:
-            return next(iter(results.values()))
+            return results[self._trajectories[0].id]
         return pd.Series(results)
 
     def distance_straight_line(self):
@@ -125,7 +125,69 @@ class MobilityMetricsCalculator:
         for traj in self._trajectories:
             results[traj.id] = traj.get_length()
         if len(self._trajectories) == 1:
-            return next(iter(results.values()))
+            return results[self._trajectories[0].id]
+        return pd.Series(results)
+
+    def k_radius_of_gyration(self, k=2):
+        """
+        Compute the k-radius of gyration.
+
+        The k-radius of gyration of an individual :math:`u` is defined as
+        [PSRPGB2015]_:
+
+        .. math::
+            r_g^{(k)}(u) = \\sqrt{ \\frac{1}{n_u^{(k)}}
+            \\sum_{i=1}^{k} n_i \\cdot dist(r_i(u), r_{cm}^{(k)}(u))^2}
+
+        where :math:`n_u^{(k)}` is the total number of visits to the top
+        :math:`k` most visited locations, :math:`n_i` is the number of visits
+        to location :math:`i`, and :math:`r_{cm}^{(k)}(u)` is the center of
+        mass of those locations weighted by visit count. When :math:`k` is
+        greater than or equal to the number of unique locations, the result
+        equals the standard radius of gyration.
+
+        Parameters
+        ----------
+        k : int, optional
+            Number of most-visited locations to consider (default: 2)
+
+        Returns
+        -------
+        float or pd.Series
+            float if a single Trajectory was provided, otherwise pd.Series
+            indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).k_radius_of_gyration(k=2)
+
+        References
+        ----------
+        .. [PSRPGB2015] Pappalardo, L., Simini, F. Rinzivillo, S., Pedreschi,
+           D. Giannotti, F. & Barabasi, A. L. (2015) Returners and Explorers
+           dichotomy in human mobility. Nature Communications 6,
+           https://www.nature.com/articles/ncomms9166
+        """  # noqa: E501
+        results = {}
+        for traj in self._trajectories:
+            pts = list(traj.df.geometry)
+            counts = {}
+            for pt in pts:
+                counts[pt] = counts.get(pt, 0) + 1
+            top_k = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:k]
+            expanded = [pt for pt, n in top_k for _ in range(n)]
+            xs = np.array([pt.x for pt in expanded])
+            ys = np.array([pt.y for pt in expanded])
+            center = Point(xs.mean(), ys.mean())
+            distances = np.array(
+                [
+                    measure_distance(pt, center, geodesic=traj.is_latlon)
+                    for pt in expanded
+                ]
+            )
+            results[traj.id] = math.sqrt(float(np.mean(distances**2)))
+        if len(self._trajectories) == 1:
+            return results[self._trajectories[0].id]
         return pd.Series(results)
 
     def jump_lengths(self):
@@ -169,7 +231,7 @@ class MobilityMetricsCalculator:
                 ]
             )
         if len(self._trajectories) == 1:
-            return next(iter(results.values()))
+            return results[self._trajectories[0].id]
         return pd.Series(results)
 
     def home_location(self, start_night="22:00", end_night="07:00"):
@@ -230,7 +292,7 @@ class MobilityMetricsCalculator:
             candidates = night_pts if len(night_pts) > 0 else pts
             results[traj.id] = self._most_visited_location(candidates)
         if len(self._trajectories) == 1:
-            return next(iter(results.values()))
+            return results[self._trajectories[0].id]
         return pd.Series(results)
 
     @staticmethod
@@ -284,5 +346,5 @@ class MobilityMetricsCalculator:
             n_locations = traj.df.geometry.nunique()
             results[traj.id] = math.log2(n_locations)
         if len(self._trajectories) == 1:
-            return next(iter(results.values()))
+            return results[self._trajectories[0].id]
         return pd.Series(results)

@@ -76,6 +76,29 @@ class TestMobilityMetricsCalculator:
         assert rog.loc[5] == pytest.approx(30806.80, rel=1e-2)  # 30.727237693
         assert rog.loc["A"] == pytest.approx(18142.77, rel=1e-2)  # 18.146860183
 
+    def test_k_radius_of_gyration(self):
+        krog2 = self.calc.k_radius_of_gyration(k=2)
+        assert len(krog2) == 6
+        assert krog2.loc[1] == pytest.approx(18142.78, rel=1e-2)  # 18.14686018
+        assert krog2.loc[2] == pytest.approx(8081.61, rel=1e-2)  # 8.0811433
+        assert krog2.loc[3] == pytest.approx(9645.45, rel=1e-2)  # 9.64969996
+        assert krog2.loc[4] == pytest.approx(9645.45, rel=1e-2)  # 9.64969996
+        assert krog2.loc[5] == pytest.approx(34164.90, rel=1e-2)  # 34.07360735
+        assert krog2.loc["A"] == pytest.approx(18142.78, rel=1e-2)  # 18.14686018
+
+        # k=1: only the most visited location is considered, so all distances
+        # to the center of mass are zero
+        krog1 = self.calc.k_radius_of_gyration(k=1)
+        for uid in [1, 2, 3, 4, 5, "A"]:
+            assert krog1.loc[uid] == pytest.approx(0, abs=1e-6)
+
+        krog3 = self.calc.k_radius_of_gyration(k=3)
+        assert krog3.loc[1] == pytest.approx(14842.45, rel=1e-2)
+        # user 2 has 3 unique locations, so k=3 equals radius_of_gyration
+        assert krog3.loc[2] == pytest.approx(14985.89, rel=1e-2)
+        # user A has 2 unique locations, so k=3 equals k=2
+        assert krog3.loc["A"] == pytest.approx(18142.78, rel=1e-2)
+
     def test_distance_straight_line(self):
         dsl = self.calc.distance_straight_line()
         assert len(dsl) == 6
