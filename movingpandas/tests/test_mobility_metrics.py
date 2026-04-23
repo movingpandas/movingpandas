@@ -53,6 +53,16 @@ class TestMobilityMetricsCalculator:
         self.collection = TrajectoryCollection(geo_df, traj_id_col="id")
         self.calc = MobilityMetricsCalculator(self.collection)
 
+    def test_real_entropy(self):
+        re = self.calc.real_entropy()
+        assert len(re) == 6
+        assert re.loc[1] == pytest.approx(1.60000000, rel=1e-4)
+        assert re.loc[2] == pytest.approx(1.14285714, rel=1e-4)
+        assert re.loc[3] == pytest.approx(1.60000000, rel=1e-4)
+        assert re.loc[4] == pytest.approx(1.18872188, rel=1e-4)
+        assert re.loc[5] == pytest.approx(1.18872188, rel=1e-4)
+        assert re.loc["A"] == pytest.approx(0.66666667, rel=1e-4)
+
     def test_random_entropy(self):
         re = self.calc.random_entropy()
         assert len(re) == 6

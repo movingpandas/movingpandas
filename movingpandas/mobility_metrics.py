@@ -307,6 +307,70 @@ class MobilityMetricsCalculator:
         lat, lon = counts.iloc[0]["coords"]
         return Point(lon, lat)
 
+    def real_entropy(self):
+        """
+        Compute the real entropy.
+
+        The real entropy of an individual :math:`u` is defined as
+        [SQBB2010]_:
+
+        .. math::
+            E(u) = -\\sum_{T'_u} P(T'_u) \\log_2[P(T'_u)]
+
+        where :math:`T'_u` represents all possible time-ordered subsequences
+        of :math:`u`'s trajectory. The real entropy hence depends not only
+        on the frequency of visitation, but also the order in which the nodes
+        were visited and the time spent at each location, thus capturing the
+        full spatiotemporal order present in an :math:`u`'s mobility patterns.
+    
+
+        Returns
+        -------
+        float or pd.Series
+            float if a single Trajectory was provided, otherwise pd.Series
+            indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).real_entropy()
+
+        References
+        ----------
+        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010)
+           Limits of Predictability in Human Mobility. Science 327(5968),
+           1018-1021, https://science.sciencemag.org/content/327/5968/1018
+        """
+        results = {}
+        for traj in self._trajectories:
+            sequence = list(zip(traj.df.geometry.x, traj.df.geometry.y))
+            results[traj.id] = self._true_entropy(sequence)
+        if len(self._trajectories) == 1:
+            return results[self._trajectories[0].id]
+        return pd.Series(results)
+
+    @staticmethod
+    def _true_entropy(sequence):
+        n = len(sequence)
+        if n <= 1:
+            return 0.0
+
+        def in_seq(superseq, subseq):
+            n_sub = len(subseq)
+            return any(
+                superseq[i : i + n_sub] == subseq
+                for i in range(len(superseq) - n_sub + 1)
+            )
+
+        sum_lambda = 3.0
+        for i in range(1, n - 1):
+            j = i + 1
+            while j < n and in_seq(sequence[:i], sequence[i:j]):
+                j += 1
+            if j == n:
+                j += 1
+            sum_lambda += j - i
+        return (n * math.log2(n)) / sum_lambda
+
     def random_entropy(self):
         """
         Compute the random entropy.
