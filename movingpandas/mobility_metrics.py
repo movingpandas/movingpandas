@@ -308,6 +308,67 @@ class MobilityMetricsCalculator:
         lat, lon = counts.iloc[0]["coords"]
         return Point(lon, lat)
 
+    def uncorrelated_entropy(self, normalize=False):
+        """
+        Compute the uncorrelated entropy.
+
+        The temporal-uncorrelated entropy of an individual :math:`u` is
+        defined as [EP2009]_ [SQBB2010]_ [PVGSPG2016]_:
+
+        .. math::
+            E_{unc}(u) = -\\sum_{j=1}^{N_u} p_u(j) \\log_2 p_u(j)
+
+        where :math:`N_u` is the number of distinct locations visited by
+        :math:`u` and :math:`p_u(j)` is the historical probability that a
+        location :math:`j` was visited by :math:`u`. The temporal-uncorrelated
+        entropy characterizes the heterogeneity of :math:`u`'s visitation
+        patterns.
+
+        Parameters
+        ----------
+        normalize : bool, optional
+            If True, divide by :math:`\\log_2(N_u)` to scale the result
+            to [0, 1] (default: False)
+
+        Returns
+        -------
+        float or pd.Series
+            float if a single Trajectory was provided, otherwise pd.Series
+            indexed by trajectory id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).uncorrelated_entropy()
+        >>> mpd.MobilityMetricsCalculator(traj).uncorrelated_entropy(normalize=True)
+
+        References
+        ----------
+        .. [EP2009] Eagle, N. & Pentland, A. S. (2009) Eigenbehaviors:
+           identifying structure in routine. Behavioral Ecology and
+           Sociobiology 63(7), 1057-1066,
+           https://link.springer.com/article/10.1007/s00265-009-0830-6
+        .. [SQBB2010] Song, C., Qu, Z., Blumm, N. & Barabási, A. L. (2010)
+           Limits of Predictability in Human Mobility. Science 327(5968),
+           1018-1021, https://science.sciencemag.org/content/327/5968/1018
+        .. [PVGSPG2016] Pappalardo, L., Vanhoof, M., Gabrielli, L., Smoreda,
+           Z., Pedreschi, D. & Giannotti, F. (2016) An analytical framework to
+           nowcast well-being using mobile phone data. International Journal of
+           Data Science and Analytics 2(75), 75-92,
+           https://link.springer.com/article/10.1007/s41060-016-0013-2
+        """  # noqa: E501
+        results = {}
+        for traj in self._trajectories:
+            n = len(traj.df)
+            probs = traj.df.geometry.value_counts() / n
+            entropy = float(-(probs * np.log2(probs)).sum())
+            if normalize:
+                n_locs = traj.df.geometry.nunique()
+                entropy = entropy / math.log2(n_locs) if n_locs > 1 else 0.0
+            results[traj.id] = entropy
+        if len(self._trajectories) == 1:
+            return results[self._trajectories[0].id]
+        return pd.Series(results)
+
     def real_entropy(self):
         """
         Compute the real entropy.

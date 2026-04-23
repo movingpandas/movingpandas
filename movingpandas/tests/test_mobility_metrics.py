@@ -53,6 +53,25 @@ class TestMobilityMetricsCalculator:
         self.collection = TrajectoryCollection(geo_df, traj_id_col="id")
         self.calc = MobilityMetricsCalculator(self.collection)
 
+    def test_uncorrelated_entropy(self):
+        ue = self.calc.uncorrelated_entropy()
+        assert len(ue) == 6
+        assert ue.loc[1] == pytest.approx(2.0000000, rel=1e-4)
+        assert ue.loc[2] == pytest.approx(1.5000000, rel=1e-4)
+        assert ue.loc[3] == pytest.approx(2.0000000, rel=1e-4)
+        assert ue.loc[4] == pytest.approx(1.5849625, rel=1e-4)
+        assert ue.loc[5] == pytest.approx(1.5849625, rel=1e-4)
+        assert ue.loc["A"] == pytest.approx(1.0000000, rel=1e-4)
+
+        ue_norm = self.calc.uncorrelated_entropy(normalize=True)
+        assert len(ue_norm) == 6
+        assert ue_norm.loc[1] == pytest.approx(1.0000000, rel=1e-4)
+        assert ue_norm.loc[2] == pytest.approx(0.9463946, rel=1e-4)
+        assert ue_norm.loc[3] == pytest.approx(1.0000000, rel=1e-4)
+        assert ue_norm.loc[4] == pytest.approx(1.0000000, rel=1e-4)
+        assert ue_norm.loc[5] == pytest.approx(1.0000000, rel=1e-4)
+        assert ue_norm.loc["A"] == pytest.approx(1.0000000, rel=1e-4)
+
     def test_real_entropy(self):
         re = self.calc.real_entropy()
         assert len(re) == 6
