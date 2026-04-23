@@ -101,7 +101,7 @@ class MobilityMetricsCalculator:
         where :math:`n_u` is the number of points recorded for :math:`u`,
         :math:`r_{j-1}` and :math:`r_j` are two consecutive points,
         described as a :math:`(latitude, longitude)` pair, in :math:`u`'s
-        time-ordered trajectory, and :math:`dist` is the geographic distance
+        time-ordered trajectory, and :math:`dist` is the distance
         between the two points [WTDED2015]_.
 
         Returns
@@ -192,7 +192,8 @@ class MobilityMetricsCalculator:
 
     def jump_lengths(self):
         """
-        Compute the jump lengths between consecutive locations.
+        Compute the jump lengths between consecutive locations in meters 
+        (or CRS units for projected CRS).
 
         The jump length :math:`\\Delta r_i` of an individual :math:`u` is
         defined as [BHG2006]_:
@@ -201,7 +202,7 @@ class MobilityMetricsCalculator:
             \\Delta r_i = dist(r_i, r_{i+1})
 
         where :math:`r_i` and :math:`r_{i+1}` are two consecutive positions
-        recorded for :math:`u` and :math:`dist` is the geographic distance
+        recorded for :math:`u` and :math:`dist` is the distance
         between the two points.
 
         Returns
