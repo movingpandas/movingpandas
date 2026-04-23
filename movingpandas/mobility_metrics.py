@@ -433,6 +433,48 @@ class MobilityMetricsCalculator:
             sum_lambda += j - i
         return (n * math.log2(n)) / sum_lambda
 
+    def waiting_times(self):
+        """
+        Compute the waiting times between consecutive points.
+
+        The waiting time :math:`\\Delta t_i` of an individual :math:`u` is
+        defined as [SKWB2010]_ [PF2018]_:
+
+        .. math::
+            \\Delta t_i = |t(r_i) - t(r_{i+1})|
+
+        where :math:`r_i` and :math:`r_{i+1}` are two consecutive positions
+        and :math:`t(r)` is the timestamp of position :math:`r`.
+
+        Returns
+        -------
+        np.ndarray or pd.Series
+            np.ndarray of waiting times in seconds if a single Trajectory was
+            provided, otherwise pd.Series of np.ndarrays indexed by trajectory
+            id
+
+        Examples
+        --------
+        >>> mpd.MobilityMetricsCalculator(traj).waiting_times()
+
+        References
+        ----------
+        .. [SKWB2010] Song, C., Koren, T., Wang, P. & Barabasi, A.L. (2010)
+           Modelling the scaling properties of human mobility. Nature Physics
+           6, 818-823, https://www.nature.com/articles/nphys1760
+        .. [PF2018] Pappalardo, L. & Simini, F. (2018) Data-driven generation
+           of spatio-temporal routines in human mobility. Data Mining and
+           Knowledge Discovery 32, 787-829,
+           https://link.springer.com/article/10.1007/s10618-017-0548-4
+        """  # noqa: E501
+        results = {}
+        for traj in self._trajectories:
+            times = traj.df.index.to_series()
+            results[traj.id] = times.diff().iloc[1:].dt.total_seconds().to_numpy()
+        if len(self._trajectories) == 1:
+            return results[self._trajectories[0].id]
+        return pd.Series(results)
+
     def random_entropy(self):
         """
         Compute the random entropy.

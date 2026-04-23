@@ -26,7 +26,7 @@ class TestMobilityMetricsCalculator:
     def setup_method(self):
         df = pd.DataFrame(
             [
-                [1, Point(10.507994, 43.843014), datetime(2011, 2, 3, 8, 34, 4)],
+                [1, Point(10.507994, 43.843014), datetime(2011, 2, 3, 8, 30, 0)],
                 [1, Point(10.326150, 43.544270), datetime(2011, 2, 3, 9, 34, 4)],
                 [1, Point(10.403600, 43.708530), datetime(2011, 2, 3, 10, 34, 4)],
                 [1, Point(11.246260, 43.779250), datetime(2011, 2, 4, 10, 34, 4)],
@@ -139,6 +139,14 @@ class TestMobilityMetricsCalculator:
         assert dsl.loc[4] == pytest.approx(97964.95, rel=1e-2)  # 97.79046189
         assert dsl.loc[5] == pytest.approx(128151.39, rel=1e-2)  # 127.8088686
         assert dsl.loc["A"] == pytest.approx(36285.54, rel=1e-2)  # 36.29370121
+
+    def test_waiting_times(self):
+        wt = self.calc.waiting_times()
+        assert len(wt) == 6
+        np.testing.assert_allclose(wt.loc[1], [3844.0, 3600.0, 86400.0])
+        np.testing.assert_allclose(wt.loc[2], [3600.0, 90000.0, 3600.0])
+        assert len(wt.loc["A"]) == 1
+        assert wt.loc["A"][0] == pytest.approx(3600.0)
 
     def test_jump_lengths(self):
         jl = self.calc.jump_lengths()
