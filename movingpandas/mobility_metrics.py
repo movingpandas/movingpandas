@@ -192,7 +192,7 @@ class MobilityMetricsCalculator:
 
     def jump_lengths(self):
         """
-        Compute the jump lengths between consecutive locations in meters 
+        Compute the jump lengths between consecutive locations in meters
         (or CRS units for projected CRS).
 
         The jump length :math:`\\Delta r_i` of an individual :math:`u` is
@@ -323,7 +323,7 @@ class MobilityMetricsCalculator:
         on the frequency of visitation, but also the order in which the nodes
         were visited and the time spent at each location, thus capturing the
         full spatiotemporal order present in an :math:`u`'s mobility patterns.
-    
+
 
         Returns
         -------
