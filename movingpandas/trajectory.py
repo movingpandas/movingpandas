@@ -2,6 +2,7 @@
 
 import warnings
 
+import shapely
 from functools import wraps
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
@@ -1623,6 +1624,49 @@ class Trajectory:
         if isinstance(other, Trajectory):
             other = other.to_linestring()
         dist = self.to_linestring().hausdorff_distance(other)
+        conversion = get_conversion(units, self.crs_units)
+        return dist / conversion.distance
+
+    @requires_geometry
+    def frechet_distance(self, other, units=UNITS()):
+        """
+        Return the Fréchet distance to the other geometric object (based on
+        shapely
+        https://shapely.readthedocs.io/en/stable/reference/shapely.frechet_distance.html).
+        The Fréchet distance is a measure of the similarity between curves
+        that takes into account the location and ordering of the points along
+        the curves.
+
+        If units have been declared:
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
+
+        Parameters
+        ----------
+        other : shapely.geometry or Trajectory
+            Other geometric object or trajectory
+
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
+
+        Returns
+        -------
+        float
+            Fréchet distance
+        """
+        if self.is_latlon:
+            message = (
+                f"Fréchet distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        if isinstance(other, Trajectory):
+            other = other.to_linestring()
+        dist = shapely.frechet_distance(self.to_linestring(), other)
         conversion = get_conversion(units, self.crs_units)
         return dist / conversion.distance
 
