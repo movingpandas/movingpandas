@@ -1666,6 +1666,11 @@ class Trajectory:
             warnings.warn(message, UserWarning)
         if isinstance(other, Trajectory):
             other = other.to_linestring()
+        if not hasattr(shapely, "frechet_distance"):
+            raise NotImplementedError(
+                "Trajectory.frechet_distance() requires Shapely >= 2.0 "
+                f"(installed: {shapely.__version__}). Please upgrade Shapely."
+            )
         dist = shapely.frechet_distance(self.to_linestring(), other)
         conversion = get_conversion(units, self.crs_units)
         return dist / conversion.distance

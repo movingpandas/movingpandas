@@ -1200,6 +1200,15 @@ class TestTrajectory:
             point = Point(0, 0)
             self.default_traj_latlon.frechet_distance(point)
 
+    def test_frechet_distance_requires_shapely_2(self, monkeypatch):
+        import shapely
+
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
+        # Simulate Shapely < 2.0, where the top-level frechet_distance is absent.
+        monkeypatch.delattr(shapely, "frechet_distance", raising=False)
+        with pytest.raises(NotImplementedError, match="Shapely >= 2.0"):
+            traj.frechet_distance(Point(0, 0))
+
     """
     This test should work but fails in my PyCharm probably due to
     https://github.com/pyproj4/pyproj/issues/134
