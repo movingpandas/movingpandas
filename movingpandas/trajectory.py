@@ -1626,6 +1626,81 @@ class Trajectory:
         conversion = get_conversion(units, self.crs_units)
         return dist / conversion.distance
 
+    def _to_point_array(self, other):
+        """Return the ordered (x, y) point sequence of ``other`` as an array.
+
+        Accepts a Trajectory, a shapely LineString, or a shapely Point.
+        """
+        import numpy as np
+
+        if isinstance(other, Trajectory):
+            other = other.to_linestring()
+        if isinstance(other, Point):
+            return np.array([[other.x, other.y]])
+        return np.array(other.coords)
+
+    @requires_geometry
+    def lcss_distance(self, other, epsilon, delta=None):
+        """
+        Return the Longest Common Subsequence (LCSS) distance to the other
+        trajectory or geometric object.
+
+        LCSS counts how many points can be matched between the two ordered
+        sequences such that each matched pair is within ``epsilon`` and, if
+        ``delta`` is given, no more than ``delta`` positions apart in the
+        sequences. The similarity is that count divided by the length of the
+        shorter sequence, and the returned distance is ``1 - similarity`` (0
+        means the trajectories match everywhere, 1 means no points match).
+        Because unmatched points are simply skipped, LCSS is robust to noise
+        and outliers, unlike DTW and Fréchet distance.
+
+        Distances are computed using Euclidean geometry, so a
+        ``UserWarning`` is raised for trajectories in a geographic (lat/lon)
+        CRS. Project to a suitable planar CRS first for meaningful results.
+
+        Parameters
+        ----------
+        other : shapely.geometry or Trajectory
+            Other geometric object or trajectory
+
+        epsilon : float
+            Spatial matching threshold, in CRS units. Two points are considered
+            a match when their Euclidean distance is at most ``epsilon``.
+
+        delta : int, optional
+            Maximum offset allowed between the indices of two matched points.
+            Default None (no constraint on temporal alignment).
+
+        Returns
+        -------
+        float
+            LCSS distance in the range [0, 1] (dimensionless)
+        """
+        import numpy as np
+
+        if epsilon <= 0:
+            raise ValueError("epsilon must be positive")
+        if self.is_latlon:
+            message = (
+                f"LCSS distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        p = self._to_point_array(self.to_linestring())
+        q = self._to_point_array(other)
+        n, m = len(p), len(q)
+        lcss = np.zeros((n + 1, m + 1), dtype=int)
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                if delta is not None and abs(i - j) > delta:
+                    lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
+                elif np.linalg.norm(p[i - 1] - q[j - 1]) <= epsilon:
+                    lcss[i, j] = lcss[i - 1, j - 1] + 1
+                else:
+                    lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
+        similarity = lcss[n, m] / min(n, m)
+        return 1.0 - similarity
+
     @requires_geometry
     def clip(self, polygon, point_based=False):
         """

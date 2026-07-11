@@ -27,7 +27,6 @@ from . import (
     requires_geopandas1,
 )
 
-
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
 CRS_FEET = CRS.from_user_input(2964)
@@ -1174,6 +1173,32 @@ class TestTrajectory:
         with pytest.warns(UserWarning):
             point = Point(0, 0)
             self.default_traj_latlon.hausdorff_distance(point)
+
+    def test_lcss_distance(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        # identical trajectories match everywhere -> distance 0
+        assert traj.lcss_distance(traj, epsilon=0.5) == 0
+        # one point is an outlier, the other two match in order -> 1 - 2/3
+        traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1) == pytest.approx(1 / 3)
+        # nothing within epsilon -> distance 1
+        far = make_traj([Node(9, 9, day=1), Node(9, 8, day=2), Node(9, 7, day=3)])
+        assert traj.lcss_distance(far, epsilon=0.1) == 1
+
+    def test_lcss_distance_delta(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        # same points reversed: only the middle point is index-aligned
+        traj2 = make_traj([Node(0, 2, day=1), Node(0, 1, day=2), Node(0, 0, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1, delta=0) == pytest.approx(2 / 3)
+
+    def test_lcss_distance_epsilon_validation(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="epsilon"):
+            traj.lcss_distance(traj, epsilon=0)
+
+    def test_lcss_distance_warning(self):
+        with pytest.warns(UserWarning):
+            self.default_traj_latlon.lcss_distance(Point(0, 0), epsilon=1)
 
     """
     This test should work but fails in my PyCharm probably due to
