@@ -27,7 +27,6 @@ from . import (
     requires_geopandas1,
 )
 
-
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
 CRS_FEET = CRS.from_user_input(2964)
@@ -1174,6 +1173,22 @@ class TestTrajectory:
         with pytest.warns(UserWarning):
             point = Point(0, 0)
             self.default_traj_latlon.hausdorff_distance(point)
+
+    def test_dtw_distance(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(traj) == 0
+        # warping all three points onto a single point sums their distances
+        assert traj.dtw_distance(Point(0, 0)) == 3
+        traj2 = make_traj([Node(0, 0, day=1), Node(0, 2, day=2)])
+        assert traj.dtw_distance(traj2) == 1
+
+    def test_dtw_distance_units(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(Point(0, 0), units="km") == 3 / 1000
+
+    def test_dtw_distance_warning(self):
+        with pytest.warns(UserWarning):
+            self.default_traj_latlon.dtw_distance(Point(0, 0))
 
     """
     This test should work but fails in my PyCharm probably due to

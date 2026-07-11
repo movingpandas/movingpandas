@@ -1626,6 +1626,83 @@ class Trajectory:
         conversion = get_conversion(units, self.crs_units)
         return dist / conversion.distance
 
+    def _to_point_array(self, other):
+        """Return the ordered (x, y) point sequence of ``other`` as an array.
+
+        Accepts a Trajectory, a shapely LineString, or a shapely Point.
+        """
+        import numpy as np
+
+        if isinstance(other, Trajectory):
+            other = other.to_linestring()
+        if isinstance(other, Point):
+            return np.array([[other.x, other.y]])
+        return np.array(other.coords)
+
+    @requires_geometry
+    def dtw_distance(self, other, units=UNITS()):
+        """
+        Return the Dynamic Time Warping (DTW) distance to the other trajectory
+        or geometric object.
+
+        DTW finds the alignment between the two ordered point sequences that
+        minimises the accumulated pairwise distance, allowing the sequences to
+        be stretched or compressed along their order ("warped"). Unlike the
+        Fréchet distance, which is the largest single gap along the best
+        alignment, DTW sums the matched point distances, so it reflects the
+        overall cumulative deviation between the trajectories.
+
+        Distances are computed using Euclidean geometry, so a
+        ``UserWarning`` is raised for trajectories in a geographic (lat/lon)
+        CRS. Project to a suitable planar CRS first for meaningful results.
+
+        If units have been declared:
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
+
+        Parameters
+        ----------
+        other : shapely.geometry or Trajectory
+            Other geometric object or trajectory
+
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
+
+        Returns
+        -------
+        float
+            DTW distance
+        """
+        import numpy as np
+
+        if self.is_latlon:
+            message = (
+                f"DTW distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        p = self._to_point_array(self.to_linestring())
+        q = self._to_point_array(other)
+        n, m = len(p), len(q)
+        cost = np.linalg.norm(p[:, None, :] - q[None, :, :], axis=2)
+        acc = np.full((n, m), np.inf)
+        acc[0, 0] = cost[0, 0]
+        for i in range(1, n):
+            acc[i, 0] = acc[i - 1, 0] + cost[i, 0]
+        for j in range(1, m):
+            acc[0, j] = acc[0, j - 1] + cost[0, j]
+        for i in range(1, n):
+            for j in range(1, m):
+                acc[i, j] = cost[i, j] + min(
+                    acc[i - 1, j], acc[i, j - 1], acc[i - 1, j - 1]
+                )
+        conversion = get_conversion(units, self.crs_units)
+        return acc[n - 1, m - 1] / conversion.distance
+
     @requires_geometry
     def clip(self, polygon, point_based=False):
         """
