@@ -1637,6 +1637,10 @@ class Trajectory:
         that takes into account the location and ordering of the points along
         the curves.
 
+        The distance is computed using Euclidean geometry, so a ``UserWarning``
+        is raised for trajectories in a geographic (lat/lon) CRS. Project to a
+        suitable planar CRS first for meaningful results.
+
         If units have been declared:
 
         - For geographic projections, in declared units
