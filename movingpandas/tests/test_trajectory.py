@@ -27,7 +27,6 @@ from . import (
     requires_geopandas1,
 )
 
-
 CRS_METRIC = CRS.from_user_input(31256)
 CRS_LATLON = CRS.from_user_input(4326)
 CRS_FEET = CRS.from_user_input(2964)
@@ -1020,6 +1019,43 @@ class TestTrajectory:
         geo_df = traj.df.copy()
         point_gdf = traj.to_point_gdf()
         assert_frame_equal(point_gdf, geo_df)
+
+    def test_to_point_gdf_return_tz_without_tz(self):
+        traj = self.default_traj_metric
+        point_gdf = traj.to_point_gdf(return_orig_tz=True)
+        assert_frame_equal(point_gdf, traj.df)
+
+    def test_to_line_gdf_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        line_gdf = traj.to_line_gdf(return_orig_tz=True)
+        expected = traj.to_line_gdf()
+        expected["t"] = expected["t"].dt.tz_localize(traj.df_orig_tz)
+        expected["prev_t"] = expected["prev_t"].dt.tz_localize(traj.df_orig_tz)
+        assert str(line_gdf["t"].dt.tz) == "CET"
+        assert str(line_gdf["prev_t"].dt.tz) == "CET"
+        assert_frame_equal(line_gdf, expected)
+
+    def test_to_line_gdf_dont_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        line_gdf = traj.to_line_gdf()
+        assert line_gdf["t"].dt.tz is None
+        assert line_gdf["prev_t"].dt.tz is None
+
+    def test_to_traj_gdf_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        traj_gdf = traj.to_traj_gdf(return_orig_tz=True)
+        expected = traj.to_traj_gdf()
+        expected["start_t"] = expected["start_t"].dt.tz_localize(traj.df_orig_tz)
+        expected["end_t"] = expected["end_t"].dt.tz_localize(traj.df_orig_tz)
+        assert str(traj_gdf["start_t"].dt.tz) == "CET"
+        assert str(traj_gdf["end_t"].dt.tz) == "CET"
+        assert_frame_equal(traj_gdf, expected)
+
+    def test_to_traj_gdf_dont_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        traj_gdf = traj.to_traj_gdf()
+        assert traj_gdf["start_t"].dt.tz is None
+        assert traj_gdf["end_t"].dt.tz is None
 
     def test_to_line_gdf(self):
         df = pd.DataFrame(
