@@ -3,6 +3,7 @@
 from copy import copy
 from functools import partial
 from multiprocessing import Pool
+from os import cpu_count
 from pandas import Grouper
 import numpy as np
 import warnings
@@ -54,7 +55,10 @@ class TrajectorySplitter:
         if isinstance(self.traj, Trajectory):
             return self._split_traj(self.traj, **kwargs)
         elif isinstance(self.traj, TrajectoryCollection):
-            if n_processes > 1 or n_processes is None:
+            if n_processes is None:
+                n_processes = cpu_count()
+
+            if n_processes > 1:
                 return self._split_traj_collection_multiprocessing(
                     n_processes, **kwargs
                 )
