@@ -156,8 +156,8 @@ class Trajectory:
         return df
 
     def _handle_timezone(self, df):
+        self.df_orig_tz = df.index.tzinfo
         if df.index.tzinfo is not None:
-            self.df_orig_tz = df.index.tzinfo
             warnings.warn(
                 "Time zone information dropped from trajectory. "
                 "All dates and times will use local time. "
@@ -637,14 +637,21 @@ class Trajectory:
         -------
         GeoDataFrame
         """
-        if return_orig_tz:
+        if return_orig_tz and self.df_orig_tz is not None:
             return self.df.tz_localize(self.df_orig_tz)
         return self.df
 
     @requires_geometry
-    def to_line_gdf(self, columns=None):
+    def to_line_gdf(self, columns=None, return_orig_tz=False):
         """
         Return the trajectory's line segments as GeoDataFrame.
+
+        Parameters
+        ----------
+        columns : list[string]
+            List of column names to copy from the trajectory dataframe
+        return_orig_tz : bool
+            If True, adds timezone info back to the t and prev_t columns
 
         Returns
         -------
@@ -657,10 +664,13 @@ class Trajectory:
         line_gdf.set_geometry("geometry", inplace=True)
         if self.crs:
             line_gdf.set_crs(self.crs, inplace=True)
+        if return_orig_tz and self.df_orig_tz is not None:
+            line_gdf["t"] = line_gdf["t"].dt.tz_localize(self.df_orig_tz)
+            line_gdf["prev_t"] = line_gdf["prev_t"].dt.tz_localize(self.df_orig_tz)
         return line_gdf
 
     @requires_geometry
-    def to_traj_gdf(self, wkt=False, agg=False):
+    def to_traj_gdf(self, wkt=False, agg=False, return_orig_tz=False):
         """
         Return a GeoDataFrame with one row containing the trajectory as a
         single LineString.
@@ -674,6 +684,8 @@ class Trajectory:
             columns according to specified aggregation mode, using
             pandas.DataFrame.agg(), and shortcuts for "mode" and quantiles
             (e.g. "q5" or "q95")
+        return_orig_tz : bool
+            If True, adds timezone info back to the start_t and end_t columns
 
         Examples
         --------
@@ -711,6 +723,9 @@ class Trajectory:
                     properties[f"{col}_{agg_mode}"] = aggregated
         df = DataFrame([properties])
         traj_gdf = GeoDataFrame(df, crs=self.crs)
+        if return_orig_tz and self.df_orig_tz is not None:
+            traj_gdf["start_t"] = traj_gdf["start_t"].dt.tz_localize(self.df_orig_tz)
+            traj_gdf["end_t"] = traj_gdf["end_t"].dt.tz_localize(self.df_orig_tz)
         return traj_gdf
 
     @requires_geometry

@@ -584,6 +584,34 @@ class TestTrajectoryCollection:
 
         assert_frame_equal(traj_gdf, expected_line_gdf)
 
+    def test_to_point_gdf_return_tz(self):
+        geo_df_tz = self.geo_df.tz_localize("CET")
+        tc = TrajectoryCollection(geo_df_tz, traj_id_col="id", obj_id_col="obj")
+        point_gdf = tc.to_point_gdf(return_orig_tz=True)
+        assert_frame_equal(point_gdf, geo_df_tz)
+
+    def test_to_line_gdf_return_tz(self):
+        temp_df = self.geo_df.drop(columns=["obj", "val", "val2"]).tz_localize("CET")
+        tc = TrajectoryCollection(temp_df, "id")
+        line_gdf = tc.to_line_gdf(return_orig_tz=True)
+        assert str(line_gdf["t"].dt.tz) == "CET"
+        assert str(line_gdf["prev_t"].dt.tz) == "CET"
+        expected = tc.to_line_gdf()
+        expected["t"] = expected["t"].dt.tz_localize("CET")
+        expected["prev_t"] = expected["prev_t"].dt.tz_localize("CET")
+        assert_frame_equal(line_gdf, expected)
+
+    def test_to_traj_gdf_return_tz(self):
+        temp_df = self.geo_df.drop(columns=["obj", "val", "val2"]).tz_localize("CET")
+        tc = TrajectoryCollection(temp_df, "id")
+        traj_gdf = tc.to_traj_gdf(return_orig_tz=True)
+        assert str(traj_gdf["start_t"].dt.tz) == "CET"
+        assert str(traj_gdf["end_t"].dt.tz) == "CET"
+        expected = tc.to_traj_gdf()
+        expected["start_t"] = expected["start_t"].dt.tz_localize("CET")
+        expected["end_t"] = expected["end_t"].dt.tz_localize("CET")
+        assert_frame_equal(traj_gdf, expected)
+
     def test_to_traj_gdf_aggregate(self):
         temp_df = self.geo_df.drop(columns=["val2"])
         tc = TrajectoryCollection(temp_df, "id")
