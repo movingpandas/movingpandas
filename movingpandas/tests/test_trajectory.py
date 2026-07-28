@@ -1257,6 +1257,22 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
         assert traj.dtw_distance(Point(0, 0), units="km") == 3 / 1000
 
+    def test_dtw_distance_linestring(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(LineString([(0, 0), (0, 2)])) == 1
+
+    def test_dtw_distance_symmetry(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        traj2 = make_traj([Node(1, 0, day=1), Node(1, 2, day=2)])
+        assert traj.dtw_distance(traj2) == traj2.dtw_distance(traj)
+
+    def test_dtw_distance_unsupported_type(self):
+        from shapely.geometry import Polygon
+
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(TypeError):
+            traj.dtw_distance(Polygon([(0, 0), (1, 0), (1, 1)]))
+
     def test_dtw_distance_warning(self):
         with pytest.warns(UserWarning):
             self.default_traj_latlon.dtw_distance(Point(0, 0))

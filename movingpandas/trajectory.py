@@ -2,6 +2,7 @@
 
 import warnings
 
+import numpy as np
 import shapely
 from functools import wraps
 from shapely.affinity import translate
@@ -1646,14 +1647,20 @@ class Trajectory:
         """Return the ordered (x, y) point sequence of ``other`` as an array.
 
         Accepts a Trajectory, a shapely LineString, or a shapely Point.
+        Z coordinates are ignored.
         """
-        import numpy as np
-
         if isinstance(other, Trajectory):
             other = other.to_linestring()
         if isinstance(other, Point):
             return np.array([[other.x, other.y]])
-        return np.array(other.coords)
+        if not isinstance(other, LineString):
+            raise TypeError(
+                f"Expected a Trajectory, LineString, or Point, "
+                f"got {type(other).__name__}"
+            )
+        if other.is_empty:
+            raise ValueError("LineString must not be empty")
+        return np.array(other.coords)[:, :2]
 
     @requires_geometry
     def dtw_distance(self, other, units=UNITS()):
@@ -1680,8 +1687,8 @@ class Trajectory:
 
         Parameters
         ----------
-        other : shapely.geometry or Trajectory
-            Other geometric object or trajectory
+        other : Trajectory, LineString, or Point
+            Other trajectory or geometric object
 
         units : str
             Units in which to calculate distance values (default: CRS units)
@@ -1693,31 +1700,26 @@ class Trajectory:
         float
             DTW distance
         """
-        import numpy as np
-
         if self.is_latlon:
             message = (
                 f"DTW distance is computed using Euclidean geometry but "
                 f"the trajectory coordinate system is {self.crs}."
             )
             warnings.warn(message, UserWarning)
-        p = self._to_point_array(self.to_linestring())
+        p = self._to_point_array(self)
         q = self._to_point_array(other)
         n, m = len(p), len(q)
         cost = np.linalg.norm(p[:, None, :] - q[None, :, :], axis=2)
         acc = np.full((n, m), np.inf)
-        acc[0, 0] = cost[0, 0]
-        for i in range(1, n):
-            acc[i, 0] = acc[i - 1, 0] + cost[i, 0]
-        for j in range(1, m):
-            acc[0, j] = acc[0, j - 1] + cost[0, j]
+        acc[:, 0] = np.cumsum(cost[:, 0])
+        acc[0, :] = np.cumsum(cost[0, :])
         for i in range(1, n):
             for j in range(1, m):
                 acc[i, j] = cost[i, j] + min(
                     acc[i - 1, j], acc[i, j - 1], acc[i - 1, j - 1]
                 )
         conversion = get_conversion(units, self.crs_units)
-        return acc[n - 1, m - 1] / conversion.distance
+        return acc[-1, -1] / conversion.distance
 
     @requires_geometry
     def frechet_distance(self, other, units=UNITS()):
