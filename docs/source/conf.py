@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 # -- Project information -----------------------------------------------------
 
 project = "MovingPandas"
-copyright = "2024, MovingPandas developers"
+copyright = "2026, MovingPandas developers"
 author = "MovingPandas developers"
 
 # The full version, including alpha/beta/rc tags

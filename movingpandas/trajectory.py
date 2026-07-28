@@ -2,6 +2,7 @@
 
 import warnings
 
+import shapely
 from functools import wraps
 from shapely.affinity import translate
 from shapely.geometry import Point, LineString
@@ -155,8 +156,8 @@ class Trajectory:
         return df
 
     def _handle_timezone(self, df):
+        self.df_orig_tz = df.index.tzinfo
         if df.index.tzinfo is not None:
-            self.df_orig_tz = df.index.tzinfo
             warnings.warn(
                 "Time zone information dropped from trajectory. "
                 "All dates and times will use local time. "
@@ -636,14 +637,21 @@ class Trajectory:
         -------
         GeoDataFrame
         """
-        if return_orig_tz:
+        if return_orig_tz and self.df_orig_tz is not None:
             return self.df.tz_localize(self.df_orig_tz)
         return self.df
 
     @requires_geometry
-    def to_line_gdf(self, columns=None):
+    def to_line_gdf(self, columns=None, return_orig_tz=False):
         """
         Return the trajectory's line segments as GeoDataFrame.
+
+        Parameters
+        ----------
+        columns : list[string]
+            List of column names to copy from the trajectory dataframe
+        return_orig_tz : bool
+            If True, adds timezone info back to the t and prev_t columns
 
         Returns
         -------
@@ -656,10 +664,13 @@ class Trajectory:
         line_gdf.set_geometry("geometry", inplace=True)
         if self.crs:
             line_gdf.set_crs(self.crs, inplace=True)
+        if return_orig_tz and self.df_orig_tz is not None:
+            line_gdf["t"] = line_gdf["t"].dt.tz_localize(self.df_orig_tz)
+            line_gdf["prev_t"] = line_gdf["prev_t"].dt.tz_localize(self.df_orig_tz)
         return line_gdf
 
     @requires_geometry
-    def to_traj_gdf(self, wkt=False, agg=False):
+    def to_traj_gdf(self, wkt=False, agg=False, return_orig_tz=False):
         """
         Return a GeoDataFrame with one row containing the trajectory as a
         single LineString.
@@ -673,6 +684,8 @@ class Trajectory:
             columns according to specified aggregation mode, using
             pandas.DataFrame.agg(), and shortcuts for "mode" and quantiles
             (e.g. "q5" or "q95")
+        return_orig_tz : bool
+            If True, adds timezone info back to the start_t and end_t columns
 
         Examples
         --------
@@ -710,6 +723,9 @@ class Trajectory:
                     properties[f"{col}_{agg_mode}"] = aggregated
         df = DataFrame([properties])
         traj_gdf = GeoDataFrame(df, crs=self.crs)
+        if return_orig_tz and self.df_orig_tz is not None:
+            traj_gdf["start_t"] = traj_gdf["start_t"].dt.tz_localize(self.df_orig_tz)
+            traj_gdf["end_t"] = traj_gdf["end_t"].dt.tz_localize(self.df_orig_tz)
         return traj_gdf
 
     @requires_geometry
@@ -1702,6 +1718,58 @@ class Trajectory:
                 )
         conversion = get_conversion(units, self.crs_units)
         return acc[n - 1, m - 1] / conversion.distance
+
+    @requires_geometry
+    def frechet_distance(self, other, units=UNITS()):
+        """
+        Return the Fréchet distance to the other geometric object (based on
+        shapely
+        https://shapely.readthedocs.io/en/stable/reference/shapely.frechet_distance.html).
+        The Fréchet distance is a measure of the similarity between curves
+        that takes into account the location and ordering of the points along
+        the curves.
+
+        The distance is computed using Euclidean geometry, so a ``UserWarning``
+        is raised for trajectories in a geographic (lat/lon) CRS. Project to a
+        suitable planar CRS first for meaningful results.
+
+        If units have been declared:
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
+
+        Parameters
+        ----------
+        other : shapely.geometry or Trajectory
+            Other geometric object or trajectory
+
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
+
+        Returns
+        -------
+        float
+            Fréchet distance
+        """
+        if self.is_latlon:
+            message = (
+                f"Fréchet distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        if isinstance(other, Trajectory):
+            other = other.to_linestring()
+        if not hasattr(shapely, "frechet_distance"):
+            raise NotImplementedError(
+                "Trajectory.frechet_distance() requires Shapely >= 2.0 "
+                f"(installed: {shapely.__version__}). Please upgrade Shapely."
+            )
+        dist = shapely.frechet_distance(self.to_linestring(), other)
+        conversion = get_conversion(units, self.crs_units)
+        return dist / conversion.distance
 
     @requires_geometry
     def clip(self, polygon, point_based=False):
