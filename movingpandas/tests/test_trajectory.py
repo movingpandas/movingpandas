@@ -1020,6 +1020,43 @@ class TestTrajectory:
         point_gdf = traj.to_point_gdf()
         assert_frame_equal(point_gdf, geo_df)
 
+    def test_to_point_gdf_return_tz_without_tz(self):
+        traj = self.default_traj_metric
+        point_gdf = traj.to_point_gdf(return_orig_tz=True)
+        assert_frame_equal(point_gdf, traj.df)
+
+    def test_to_line_gdf_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        line_gdf = traj.to_line_gdf(return_orig_tz=True)
+        expected = traj.to_line_gdf()
+        expected["t"] = expected["t"].dt.tz_localize(traj.df_orig_tz)
+        expected["prev_t"] = expected["prev_t"].dt.tz_localize(traj.df_orig_tz)
+        assert str(line_gdf["t"].dt.tz) == "CET"
+        assert str(line_gdf["prev_t"].dt.tz) == "CET"
+        assert_frame_equal(line_gdf, expected)
+
+    def test_to_line_gdf_dont_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        line_gdf = traj.to_line_gdf()
+        assert line_gdf["t"].dt.tz is None
+        assert line_gdf["prev_t"].dt.tz is None
+
+    def test_to_traj_gdf_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        traj_gdf = traj.to_traj_gdf(return_orig_tz=True)
+        expected = traj.to_traj_gdf()
+        expected["start_t"] = expected["start_t"].dt.tz_localize(traj.df_orig_tz)
+        expected["end_t"] = expected["end_t"].dt.tz_localize(traj.df_orig_tz)
+        assert str(traj_gdf["start_t"].dt.tz) == "CET"
+        assert str(traj_gdf["end_t"].dt.tz) == "CET"
+        assert_frame_equal(traj_gdf, expected)
+
+    def test_to_traj_gdf_dont_return_tz(self):
+        traj = self.default_traj_metric_with_tz
+        traj_gdf = traj.to_traj_gdf()
+        assert traj_gdf["start_t"].dt.tz is None
+        assert traj_gdf["end_t"].dt.tz is None
+
     def test_to_line_gdf(self):
         df = pd.DataFrame(
             [
@@ -1173,6 +1210,40 @@ class TestTrajectory:
         with pytest.warns(UserWarning):
             point = Point(0, 0)
             self.default_traj_latlon.hausdorff_distance(point)
+
+    def test_frechet_distance(self):
+        from math import sqrt
+
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
+        point = Point(0, 0)
+        assert traj.frechet_distance(point) == sqrt(4 + 4)
+        line = LineString([(2, 0), (2, 4), (3, 4)])
+        assert traj.frechet_distance(line) == sqrt(4 + 1)
+        traj2 = make_traj([Node(2, 0, day=1), Node(2, 4, day=2), Node(3, 4, day=3)])
+        assert traj.frechet_distance(traj2) == sqrt(4 + 1)
+
+    def test_frechet_distance_units(self):
+        from math import sqrt
+
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
+        point = Point(0, 0)
+        assert traj.frechet_distance(point, units="km") == sqrt(4 + 4) / 1000
+        line = LineString([(2, 0), (2, 4), (3, 4)])
+        assert traj.frechet_distance(line, units="km") == sqrt(4 + 1) / 1000
+
+    def test_frechet_distance_warning(self):
+        with pytest.warns(UserWarning):
+            point = Point(0, 0)
+            self.default_traj_latlon.frechet_distance(point)
+
+    def test_frechet_distance_requires_shapely_2(self, monkeypatch):
+        import shapely
+
+        traj = make_traj([Node(0, 0, day=1), Node(1, 1, day=2), Node(2, 2, day=3)])
+        # Simulate Shapely < 2.0, where the top-level frechet_distance is absent.
+        monkeypatch.delattr(shapely, "frechet_distance", raising=False)
+        with pytest.raises(NotImplementedError, match="Shapely >= 2.0"):
+            traj.frechet_distance(Point(0, 0))
 
     def test_lcss_distance(self):
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])

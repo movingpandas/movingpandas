@@ -162,40 +162,66 @@ class TrajectoryCollection:
         for traj in self.trajectories:
             traj.drop(**kwargs)
 
-    def to_point_gdf(self):
+    def to_point_gdf(self, return_orig_tz=False):
         """
         Return the trajectories' points as GeoDataFrame.
 
+        Parameters
+        ----------
+        return_orig_tz : bool
+            If True, adds timezone info back to the dataframe index
+
         Returns
         -------
         GeoDataFrame
         """
-        gdfs = [traj.to_point_gdf() for traj in self.trajectories]
+        gdfs = [traj.to_point_gdf(return_orig_tz) for traj in self.trajectories]
         return concat(gdfs)
 
-    def to_line_gdf(self, columns=None):
+    def to_line_gdf(self, columns=None, return_orig_tz=False):
         """
         Return the trajectories' line segments as GeoDataFrame.
 
+        Parameters
+        ----------
+        columns : list[string]
+            List of column names to copy from the trajectory dataframe
+        return_orig_tz : bool
+            If True, adds timezone info back to the t and prev_t columns
+
         Returns
         -------
         GeoDataFrame
         """
-        gdfs = [traj.to_line_gdf(columns) for traj in self.trajectories]
+        gdfs = [traj.to_line_gdf(columns, return_orig_tz) for traj in self.trajectories]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
 
-    def to_traj_gdf(self, wkt=False, agg=False):
+    def to_traj_gdf(self, wkt=False, agg=False, return_orig_tz=False):
         """
         Return a GeoDataFrame with one row per Trajectory within the
         TrajectoryCollection
+
+        Parameters
+        ----------
+        wkt : bool
+            If True, adds WKT column representing the trajectory geometry
+        agg : dict
+            Adds columns with aggregate values computed from trajectory dataframe
+            columns according to specified aggregation mode, using
+            pandas.DataFrame.agg(), and shortcuts for "mode" and quantiles
+            (e.g. "q5" or "q95")
+        return_orig_tz : bool
+            If True, adds timezone info back to the start_t and end_t columns
 
         Returns
         -------
         GeoDataFrame
         """
-        gdfs = [traj.to_traj_gdf(wkt, agg) for traj in self.trajectories]
+        gdfs = [
+            traj.to_traj_gdf(wkt, agg, return_orig_tz) for traj in self.trajectories
+        ]
         gdf = concat(gdfs)
         gdf.reset_index(drop=True, inplace=True)
         return gdf
