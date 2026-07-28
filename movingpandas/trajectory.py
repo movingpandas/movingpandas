@@ -2,6 +2,7 @@
 
 import warnings
 
+import numpy as np
 import shapely
 from functools import wraps
 from shapely.affinity import translate
@@ -1646,14 +1647,20 @@ class Trajectory:
         """Return the ordered (x, y) point sequence of ``other`` as an array.
 
         Accepts a Trajectory, a shapely LineString, or a shapely Point.
+        Z coordinates are ignored.
         """
-        import numpy as np
-
         if isinstance(other, Trajectory):
             other = other.to_linestring()
         if isinstance(other, Point):
             return np.array([[other.x, other.y]])
-        return np.array(other.coords)
+        if not isinstance(other, LineString):
+            raise TypeError(
+                f"Expected a Trajectory, LineString, or Point, "
+                f"got {type(other).__name__}"
+            )
+        if other.is_empty:
+            raise ValueError("LineString must not be empty")
+        return np.array(other.coords)[:, :2]
 
     @requires_geometry
     def lcss_distance(self, other, epsilon, delta=None):
@@ -1676,41 +1683,42 @@ class Trajectory:
 
         Parameters
         ----------
-        other : shapely.geometry or Trajectory
-            Other geometric object or trajectory
+        other : Trajectory, LineString, or Point
+            Other trajectory or geometric object
 
         epsilon : float
             Spatial matching threshold, in CRS units. Two points are considered
             a match when their Euclidean distance is at most ``epsilon``.
 
         delta : int, optional
-            Maximum offset allowed between the indices of two matched points.
-            Default None (no constraint on temporal alignment).
+            Maximum allowed difference between the sequence positions of two
+            matched points. Default None (no constraint on sequence alignment).
 
         Returns
         -------
         float
             LCSS distance in the range [0, 1] (dimensionless)
         """
-        import numpy as np
-
         if epsilon <= 0:
             raise ValueError("epsilon must be positive")
+        if delta is not None and delta < 0:
+            raise ValueError("delta must be non-negative")
         if self.is_latlon:
             message = (
                 f"LCSS distance is computed using Euclidean geometry but "
                 f"the trajectory coordinate system is {self.crs}."
             )
             warnings.warn(message, UserWarning)
-        p = self._to_point_array(self.to_linestring())
+        p = self._to_point_array(self)
         q = self._to_point_array(other)
         n, m = len(p), len(q)
+        within = np.linalg.norm(p[:, None, :] - q[None, :, :], axis=2) <= epsilon
         lcss = np.zeros((n + 1, m + 1), dtype=int)
         for i in range(1, n + 1):
             for j in range(1, m + 1):
                 if delta is not None and abs(i - j) > delta:
                     lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
-                elif np.linalg.norm(p[i - 1] - q[j - 1]) <= epsilon:
+                elif within[i - 1, j - 1]:
                     lcss[i, j] = lcss[i - 1, j - 1] + 1
                 else:
                     lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])

@@ -97,6 +97,7 @@ Spatiotemporal analysis
    Trajectory.intersection
    Trajectory.intersects
    Trajectory.is_latlon
+   Trajectory.lcss_distance
    Trajectory.to_crs
 
 

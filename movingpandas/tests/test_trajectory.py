@@ -1262,10 +1262,62 @@ class TestTrajectory:
         traj2 = make_traj([Node(0, 2, day=1), Node(0, 1, day=2), Node(0, 0, day=3)])
         assert traj.lcss_distance(traj2, epsilon=0.1, delta=0) == pytest.approx(2 / 3)
 
+    def test_lcss_distance_delta_window(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        # same trajectory with a leading outlier shifts all matches by one index
+        shifted = make_traj(
+            [
+                Node(0, 9, day=1),
+                Node(0, 0, day=2),
+                Node(0, 1, day=3),
+                Node(0, 2, day=4),
+            ]
+        )
+        assert traj.lcss_distance(shifted, epsilon=0.5) == 0
+        assert traj.lcss_distance(shifted, epsilon=0.5, delta=1) == 0
+        assert traj.lcss_distance(shifted, epsilon=0.5, delta=0) == 1
+
+    def test_lcss_distance_unequal_lengths(self):
+        # 3 of 3 shorter-sequence points match -> similarity 3/min(3, 5) = 1
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        longer = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(0, 1, day=2),
+                Node(0, 2, day=3),
+                Node(0, 3, day=4),
+                Node(0, 4, day=5),
+            ]
+        )
+        assert traj.lcss_distance(longer, epsilon=0.5) == 0
+
+    def test_lcss_distance_epsilon_boundary(self):
+        # pairwise distances are exactly epsilon -> still a match
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        parallel = make_traj([Node(1, 0, day=1), Node(1, 1, day=2)])
+        assert traj.lcss_distance(parallel, epsilon=1.0) == 0
+
+    def test_lcss_distance_point(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(Point(0, 0), epsilon=0.5) == 0
+        assert traj.lcss_distance(Point(9, 9), epsilon=0.5) == 1
+
+    def test_lcss_distance_symmetry(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1) == traj2.lcss_distance(
+            traj, epsilon=0.1
+        )
+
     def test_lcss_distance_epsilon_validation(self):
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
         with pytest.raises(ValueError, match="epsilon"):
             traj.lcss_distance(traj, epsilon=0)
+
+    def test_lcss_distance_delta_validation(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="delta"):
+            traj.lcss_distance(traj, epsilon=1, delta=-1)
 
     def test_lcss_distance_warning(self):
         with pytest.warns(UserWarning):
