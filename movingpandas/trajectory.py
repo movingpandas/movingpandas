@@ -1662,6 +1662,60 @@ class Trajectory:
             raise ValueError("LineString must not be empty")
         return np.array(other.coords)[:, :2]
 
+    @staticmethod
+    def _lcss_match_count(p, q, epsilon, delta):
+        """Count LCSS-matched point pairs between two point sequences.
+
+        Evaluates the standard LCSS dynamic program one anti-diagonal at a
+        time, so each diagonal is a single vectorized numpy operation and
+        only the two previous diagonals are kept in memory. Pairwise
+        distances are computed per diagonal, so the n x m distance matrix is
+        never materialized.
+
+        When ``delta`` is given, only the cells of the band
+        ``|i - j| <= delta`` are evaluated, dropping the work from O(n*m) to
+        O((n+m) * delta). Each diagonal is padded by one carry cell on both
+        sides of the band, which keeps the recurrence exact at the band
+        edges. Because matches cannot occur outside the band, the count at
+        (n, m) equals the count at the band cell nearest to it, which is
+        where the band is evaluated last.
+        """
+        n, m = len(p), len(q)
+        eps2 = epsilon * epsilon
+        qr = q[::-1]  # reversed view: each anti-diagonal is a forward slice
+        end_i, end_j = n, m
+        if delta is not None:
+            if m - n > delta:
+                end_i, end_j = n, n + delta
+            elif n - m > delta:
+                end_i, end_j = m + delta, m
+        prev2 = np.zeros(n + 1, dtype=int)  # anti-diagonal s - 2, indexed by i
+        prev = np.zeros(n + 1, dtype=int)  # anti-diagonal s - 1
+        cur = np.zeros(n + 1, dtype=int)
+        for s in range(2, end_i + end_j + 1):  # cells (i, j) with i + j == s
+            lo, hi = max(1, s - m), min(n, s - 1)
+            if delta is not None:
+                lo = max(lo, -((delta - s) // 2) - 1)  # ceil((s-delta)/2) - 1
+                hi = min(hi, (s + delta) // 2 + 1)
+            # rows i-1 of p and, via the reversed view, rows j-1 of q
+            diff = p[lo - 1 : hi] - qr[m - s + lo : m - s + hi + 1]
+            match = (diff * diff).sum(axis=1) <= eps2
+            if delta is not None:
+                # the padded carry cells outside the band never match
+                if abs(2 * lo - s) > delta:
+                    match[0] = False
+                if abs(2 * hi - s) > delta:
+                    match[-1] = False
+            # clear every stale cell a later diagonal may read, then write
+            cur[max(0, lo - 1) : hi + 3] = 0
+            cur[lo : hi + 1] = np.where(
+                match,
+                prev2[lo - 1 : hi] + 1,
+                np.maximum(prev[lo - 1 : hi], prev[lo : hi + 1]),
+            )
+            prev2, prev, cur = prev, cur, prev2
+        return int(prev[end_i])
+
     @requires_geometry
     def lcss_distance(self, other, epsilon, delta=None):
         """
@@ -1676,6 +1730,13 @@ class Trajectory:
         means the trajectories match everywhere, 1 means no points match).
         Because unmatched points are simply skipped, LCSS is robust to noise
         and outliers, unlike DTW and Fréchet distance.
+
+        The similarity is computed with a vectorized dynamic program that
+        keeps only two anti-diagonals of the DP matrix in memory. Without
+        ``delta`` the computation takes O(n*m) time and O(n+m) memory. With
+        ``delta`` only the band of cells at most ``delta`` positions off the
+        diagonal is evaluated, taking O((n+m) * delta) time, so a small
+        ``delta`` makes the computation linear in trajectory length.
 
         Distances are computed using Euclidean geometry, so a
         ``UserWarning`` is raised for trajectories in a geographic (lat/lon)
@@ -1711,19 +1772,10 @@ class Trajectory:
             warnings.warn(message, UserWarning)
         p = self._to_point_array(self)
         q = self._to_point_array(other)
-        n, m = len(p), len(q)
-        within = np.linalg.norm(p[:, None, :] - q[None, :, :], axis=2) <= epsilon
-        lcss = np.zeros((n + 1, m + 1), dtype=int)
-        for i in range(1, n + 1):
-            for j in range(1, m + 1):
-                if delta is not None and abs(i - j) > delta:
-                    lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
-                elif within[i - 1, j - 1]:
-                    lcss[i, j] = lcss[i - 1, j - 1] + 1
-                else:
-                    lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
-        similarity = lcss[n, m] / min(n, m)
-        return 1.0 - similarity
+        if delta is not None:
+            delta = int(delta)
+        matches = self._lcss_match_count(p, q, epsilon, delta)
+        return 1.0 - matches / min(len(p), len(q))
 
     @requires_geometry
     def frechet_distance(self, other, units=UNITS()):

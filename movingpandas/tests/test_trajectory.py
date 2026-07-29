@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal
@@ -1322,6 +1323,36 @@ class TestTrajectory:
     def test_lcss_distance_warning(self):
         with pytest.warns(UserWarning):
             self.default_traj_latlon.lcss_distance(Point(0, 0), epsilon=1)
+
+    def test_lcss_distance_matches_bruteforce(self):
+        # cross-check the banded, vectorized DP against a straightforward
+        # full-matrix reference implementation
+        def lcss_ref(p, q, epsilon, delta):
+            n, m = len(p), len(q)
+            lcss = np.zeros((n + 1, m + 1), dtype=int)
+            for i in range(1, n + 1):
+                for j in range(1, m + 1):
+                    if delta is not None and abs(i - j) > delta:
+                        lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
+                    elif np.hypot(*(p[i - 1] - q[j - 1])) <= epsilon:
+                        lcss[i, j] = lcss[i - 1, j - 1] + 1
+                    else:
+                        lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
+            return 1.0 - lcss[n, m] / min(n, m)
+
+        rng = np.random.default_rng(42)
+        for n, m in [(7, 13), (20, 20), (15, 40), (33, 8), (12, 1)]:
+            p = rng.normal(size=(n, 2)).cumsum(axis=0)
+            q = rng.normal(size=(m, 2)).cumsum(axis=0)
+            traj = make_traj([Node(x, y, minute=k) for k, (x, y) in enumerate(p)])
+            other = LineString(q) if m > 1 else Point(q[0])
+            for epsilon in [0.5, 1.5, 4.0]:
+                for delta in [None, 0, 1, 3, 100]:
+                    got = traj.lcss_distance(other, epsilon=epsilon, delta=delta)
+                    expected = lcss_ref(p, q, epsilon, delta)
+                    assert got == pytest.approx(expected, abs=1e-12), (
+                        f"mismatch for n={n} m={m} " f"epsilon={epsilon} delta={delta}"
+                    )
 
     """
     This test should work but fails in my PyCharm probably due to
