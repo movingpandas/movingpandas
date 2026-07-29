@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal
@@ -1276,6 +1277,59 @@ class TestTrajectory:
     def test_dtw_distance_warning(self):
         with pytest.warns(UserWarning):
             self.default_traj_latlon.dtw_distance(Point(0, 0))
+
+    def test_dtw_distance_matches_bruteforce(self):
+        # cross-check the anti-diagonal DP against a straightforward
+        # full-matrix reference implementation
+        def dtw_ref(p, q):
+            n, m = len(p), len(q)
+            cost = np.linalg.norm(p[:, None, :] - q[None, :, :], axis=2)
+            acc = np.full((n, m), np.inf)
+            acc[:, 0] = np.cumsum(cost[:, 0])
+            acc[0, :] = np.cumsum(cost[0, :])
+            for i in range(1, n):
+                for j in range(1, m):
+                    acc[i, j] = cost[i, j] + min(
+                        acc[i - 1, j], acc[i, j - 1], acc[i - 1, j - 1]
+                    )
+            return acc[-1, -1]
+
+        rng = np.random.default_rng(42)
+        for n, m in [(7, 13), (20, 20), (15, 40), (33, 8), (12, 1)]:
+            p = rng.normal(size=(n, 2)).cumsum(axis=0)
+            q = rng.normal(size=(m, 2)).cumsum(axis=0)
+            traj = make_traj([Node(x, y, minute=k) for k, (x, y) in enumerate(p)])
+            other = LineString(q) if m > 1 else Point(q[0])
+            got = traj.dtw_distance(other)
+            assert got == pytest.approx(dtw_ref(p, q)), f"mismatch for n={n} m={m}"
+
+    def test_dtw_distance_radius(self):
+        rng = np.random.default_rng(42)
+        p = rng.normal(size=(60, 2)).cumsum(axis=0)
+        q = p[::-1] + rng.normal(scale=0.1, size=(60, 2))
+        traj = make_traj([Node(x, y, minute=k) for k, (x, y) in enumerate(p)])
+        other = LineString(q)
+        exact = traj.dtw_distance(other)
+        # FastDTW searches a subset of alignments, so it never underestimates
+        # and approaches the exact distance as the radius grows
+        approx = [traj.dtw_distance(other, radius=r) for r in (1, 2, 5, 100)]
+        for fast in approx:
+            assert fast >= exact - 1e-9
+        assert approx == sorted(approx, reverse=True)
+        # a radius that covers the full matrix is exact
+        assert approx[-1] == pytest.approx(exact)
+
+    def test_dtw_distance_radius_small_inputs(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(traj, radius=1) == 0
+        assert traj.dtw_distance(Point(0, 0), radius=1) == 3
+        traj2 = make_traj([Node(0, 0, day=1), Node(0, 2, day=2)])
+        assert traj.dtw_distance(traj2, radius=1) == 1
+
+    def test_dtw_distance_radius_validation(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="radius"):
+            traj.dtw_distance(traj, radius=0)
 
     """
     This test should work but fails in my PyCharm probably due to
