@@ -389,6 +389,18 @@ class TestTrajectorySplitter:
         assert isinstance(split, TrajectoryCollection)
         assert len(split) == 4
 
+    def test_collection_split_by_observation_gap_multiprocessing_with_all_threads(self):
+        split = ObservationGapSplitter(self.collection).split(
+            n_processes=None, gap=timedelta(hours=1)
+        )
+        assert isinstance(split, TrajectoryCollection)
+        assert len(split) == 4
+
+    def test_collection_split_by_date_multiprocessing_with_all_threads(self):
+        split = TemporalSplitter(self.collection).split(n_processes=None, mode="day")
+        assert isinstance(split, TrajectoryCollection)
+        assert len(split) == 3
+
     def test_stop_splitter_stop_at_start(self):
         traj = make_traj(
             [

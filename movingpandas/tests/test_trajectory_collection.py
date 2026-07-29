@@ -440,6 +440,15 @@ class TestTrajectoryCollection:
         result1 = self.collection.trajectories[1].df[ACCELERATION_COL_NAME].tolist()
         assert result1 == expected.trajectories[1].df[ACCELERATION_COL_NAME].tolist()
 
+    def test_add_acceleration_multiprocessing_with_all_threads(self):
+        expected = self.collection.copy()
+        expected.add_acceleration()
+        self.collection.add_acceleration(n_processes=None)
+        result0 = self.collection.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[ACCELERATION_COL_NAME].tolist()
+        result1 = self.collection.trajectories[1].df[ACCELERATION_COL_NAME].tolist()
+        assert result1 == expected.trajectories[1].df[ACCELERATION_COL_NAME].tolist()
+
     def test_add_direction(self):
         self.collection.add_direction()
         result = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
@@ -456,6 +465,15 @@ class TestTrajectoryCollection:
         result1 = self.collection.trajectories[1].df[DIRECTION_COL_NAME].tolist()
         assert result1 == expected.trajectories[1].df[DIRECTION_COL_NAME].tolist()
 
+    def test_add_direction_multiprocessing_with_all_threads(self):
+        expected = self.collection.copy()
+        expected.add_direction()
+        self.collection.add_direction(n_processes=None)
+        result0 = self.collection.trajectories[0].df[DIRECTION_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[DIRECTION_COL_NAME].tolist()
+        result1 = self.collection.trajectories[1].df[DIRECTION_COL_NAME].tolist()
+        assert result1 == expected.trajectories[1].df[DIRECTION_COL_NAME].tolist()
+
     def test_add_distance(self):
         self.collection.add_distance()
         result0 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
@@ -467,6 +485,15 @@ class TestTrajectoryCollection:
         print(expected.to_point_gdf())
         self.collection.add_distance(n_processes=2)
         print(self.collection.to_point_gdf())
+        result0 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[DISTANCE_COL_NAME].tolist()
+        result1 = self.collection.trajectories[1].df[DISTANCE_COL_NAME].tolist()
+        assert result1 == expected.trajectories[1].df[DISTANCE_COL_NAME].tolist()
+
+    def test_add_distance_multiprocessing_with_all_threads(self):
+        expected = self.collection.copy()
+        expected.add_distance()
+        self.collection.add_distance(n_processes=None)
         result0 = self.collection.trajectories[0].df[DISTANCE_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[DISTANCE_COL_NAME].tolist()
         result1 = self.collection.trajectories[1].df[DISTANCE_COL_NAME].tolist()
@@ -498,6 +525,23 @@ class TestTrajectoryCollection:
             result1 == expected.trajectories[1].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
         )
 
+    def test_add_angular_difference_multiprocessing_with_all_threads(self):
+        expected = self.collection.copy()
+        expected.add_angular_difference()
+        self.collection.add_angular_difference(n_processes=None)
+        result0 = (
+            self.collection.trajectories[0].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        )
+        assert (
+            result0 == expected.trajectories[0].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        )
+        result1 = (
+            self.collection.trajectories[1].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        )
+        assert (
+            result1 == expected.trajectories[1].df[ANGULAR_DIFFERENCE_COL_NAME].tolist()
+        )
+
     def test_add_timedelta(self):
         self.collection.add_timedelta()
         result1 = self.collection.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
@@ -509,6 +553,15 @@ class TestTrajectoryCollection:
         print(expected.to_point_gdf())
         self.collection.add_timedelta(n_processes=2)
         print(self.collection.to_point_gdf())
+        result0 = self.collection.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
+        assert result0 == expected.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
+        result1 = self.collection.trajectories[1].df[TIMEDELTA_COL_NAME].tolist()
+        assert result1 == expected.trajectories[1].df[TIMEDELTA_COL_NAME].tolist()
+
+    def test_add_timedelta_multiprocessing_with_all_threads(self):
+        expected = self.collection.copy()
+        expected.add_timedelta()
+        self.collection.add_timedelta(n_processes=None)
         result0 = self.collection.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
         assert result0 == expected.trajectories[0].df[TIMEDELTA_COL_NAME].tolist()
         result1 = self.collection.trajectories[1].df[TIMEDELTA_COL_NAME].tolist()
