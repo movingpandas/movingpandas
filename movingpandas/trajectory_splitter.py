@@ -40,10 +40,9 @@ class TrajectorySplitter:
         n_processes : int or None, optional
             Number of processes to use for computation when splitting on a
             `TrajectoryCollection` (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing. This argument will be ignored when used
-            with a `Trajectory` object.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing. This argument
+            will be ignored when used with a `Trajectory` object.
         kwargs : any type
             Split parameters, differs by splitter
 
