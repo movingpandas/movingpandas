@@ -28,6 +28,8 @@ Visit **[movingpandas.org](http://movingpandas.org)** for details!
 
 You can run **[MovingPandas examples](https://github.com/movingpandas/movingpandas-examples)** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/movingpandas/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
 
+<img align="right" src="https://movingpandas.github.io/movingpandas/assets/img/OSGeo_community.png">
+
 To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/movingpandas/movingpandas/main?filepath=tutorials/1-getting-started.ipynb).
 
 
