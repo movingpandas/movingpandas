@@ -1262,6 +1262,20 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
         assert traj.dtw_distance(LineString([(0, 0), (0, 2)])) == 1
 
+    def test_dtw_distance_ignores_z(self):
+        # _to_point_array slices coordinates to [:, :2], so a z dimension on
+        # either operand must not reach the distance computation. Guards against
+        # a regression to the 3D-vs-2D shape mismatch that used to raise here.
+        df = pd.DataFrame(
+            {
+                "geometry": [Point(0, 0, 0), Point(0, 1, 1), Point(0, 2, 2)],
+                "t": pd.date_range("2020-01-01", periods=3, freq="s"),
+            }
+        ).set_index("t")
+        traj = Trajectory(GeoDataFrame(df), 1, crs=CRS_METRIC)
+        assert traj.dtw_distance(Point(0, 0, 5)) == 3
+        assert traj.dtw_distance(Point(0, 0, 5), radius=1) == 3
+
     def test_dtw_distance_symmetry(self):
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
         traj2 = make_traj([Node(1, 0, day=1), Node(1, 2, day=2)])
@@ -1273,6 +1287,13 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
         with pytest.raises(TypeError):
             traj.dtw_distance(Polygon([(0, 0), (1, 0), (1, 1)]))
+
+    def test_dtw_distance_empty_linestring(self):
+        # an empty geometry has no coordinates to align against; _to_point_array
+        # rejects it with a ValueError rather than returning a degenerate result
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="empty"):
+            traj.dtw_distance(LineString())
 
     def test_dtw_distance_warning(self):
         with pytest.warns(UserWarning):
@@ -1330,6 +1351,12 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
         with pytest.raises(ValueError, match="radius"):
             traj.dtw_distance(traj, radius=0)
+
+    def test_dtw_distance_radius_units(self):
+        # unit conversion must be applied to the final distance regardless of
+        # whether it came from the exact DP or the FastDTW (radius) path
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(Point(0, 0), radius=1, units="km") == 3 / 1000
 
     """
     This test should work but fails in my PyCharm probably due to
