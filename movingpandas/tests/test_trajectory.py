@@ -1303,11 +1303,33 @@ class TestTrajectory:
         assert traj.lcss_distance(Point(0, 0), epsilon=0.5) == 0
         assert traj.lcss_distance(Point(9, 9), epsilon=0.5) == 1
 
+    def test_lcss_distance_ignores_z(self):
+        # _to_point_array slices coordinates to [:, :2]; a z dimension must not
+        # perturb the epsilon match test on either the exact or banded path
+        df = pd.DataFrame(
+            {
+                "geometry": [Point(0, 0, 0), Point(0, 1, 1), Point(0, 2, 2)],
+                "t": pd.date_range("2020-01-01", periods=3, freq="s"),
+            }
+        ).set_index("t")
+        traj = Trajectory(GeoDataFrame(df), 1, crs=CRS_METRIC)
+        assert traj.lcss_distance(Point(0, 0, 5), epsilon=0.5) == 0
+        assert traj.lcss_distance(Point(0, 0, 5), epsilon=0.5, delta=1) == 0
+
     def test_lcss_distance_symmetry(self):
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
         traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
         assert traj.lcss_distance(traj2, epsilon=0.1) == traj2.lcss_distance(
             traj, epsilon=0.1
+        )
+
+    def test_lcss_distance_symmetry_with_delta(self):
+        # the banded DP walks a different set of cells for (a, b) vs (b, a);
+        # symmetry must still hold when delta constrains the alignment window
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1, delta=1) == traj2.lcss_distance(
+            traj, epsilon=0.1, delta=1
         )
 
     def test_lcss_distance_epsilon_validation(self):
@@ -1319,6 +1341,20 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
         with pytest.raises(ValueError, match="delta"):
             traj.lcss_distance(traj, epsilon=1, delta=-1)
+
+    def test_lcss_distance_unsupported_type(self):
+        from shapely.geometry import Polygon
+
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(TypeError):
+            traj.lcss_distance(Polygon([(0, 0), (1, 0), (1, 1)]), epsilon=1)
+
+    def test_lcss_distance_empty_linestring(self):
+        # an empty geometry has no coordinates to align against; _to_point_array
+        # rejects it with a ValueError rather than returning a degenerate result
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="empty"):
+            traj.lcss_distance(LineString(), epsilon=1)
 
     def test_lcss_distance_warning(self):
         with pytest.warns(UserWarning):
