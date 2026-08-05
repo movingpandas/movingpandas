@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal
@@ -1244,6 +1245,118 @@ class TestTrajectory:
         monkeypatch.delattr(shapely, "frechet_distance", raising=False)
         with pytest.raises(NotImplementedError, match="Shapely >= 2.0"):
             traj.frechet_distance(Point(0, 0))
+
+    def test_dtw_distance(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(traj) == 0
+        # warping all three points onto a single point sums their distances
+        assert traj.dtw_distance(Point(0, 0)) == 3
+        traj2 = make_traj([Node(0, 0, day=1), Node(0, 2, day=2)])
+        assert traj.dtw_distance(traj2) == 1
+
+    def test_dtw_distance_units(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(Point(0, 0), units="km") == 3 / 1000
+
+    def test_dtw_distance_linestring(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(LineString([(0, 0), (0, 2)])) == 1
+
+    def test_dtw_distance_ignores_z(self):
+        # _to_point_array slices coordinates to [:, :2], so a z dimension on
+        # either operand must not reach the distance computation. Guards against
+        # a regression to the 3D-vs-2D shape mismatch that used to raise here.
+        df = pd.DataFrame(
+            {
+                "geometry": [Point(0, 0, 0), Point(0, 1, 1), Point(0, 2, 2)],
+                "t": pd.date_range("2020-01-01", periods=3, freq="s"),
+            }
+        ).set_index("t")
+        traj = Trajectory(GeoDataFrame(df), 1, crs=CRS_METRIC)
+        assert traj.dtw_distance(Point(0, 0, 5)) == 3
+        assert traj.dtw_distance(Point(0, 0, 5), radius=1) == 3
+
+    def test_dtw_distance_symmetry(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        traj2 = make_traj([Node(1, 0, day=1), Node(1, 2, day=2)])
+        assert traj.dtw_distance(traj2) == traj2.dtw_distance(traj)
+
+    def test_dtw_distance_unsupported_type(self):
+        from shapely.geometry import Polygon
+
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(TypeError):
+            traj.dtw_distance(Polygon([(0, 0), (1, 0), (1, 1)]))
+
+    def test_dtw_distance_empty_linestring(self):
+        # an empty geometry has no coordinates to align against; _to_point_array
+        # rejects it with a ValueError rather than returning a degenerate result
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="empty"):
+            traj.dtw_distance(LineString())
+
+    def test_dtw_distance_warning(self):
+        with pytest.warns(UserWarning):
+            self.default_traj_latlon.dtw_distance(Point(0, 0))
+
+    def test_dtw_distance_matches_bruteforce(self):
+        # cross-check the anti-diagonal DP against a straightforward
+        # full-matrix reference implementation
+        def dtw_ref(p, q):
+            n, m = len(p), len(q)
+            cost = np.linalg.norm(p[:, None, :] - q[None, :, :], axis=2)
+            acc = np.full((n, m), np.inf)
+            acc[:, 0] = np.cumsum(cost[:, 0])
+            acc[0, :] = np.cumsum(cost[0, :])
+            for i in range(1, n):
+                for j in range(1, m):
+                    acc[i, j] = cost[i, j] + min(
+                        acc[i - 1, j], acc[i, j - 1], acc[i - 1, j - 1]
+                    )
+            return acc[-1, -1]
+
+        rng = np.random.default_rng(42)
+        for n, m in [(7, 13), (20, 20), (15, 40), (33, 8), (12, 1)]:
+            p = rng.normal(size=(n, 2)).cumsum(axis=0)
+            q = rng.normal(size=(m, 2)).cumsum(axis=0)
+            traj = make_traj([Node(x, y, minute=k) for k, (x, y) in enumerate(p)])
+            other = LineString(q) if m > 1 else Point(q[0])
+            got = traj.dtw_distance(other)
+            assert got == pytest.approx(dtw_ref(p, q)), f"mismatch for n={n} m={m}"
+
+    def test_dtw_distance_radius(self):
+        rng = np.random.default_rng(42)
+        p = rng.normal(size=(60, 2)).cumsum(axis=0)
+        q = p[::-1] + rng.normal(scale=0.1, size=(60, 2))
+        traj = make_traj([Node(x, y, minute=k) for k, (x, y) in enumerate(p)])
+        other = LineString(q)
+        exact = traj.dtw_distance(other)
+        # FastDTW searches a subset of alignments, so it never underestimates
+        # and approaches the exact distance as the radius grows
+        approx = [traj.dtw_distance(other, radius=r) for r in (1, 2, 5, 100)]
+        for fast in approx:
+            assert fast >= exact - 1e-9
+        assert approx == sorted(approx, reverse=True)
+        # a radius that covers the full matrix is exact
+        assert approx[-1] == pytest.approx(exact)
+
+    def test_dtw_distance_radius_small_inputs(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(traj, radius=1) == 0
+        assert traj.dtw_distance(Point(0, 0), radius=1) == 3
+        traj2 = make_traj([Node(0, 0, day=1), Node(0, 2, day=2)])
+        assert traj.dtw_distance(traj2, radius=1) == 1
+
+    def test_dtw_distance_radius_validation(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="radius"):
+            traj.dtw_distance(traj, radius=0)
+
+    def test_dtw_distance_radius_units(self):
+        # unit conversion must be applied to the final distance regardless of
+        # whether it came from the exact DP or the FastDTW (radius) path
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.dtw_distance(Point(0, 0), radius=1, units="km") == 3 / 1000
 
     """
     This test should work but fails in my PyCharm probably due to

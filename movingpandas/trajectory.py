@@ -2,6 +2,7 @@
 
 import warnings
 
+import numpy as np
 import shapely
 from functools import wraps
 from shapely.affinity import translate
@@ -1639,6 +1640,198 @@ class Trajectory:
         if isinstance(other, Trajectory):
             other = other.to_linestring()
         dist = self.to_linestring().hausdorff_distance(other)
+        conversion = get_conversion(units, self.crs_units)
+        return dist / conversion.distance
+
+    def _to_point_array(self, other):
+        """Return the ordered (x, y) point sequence of ``other`` as an array.
+
+        Accepts a Trajectory, a shapely LineString, or a shapely Point.
+        Z coordinates are ignored.
+        """
+        if isinstance(other, Trajectory):
+            other = other.to_linestring()
+        if isinstance(other, Point):
+            return np.array([[other.x, other.y]])
+        if not isinstance(other, LineString):
+            raise TypeError(
+                f"Expected a Trajectory, LineString, or Point, "
+                f"got {type(other).__name__}"
+            )
+        if other.is_empty:
+            raise ValueError("LineString must not be empty")
+        return np.array(other.coords)[:, :2]
+
+    @staticmethod
+    def _dtw_cost_exact(p, q):
+        """Exact DTW cost between two point sequences.
+
+        Evaluates the DTW dynamic program one anti-diagonal at a time, so
+        each diagonal is a single vectorized numpy operation and only the
+        two previous diagonals are kept in memory. Pairwise distances are
+        computed per diagonal, so neither the n x m cost matrix nor the
+        accumulated cost matrix is ever materialized: O(n*m) time,
+        O(n+m) memory.
+        """
+        n, m = len(p), len(q)
+        qr = q[::-1]  # reversed view: each anti-diagonal is a forward slice
+        # DP over (n+1) x (m+1) with a virtual start cell acc[0, 0] = 0
+        prev2 = np.full(n + 1, np.inf)  # anti-diagonal s - 2, indexed by i
+        prev2[0] = 0.0
+        prev = np.full(n + 1, np.inf)  # anti-diagonal s - 1
+        cur = np.full(n + 1, np.inf)
+        for s in range(2, n + m + 1):  # cells (i, j) with i + j == s
+            lo, hi = max(1, s - m), min(n, s - 1)
+            # rows i-1 of p and, via the reversed view, rows j-1 of q
+            diff = p[lo - 1 : hi] - qr[m - s + lo : m - s + hi + 1]
+            cost = np.sqrt((diff * diff).sum(axis=1))
+            # clear every stale cell a later diagonal may read, then write
+            cur[max(0, lo - 1) : hi + 3] = np.inf
+            cur[lo : hi + 1] = cost + np.minimum(
+                prev2[lo - 1 : hi],
+                np.minimum(prev[lo - 1 : hi], prev[lo : hi + 1]),
+            )
+            prev2, prev, cur = prev, cur, prev2
+        return float(prev[n])
+
+    @staticmethod
+    def _dtw_windowed_path(p, q, window):
+        """DTW restricted to a per-row window; returns (cost, warp path).
+
+        ``window`` gives the inclusive column range ``(lo, hi)`` searched in
+        each row. Distances for each row's window are computed as one
+        vectorized numpy operation, the recurrence itself runs only over
+        window cells.
+        """
+        n, m = len(p), len(q)
+        inf = np.inf
+        acc = {(-1, -1): 0.0}
+        parent = {}
+        for i in range(n):
+            lo, hi = window[i]
+            diff = p[i] - q[lo : hi + 1]
+            cost = np.sqrt((diff * diff).sum(axis=1)).tolist()
+            for j in range(lo, hi + 1):
+                best, arg = inf, None
+                for cell in ((i - 1, j - 1), (i - 1, j), (i, j - 1)):
+                    val = acc.get(cell, inf)  # cells outside the window
+                    if val < best:
+                        best, arg = val, cell
+                if arg is not None:
+                    acc[(i, j)] = best + cost[j - lo]
+                    parent[(i, j)] = arg
+        path = []
+        cell = (n - 1, m - 1)
+        while cell != (-1, -1):
+            path.append(cell)
+            cell = parent[cell]
+        path.reverse()
+        return acc[(n - 1, m - 1)], path
+
+    @staticmethod
+    def _halve(x):
+        """Halve a point sequence by averaging consecutive pairs."""
+        k = 2 * (len(x) // 2)
+        return (x[0:k:2] + x[1:k:2]) / 2
+
+    @staticmethod
+    def _expand_window(path, n, m, radius):
+        """Project a coarse warp path to the next resolution and inflate it
+        by ``radius`` cells, following Salvador & Chan (2007)."""
+        lo = [m - 1] * n
+        hi = [0] * n
+        for ci, cj in path:
+            j0 = max(0, 2 * cj - radius)
+            j1 = min(m - 1, 2 * cj + 1 + radius)
+            for i in range(max(0, 2 * ci - radius), min(n, 2 * ci + 2 + radius)):
+                if j0 < lo[i]:
+                    lo[i] = j0
+                if j1 > hi[i]:
+                    hi[i] = j1
+        return list(zip(lo, hi))
+
+    @classmethod
+    def _fastdtw_path(cls, p, q, radius):
+        """FastDTW (Salvador & Chan 2007): recursively coarsen the
+        sequences, then refine the coarse warp path at each resolution
+        within ``radius`` cells. O(n) time and memory."""
+        n, m = len(p), len(q)
+        if n <= radius + 2 or m <= radius + 2:
+            return cls._dtw_windowed_path(p, q, [(0, m - 1)] * n)
+        _, coarse_path = cls._fastdtw_path(cls._halve(p), cls._halve(q), radius)
+        window = cls._expand_window(coarse_path, n, m, radius)
+        return cls._dtw_windowed_path(p, q, window)
+
+    @requires_geometry
+    def dtw_distance(self, other, units=UNITS(), radius=None):
+        """
+        Return the Dynamic Time Warping (DTW) distance to the other trajectory
+        or geometric object.
+
+        DTW finds the alignment between the two ordered point sequences that
+        minimises the accumulated pairwise distance, allowing the sequences to
+        be stretched or compressed along their order ("warped"). Unlike the
+        Fréchet distance, which is the largest single gap along the best
+        alignment, DTW sums the matched point distances, so it reflects the
+        overall cumulative deviation between the trajectories.
+
+        By default the exact DTW distance is computed, which takes O(n*m)
+        time (and O(n+m) memory, the dynamic program is evaluated in
+        vectorized anti-diagonal slices). For long trajectories, pass
+        ``radius`` to use the FastDTW approximation by Salvador & Chan
+        (2007), which runs in O(n) time and memory. FastDTW never
+        underestimates the exact distance, and a larger ``radius`` gets
+        closer to it at the cost of speed. Euclidean point distances are
+        used throughout, in both the exact and the approximate computation.
+
+        Distances are computed using Euclidean geometry, so a
+        ``UserWarning`` is raised for trajectories in a geographic (lat/lon)
+        CRS. Project to a suitable planar CRS first for meaningful results.
+
+        If units have been declared:
+
+        - For geographic projections, in declared units
+        - For known CRS units, in declared units
+        - For unknown CRS units, in declared units as if CRS is in meters
+
+        Parameters
+        ----------
+        other : Trajectory, LineString, or Point
+            Other trajectory or geometric object
+
+        units : str
+            Units in which to calculate distance values (default: CRS units)
+            For more info, check the list of supported units at
+            https://movingpandas.org/units
+
+        radius : int, optional
+            Radius of the FastDTW search window. Default None (exact DTW).
+
+        Returns
+        -------
+        float
+            DTW distance
+
+        References
+        ----------
+        Salvador, S., & Chan, P. (2007). Toward accurate dynamic time
+        warping in linear time and space. Intelligent Data Analysis, 11(5),
+        561-580.
+        """
+        if radius is not None and int(radius) < 1:
+            raise ValueError("radius must be a positive integer")
+        if self.is_latlon:
+            message = (
+                f"DTW distance is computed using Euclidean geometry but "
+                f"the trajectory coordinate system is {self.crs}."
+            )
+            warnings.warn(message, UserWarning)
+        p = self._to_point_array(self)
+        q = self._to_point_array(other)
+        if radius is None:
+            dist = self._dtw_cost_exact(p, q)
+        else:
+            dist, _ = self._fastdtw_path(p, q, int(radius))
         conversion = get_conversion(units, self.crs_units)
         return dist / conversion.distance
 
