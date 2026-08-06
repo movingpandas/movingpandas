@@ -4,6 +4,7 @@ import warnings
 from geopy import distance
 from math import hypot
 from multiprocessing import Pool
+from os import cpu_count
 from itertools import repeat
 from geopandas import GeoDataFrame
 from shapely.geometry import MultiPoint, Point
@@ -32,9 +33,8 @@ class TrajectoryStopDetector:
 
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
 
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
@@ -62,6 +62,9 @@ class TrajectoryStopDetector:
             )
             n_processes = n_threads
 
+        if n_processes is None:
+            n_processes = cpu_count()
+
         self.traj = traj
         self.n_processes = n_processes
 
@@ -87,7 +90,7 @@ class TrajectoryStopDetector:
             return self._process_traj(self.traj, max_diameter, min_duration)
         elif isinstance(self.traj, TrajectoryCollection):
             trajs = self.traj.trajectories
-            if self.n_processes > 1 or self.n_processes is None:
+            if self.n_processes > 1:
                 return self._process_traj_collection_multiprocessing(
                     trajs, max_diameter, min_duration
                 )

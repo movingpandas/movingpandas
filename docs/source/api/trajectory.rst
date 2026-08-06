@@ -77,6 +77,8 @@ Spatiotemporal analysis
 
    Trajectory.clip
    Trajectory.distance
+   Trajectory.dtw_distance
+   Trajectory.frechet_distance
    Trajectory.get_bbox
    Trajectory.get_crs
    Trajectory.get_direction

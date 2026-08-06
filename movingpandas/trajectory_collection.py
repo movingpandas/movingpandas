@@ -650,9 +650,8 @@ class TrajectoryCollection:
             https://movingpandas.org/units
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
             removed in a future version.
@@ -667,8 +666,9 @@ class TrajectoryCollection:
         )
 
         if n_processes is None:
-            self._multiprocess(self._add_speed, cpu_count(), name, units, overwrite)
-        elif n_processes > 1:
+            n_processes = cpu_count()
+
+        if n_processes > 1:
             self._multiprocess(self._add_speed, n_processes, name, units, overwrite)
         else:
             self._add_speed(self.trajectories, name, units, overwrite)
@@ -711,9 +711,8 @@ class TrajectoryCollection:
             Name of the direction column (default: "direction")
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
             removed in a future version.
@@ -722,7 +721,10 @@ class TrajectoryCollection:
             n_processes=n_processes, **kwargs
         )
 
-        if n_processes > 1 or n_processes is None:
+        if n_processes is None:
+            n_processes = cpu_count()
+
+        if n_processes > 1:
             self._multiprocess(
                 self._add_direction,
                 n_processes,
@@ -758,9 +760,8 @@ class TrajectoryCollection:
             Name of the angular_difference column (default: "angular_difference")
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
             removed in a future version.
@@ -769,7 +770,10 @@ class TrajectoryCollection:
             n_processes=n_processes, **kwargs
         )
 
-        if n_processes > 1 or n_processes is None:
+        if n_processes is None:
+            n_processes = cpu_count()
+
+        if n_processes > 1:
             self._multiprocess(
                 self._add_angular_difference, n_processes, name, UNITS(), overwrite
             )
@@ -819,9 +823,8 @@ class TrajectoryCollection:
             https://movingpandas.org/units
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
             removed in a future version.
@@ -830,7 +833,10 @@ class TrajectoryCollection:
             n_processes=n_processes, **kwargs
         )
 
-        if n_processes > 1 or n_processes is None:
+        if n_processes is None:
+            n_processes = cpu_count()
+
+        if n_processes > 1:
             self._multiprocess(
                 self._add_acceleration, n_processes, name, units, overwrite
             )
@@ -867,16 +873,18 @@ class TrajectoryCollection:
             https://movingpandas.org/units
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
             removed in a future version.
         """
         n_processes = self._add_deprecation_warning_for_n_threads(n_processes, **kwargs)
 
-        if n_processes > 1 or n_processes is None:
+        if n_processes is None:
+            n_processes = cpu_count()
+
+        if n_processes > 1:
             self._multiprocess(self._add_distance, n_processes, name, units, overwrite)
         else:
             self._add_distance(self.trajectories, name, units, overwrite)
@@ -904,9 +912,8 @@ class TrajectoryCollection:
             Name of the timedelta column (default: "timedelta")
         n_processes : int or None, optional
             Number of processes to use for computation (default: 1). If set to `None`,
-            the number of processes will be set to `os.cpu_count()`
-            (or `os.process_cpu_count()` in Python 3.13+), enabling full CPU
-            utilization via multiprocessing.
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing.
         n_threads : int, optional
             DEPRECATED. Use `n_processes` instead. This parameter will be
             removed in a future version.
@@ -915,7 +922,10 @@ class TrajectoryCollection:
             n_processes=n_processes, **kwargs
         )
 
-        if n_processes > 1 or n_processes is None:
+        if n_processes is None:
+            n_processes = cpu_count()
+
+        if n_processes > 1:
             self._multiprocess(
                 self._add_timedelta, n_processes, name, UNITS(), overwrite
             )

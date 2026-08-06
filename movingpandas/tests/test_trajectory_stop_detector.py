@@ -269,6 +269,40 @@ class TestTrajectoryStopDetector:
         assert len(stop_segments) == 2
         assert len(stop_points) == 2
 
+    def test_stop_detector_collection_multiprocessing_with_all_threads(self):
+        traj1 = make_traj(
+            [
+                Node(0, 0),
+                Node(0, 1, second=1),
+                Node(0, 2, second=2),
+                Node(0, 1, second=3),
+                Node(0, 22, second=4),
+                Node(0, 30, second=8),
+                Node(0, 40, second=10),
+                Node(1, 50, second=15),
+            ],
+            id=1,
+        )
+        traj2 = make_traj(
+            [
+                Node(0, -100),
+                Node(0, -10, second=1),
+                Node(0, 2, second=2),
+                Node(0, 1, second=3),
+                Node(0, 22, second=4),
+                Node(0, 30, second=8),
+                Node(0, 31, second=10),
+                Node(1, 32, second=15),
+            ],
+            id=2,
+        )
+        collection = TrajectoryCollection([traj1, traj2])
+        detector = TrajectoryStopDetector(collection, n_processes=None)
+        stop_times = detector.get_stop_time_ranges(
+            max_diameter=3, min_duration=timedelta(seconds=2)
+        )
+        assert len(stop_times) == 2
+
     def test_stop_splitter_no_stops(self):
         traj1 = make_traj(
             [
