@@ -1358,6 +1358,150 @@ class TestTrajectory:
         traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
         assert traj.dtw_distance(Point(0, 0), radius=1, units="km") == 3 / 1000
 
+    def test_lcss_distance(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        # identical trajectories match everywhere -> distance 0
+        assert traj.lcss_distance(traj, epsilon=0.5) == 0
+        # one point is an outlier, the other two match in order -> 1 - 2/3
+        traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1) == pytest.approx(1 / 3)
+        # nothing within epsilon -> distance 1
+        far = make_traj([Node(9, 9, day=1), Node(9, 8, day=2), Node(9, 7, day=3)])
+        assert traj.lcss_distance(far, epsilon=0.1) == 1
+
+    def test_lcss_distance_delta(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        # same points reversed: only the middle point is index-aligned
+        traj2 = make_traj([Node(0, 2, day=1), Node(0, 1, day=2), Node(0, 0, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1, delta=0) == pytest.approx(2 / 3)
+
+    def test_lcss_distance_delta_window(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        # same trajectory with a leading outlier shifts all matches by one index
+        shifted = make_traj(
+            [
+                Node(0, 9, day=1),
+                Node(0, 0, day=2),
+                Node(0, 1, day=3),
+                Node(0, 2, day=4),
+            ]
+        )
+        assert traj.lcss_distance(shifted, epsilon=0.5) == 0
+        assert traj.lcss_distance(shifted, epsilon=0.5, delta=1) == 0
+        assert traj.lcss_distance(shifted, epsilon=0.5, delta=0) == 1
+
+    def test_lcss_distance_unequal_lengths(self):
+        # 3 of 3 shorter-sequence points match -> similarity 3/min(3, 5) = 1
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        longer = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(0, 1, day=2),
+                Node(0, 2, day=3),
+                Node(0, 3, day=4),
+                Node(0, 4, day=5),
+            ]
+        )
+        assert traj.lcss_distance(longer, epsilon=0.5) == 0
+
+    def test_lcss_distance_epsilon_boundary(self):
+        # pairwise distances are exactly epsilon -> still a match
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        parallel = make_traj([Node(1, 0, day=1), Node(1, 1, day=2)])
+        assert traj.lcss_distance(parallel, epsilon=1.0) == 0
+
+    def test_lcss_distance_point(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(Point(0, 0), epsilon=0.5) == 0
+        assert traj.lcss_distance(Point(9, 9), epsilon=0.5) == 1
+
+    def test_lcss_distance_ignores_z(self):
+        # _to_point_array slices coordinates to [:, :2]; a z dimension must not
+        # perturb the epsilon match test on either the exact or banded path
+        df = pd.DataFrame(
+            {
+                "geometry": [Point(0, 0, 0), Point(0, 1, 1), Point(0, 2, 2)],
+                "t": pd.date_range("2020-01-01", periods=3, freq="s"),
+            }
+        ).set_index("t")
+        traj = Trajectory(GeoDataFrame(df), 1, crs=CRS_METRIC)
+        assert traj.lcss_distance(Point(0, 0, 5), epsilon=0.5) == 0
+        assert traj.lcss_distance(Point(0, 0, 5), epsilon=0.5, delta=1) == 0
+
+    def test_lcss_distance_symmetry(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1) == traj2.lcss_distance(
+            traj, epsilon=0.1
+        )
+
+    def test_lcss_distance_symmetry_with_delta(self):
+        # the banded DP walks a different set of cells for (a, b) vs (b, a);
+        # symmetry must still hold when delta constrains the alignment window
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2), Node(0, 2, day=3)])
+        traj2 = make_traj([Node(0, 0, day=1), Node(5, 5, day=2), Node(0, 2, day=3)])
+        assert traj.lcss_distance(traj2, epsilon=0.1, delta=1) == traj2.lcss_distance(
+            traj, epsilon=0.1, delta=1
+        )
+
+    def test_lcss_distance_epsilon_validation(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="epsilon"):
+            traj.lcss_distance(traj, epsilon=0)
+
+    def test_lcss_distance_delta_validation(self):
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="delta"):
+            traj.lcss_distance(traj, epsilon=1, delta=-1)
+
+    def test_lcss_distance_unsupported_type(self):
+        from shapely.geometry import Polygon
+
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(TypeError):
+            traj.lcss_distance(Polygon([(0, 0), (1, 0), (1, 1)]), epsilon=1)
+
+    def test_lcss_distance_empty_linestring(self):
+        # an empty geometry has no coordinates to align against; _to_point_array
+        # rejects it with a ValueError rather than returning a degenerate result
+        traj = make_traj([Node(0, 0, day=1), Node(0, 1, day=2)])
+        with pytest.raises(ValueError, match="empty"):
+            traj.lcss_distance(LineString(), epsilon=1)
+
+    def test_lcss_distance_warning(self):
+        with pytest.warns(UserWarning):
+            self.default_traj_latlon.lcss_distance(Point(0, 0), epsilon=1)
+
+    def test_lcss_distance_matches_bruteforce(self):
+        # cross-check the banded, vectorized DP against a straightforward
+        # full-matrix reference implementation
+        def lcss_ref(p, q, epsilon, delta):
+            n, m = len(p), len(q)
+            lcss = np.zeros((n + 1, m + 1), dtype=int)
+            for i in range(1, n + 1):
+                for j in range(1, m + 1):
+                    if delta is not None and abs(i - j) > delta:
+                        lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
+                    elif np.hypot(*(p[i - 1] - q[j - 1])) <= epsilon:
+                        lcss[i, j] = lcss[i - 1, j - 1] + 1
+                    else:
+                        lcss[i, j] = max(lcss[i - 1, j], lcss[i, j - 1])
+            return 1.0 - lcss[n, m] / min(n, m)
+
+        rng = np.random.default_rng(42)
+        for n, m in [(7, 13), (20, 20), (15, 40), (33, 8), (12, 1)]:
+            p = rng.normal(size=(n, 2)).cumsum(axis=0)
+            q = rng.normal(size=(m, 2)).cumsum(axis=0)
+            traj = make_traj([Node(x, y, minute=k) for k, (x, y) in enumerate(p)])
+            other = LineString(q) if m > 1 else Point(q[0])
+            for epsilon in [0.5, 1.5, 4.0]:
+                for delta in [None, 0, 1, 3, 100]:
+                    got = traj.lcss_distance(other, epsilon=epsilon, delta=delta)
+                    expected = lcss_ref(p, q, epsilon, delta)
+                    assert got == pytest.approx(expected, abs=1e-12), (
+                        f"mismatch for n={n} m={m} " f"epsilon={epsilon} delta={delta}"
+                    )
+
     """
     This test should work but fails in my PyCharm probably due to
     https://github.com/pyproj4/pyproj/issues/134
