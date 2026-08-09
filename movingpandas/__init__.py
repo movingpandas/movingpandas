@@ -41,4 +41,4 @@ except ImportError as e:
     warnings.warn(e.msg, UserWarning)
 
 name = "movingpandas"
-__version__ = "0.22.4"
+__version__ = "0.23.0"
