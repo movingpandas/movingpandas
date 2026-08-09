@@ -95,7 +95,7 @@ Aggregate trajectories to explore larger patterns
 
 ## Installation
 
-MovingPandas for Python >= 3.8 and all its dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
+MovingPandas for Python >= 3.9 and all its dependencies are available from [conda-forge](https://anaconda.org/conda-forge/movingpandas) and can be installed using 
 
 `conda install -c conda-forge movingpandas`
  
