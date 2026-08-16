@@ -1783,16 +1783,8 @@ class Trajectory:
         ``radius``. FastDTW never underestimates the exact distance, and a
         larger ``radius`` generally gets closer to the exact distance at the
         cost of speed. The approximation is not guaranteed to improve at
-        every step, though. FastDTW repeatedly halves both sequences, aligns
-        the shortest pair, and then searches only the cells within
-        ``radius`` of that alignment as it projects it back up to full
-        resolution. Since ``radius`` also decides how far the halving goes,
-        changing it changes which coarse alignment gets refined, and the
-        cells searched at one ``radius`` are not necessarily a subset of
-        those searched at a larger one. An individual increase can therefore
-        move the estimate further from the exact distance. Euclidean point
-        distances are used throughout, in both the exact and the approximate
-        computation.
+        every step, though. Euclidean point distances are used throughout, in
+        both the exact and the approximate computation.
 
         Distances are computed using Euclidean geometry, so a
         ``UserWarning`` is raised for trajectories in a geographic (lat/lon)
