@@ -151,6 +151,39 @@ class TestTrajectoryGeneralizer:
         wkt2 = collection.trajectories[1].to_linestring().wkt
         assert wkt2 == "LINESTRING (10 10, 16 16, 190 19)"
 
+    def test_collection_multiprocessing(self):
+        collection = MinTimeDeltaGeneralizer(self.collection).generalize(
+            tolerance=timedelta(minutes=10), n_processes=2
+        )
+        assert len(collection) == 2
+        wkt1 = collection.trajectories[0].to_linestring().wkt
+        assert wkt1 == "LINESTRING (0 0, 6 6, 9 9)"
+        wkt2 = collection.trajectories[1].to_linestring().wkt
+        assert wkt2 == "LINESTRING (10 10, 16 16, 190 19)"
+
+    def test_collection_multiprocessing_all_cpus(self):
+        collection = MinTimeDeltaGeneralizer(self.collection).generalize(
+            tolerance=timedelta(minutes=10), n_processes=None
+        )
+        assert len(collection) == 2
+
+    def test_collection_multiprocessing_matches_serial(self):
+        cases = [
+            (MinDistanceGeneralizer, 1),
+            (MinTimeDeltaGeneralizer, timedelta(minutes=10)),
+            (MaxDistanceGeneralizer, 1),
+            (DouglasPeuckerGeneralizer, 1),
+            (TopDownTimeRatioGeneralizer, 1),
+        ]
+        for generalizer, tolerance in cases:
+            serial = generalizer(self.collection).generalize(tolerance=tolerance)
+            parallel = generalizer(self.collection).generalize(
+                tolerance=tolerance, n_processes=2
+            )
+            assert len(serial) == len(parallel)
+            for expected, actual in zip(serial.trajectories, parallel.trajectories):
+                assert expected.to_linestring().wkt == actual.to_linestring().wkt
+
 
 class TestTrajectoryGeneralizerNonGeo:
     def setup_method(self):
