@@ -2,7 +2,9 @@
 
 import itertools as it
 import pandas as pd
+from geopandas import GeoDataFrame, GeoSeries
 from shapely.geometry import Point, LineString, shape
+from shapely.geometry.base import BaseGeometry
 from shapely.affinity import translate
 from datetime import datetime, timedelta
 
@@ -216,16 +218,48 @@ def _determine_time_ranges_linebased(traj, polygon):
     return _dissolve_ranges(ranges)
 
 
+def _as_geometry_list(polygon):
+    """
+    Normalizes the clipping input to a list of geometries.
+
+    A single geometry is kept as one geometry, so clipping with a MultiPolygon
+    still yields segments for the MultiPolygon as a whole rather than for each
+    of its parts.
+    """
+    if isinstance(polygon, BaseGeometry):
+        return [polygon]
+    if isinstance(polygon, GeoDataFrame):
+        return list(polygon.geometry)
+    if isinstance(polygon, GeoSeries):
+        return list(polygon)
+    if isinstance(polygon, (list, tuple)):
+        return list(polygon)
+    raise TypeError(
+        "Trajectories can only be clipped with a Shapely geometry, a list or "
+        f"tuple of them, a GeoSeries, or a GeoDataFrame, not {type(polygon)}!"
+    )
+
+
 def clip(traj, polygon, pointbased=False):
     """
-    Returns a list of trajectory segments clipped by the given feature.
+    Returns a list of trajectory segments clipped by the given feature(s).
+
+    Multiple polygons are clipped in a single pass so that the resulting
+    segment ids stay unique across all of them.
     """
-    if not intersects(traj, polygon):
+    ranges = []
+    for geom in _as_geometry_list(polygon):
+        if not intersects(traj, geom):
+            continue
+        if pointbased:
+            ranges += _determine_time_ranges_pointbased(traj, geom)
+        else:
+            ranges += _determine_time_ranges_linebased(traj, geom)
+    if not ranges:
         return []
-    if pointbased:
-        ranges = _determine_time_ranges_pointbased(traj, polygon)
-    else:
-        ranges = _determine_time_ranges_linebased(traj, polygon)
+    # Segments are numbered in the order they are returned, so order the ranges
+    # chronologically rather than by the order the polygons happened to be in.
+    ranges.sort(key=lambda the_range: the_range.t_0)
     return _get_segments_for_ranges(traj, ranges)
 
 

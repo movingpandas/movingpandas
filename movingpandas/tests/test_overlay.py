@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 from pytest import approx
+from geopandas import GeoDataFrame, GeoSeries
 from pandas.testing import assert_frame_equal
 from shapely.geometry import Polygon
 from datetime import datetime, timedelta
@@ -64,6 +66,65 @@ class TestOverlay:
         assert intersections.get_trajectory("1_1") == make_traj(
             [Node(7, 10, second=23), Node(5, 10, second=25)], id="1_1", parent=traj
         )
+
+    def test_clip_with_multiple_polygons_yields_unique_ids(self):
+        # Clipping with one polygon at a time restarts the segment counter, so
+        # the ids collide. Clipping with both at once must not.
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        traj = self.default_traj_metric_5
+
+        separately = [t.id for t in traj.clip(poly1)] + [t.id for t in traj.clip(poly2)]
+        assert len(set(separately)) == 1  # the bug: both are "1_0"
+
+        together = traj.clip([poly1, poly2])
+        assert [t.id for t in together] == ["1_0", "1_1"]
+
+    def test_clip_with_multiple_polygons_matches_equivalent_single_polygon(self):
+        # Two polygons covering the same area as one tall polygon should give
+        # the same segments.
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        tall = Polygon([(5, -5), (7, -5), (7, 12), (5, 12), (5, -5)])
+        traj = self.default_traj_metric_5
+
+        from_parts = traj.clip([poly1, poly2])
+        from_single = traj.clip(tall)
+        assert len(from_parts) == len(from_single)
+        for expected, actual in zip(from_single, from_parts):
+            assert expected.id == actual.id
+            assert expected.to_linestring().wkt == actual.to_linestring().wkt
+
+    def test_clip_with_multiple_polygons_is_order_independent(self):
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        traj = self.default_traj_metric_5
+
+        forwards = traj.clip([poly1, poly2])
+        backwards = traj.clip([poly2, poly1])
+        assert [t.to_linestring().wkt for t in forwards] == [
+            t.to_linestring().wkt for t in backwards
+        ]
+
+    def test_clip_with_geoseries_and_geodataframe(self):
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        traj = self.default_traj_metric_5
+
+        expected = [t.to_linestring().wkt for t in traj.clip([poly1, poly2])]
+        from_series = traj.clip(GeoSeries([poly1, poly2]))
+        from_frame = traj.clip(GeoDataFrame(geometry=[poly1, poly2]))
+        assert [t.to_linestring().wkt for t in from_series] == expected
+        assert [t.to_linestring().wkt for t in from_frame] == expected
+
+    def test_clip_with_multiple_polygons_without_intersection(self):
+        poly1 = Polygon([(100, 100), (101, 100), (101, 101), (100, 101)])
+        poly2 = Polygon([(200, 200), (201, 200), (201, 201), (200, 201)])
+        assert len(self.default_traj_metric_5.clip([poly1, poly2])) == 0
+
+    def test_clip_with_unsupported_type_raises(self):
+        with pytest.raises(TypeError):
+            self.default_traj_metric_5.clip(42)
 
     def test_clip_with_duplicate_traj_points_does_not_drop_any_points(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
