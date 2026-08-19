@@ -29,6 +29,7 @@ from .trajectory_splitter import (  # noqa F401
     StopSplitter,
     AngleChangeSplitter,
     ValueChangeSplitter,
+    DistanceSplitter,
 )
 from .trajectory_cleaner import IqrCleaner, OutlierCleaner  # noqa F401
 from .trajectory_stop_detector import TrajectoryStopDetector  # noqa F401
