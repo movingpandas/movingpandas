@@ -562,6 +562,49 @@ class TestTrajectorySplitter:
         assert len(split) == 6
         assert split.get_crs() == "EPSG:31256"
 
+    def test_split_has_no_parent_by_default(self):
+        traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=6)])
+        split = ObservationGapSplitter(traj).split(gap=timedelta(seconds=120))
+        assert len(split) == 2
+        for segment in split:
+            assert segment.parent is None
+
+    def test_split_with_parent(self):
+        traj = make_traj([Node(), Node(minute=1), Node(minute=5), Node(minute=6)])
+        split = ObservationGapSplitter(traj).split(
+            gap=timedelta(seconds=120), parent=True
+        )
+        assert len(split) == 2
+        for segment in split:
+            assert segment.parent is traj
+
+    def test_split_collection_with_parent(self):
+        split = ObservationGapSplitter(self.collection).split(
+            gap=timedelta(minutes=30), parent=True
+        )
+        assert len(split) > 0
+        sources = {t.id: t for t in self.collection}
+        for segment in split:
+            assert segment.parent is not None
+            # segment ids are "<parent id>_<n>"
+            assert segment.parent is sources[segment.parent.id]
+            assert str(segment.id).startswith(f"{segment.parent.id}_")
+
+    def test_split_collection_without_parent_by_default(self):
+        split = ObservationGapSplitter(self.collection).split(gap=timedelta(minutes=30))
+        assert len(split) > 0
+        for segment in split:
+            assert segment.parent is None
+
+    def test_split_collection_with_parent_multiprocessing(self):
+        split = ObservationGapSplitter(self.collection).split(
+            gap=timedelta(minutes=30), parent=True, n_processes=2
+        )
+        assert len(split) > 0
+        for segment in split:
+            assert segment.parent is not None
+            assert str(segment.id).startswith(f"{segment.parent.id}_")
+
 
 class TestTrajectorySplitterNonGeo:
     def setup_method(self):
