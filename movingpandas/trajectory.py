@@ -1779,10 +1779,12 @@ class Trajectory:
         time (and O(n+m) memory, the dynamic program is evaluated in
         vectorized anti-diagonal slices). For long trajectories, pass
         ``radius`` to use the FastDTW approximation by Salvador & Chan
-        (2007), which runs in O(n) time and memory. FastDTW never
-        underestimates the exact distance, and a larger ``radius`` gets
-        closer to it at the cost of speed. Euclidean point distances are
-        used throughout, in both the exact and the approximate computation.
+        (2007), which runs in linear time and memory for a given
+        ``radius``. FastDTW never underestimates the exact distance, and a
+        larger ``radius`` generally gets closer to the exact distance at the
+        cost of speed. The approximation is not guaranteed to improve at
+        every step, though. Euclidean point distances are used throughout, in
+        both the exact and the approximate computation.
 
         Distances are computed using Euclidean geometry, so a
         ``UserWarning`` is raised for trajectories in a geographic (lat/lon)
@@ -1899,10 +1901,15 @@ class Trajectory:
         sequences such that each matched pair is within ``epsilon`` and, if
         ``delta`` is given, no more than ``delta`` positions apart in the
         sequences. The similarity is that count divided by the length of the
-        shorter sequence, and the returned distance is ``1 - similarity`` (0
-        means the trajectories match everywhere, 1 means no points match).
-        Because unmatched points are simply skipped, LCSS is robust to noise
-        and outliers, unlike DTW and Fréchet distance.
+        shorter sequence, and the returned distance is ``1 - similarity``. So
+        0 means every point of the shorter trajectory found a match, i.e. it
+        is essentially a (noisy) subsequence of the other, and 1 means no
+        points match within ``epsilon``. Points of the longer trajectory that
+        are left over do not count against the result. Because unmatched
+        points are simply skipped, LCSS is more robust to noise and
+        outliers than DTW and Fréchet distance, which must account for every
+        point. Values are only comparable between trajectory pairs when they
+        were computed with the same ``epsilon`` and ``delta``.
 
         The similarity is computed with a vectorized dynamic program that
         keeps only two anti-diagonals of the DP matrix in memory. Without
@@ -1958,7 +1965,11 @@ class Trajectory:
         https://shapely.readthedocs.io/en/stable/reference/shapely.frechet_distance.html).
         The Fréchet distance is a measure of the similarity between curves
         that takes into account the location and ordering of the points along
-        the curves.
+        the curves. Shapely computes the *discrete* Fréchet distance, which
+        only considers the recorded points and not the line interpolated
+        between them. The result therefore depends on how densely each
+        trajectory is sampled, and a coarsely sampled trajectory can score
+        much higher than the shape of the curves alone would suggest.
 
         The distance is computed using Euclidean geometry, so a ``UserWarning``
         is raised for trajectories in a geographic (lat/lon) CRS. Project to a
