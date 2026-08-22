@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+from functools import partial
+from multiprocessing import Pool, cpu_count
 from shapely.geometry import LineString, Point
 import pandas as pd
 
@@ -25,7 +27,7 @@ class TrajectoryGeneralizer:
         self.traj = traj
         self.traj_col_name = traj.get_geom_col()
 
-    def generalize(self, tolerance):
+    def generalize(self, tolerance, n_processes=1):
         """
         Generalize the input Trajectory/TrajectoryCollection.
 
@@ -33,6 +35,12 @@ class TrajectoryGeneralizer:
         ----------
         tolerance : any type
             Tolerance threshold, differs by generalizer
+        n_processes : int or None, optional
+            Number of processes to use for computation when generalizing a
+            `TrajectoryCollection` (default: 1). If set to `None`,
+            the number of processes will be set to `os.cpu_count()`,
+            enabling full CPU utilization via multiprocessing. This argument
+            will be ignored when used with a `Trajectory` object.
 
         Returns
         -------
@@ -42,14 +50,42 @@ class TrajectoryGeneralizer:
         if isinstance(self.traj, Trajectory):
             return self._generalize_traj(self.traj, tolerance)
         elif isinstance(self.traj, TrajectoryCollection):
-            return self._generalize_traj_collection(tolerance)
+            if n_processes is None:
+                n_processes = cpu_count()
+
+            if n_processes > 1:
+                return self._generalize_traj_collection_multiprocessing(
+                    tolerance, n_processes
+                )
+            else:
+                return self._generalize_traj_collection(
+                    self.traj.trajectories, tolerance
+                )
         else:
             raise TypeError
 
-    def _generalize_traj_collection(self, tolerance):
+    def _generalize_traj_collection(self, trajs, tolerance):
         generalized = []
-        for traj in self.traj:
+        for traj in trajs:
             generalized.append(self._generalize_traj(traj, tolerance))
+        result = copy(self.traj)
+        result.trajectories = generalized
+        return result
+
+    def _generalize_traj_collection_multiprocessing(self, tolerance, n_processes):
+        from movingpandas.tools._multi_threading import split_list
+
+        p = Pool(n_processes)
+        data = [d for d in split_list(self.traj.trajectories, n_processes)]
+
+        generalize_traj_collection_with_tolerance = partial(
+            self._generalize_traj_collection, tolerance=tolerance
+        )
+
+        generalized = []
+        for g in p.map(generalize_traj_collection_with_tolerance, data):
+            generalized.extend(g)
+
         result = copy(self.traj)
         result.trajectories = generalized
         return result
