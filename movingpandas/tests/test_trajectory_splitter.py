@@ -16,6 +16,7 @@ from movingpandas.trajectory_splitter import (
     StopSplitter,
     AngleChangeSplitter,
     ValueChangeSplitter,
+    DistanceSplitter,
 )
 
 
@@ -561,6 +562,100 @@ class TestTrajectorySplitter:
         assert isinstance(split, TrajectoryCollection)
         assert len(split) == 6
         assert split.get_crs() == "EPSG:31256"
+
+    def test_split_by_distance(self):
+        traj = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(2, 0, day=2),
+                Node(4, 0, day=3),
+                Node(104, 0, day=4),
+                Node(106, 0, day=5),
+            ]
+        )
+        split = DistanceSplitter(traj).split(distance=50)
+        assert isinstance(split, TrajectoryCollection)
+        assert len(split) == 2
+        assert split.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 2 0, 4 0)"
+        assert split.trajectories[1].to_linestring().wkt == "LINESTRING (104 0, 106 0)"
+        assert [t.id for t in split] == ["1_0", "1_1"]
+
+    def test_split_by_distance_below_threshold_does_not_split(self):
+        traj = make_traj([Node(0, 0, day=1), Node(2, 0, day=2), Node(104, 0, day=3)])
+        split = DistanceSplitter(traj).split(distance=1000)
+        assert len(split) == 1
+        assert (
+            split.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 2 0, 104 0)"
+        )
+
+    def test_split_by_distance_skips_single_points(self):
+        # the last point is isolated by two big gaps, so it cannot form a segment
+        traj = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(2, 0, day=2),
+                Node(200, 0, day=3),
+                Node(400, 0, day=4),
+            ]
+        )
+        split = DistanceSplitter(traj).split(distance=50)
+        assert len(split) == 1
+        assert split.trajectories[0].to_linestring().wkt == "LINESTRING (0 0, 2 0)"
+
+    def test_split_by_distance_does_not_alter_df(self):
+        traj = make_traj([Node(0, 0, day=1), Node(2, 0, day=2), Node(104, 0, day=3)])
+        traj_copy = traj.copy()
+        DistanceSplitter(traj).split(distance=50)  # noqa: F841
+        assert_frame_equal(traj.df, traj_copy.df)
+
+    def test_split_by_distance_does_not_leak_distance_column(self):
+        traj = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(2, 0, day=2),
+                Node(104, 0, day=3),
+                Node(106, 0, day=4),
+            ]
+        )
+        split = DistanceSplitter(traj).split(distance=50)
+        for segment in split:
+            assert traj.get_distance_col() not in segment.df.columns
+
+    def test_split_by_distance_is_crs_aware(self):
+        # one degree is a single CRS unit in a metric CRS but roughly 111 km
+        # in a geographic one, so the same threshold splits only the latter
+        nodes = [Node(0, 0, day=1), Node(1, 0, day=2), Node(2, 0, day=3)]
+        metric = DistanceSplitter(make_traj(nodes, crs=CRS_METRIC)).split(distance=1000)
+        latlon = DistanceSplitter(make_traj(nodes, crs=CRS_LATLON)).split(distance=1000)
+        assert len(metric) == 1
+        assert len(latlon) == 0  # every point is isolated, no segment survives
+
+    def test_split_by_distance_min_length(self):
+        traj = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(2, 0, day=2),
+                Node(104, 0, day=3),
+                Node(154, 0, day=4),
+            ]
+        )
+        split = DistanceSplitter(traj).split(distance=50, min_length=10)
+        assert len(split) == 1
+        assert split.trajectories[0].to_linestring().wkt == "LINESTRING (104 0, 154 0)"
+
+    def test_split_by_distance_multiprocessing(self):
+        traj = make_traj(
+            [
+                Node(0, 0, day=1),
+                Node(2, 0, day=2),
+                Node(104, 0, day=3),
+                Node(106, 0, day=4),
+            ]
+        )
+        collection = TrajectoryCollection([traj])
+        split = DistanceSplitter(collection).split(distance=50, n_processes=2)
+        assert len(split) == 2
+        assert [t.id for t in split] == ["1_0", "1_1"]
 
 
 class TestTrajectorySplitterNonGeo:
