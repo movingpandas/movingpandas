@@ -31,7 +31,7 @@ class TrajectorySplitter:
         """
         self.traj = traj
 
-    def split(self, n_processes=1, **kwargs):
+    def split(self, n_processes=1, parent=False, **kwargs):
         """
         Split the input Trajectory/TrajectoryCollection.
 
@@ -43,6 +43,13 @@ class TrajectorySplitter:
             the number of processes will be set to `os.cpu_count()`,
             enabling full CPU utilization via multiprocessing. This argument
             will be ignored when used with a `Trajectory` object.
+        parent : bool, optional
+            Whether to set the `parent` attribute of each resulting segment to
+            the trajectory it was split from (default: False), the way
+            `Trajectory.clip` already does. Off by default because holding on
+            to the source trajectory keeps its DataFrame alive for as long as
+            any of its segments are, and because it makes segments compare
+            unequal to otherwise identical parentless trajectories.
         kwargs : any type
             Split parameters, differs by splitter
 
@@ -52,32 +59,40 @@ class TrajectorySplitter:
             Split trajectories
         """
         if isinstance(self.traj, Trajectory):
-            return self._split_traj(self.traj, **kwargs)
+            result = self._split_traj(self.traj, **kwargs)
+            if parent:
+                for segment in result:
+                    segment.parent = self.traj
+            return result
         elif isinstance(self.traj, TrajectoryCollection):
             if n_processes is None:
                 n_processes = cpu_count()
 
             if n_processes > 1:
                 return self._split_traj_collection_multiprocessing(
-                    n_processes, **kwargs
+                    n_processes, parent=parent, **kwargs
                 )
             else:
-                return self._split_traj_collection(self.traj, **kwargs)
+                return self._split_traj_collection(self.traj, parent=parent, **kwargs)
         else:
             raise TypeError
 
-    def _split_traj_collection(self, trajs, **kwargs):
+    def _split_traj_collection(self, trajs, parent=False, **kwargs):
         trips = []
 
         for traj in trajs:
             for x in self._split_traj(traj, **kwargs):
                 if x.get_length() > self.traj.min_length:
+                    if parent:
+                        x.parent = traj
                     trips.append(x)
         result = copy(self.traj)
         result.trajectories = trips
         return result
 
-    def _split_traj_collection_multiprocessing(self, n_processes, **kwargs):
+    def _split_traj_collection_multiprocessing(
+        self, n_processes, parent=False, **kwargs
+    ):
         from movingpandas.tools._multi_threading import split_list
 
         p = Pool(n_processes)
@@ -85,7 +100,7 @@ class TrajectorySplitter:
         data = [d for d in data]
 
         split_traj_collection_with_kwargs = partial(
-            self._split_traj_collection, **kwargs
+            self._split_traj_collection, parent=parent, **kwargs
         )
 
         splits = []
