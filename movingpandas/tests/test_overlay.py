@@ -106,6 +106,71 @@ class TestOverlay:
             t.to_linestring().wkt for t in backwards
         ]
 
+    @staticmethod
+    def _straight_traj():
+        """A simple west-to-east line, so a polygon's x-extent maps to a time range.
+
+        The shared fixture doubles back through the same x-band, which makes a
+        single polygon produce two ranges and obscures what these tests check.
+        """
+        return make_traj(
+            [Node(x, 0, 1970, 1, 1, 0, 0, x) for x in range(0, 25, 5)], CRS_METRIC
+        )
+
+    @staticmethod
+    def _band(x_min, x_max):
+        return Polygon([(x_min, -5), (x_max, -5), (x_max, 5), (x_min, 5), (x_min, -5)])
+
+    def test_clip_with_overlapping_polygons_dissolves_across_them(self):
+        # Ranges were only dissolved within one polygon's own list, so polygons
+        # overlapping along the trajectory produced two segments sharing points.
+        traj = self._straight_traj()
+        left, right = self._band(-1, 15), self._band(5, 25)
+        whole = self._band(-1, 25)
+
+        overlapping = list(traj.clip([left, right]))
+        expected = list(traj.clip(whole))
+        assert len(overlapping) == 1
+        assert overlapping[0].to_linestring().wkt == expected[0].to_linestring().wkt
+
+    def test_clip_with_duplicate_polygon_does_not_duplicate_segments(self):
+        traj = self._straight_traj()
+        band = self._band(-1, 15)
+
+        once = traj.clip(band)
+        twice = traj.clip([band, band])
+        assert [t.to_linestring().wkt for t in twice] == [
+            t.to_linestring().wkt for t in once
+        ]
+
+    def test_clip_with_contained_polygon_keeps_the_larger_extent(self):
+        # A range contained in an earlier one must not pull the end backwards.
+        traj = self._straight_traj()
+        whole, inner = self._band(-1, 25), self._band(5, 10)
+
+        expected = list(traj.clip(whole))[0].to_linestring().wkt
+        for polygons in ([whole, inner], [inner, whole]):
+            clipped = list(traj.clip(polygons))
+            assert len(clipped) == 1
+            assert clipped[0].to_linestring().wkt == expected
+
+    def test_clip_with_disjoint_polygons_stays_separate(self):
+        # Guard the dissolve against over-merging: polygons that do not overlap
+        # along the trajectory must still yield one segment each.
+        traj = self._straight_traj()
+
+        assert len(traj.clip([self._band(-1, 5), self._band(15, 25)])) == 2
+
+    def test_clip_pointbased_with_duplicate_polygon_does_not_duplicate(self):
+        traj = self._straight_traj()
+        band = self._band(-1, 15)
+
+        once = traj.clip(band, point_based=True)
+        twice = traj.clip([band, band], point_based=True)
+        assert [t.to_linestring().wkt for t in twice] == [
+            t.to_linestring().wkt for t in once
+        ]
+
     def test_clip_with_geoseries_and_geodataframe(self):
         poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
         poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
