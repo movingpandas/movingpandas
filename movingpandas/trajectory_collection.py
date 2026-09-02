@@ -556,8 +556,10 @@ class TrajectoryCollection:
 
         Parameters
         ----------
-        polygon : shapely.geometry.Polygon
-            Polygon to clip with
+        polygon : shapely geometry, list, tuple, GeoSeries, or GeoDataFrame
+            Polygon(s) to clip with. Passing several polygons in one call
+            numbers each trajectory's resulting segments in a single sequence,
+            so their ids stay unique.
         point_based : bool
             Clipping method
 

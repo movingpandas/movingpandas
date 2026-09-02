@@ -2,8 +2,11 @@
 
 import itertools as it
 import pandas as pd
+from geopandas import GeoDataFrame, GeoSeries
 from shapely.geometry import Point, LineString, shape
+from shapely.geometry.base import BaseGeometry
 from shapely.affinity import translate
+from copy import copy
 from datetime import datetime, timedelta
 
 from .spatiotemporal_utils import TRange, STRange
@@ -48,8 +51,15 @@ def _get_spatiotemporal_ref(row):
 
 def _dissolve_ranges(ranges):
     """
-    SpatioTemporalRanges that touch (i.e. the end of one equals the start of
-    another) are dissolved (aka. merged).
+    SpatioTemporalRanges that touch or overlap (i.e. the next one starts at or
+    before the end of the current one) are dissolved (aka. merged).
+
+    Ranges from a single polygon never overlap, so overlap handling only comes
+    into play when clipping with multiple polygons that cover a shared part of
+    the trajectory. Expects ranges ordered by t_0.
+
+    Merged ranges keep the type they came in as: STRange for the line-based
+    path, TRange (times only, no points) for the point-based one.
     """
     if len(ranges) == 0:
         raise ValueError("Nothing to dissolve (received empty ranges)!")
@@ -59,15 +69,17 @@ def _dissolve_ranges(ranges):
         if r is None:
             continue  # raise ValueError('Received range that is None!')
         if new_range is None:
-            new_range = STRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
-        elif new_range.t_n == r.t_0 or (
-            r.t_0 > new_range.t_n and is_equal(r.t_0, new_range.t_n)
-        ):
-            new_range.t_n = r.t_n
-            new_range.pt_n = r.pt_n
+            new_range = copy(r)
+        elif r.t_0 <= new_range.t_n or is_equal(r.t_0, new_range.t_n):
+            # Only extend. An overlapping range may end before the current one
+            # (or be contained in it), in which case the end must not move back.
+            if r.t_n > new_range.t_n:
+                new_range.t_n = r.t_n
+                if hasattr(r, "pt_n"):
+                    new_range.pt_n = r.pt_n
         else:
             dissolved_ranges.append(new_range)
-            new_range = STRange(r.pt_0, r.pt_n, r.t_0, r.t_n)
+            new_range = copy(r)
     dissolved_ranges.append(new_range)
     return dissolved_ranges
 
@@ -216,16 +228,52 @@ def _determine_time_ranges_linebased(traj, polygon):
     return _dissolve_ranges(ranges)
 
 
+def _as_geometry_list(polygon):
+    """
+    Normalizes the clipping input to a list of geometries.
+
+    A single geometry is kept as one geometry, so clipping with a MultiPolygon
+    still yields segments for the MultiPolygon as a whole rather than for each
+    of its parts.
+    """
+    if isinstance(polygon, BaseGeometry):
+        return [polygon]
+    if isinstance(polygon, GeoDataFrame):
+        return list(polygon.geometry)
+    if isinstance(polygon, GeoSeries):
+        return list(polygon)
+    if isinstance(polygon, (list, tuple)):
+        return list(polygon)
+    raise TypeError(
+        "Trajectories can only be clipped with a Shapely geometry, a list or "
+        f"tuple of them, a GeoSeries, or a GeoDataFrame, not {type(polygon)}!"
+    )
+
+
 def clip(traj, polygon, pointbased=False):
     """
-    Returns a list of trajectory segments clipped by the given feature.
+    Returns a list of trajectory segments clipped by the given feature(s).
+
+    Multiple polygons are clipped in a single pass so that the resulting
+    segment ids stay unique across all of them.
     """
-    if not intersects(traj, polygon):
+    ranges = []
+    for geom in _as_geometry_list(polygon):
+        if not intersects(traj, geom):
+            continue
+        if pointbased:
+            ranges += _determine_time_ranges_pointbased(traj, geom)
+        else:
+            ranges += _determine_time_ranges_linebased(traj, geom)
+    if not ranges:
         return []
-    if pointbased:
-        ranges = _determine_time_ranges_pointbased(traj, polygon)
-    else:
-        ranges = _determine_time_ranges_linebased(traj, polygon)
+    # Segments are numbered in the order they are returned, so order the ranges
+    # chronologically rather than by the order the polygons happened to be in.
+    ranges.sort(key=lambda the_range: the_range.t_0)
+    # Ranges are only dissolved within one polygon's own range list, so polygons
+    # that overlap along the trajectory (or the same polygon passed twice) would
+    # otherwise yield duplicate/overlapping segments sharing points.
+    ranges = _dissolve_ranges(ranges)
     return _get_segments_for_ranges(traj, ranges)
 
 
