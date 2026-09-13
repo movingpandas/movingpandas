@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 from pytest import approx
+from geopandas import GeoDataFrame, GeoSeries
 from pandas.testing import assert_frame_equal
 from shapely.geometry import Polygon
 from datetime import datetime, timedelta
@@ -64,6 +66,130 @@ class TestOverlay:
         assert intersections.get_trajectory("1_1") == make_traj(
             [Node(7, 10, second=23), Node(5, 10, second=25)], id="1_1", parent=traj
         )
+
+    def test_clip_with_multiple_polygons_yields_unique_ids(self):
+        # Clipping with one polygon at a time restarts the segment counter, so
+        # the ids collide. Clipping with both at once must not.
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        traj = self.default_traj_metric_5
+
+        separately = [t.id for t in traj.clip(poly1)] + [t.id for t in traj.clip(poly2)]
+        assert len(set(separately)) == 1  # the bug: both are "1_0"
+
+        together = traj.clip([poly1, poly2])
+        assert [t.id for t in together] == ["1_0", "1_1"]
+
+    def test_clip_with_multiple_polygons_matches_equivalent_single_polygon(self):
+        # Two polygons covering the same area as one tall polygon should give
+        # the same segments.
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        tall = Polygon([(5, -5), (7, -5), (7, 12), (5, 12), (5, -5)])
+        traj = self.default_traj_metric_5
+
+        from_parts = traj.clip([poly1, poly2])
+        from_single = traj.clip(tall)
+        assert len(from_parts) == len(from_single)
+        for expected, actual in zip(from_single, from_parts):
+            assert expected.id == actual.id
+            assert expected.to_linestring().wkt == actual.to_linestring().wkt
+
+    def test_clip_with_multiple_polygons_is_order_independent(self):
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        traj = self.default_traj_metric_5
+
+        forwards = traj.clip([poly1, poly2])
+        backwards = traj.clip([poly2, poly1])
+        assert [t.to_linestring().wkt for t in forwards] == [
+            t.to_linestring().wkt for t in backwards
+        ]
+
+    @staticmethod
+    def _straight_traj():
+        """A simple west-to-east line, so a polygon's x-extent maps to a time range.
+
+        The shared fixture doubles back through the same x-band, which makes a
+        single polygon produce two ranges and obscures what these tests check.
+        """
+        return make_traj(
+            [Node(x, 0, 1970, 1, 1, 0, 0, x) for x in range(0, 25, 5)], CRS_METRIC
+        )
+
+    @staticmethod
+    def _band(x_min, x_max):
+        return Polygon([(x_min, -5), (x_max, -5), (x_max, 5), (x_min, 5), (x_min, -5)])
+
+    def test_clip_with_overlapping_polygons_dissolves_across_them(self):
+        # Ranges were only dissolved within one polygon's own list, so polygons
+        # overlapping along the trajectory produced two segments sharing points.
+        traj = self._straight_traj()
+        left, right = self._band(-1, 15), self._band(5, 25)
+        whole = self._band(-1, 25)
+
+        overlapping = list(traj.clip([left, right]))
+        expected = list(traj.clip(whole))
+        assert len(overlapping) == 1
+        assert overlapping[0].to_linestring().wkt == expected[0].to_linestring().wkt
+
+    def test_clip_with_duplicate_polygon_does_not_duplicate_segments(self):
+        traj = self._straight_traj()
+        band = self._band(-1, 15)
+
+        once = traj.clip(band)
+        twice = traj.clip([band, band])
+        assert [t.to_linestring().wkt for t in twice] == [
+            t.to_linestring().wkt for t in once
+        ]
+
+    def test_clip_with_contained_polygon_keeps_the_larger_extent(self):
+        # A range contained in an earlier one must not pull the end backwards.
+        traj = self._straight_traj()
+        whole, inner = self._band(-1, 25), self._band(5, 10)
+
+        expected = list(traj.clip(whole))[0].to_linestring().wkt
+        for polygons in ([whole, inner], [inner, whole]):
+            clipped = list(traj.clip(polygons))
+            assert len(clipped) == 1
+            assert clipped[0].to_linestring().wkt == expected
+
+    def test_clip_with_disjoint_polygons_stays_separate(self):
+        # Guard the dissolve against over-merging: polygons that do not overlap
+        # along the trajectory must still yield one segment each.
+        traj = self._straight_traj()
+
+        assert len(traj.clip([self._band(-1, 5), self._band(15, 25)])) == 2
+
+    def test_clip_pointbased_with_duplicate_polygon_does_not_duplicate(self):
+        traj = self._straight_traj()
+        band = self._band(-1, 15)
+
+        once = traj.clip(band, point_based=True)
+        twice = traj.clip([band, band], point_based=True)
+        assert [t.to_linestring().wkt for t in twice] == [
+            t.to_linestring().wkt for t in once
+        ]
+
+    def test_clip_with_geoseries_and_geodataframe(self):
+        poly1 = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])
+        poly2 = Polygon([(5, 8), (7, 8), (7, 12), (5, 12), (5, 8)])
+        traj = self.default_traj_metric_5
+
+        expected = [t.to_linestring().wkt for t in traj.clip([poly1, poly2])]
+        from_series = traj.clip(GeoSeries([poly1, poly2]))
+        from_frame = traj.clip(GeoDataFrame(geometry=[poly1, poly2]))
+        assert [t.to_linestring().wkt for t in from_series] == expected
+        assert [t.to_linestring().wkt for t in from_frame] == expected
+
+    def test_clip_with_multiple_polygons_without_intersection(self):
+        poly1 = Polygon([(100, 100), (101, 100), (101, 101), (100, 101)])
+        poly2 = Polygon([(200, 200), (201, 200), (201, 201), (200, 201)])
+        assert len(self.default_traj_metric_5.clip([poly1, poly2])) == 0
+
+    def test_clip_with_unsupported_type_raises(self):
+        with pytest.raises(TypeError):
+            self.default_traj_metric_5.clip(42)
 
     def test_clip_with_duplicate_traj_points_does_not_drop_any_points(self):
         polygon = Polygon([(5, -5), (7, -5), (7, 5), (5, 5), (5, -5)])

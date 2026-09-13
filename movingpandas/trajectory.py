@@ -2024,8 +2024,11 @@ class Trajectory:
 
         Parameters
         ----------
-        polygon : shapely Polygon
-            Polygon to clip with
+        polygon : shapely geometry, list, tuple, GeoSeries, or GeoDataFrame
+            Polygon(s) to clip with. Passing several polygons in one call
+            numbers the resulting segments in a single sequence, so their ids
+            stay unique. Clipping once per polygon instead restarts the
+            numbering each time and produces colliding ids.
         point_based : bool
             Clipping method
 
