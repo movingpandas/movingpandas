@@ -391,3 +391,64 @@ class ValueChangeSplitter(TrajectorySplitter):
                     )
                 )
         return TrajectoryCollection(result, min_length=min_length)
+
+
+class DistanceSplitter(TrajectorySplitter):
+    """
+    Split trajectories into subtrajectories whenever there is a gap larger than
+    the specified distance between two consecutive points.
+
+    This is the spatial counterpart to ObservationGapSplitter, which splits on
+    the time between consecutive points instead.
+
+    Parameters
+    ----------
+    distance : numeric
+        Distance threshold between two consecutive points
+        (Distance is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then distance is calculated in metres, unless
+        different units are specified.)
+    min_length : numeric
+        Desired minimum length of trajectories. Shorter trajectories are discarded.
+        (Length is calculated using CRS units, except if the CRS is geographic
+        (e.g. EPSG:4326 WGS84) then length is calculated in metres.)
+    units : str
+        Units in which to calculate the distance between consecutive points
+        (default: CRS units). Ignored if the trajectory already has a distance
+        column. For more info, check the list of supported units at
+        https://movingpandas.org/units
+
+    Examples
+    --------
+    >>> mpd.DistanceSplitter(traj).split(distance=100)
+    """
+
+    def _split_traj(self, traj, distance, min_length=0, units=None):
+        result = []
+        traj = traj.copy()
+        distance_col_name = traj.get_distance_col()
+        added_distance_col = distance_col_name not in traj.df.columns
+        if added_distance_col:
+            traj.add_distance(overwrite=True, units=units)
+
+        temp_df = traj.df.copy()
+        temp_df["gap"] = temp_df[distance_col_name] > distance
+        temp_df["gap"] = temp_df["gap"].apply(lambda x: 1 if x else 0).cumsum()
+        dfs = [group[1] for group in temp_df.groupby(temp_df["gap"])]
+        drop_cols = ["gap"]
+        if added_distance_col:
+            drop_cols.append(distance_col_name)
+        for i, df in enumerate(dfs):
+            df = df.drop(columns=drop_cols)
+            if len(df) > 1:
+                result.append(
+                    Trajectory(
+                        df,
+                        f"{traj.id}_{i}",
+                        traj_id_col=traj.get_traj_id_col(),
+                        x=traj.x,
+                        y=traj.y,
+                        crs=traj.crs,
+                    )
+                )
+        return TrajectoryCollection(result, min_length=min_length)
