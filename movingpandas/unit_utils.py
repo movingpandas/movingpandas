@@ -11,7 +11,7 @@ UNITS = namedtuple(
 
 DISTANCE_UNIT_LIST = [
     {"abbr": "km", "conv": 1000, "fullname": "Kilometer"},
-    {"abbr": "m", "conv": 1, "fullname": "metre"},
+    {"abbr": "m", "conv": 1, "fullname": "Meter"},
     {"abbr": "dm", "conv": 0.1, "fullname": "Decimeter"},
     {"abbr": "cm", "conv": 0.01, "fullname": "Centimeter"},
     {"abbr": "mm", "conv": 0.001, "fullname": "Millimeter"},

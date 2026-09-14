@@ -6,7 +6,7 @@ from .trajectory_collection import TrajectoryCollection
 
 def convert_time_ranges_to_segments(traj, time_ranges):
     """
-    Extracts trajectory segments for the specified time ranges.
+    Extract trajectory segments for the specified time ranges.
 
     Parameters
     ----------
