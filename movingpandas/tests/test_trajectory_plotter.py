@@ -37,6 +37,14 @@ class TestTrajectoryCollection:
         assert min_value == 2
         assert max_value == 10
 
+    def test_get_min_max_values_respects_vmin_vmax(self):
+        self.plotter = _TrajectoryPlotter(
+            self.collection, column="val", vmin=1, vmax=20
+        )
+        min_value, max_value = self.plotter.get_min_max_values()
+        assert min_value == 1
+        assert max_value == 20
+
 
 class TestTrajectoryCollectionNonGeo:
     def setup_method(self):

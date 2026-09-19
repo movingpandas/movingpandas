@@ -51,7 +51,7 @@ class _TrajectoryPlotter:
         max_value = self.data.get_max(self.column)
         self.min_value = self.kwargs.pop("vmin", min_value)
         self.max_value = self.kwargs.pop("vmax", max_value)
-        return min_value, max_value
+        return self.min_value, self.max_value
 
     def plot(self):
         if not self.ax:
