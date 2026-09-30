@@ -14,26 +14,34 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 [![Mastodon Follow](https://img.shields.io/mastodon/follow/109434720057484377?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@movingpandas)
+[![Issue Tracker](https://img.shields.io/badge/Issue_tracker-Codeberg-blue.svg)](https://codeberg.org/movingpandas/movingpandas/issues) 
 
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
 
-<img align="right" src="https://movingpandas.github.io/movingpandas/assets/img/movingpandas.png">
+<img align="right" width="200px" src="https://movingpandas.github.io/movingpandas/assets/img/movingpandas.png">
 
 MovingPandas is a Python library for movement data exploration and analysis.
 
 MovingPandas provides trajectory data structures and functions for handling movement data based on Pandas, **[GeoPandas](https://geopandas.org)**, and HoloViz.
 
+
+
 Visit **[movingpandas.org](http://movingpandas.org)** for details! 
 
 You can run **[MovingPandas examples](https://github.com/movingpandas/movingpandas-examples)** on MyBinder - no installation required: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/movingpandas/movingpandas-examples/main) (These examples use the latest MovingPandas release version.) 
 
-<img width="30%" align="right" src="https://movingpandas.github.io/movingpandas/assets/img/OSGeo_community.png">
+<a href="https://codeberg.org/movingpandas/movingpandas">
+    <img alt="Get it on Codeberg" src="https://get-it-on.codeberg.org/get-it-on-blue-on-white.png" height="60" align="right">
+</a>
+
 
 To try the cutting-edge dev version, use [this MyBinder link](https://mybinder.org/v2/gh/movingpandas/movingpandas/main?filepath=tutorials/1-getting-started.ipynb).
 
 
 ## Documentation
+
+<img width="200px" align="right" src="https://movingpandas.github.io/movingpandas/assets/img/OSGeo_community.png">
 
 We recommend starting your MovingPandas journey with the **[tutorial notebooks on the official homepage](https://movingpandas.org/examples)**
 
